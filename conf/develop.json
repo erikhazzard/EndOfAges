@@ -1,0 +1,12 @@
+{
+    "facebook": {
+        "callbackURL": "http://edge.outline.com/api/auth/facebook/callback",
+        "scope": [ "email", "user_about_me"]
+    },
+    "database": {
+        "db": "mongodb://localhost/endofages"
+    },
+    "app": {
+        "port": 80
+    }
+}

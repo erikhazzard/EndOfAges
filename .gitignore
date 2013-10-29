@@ -1,0 +1,12 @@
+dump.rdb
+node_modules
+*.swp
+.sass-cache
+.DS_Store
+
+static/build/*
+!static/build/main.js
+
+npm-debug.log
+secrets.json
+log/log.log
