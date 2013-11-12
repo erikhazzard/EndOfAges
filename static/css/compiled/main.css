@@ -1,0 +1,42 @@
+/* Colors */
+/* Must be before imports, because they are referenced
+ * by some imports. */
+/* Variable declarations */
+/* Header area */
+body {
+  font-size: 17px;
+  color: #000; }
+
+body, #region-main {
+  -webkit-overflow-scrolling: touch; }
+
+.navbar-spacer {
+  padding-top: 80px; }
+
+a {
+  cursor: pointer;
+  color: #3387f5;
+  text-decoration: none !important; }
+  a:hover {
+    color: #0b6cea; }
+
+.preload-content {
+  text-align: center;
+  color: #999;
+  font-weight: 500;
+  margin: 3em 0; }
+
+.hidden {
+  display: none; }
+
+.clear {
+  clear: both; }
+
+.blur {
+  -webkit-filter: blur(10px) !important;
+  filter: blur(10px) !important;
+  opacity: 1 !important;
+  filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
+  opacity: 1\9 !important;
+  pointer-events: none; }
