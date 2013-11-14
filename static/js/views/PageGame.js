@@ -1,38 +1,42 @@
 // ===========================================================================
 //
-// PageTitleScreen
-// 
+// Page Home
+//
+//      View for the home 
+//
 // ===========================================================================
 define(
     [ 
         'd3', 'backbone', 'marionette',
-        'logger', 'events',
-
-        //TODO: not here
-        'models/Map',
-        'views/subViews/Map'
+        'logger', 'events'
     ], function viewPageHome(
         d3, backbone, marionette, 
-        logger, events,
-
-        Map,
-        MapView
+        logger, events
     ){
 
     var PageHome = Backbone.Marionette.Layout.extend({
         template: '#template-page-home',
 
+        events: {
+            'click .login-facebook': 'facebookLogin'
+        },
         initialize: function initialize(options){
             // initialize:
-            logger.log( 'views/PageHome', 'in initialize');
+            logger.log('views/PageHome', 'in initialize');
 
-            window.M = Map;
-            window.V = MapView;
             return this;
         },
         onShow: function homeOnShow(){
             return this;
         }
+
+        // ------------------------------
+        //
+        // User Interaction
+        //
+        // ------------------------------
+
+
     });
 
     return PageHome;
