@@ -8,10 +8,17 @@
 define(
     [ 
         'd3', 'backbone', 'marionette',
-        'logger', 'events'
+        'logger', 'events',
+
+        // Map
+        'models/Map',
+        'views/subViews/Map'
+
     ], function viewPageHome(
         d3, backbone, marionette, 
-        logger, events
+        logger, events,
+
+        Map, MapView
     ){
 
     var PageHome = Backbone.Marionette.Layout.extend({

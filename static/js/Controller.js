@@ -15,6 +15,7 @@ define([
         PageHome
     ){
 
+    // console color
     var Controller = Backbone.Marionette.Controller.extend({
         //The controller handles the navigation logic / calling views
         
@@ -23,20 +24,13 @@ define([
             //  regionMain parameter must be passed in, which specifies what 
             //  region to show. (NOTE: fire off events)
             var self = this;
-            logger.log('Controller', 'initialize', 'controller initialized');
+            logger.log('Controller', '%cController: %s',
+                'initialize() called');
 
             _.each(options.regions, function(region, key){
                 self[key] = region;
             });
             
-            // When appUser logs in (from any page), take them to their home page
-            appUser.on('loggedIn', function controllerUserLoggedInCallback(){
-                logger.log('Controller', 'appUser:isLoggedIn', 'appUser logged in, called showUser');
-                events.trigger('appRouter:showMe');
-
-                $('body').addClass('logged-in');
-            });
-
             return this;
         },
 
@@ -55,21 +49,22 @@ define([
             // they will be redirected to the /me endpoint (set in html
             // head before anything loads)
             var self = this;
-            logger.log('Controller', 'showHome() called');
-
-            // If appUser is already logged in, redirect to self page
-            if(appUser.get('isLoggedIn')){
-                logger.log('Controller', 
-                    'showHome(): appUser logged in, redirecting to /me');
-                // directly call personal page
-                return this.showMe();
-            }
+            logger.log('Controller', '%cController: %s',
+                'showHome() called');
 
             // Otherwise, show the homepage
             this.currentRegion = new PageHome({});
             this.regionMain.show(this.currentRegion);
 
             return this;
+        },
+
+        // ------------------------------
+        // Game
+        // ------------------------------
+        showGame: function controllerShowGame(){
+            logger.log('Controller', '%cController: %s',
+                'showGame() called');
         }
 
     });

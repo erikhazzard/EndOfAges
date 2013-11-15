@@ -63,9 +63,10 @@ define(
                 var maxY = _.max(nodes, function(d){ return d.y; });
 
                 // add the difference so it extends to 1
+                // Make sure it's not too close to edge though, so use 0.95 
                 _.each(nodes, function(node){
-                    node.x += (1 - maxX.x);
-                    node.y += (1 - maxY.y);
+                    node.x += (0.95 - maxX.x);
+                    node.y += (0.95 - maxY.y);
                 });
 
                 this.set({ nodes: nodes }, {silent: true});
@@ -84,7 +85,8 @@ define(
                     var val = Math.abs(simplex.noise(x,y,i));
                     //val = Math.random();
                     if(val > 1){ val = Math.random(); }
-                    if(val < 0.05){ val = Math.random(); }
+                    else if(val < 0.05){ val = Math.random(); }
+
                     return val;
                 }
                 

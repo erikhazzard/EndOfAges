@@ -10,7 +10,8 @@ define(['backbone', 'marionette', 'logger', 'events'],
     var Router = Backbone.Marionette.AppRouter.extend({
         appRoutes: {
             //Main route
-            "(/)": "showHome"
+            "(/)": "showHome",
+            "game": "showGame"
         }
     });
 
@@ -20,29 +21,29 @@ define(['backbone', 'marionette', 'logger', 'events'],
     function getAppRouter(options){
         // We only want to create one app router - if it's already been
         // created don't create another one
-        if(appRouter === undefined ){
-            logger.log('appRouter', 'Creating app router!');
+        if(appRouter !== undefined ){ return appRouter; }
 
-            var controller = options.controller;
-            if(!controller){ 
-                throw new Error('Controller must be passed in as an option');
-            }
+        logger.log('appRouter', 'Creating app router!');
 
-            // set new app router
-            appRouter = new Router({
-                controller: controller
-            });
-
-            // setup global event handlers (allows code to trigger a page 
-            // redirect without directly accessing router)
-            events.on('appRouter:showHome', function(){
-                appRouter.navigate('/', {trigger: true});
-            }, this);
-
-            events.on('appRouter:showMe', function(){
-                appRouter.navigate('/me', {trigger: true});
-            }, this);
+        var controller = options.controller;
+        if(!controller){ 
+            throw new Error('Controller must be passed in as an option');
         }
+
+        // set new app router
+        appRouter = new Router({
+            controller: controller
+        });
+
+        // setup global event handlers (allows code to trigger a page 
+        // redirect without directly accessing router)
+        events.on('appRouter:showHome', function(){
+            appRouter.navigate('/', {trigger: true});
+        }, this);
+
+        events.on('appRouter:showGame', function(){
+            appRouter.navigate('/game', {trigger: true});
+        }, this);
 
         return appRouter;
     }

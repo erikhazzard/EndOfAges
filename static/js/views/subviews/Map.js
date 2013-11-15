@@ -42,9 +42,9 @@ define(
             // empty existing map
             svg.select('.svg-wrapper').remove();
 
-            var width = svg.attr('width'); 
+            var width = $('#map').width();
             this.width = width;
-            var height = svg.attr('height'); 
+            var height = $('#map').height();
             this.height = height;
 
             // setup wrapper and elements
@@ -56,43 +56,77 @@ define(
 
             // Add background layer
             this.background = this.wrapper.append('g');
-            this.background.append("rect")
+            this.background.append("image")
                 .attr({ 
+                    'xlink:href': '/static/img/space-dark.png',
+                    'preserveAspectRatio': 'none',
                     'class': 'fog', x: 0, y: 0,
                     height: height, width: width
+                    // fill with blacked out map
                 });
             // hull / visible area
-            this.visibleArea = this.background.append("rect")
+            this.visibleArea = this.background.append("image")
                 .attr({ 
+                    'xlink:href': '/static/img/space.png',
+                    'preserveAspectRatio': 'none',
                     'class': 'visibleArea', x: 0, y: 0,
-                    height: width, width: width
+                    height: height, width: width
                 })
                 .style({ 
+                    // fill with full version of map
                     fill: '#336699', mask: 'url(#map-mask)'
                 });
 
             // Add nodes
-            var map = this.wrapper.attr({ 'class': 'map' });
-            var nodes = map.selectAll('.node')
+            this.map = this.wrapper.attr({ 'class': 'map' });
+
+            // Draw nodes
+            this.updateMap();
+
+            return this;
+        },
+
+        // ------------------------------
+        // Update Map
+        // ------------------------------
+        updateMap: function mapUpdate(){
+            this.drawNodes();
+            this.updateVisible();
+            return this;
+        },
+
+        drawNodes: function mapDrawNodes(){
+            var self = this;
+
+            function nodeClicked(d,i){
+                // callback when a node is interacted with
+                // TODO: What should happen?
+                logger.log('views/subViews/Map', 'node clicked', d, i);
+            }
+
+            // TODO: Use different images?
+            var nodes = this.map.selectAll('.node')
                 .data(this.model.get('nodes'))
                 .enter()
                 .append('circle')
                     .attr({
+                        'class': 'node',
                         cx: function(d){
-                            return d.x * width;
+                            return d.x * self.width;
                         },
                         cy: function(d){
-                            return d.y * height;
+                            return d.y * self.height;
                         },
-                        r: 5
-                    });
-            this.vertices = this.getVertices(this.model.get('nodes'));
-            return this;
+                        r: 10
+                    })
+                    .on('touchend', nodeClicked)
+                    .on('click', nodeClicked);
         },
 
         getVertices: function mapGetVerticies(nodes){
             // takes in an array of nodes and returns an array of
             // [x,y] pairs
+            // TODO: get only the visible vertices
             var self = this;
             var vertices = [];
 
@@ -108,8 +142,9 @@ define(
             return vertices;
         }, 
 
-        updateHull: function mapGenerateHull(){
-            // Updates the convex hull, the visible area, based on nodes
+        updateVisible: function mapGenerateHull(){
+            // Updates the the visible area, based on nodes
+            this.vertices = this.getVertices(this.model.get('nodes'));
             this.maskPath.selectAll('.visibleNode')
                 .data(this.vertices)
                 .enter()
@@ -119,7 +154,7 @@ define(
                         cx: function(d){ return d[0]; },
                         cy: function(d){ return d[1]; },
                         filter: 'url(#map-filter)',
-                        r: 50
+                        r: 80
                     }).style({
                         fill: '#ffffff'   
                     });

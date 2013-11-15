@@ -1,4 +1,9 @@
 /* Colors */
+.node {
+  fill: #336699;
+  stroke: #ffffff;
+  stroke-width: 2px; }
+
 /* Must be before imports, because they are referenced
  * by some imports. */
 /* Variable declarations */

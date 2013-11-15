@@ -18,8 +18,44 @@
 //    To access history:
 //            LOGGER.history[type] to access messages by type
 //----------------------------------------------------------------------------
-define([], function() {
+define(['d3'], function(d3) {
     var LOGGER;
+
+    // generate some color scales, give a wide range of unique colors
+    var colorScales = [
+        d3.scale.category20c(),
+        d3.scale.category20b(),
+        d3.scale.category20(),
+        d3.scale.category10()
+    ];
+
+    // values of found colors, to check for same colors
+    var foundColors = [];
+    // key : value of colors so we don't generate new colors
+    // for each key
+    var colorDict = {};
+
+    var getColor = function loggerGetColor(target){
+        // generates or returns a color used by a target key
+        var i=0;
+        var color = '';
+        if(colorDict[target]){ return colorDict[target]; }
+
+        while(i<colorScales.length){
+            color = colorScales[i](target);
+
+            // did NOT find the color, update the objects and break loop
+            if(foundColors.indexOf(color) === -1){
+                foundColors.push(color);
+                colorDict[target] = color;
+                break;
+            } 
+
+            i += 1;
+        }
+
+        return color;
+    };
 
     LOGGER = {};
     LOGGER.options = {
@@ -71,7 +107,44 @@ define([], function() {
                 logHistory[type].push(args);
         }
         if (window && window.console) {
-            console.log(Array.prototype.slice.call(args));
+            //console.log(Array.prototype.slice.call(args));
+            // add a spacer between each arg
+            var len = args.length;
+            var newArgs = Array.prototype.slice.call(args);
+
+            // Don't show first argument if second argument has formatting
+            if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
+                var shifted = newArgs.shift();
+                // if the string is a formatted string, format date
+                newArgs[0] += ' <time:%O>';
+
+                // If the second argument is NOT a color format string,
+                // create one
+                if(newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null){
+                    var background = getColor(shifted);
+                    var color = d3.rgb(background);
+                    var border = color.darker();
+
+                    // make the text bright or light depending on how
+                    // dark or light it already is
+                    if(color.r + color.g + color.b < 378){
+                        color = color.brighter().brighter().brighter().brighter();
+                    } else { 
+                        color = color.darker().darker().darker();
+                    }
+
+                    // format string
+                    var formatString = "background: " + background + ';' + 
+                        'color:' + color + ';' + 
+                        'border: 2px solid ' + border + ';';
+
+                    newArgs.splice(1, 0, formatString);
+                    console.log.apply(console, newArgs);
+                }
+            } else {
+                // no special formatting, just call it normally
+                console.log(args);
+            }
         }
         return true;
     };
