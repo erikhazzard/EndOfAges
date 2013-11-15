@@ -23,7 +23,8 @@ define(
 
         initialize: function mapViewInitialize(options){
             // initialize:
-            logger.log('views/PageMap', 'in initialize');
+            logger.log('views/PageMap', '%cviews/PageMap: %s',
+                'initialize() called');
 
             return this;
         },
@@ -36,6 +37,8 @@ define(
         // ------------------------------
         drawMap: function mapViewGenerateMap(){
             var self = this;
+            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
+                'drawMap() called');
 
             // d3 used to draw map
             var svg = d3.select('#map');
@@ -81,7 +84,10 @@ define(
             this.map = this.wrapper.attr({ 'class': 'map' });
 
             // Draw nodes
-            this.updateMap();
+            // Delay execution since the filters is a time consuming process
+            setTimeout(function mapDelayUpdateMap(){
+                self.updateMap.call(self);
+            }, 20);
 
             return this;
         },
@@ -90,13 +96,22 @@ define(
         // Update Map
         // ------------------------------
         updateMap: function mapUpdate(){
+            var self = this;
+            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
+                'updateMap() called');
+
             this.drawNodes();
-            this.updateVisible();
+            setTimeout(function(){
+                self.updateVisible.call(self);
+            }, 20);
+
             return this;
         },
 
         drawNodes: function mapDrawNodes(){
             var self = this;
+            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
+                'drawNodes() called');
 
             function nodeClicked(d,i){
                 // callback when a node is interacted with
@@ -144,6 +159,8 @@ define(
 
         updateVisible: function mapGenerateHull(){
             // Updates the the visible area, based on nodes
+            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
+                'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
             this.maskPath.selectAll('.visibleNode')
                 .data(this.vertices)

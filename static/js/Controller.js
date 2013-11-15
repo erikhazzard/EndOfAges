@@ -6,13 +6,15 @@
 define([
     'backbone', 'marionette', 'logger', 'events',
     'models/appUser-object',
-    'views/PageHome'
+    'views/PageHome',
+    'views/PageGame'
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
 
         // include views here
-        PageHome
+        PageHome,
+        PageGame
     ){
 
     // console color
@@ -65,6 +67,9 @@ define([
         showGame: function controllerShowGame(){
             logger.log('Controller', '%cController: %s',
                 'showGame() called');
+
+            this.currentRegion = new PageGame({});
+            this.regionMain.show(this.currentRegion);
         }
 
     });

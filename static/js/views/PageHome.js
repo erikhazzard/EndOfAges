@@ -20,7 +20,8 @@ define(
 
         initialize: function initialize(options){
             // initialize:
-            logger.log( 'views/PageHome', 'in initialize');
+            logger.log('views/PageHome', '%cviews/PageHome: %s',
+                'initialize() called');
             return this;
         },
         onShow: function homeOnShow(){
