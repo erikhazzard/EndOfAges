@@ -19,47 +19,17 @@ define(
                 fName: '',
                 lName: '',
                 facebookId: '',
-
-                personality: null,
-                // will look like this:
-                    //personality: {
-                        //openness: 0,
-                        //neuroticism: 0,
-                        //extraversion: 0,
-                        //conscientiousness: 0,
-                        //agreeableness: 0
-                    //},
                 personalityHistory: [],
 
                 // Empty Facebook ID
-                facebookId: null,
-
-                // points are used for viewing profiles, etc
-                points: 10,
-        
-                // number of questions users have answered about this person
-                numRatings: 3,
-                // number of times users have viewed this profile
-                views: 10,
-
-                // this property is only ever set on the appUser app object
-                isLoggedIn: false,
-
-                // Close friends and friends will be a collection of users,
-                // once friends are returned from server
-                friends: null,
-                // will be an object containing collections for 
-                // each 'network' (friends, closeFriends, etc)
-
-                // array of user names of viewed profiles
-                viewedProfiles: []
+                facebookId: null
             },
         
             url: API_URL + 'user/',
 
             initialize: function appUserInitialize(){
                 var self = this;
-                logger.log('models/AppUser',
+                logger.log('models/AppUser', '%cmodels/AppUser: %s',
                     'User:initialize: New app user created');
 
                 // When model comes back from server, if there's no error
@@ -85,17 +55,19 @@ define(
                     success: function(res){ 
                         // Check if there's an error (e.g., appUser isn't authed)
                         if(res.attributes.error){
-                            logger.log('models/AppUser',
-                                'fetch: appUser not logged in');
+                            logger.log('models/AppUser', '%cmodels/AppUser: %s',
+                                'fetch(): appUser not logged in');
                             return false;
                         }
                         // no error, remove if there was an exisiting error
                         self.unset('error');
                         self.trigger('initialFetchFromServer');
+                        return self;
                     },
                     error: function(){ 
-                        logger.error('models/AppUser',
-                            'fetch: COULD NOT GET MODEL FROM SERVER!');
+                        logger.error('models/AppUser', 
+                            'fetch(): unable to get model from server');
+                        return self;
                     }
                 });
 

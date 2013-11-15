@@ -128,9 +128,9 @@ define(['d3'], function(d3) {
                     // make the text bright or light depending on how
                     // dark or light it already is
                     if(color.r + color.g + color.b < 378){
-                        color = color.brighter().brighter().brighter().brighter();
+                        color = color.brighter().brighter().brighter().brighter().brighter();
                     } else { 
-                        color = color.darker().darker().darker();
+                        color = color.darker().darker().darker().darker().darker();
                     }
 
                     // format string
