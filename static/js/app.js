@@ -79,15 +79,27 @@ define([
         $(document).on('click', 'a', function(e) {
             var $el = $(this);
             e = e || window.event;
+            var href = $(this).attr('href');
+
+            // if the link has no href or an empty string, assume it shouldn't
+            // link anywhere and return the event
+            if(href === undefined || href === ''){
+                e.preventDefault();
+                return e;
+            }
 
             // we need to catch all internal links and pass them to the router
-            var fragment = Backbone.history.getFragment($(this).attr('href'));
+            var fragment = Backbone.history.getFragment(href);
             var matched = _.any(Backbone.history.handlers, function(handler) {
                 return handler.route.test(fragment);
             });
-            if (matched) {
+            if(matched) {
                 // found a matched link, send it to the router
                 e.preventDefault();
+                // always navigate to link, even if fragment is same
+                if(Backbone.history.fragment === fragment){
+                    Backbone.history.fragment = null;
+                }
                 Backbone.history.navigate(fragment, { trigger: true });
             }
 

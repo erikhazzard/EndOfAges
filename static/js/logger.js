@@ -115,12 +115,16 @@ define(['d3'], function(d3) {
             // Don't show first argument if second argument has formatting
             if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
                 var shifted = newArgs.shift();
-                // if the string is a formatted string, format date
-                newArgs[0] += ' <time:%O>';
+                // if the string is a formatted string, add in the
+                // log type, the message, then the time
+                newArgs[0] = '%c' + 
+                    shifted + ':' + 
+                    newArgs[0].replace('%c', '') + 
+                    ' <time:%O>';
 
-                // If the second argument is NOT a color format string,
-                // create one
-                if(newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null){
+                // If the second argument is a string and it is 
+                // NOT a color format string, the create one
+                if(typeof newArgs[1] !== 'string' || (typeof newArgs[1] === 'string' && newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null)){
                     var background = getColor(shifted);
                     var color = d3.rgb(background);
                     var border = color.darker();

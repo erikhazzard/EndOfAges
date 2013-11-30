@@ -116,10 +116,22 @@ define(
             function nodeClicked(d,i){
                 // callback when a node is interacted with
                 // TODO: What should happen?
-                logger.log('views/subViews/Map', 'node clicked', d, i);
+                logger.log('views/subView/Map', '%cviews/subView/Map: %s %O %O',
+                    'nodeClicked:', d, i);
+                events.trigger('map:nodeClicked', {node: d, map: self.model});
+            }
+
+            function nodeHoverStart(d,i){
+                logger.log('views/subView/Map', '%cviews/subView/Map: %s d:%O i:%O',
+                    'nodeHoverStart:', d, i);
+            }
+            function nodeHoverEnd(d,i){
+                logger.log('views/subView/Map', '%cviews/subView/Map: %s %O %O',
+                    'nodeHoverEnd:', d, i);
             }
 
             // TODO: Use different images?
+            // Draw nodes
             var nodes = this.map.selectAll('.node')
                 .data(this.model.get('nodes'))
                 .enter()
@@ -134,6 +146,9 @@ define(
                         },
                         r: 10
                     })
+                    .on('mouseenter', nodeHoverStart)
+                    .on('mouseleave', nodeHoverEnd)
+
                     .on('touchend', nodeClicked)
                     .on('click', nodeClicked);
         },
@@ -162,6 +177,7 @@ define(
             logger.log('views/subView/Map', '%cviews/subView/Map: %s',
                 'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
+
             this.maskPath.selectAll('.visibleNode')
                 .data(this.vertices)
                 .enter()
