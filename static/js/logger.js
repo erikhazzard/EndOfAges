@@ -30,10 +30,12 @@ define(['d3'], function(d3) {
     ];
 
     // values of found colors, to check for same colors
-    var foundColors = [];
+    var foundColors = ['#dd4444'];
+
     // key : value of colors so we don't generate new colors
     // for each key
-    var colorDict = {};
+    // set some default colors
+    var colorDict = {error: '#dd4444'};
 
     var getColor = function loggerGetColor(target){
         // generates or returns a color used by a target key
@@ -112,13 +114,17 @@ define(['d3'], function(d3) {
             var len = args.length;
             var newArgs = Array.prototype.slice.call(args);
 
-            // Don't show first argument if second argument has formatting
-            if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
+            // NOTE: this will only add color to %c specified strings
+            ////if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
+
+            // Add color to everything
+            if(newArgs[1] && typeof newArgs[1] === 'string'){
                 var shifted = newArgs.shift();
+
                 // if the string is a formatted string, add in the
                 // log type, the message, then the time
                 newArgs[0] = '%c' + 
-                    shifted + ':' + 
+                    shifted + '\t:\t' + 
                     newArgs[0].replace('%c', '') + 
                     ' <time:%O>';
 
