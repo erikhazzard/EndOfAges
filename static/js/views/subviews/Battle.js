@@ -17,10 +17,22 @@ define(
         template: '#template-game-battle',
         'className': 'game-battle-wrapper',
 
-        events: { },
+        events: {
+            'click .finish-instance': 'finishInstance'
+        },
 
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/Battle', 'initialize() called');
+        },
+
+
+        // ------------------------------
+        //
+        // User interaction
+        //
+        // ------------------------------
+        finishInstance: function finishInstance(){
+            events.trigger('node:instanceFinished');
         }
 
     });
