@@ -6,11 +6,13 @@
 define([
     'backbone', 'marionette', 'logger', 'events',
     'models/appUser-object',
+    'models/Game',
     'views/PageHome',
     'views/PageGame'
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
+        Game,
 
         // include views here
         PageHome,
@@ -26,8 +28,7 @@ define([
             //  regionMain parameter must be passed in, which specifies what 
             //  region to show. (NOTE: fire off events)
             var self = this;
-            logger.log('Controller', '%cController: %s',
-                'initialize() called');
+            logger.log('Controller', 'initialize() called');
 
             _.each(options.regions, function(region, key){
                 self[key] = region;
@@ -51,8 +52,7 @@ define([
             // they will be redirected to the /me endpoint (set in html
             // head before anything loads)
             var self = this;
-            logger.log('Controller', '%cController: %s',
-                'showHome() called');
+            logger.log('Controller', 'showHome() called');
 
             // Otherwise, show the homepage
             this.currentRegion = new PageHome({});
@@ -65,11 +65,15 @@ define([
         // Game
         // ------------------------------
         showGame: function controllerShowGame(){
-            logger.log('Controller', '%cController: %s',
-                'showGame() called');
+            logger.log('Controller', 'showGame() called');
 
-            this.currentRegion = new PageGame({});
+            // get game model from server(?)
+            this.currentRegion = new PageGame({
+                model: new Game({})
+            });
             this.regionMain.show(this.currentRegion);
+
+            return this;
         }
 
     });

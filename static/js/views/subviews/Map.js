@@ -10,26 +10,28 @@ define(
         'd3', 'backbone', 'marionette',
         'logger', 'events',
         'Models/Map'
-    ], function viewPageHome(
+    ], function viewMap(
         d3, backbone, marionette, 
         logger, events,
         Map
     ){
 
     var MapView = Backbone.Marionette.Layout.extend({
-        template: '#template-page-home',
+        template: '#template-game-map',
 
         events: { },
 
+        'className': 'game-map-wrapper',
+
         initialize: function mapViewInitialize(options){
             // initialize:
-            logger.log('views/PageMap', '%cviews/PageMap: %s',
-                'initialize() called');
+            logger.log('views/subviews/Map', 'initialize() called');
 
             return this;
         },
 
         onShow: function mapViewOnShow(){
+            this.drawMap();
             return this;
         },
 
@@ -37,8 +39,7 @@ define(
         // ------------------------------
         drawMap: function mapViewGenerateMap(){
             var self = this;
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
-                'drawMap() called');
+            logger.log('views/subviews/Map', 'drawMap() called');
 
             // d3 used to draw map
             var svg = d3.select('#map');
@@ -61,7 +62,7 @@ define(
             this.background = this.wrapper.append('g');
             this.background.append("image")
                 .attr({ 
-                    'xlink:href': '/static/img/space-dark.png',
+                    'xlink:href': '/static/img/map1-dark.png',
                     'preserveAspectRatio': 'none',
                     'class': 'fog', x: 0, y: 0,
                     height: height, width: width
@@ -70,7 +71,7 @@ define(
             // hull / visible area
             this.visibleArea = this.background.append("image")
                 .attr({ 
-                    'xlink:href': '/static/img/space.png',
+                    'xlink:href': '/static/img/map1.png',
                     'preserveAspectRatio': 'none',
                     'class': 'visibleArea', x: 0, y: 0,
                     height: height, width: width
@@ -96,9 +97,9 @@ define(
         // Update Map
         // ------------------------------
         updateMap: function mapUpdate(){
+            // Draws all nodes then updates the visible areas
             var self = this;
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
-                'updateMap() called');
+            logger.log('views/subviews/Map', 'updateMap() called');
 
             this.drawNodes();
             setTimeout(function(){
@@ -109,25 +110,38 @@ define(
         },
 
         drawNodes: function mapDrawNodes(){
+            // Draws all the nodes on the map
             var self = this;
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
-                'drawNodes() called');
+            logger.log('views/subviews/Map', 'drawNodes() called');
 
+            // CLICK event
+            // --------------------------
             function nodeClicked(d,i){
                 // callback when a node is interacted with
                 // TODO: What should happen?
-                logger.log('views/subView/Map', '%cviews/subView/Map: %s %O %O',
+                logger.log('views/subviews/Map', '%s %O %O', 
                     'nodeClicked:', d, i);
                 events.trigger('map:nodeClicked', {node: d, map: self.model});
             }
 
+            // HOVER events
+            // --------------------------
             function nodeHoverStart(d,i){
-                logger.log('views/subView/Map', '%cviews/subView/Map: %s d:%O i:%O',
+                logger.log('views/subviews/Map', '%s d:%O i:%O', 
                     'nodeHoverStart:', d, i);
+
+                // hover effect
+                d3.select(this).attr({
+                    'xlink:href':'#icon-tower-hover'
+                });
             }
             function nodeHoverEnd(d,i){
-                logger.log('views/subView/Map', '%cviews/subView/Map: %s %O %O',
+                logger.log('views/subviews/Map', '%s %O %O',
                     'nodeHoverEnd:', d, i);
+                // dehover
+                d3.select(this).attr({
+                    'xlink:href':'#icon-tower'
+                });
             }
 
             // TODO: Use different images?
@@ -135,16 +149,30 @@ define(
             var nodes = this.map.selectAll('.node')
                 .data(this.model.get('nodes'))
                 .enter()
-                .append('circle')
+
+                // Draw circles
+                ////.append('circle')
+                    ////.attr({
+                        ////'class': 'node',
+                        ////cx: function(d){
+                            ////return d.x * self.width;
+                        ////},
+                        ////cy: function(d){
+                            ////return d.y * self.height;
+                        ////},
+                        ////r: 10
+                    ////})
+
+                // Use an existing icon
+                .append('use')
                     .attr({
-                        'class': 'node',
-                        cx: function(d){
-                            return d.x * self.width;
+                        'xlink:href':'#icon-tower',
+                        x: function(d){
+                            return (d.x * self.width) - 20;
                         },
-                        cy: function(d){
-                            return d.y * self.height;
-                        },
-                        r: 10
+                        y: function(d){
+                            return (d.y * self.height) - 20;
+                        }
                     })
                     .on('mouseenter', nodeHoverStart)
                     .on('mouseleave', nodeHoverEnd)
@@ -174,7 +202,7 @@ define(
 
         updateVisible: function mapGenerateHull(){
             // Updates the the visible area, based on nodes
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
+            logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
 

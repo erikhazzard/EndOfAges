@@ -1,16 +1,27 @@
-/* Colors */
-@import "map";
-
-/* Must be before imports, because they are referenced
- * by some imports. */
+// --------------------------------------
+//
+// Variables
+//
+// --------------------------------------
 $highlight-blue: #3387f5;
 $highlight-green: #1bc812;
 
-/* Variable declarations */
-$bold-weight: 500;
+// NOTE: this should not be used when the layout is rejiggered
+$nav-height: 75px;
 
-/* Header area */
+// --------------------------------------
+//
+// Imports
+//
+// --------------------------------------
+@import "map";
+@import "nodeInstance";
 
+// --------------------------------------
+//
+// Base elements
+//
+// --------------------------------------
 body {
   font-size: 17px;
   color: #000;
@@ -34,7 +45,7 @@ a {
 .preload-content {
   text-align: center;
   color: #999;
-  font-weight: $bold-weight;
+  font-weight: 500;
   margin: 3em 0
 }
 

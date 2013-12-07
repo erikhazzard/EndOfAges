@@ -14,14 +14,14 @@ define(
 
     var PageHome = Backbone.Marionette.Layout.extend({
         template: '#template-page-home',
+        'className': 'page-home-wrapper',
         events: {
             'click .btn-play-game': 'playGame'
         },
 
         initialize: function initialize(options){
             // initialize:
-            logger.log('views/PageHome', '%cviews/PageHome: %s',
-                'initialize() called');
+            logger.log('views/PageHome', 'initialize() called');
             return this;
         },
         onShow: function homeOnShow(){

@@ -23,8 +23,7 @@ define(['backbone', 'marionette', 'logger', 'events'],
         // created don't create another one
         if(appRouter !== undefined ){ return appRouter; }
 
-        logger.log('appRouter', '%cappRouter: %s',
-            'creating appRouter');
+        logger.log('appRouter', 'creating appRouter');
 
         var controller = options.controller;
         if(!controller){ 
@@ -39,14 +38,12 @@ define(['backbone', 'marionette', 'logger', 'events'],
         // setup global event handlers (allows code to trigger a page 
         // redirect without directly accessing router)
         events.on('appRouter:showHome', function(){
-            logger.log('appRouter', '%cappRouter: %s',
-                'appRouter:showHome event called');
+            logger.log('appRouter', 'appRouter:showHome event called');
             appRouter.navigate('/', {trigger: true});
         }, this);
 
         events.on('appRouter:showGame', function(){
-            logger.log('appRouter', '%cappRouter: %s',
-                'appRouter:showGame event called');
+            logger.log('appRouter', 'appRouter:showGame event called');
             appRouter.navigate('/game', {trigger: true});
         }, this);
 

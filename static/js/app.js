@@ -66,8 +66,7 @@ define([
     //Finished
     //-----------------------------------
     app.on('initialize:after', function(options){
-        logger.log('app', '%capp: %s',
-            'app-main.js: Finished initialization of app');
+        logger.log('app', 'app-main.js: Finished initialization of app');
 
         if(Backbone.history){
             //start history to enable bookmarkable URLs

@@ -19,26 +19,23 @@ define(
                 fName: '',
                 lName: '',
                 facebookId: '',
-                personalityHistory: [],
-
-                // Empty Facebook ID
-                facebookId: null
+                personalityHistory: []
             },
         
             url: API_URL + 'user/',
 
             initialize: function appUserInitialize(){
                 var self = this;
-                logger.log('models/AppUser', '%cmodels/AppUser: %s',
+                logger.log('models/AppUser', 
                     'User:initialize: New app user created');
 
                 // When model comes back from server, if there's no error
                 this.on('sync', function(model, res){
                     if(!res.error && res.username){
                         logger.log('models/AppUser', 
-                            'sync: no error, setting properties for model:',
+                            'sync: no error, setting properties for model: %O | res: %O',
                             self.cid,
-                            'res:', res);
+                            res);
 
                         var newProps = {
                             error: false,
@@ -55,7 +52,7 @@ define(
                     success: function(res){ 
                         // Check if there's an error (e.g., appUser isn't authed)
                         if(res.attributes.error){
-                            logger.log('models/AppUser', '%cmodels/AppUser: %s',
+                            logger.log('models/AppUser',
                                 'fetch(): appUser not logged in');
                             return false;
                         }

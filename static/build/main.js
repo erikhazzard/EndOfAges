@@ -152,10 +152,12 @@ define('logger',['d3'], function(d3) {
     ];
 
     // values of found colors, to check for same colors
-    var foundColors = [];
+    var foundColors = ['#dd4444'];
+
     // key : value of colors so we don't generate new colors
     // for each key
-    var colorDict = {};
+    // set some default colors
+    var colorDict = {error: '#dd4444'};
 
     var getColor = function loggerGetColor(target){
         // generates or returns a color used by a target key
@@ -234,15 +236,23 @@ define('logger',['d3'], function(d3) {
             var len = args.length;
             var newArgs = Array.prototype.slice.call(args);
 
-            // Don't show first argument if second argument has formatting
-            if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
-                var shifted = newArgs.shift();
-                // if the string is a formatted string, format date
-                newArgs[0] += ' <time:%O>';
+            // NOTE: this will only add color to %c specified strings
+            ////if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
 
-                // If the second argument is NOT a color format string,
-                // create one
-                if(newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null){
+            // Add color to everything
+            if(newArgs[1] && typeof newArgs[1] === 'string'){
+                var shifted = newArgs.shift();
+
+                // if the string is a formatted string, add in the
+                // log type, the message, then the time
+                newArgs[0] = '%c' + 
+                    shifted + '\t:\t' + 
+                    newArgs[0].replace('%c', '') + 
+                    ' <time:%O>';
+
+                // If the second argument is a string and it is 
+                // NOT a color format string, the create one
+                if(typeof newArgs[1] !== 'string' || (typeof newArgs[1] === 'string' && newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null)){
                     var background = getColor(shifted);
                     var color = d3.rgb(background);
                     var border = color.darker();
@@ -385,26 +395,23 @@ define(
                 fName: '',
                 lName: '',
                 facebookId: '',
-                personalityHistory: [],
-
-                // Empty Facebook ID
-                facebookId: null
+                personalityHistory: []
             },
         
             url: API_URL + 'user/',
 
             initialize: function appUserInitialize(){
                 var self = this;
-                logger.log('models/AppUser', '%cmodels/AppUser: %s',
+                logger.log('models/AppUser', 
                     'User:initialize: New app user created');
 
                 // When model comes back from server, if there's no error
                 this.on('sync', function(model, res){
                     if(!res.error && res.username){
                         logger.log('models/AppUser', 
-                            'sync: no error, setting properties for model:',
+                            'sync: no error, setting properties for model: %O | res: %O',
                             self.cid,
-                            'res:', res);
+                            res);
 
                         var newProps = {
                             error: false,
@@ -421,7 +428,7 @@ define(
                     success: function(res){ 
                         // Check if there's an error (e.g., appUser isn't authed)
                         if(res.attributes.error){
-                            logger.log('models/AppUser', '%cmodels/AppUser: %s',
+                            logger.log('models/AppUser',
                                 'fetch(): appUser not logged in');
                             return false;
                         }
@@ -571,8 +578,7 @@ define('app',[
     //Finished
     //-----------------------------------
     app.on('initialize:after', function(options){
-        logger.log('app', '%capp: %s',
-            'app-main.js: Finished initialization of app');
+        logger.log('app', 'app-main.js: Finished initialization of app');
 
         if(Backbone.history){
             //start history to enable bookmarkable URLs
@@ -584,15 +590,24 @@ define('app',[
         $(document).on('click', 'a', function(e) {
             var $el = $(this);
             e = e || window.event;
+            var href = $(this).attr('href');
+
+            // if the link has no href or an empty string, assume it shouldn't
+            // link anywhere and return the event
+            if(href === undefined || href === ''){
+                e.preventDefault();
+                return e;
+            }
 
             // we need to catch all internal links and pass them to the router
-            var fragment = Backbone.history.getFragment($(this).attr('href'));
+            var fragment = Backbone.history.getFragment(href);
             var matched = _.any(Backbone.history.handlers, function(handler) {
                 return handler.route.test(fragment);
             });
-            if (matched) {
+            if(matched) {
                 // found a matched link, send it to the router
                 e.preventDefault();
+                // always navigate to link, even if fragment is same
                 if(Backbone.history.fragment === fragment){
                     Backbone.history.fragment = null;
                 }
@@ -614,6 +629,41 @@ define('app',[
 
 // ===========================================================================
 //
+//  Game
+//
+//      This model manages a game
+//
+// ===========================================================================
+define(
+    'models/Game',[ 'backbone', 'marionette', 'logger',
+        'events', 'd3', 'util/API_URL'
+    ], function MapModel(
+        Backbone, Marionette, logger,
+        events, d3, API_URL
+    ){
+
+    var Game = Backbone.Model.extend({
+        defaults: {
+            activeNodeInstance: null
+        },
+
+        url: function getURL(){
+            var url = API_URL + 'user/game';
+            return url;
+        },
+
+        initialize: function gameInitialize(){
+            logger.log('models/Game', 'initialize() called');
+
+            return this;
+        }
+    });
+
+    return Game;
+});
+
+// ===========================================================================
+//
 // PageTitleScreen
 // 
 // ===========================================================================
@@ -628,14 +678,14 @@ define(
 
     var PageHome = Backbone.Marionette.Layout.extend({
         template: '#template-page-home',
+        'className': 'page-home-wrapper',
         events: {
             'click .btn-play-game': 'playGame'
         },
 
         initialize: function initialize(options){
             // initialize:
-            logger.log('views/PageHome', '%cviews/PageHome: %s',
-                'initialize() called');
+            logger.log('views/PageHome', 'initialize() called');
             return this;
         },
         onShow: function homeOnShow(){
@@ -944,26 +994,28 @@ define(
         'd3', 'backbone', 'marionette',
         'logger', 'events',
         'Models/Map'
-    ], function viewPageHome(
+    ], function viewMap(
         d3, backbone, marionette, 
         logger, events,
         Map
     ){
 
     var MapView = Backbone.Marionette.Layout.extend({
-        template: '#template-page-home',
+        template: '#template-game-map',
 
         events: { },
 
+        'className': 'game-map-wrapper',
+
         initialize: function mapViewInitialize(options){
             // initialize:
-            logger.log('views/PageMap', '%cviews/PageMap: %s',
-                'initialize() called');
+            logger.log('views/subviews/Map', 'initialize() called');
 
             return this;
         },
 
         onShow: function mapViewOnShow(){
+            this.drawMap();
             return this;
         },
 
@@ -971,8 +1023,7 @@ define(
         // ------------------------------
         drawMap: function mapViewGenerateMap(){
             var self = this;
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
-                'drawMap() called');
+            logger.log('views/subviews/Map', 'drawMap() called');
 
             // d3 used to draw map
             var svg = d3.select('#map');
@@ -995,7 +1046,7 @@ define(
             this.background = this.wrapper.append('g');
             this.background.append("image")
                 .attr({ 
-                    'xlink:href': '/static/img/space-dark.png',
+                    'xlink:href': '/static/img/map1-dark.png',
                     'preserveAspectRatio': 'none',
                     'class': 'fog', x: 0, y: 0,
                     height: height, width: width
@@ -1004,7 +1055,7 @@ define(
             // hull / visible area
             this.visibleArea = this.background.append("image")
                 .attr({ 
-                    'xlink:href': '/static/img/space.png',
+                    'xlink:href': '/static/img/map1.png',
                     'preserveAspectRatio': 'none',
                     'class': 'visibleArea', x: 0, y: 0,
                     height: height, width: width
@@ -1030,9 +1081,9 @@ define(
         // Update Map
         // ------------------------------
         updateMap: function mapUpdate(){
+            // Draws all nodes then updates the visible areas
             var self = this;
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
-                'updateMap() called');
+            logger.log('views/subviews/Map', 'updateMap() called');
 
             this.drawNodes();
             setTimeout(function(){
@@ -1043,25 +1094,38 @@ define(
         },
 
         drawNodes: function mapDrawNodes(){
+            // Draws all the nodes on the map
             var self = this;
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
-                'drawNodes() called');
+            logger.log('views/subviews/Map', 'drawNodes() called');
 
+            // CLICK event
+            // --------------------------
             function nodeClicked(d,i){
                 // callback when a node is interacted with
                 // TODO: What should happen?
-                logger.log('views/subView/Map', '%cviews/subView/Map: %s %O %O',
+                logger.log('views/subviews/Map', '%s %O %O', 
                     'nodeClicked:', d, i);
                 events.trigger('map:nodeClicked', {node: d, map: self.model});
             }
 
+            // HOVER events
+            // --------------------------
             function nodeHoverStart(d,i){
-                logger.log('views/subView/Map', '%cviews/subView/Map: %s d:%O i:%O',
+                logger.log('views/subviews/Map', '%s d:%O i:%O', 
                     'nodeHoverStart:', d, i);
+
+                // hover effect
+                d3.select(this).attr({
+                    'xlink:href':'#icon-tower-hover'
+                });
             }
             function nodeHoverEnd(d,i){
-                logger.log('views/subView/Map', '%cviews/subView/Map: %s %O %O',
+                logger.log('views/subviews/Map', '%s %O %O',
                     'nodeHoverEnd:', d, i);
+                // dehover
+                d3.select(this).attr({
+                    'xlink:href':'#icon-tower'
+                });
             }
 
             // TODO: Use different images?
@@ -1069,16 +1133,30 @@ define(
             var nodes = this.map.selectAll('.node')
                 .data(this.model.get('nodes'))
                 .enter()
-                .append('circle')
+
+                // Draw circles
+                ////.append('circle')
+                    ////.attr({
+                        ////'class': 'node',
+                        ////cx: function(d){
+                            ////return d.x * self.width;
+                        ////},
+                        ////cy: function(d){
+                            ////return d.y * self.height;
+                        ////},
+                        ////r: 10
+                    ////})
+
+                // Use an existing icon
+                .append('use')
                     .attr({
-                        'class': 'node',
-                        cx: function(d){
-                            return d.x * self.width;
+                        'xlink:href':'#icon-tower',
+                        x: function(d){
+                            return (d.x * self.width) - 20;
                         },
-                        cy: function(d){
-                            return d.y * self.height;
-                        },
-                        r: 10
+                        y: function(d){
+                            return (d.y * self.height) - 20;
+                        }
                     })
                     .on('mouseenter', nodeHoverStart)
                     .on('mouseleave', nodeHoverEnd)
@@ -1108,7 +1186,7 @@ define(
 
         updateVisible: function mapGenerateHull(){
             // Updates the the visible area, based on nodes
-            logger.log('views/subView/Map', '%cviews/subView/Map: %s',
+            logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
 
@@ -1136,9 +1214,42 @@ define(
 
 // ===========================================================================
 //
+// Battle subview
+//
+//      View for a battle. Sub views contains in the Combat subfolder
+//
+// ===========================================================================
+define(
+    'views/subViews/Battle',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events'
+    ], function viewBattle(
+        d3, backbone, marionette, logger, events
+    ){
+
+    var BattleView = Backbone.Marionette.Layout.extend({
+        template: '#template-game-battle',
+        'className': 'game-battle-wrapper',
+
+        events: { },
+
+        initialize: function battleViewInitialize(options){
+            logger.log('views/subviews/Battle', 'initialize() called');
+        }
+
+    });
+
+    return BattleView;
+});
+
+// ===========================================================================
+//
 // Page Game
 //
 //      View for the game 
+//
+//      This acts also as a controller for the game. It listens for and 
+//      handles game related events 
 //
 // ===========================================================================
 define(
@@ -1148,54 +1259,161 @@ define(
 
         // Map
         'models/Map',
-        'views/subViews/Map'
+        'views/subViews/Map',
+        'views/subViews/Battle'
 
     ], function viewPageGame(
         d3, backbone, marionette, 
         logger, events,
 
-        Map, MapView
+        Map, MapView,
+        BattleView
     ){
 
     var PageGame = Backbone.Marionette.Layout.extend({
         template: '#template-page-game',
+        'className': 'page-game-wrapper',
 
         events: {
             'click .login-facebook': 'facebookLogin'
         },
+        
+        regions: {
+            regionNodeInstance: '#region-node-instance-wrapper',
+            regionMap: '#region-map'
+        },
+
         initialize: function initialize(options){
             // initialize:
-            logger.log('views/PageGame', '%cviews/PageGame: %s',
-                'initialize() called');
+            logger.log('views/PageGame', 'initialize() called');
+
+            // --------------------------
+            // controller / game related properties
+            // --------------------------
+            // only one node instance may be active at a time.
+            // when a node instance is active, map is disabled and
+            // nothing can happen until the instance is finished or
+            // abandoned
+            // NOTE: activeNodeInstance is a model property, used to 
+            // keep track of what node is active
+
+            // --------------------------
+            // Setup event listeners
+            // --------------------------
+            // when a user clicks a node on the map
+            this.listenTo(events, 'map:nodeClicked', this.mapNodeClicked);
+
+            // when an instance (battle / shop / etc.) is finished
+            this.listenTo(events, 'node:instanceFinished', 
+                this.nodeInstanceFinished);
+            
+            // --------------------------
+            // Setup views
+            // --------------------------
+            //
+            // MAP
+            // TODO: get model
+            this.modelMap = new Map({});
+            this.viewMap = new MapView({
+                model: this.modelMap
+            }); 
 
             return this;
         },
+
         onShow: function gameOnShow(){
+            logger.log('views/PageGame', 'onShow() called');
             var self = this;
             // setup the map
 
             // TODO: Get map model from game.
-            this.modelMap = new Map({});
             this.modelMap.generateMap();
-            this.setupMap();
+
+            this.regionMap.show(this.viewMap);
             return this;
         },
 
         // ------------------------------
         //
-        // User Interaction
+        // Map - User Interaction
         //
         // ------------------------------
-        setupMap: function gameSetupMap(){
-            var self = this;
-            logger.log('views/PageGame', '%cviews/PageGame: %s',
-                'setupMap() called');
+        mapNodeClicked: function mapNodeClicked(options){
+            //
+            // This function handles user clicks on map nodes. This is
+            // the main function which brings up the coresponding
+            // battle / shop / etc. view based on the clicked node.
+            //
+            // When the instance is finished, the node:instanceFinished 
+            // event is fired off, which will re-show the map
+            //
+            logger.log('views/PageGame', 
+                '1. mapNodeClicked() called. Options: %O',
+                options);
 
-            // TODO: get model
-            this.viewMap = new MapView({
-                model: this.modelMap
-            }); 
-            self.viewMap.drawMap.call(self.viewMap);
+            // If the node instance was clicked and an instance is already 
+            // active, do nothing
+            if(this.model.get('activeNodeInstance') !== null){
+                logger.error('views/PageGame : node instance already active!');
+                logger.log('views/PageGame', '2. exiting function');
+                return this;
+            }
+
+            // Hide map
+            logger.log('views/PageGame', '2. Hiding map');
+            //this.regionMap.$el.hide();
+            this.regionMap.$el.css({ height: 0 });
+
+            // Get node type from options
+            // TODO: Best place to put a mapping of node types to views?
+            var nodeTypeViews = [
+                BattleView
+            ];
+
+            // create node
+            logger.log('views/PageGame', '3. Creating node instance: %O',
+                nodeInstance);
+            var nodeInstance = new nodeTypeViews[0]({});
+
+            // update game model
+            this.model.set({activeNodeInstance: nodeInstance}, {silent: true});
+            this.model.trigger('change:activeNodeInstance');
+
+            // show it
+            logger.log('views/PageGame', '4. Showing node instance: %O',
+                nodeInstance);
+            this.regionNodeInstance.show( nodeInstance );
+            this.regionNodeInstance.$el.removeClass('hidden');
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // Node Instance - Finished
+        //
+        // ------------------------------
+        nodeInstanceFinished: function gameNodeInstanceFinished(options){
+            //
+            // When the node instance is completed (or aborted), this
+            // is called. It will show the map
+            //
+            logger.log('views/PageGame', 
+                '1. nodeInstanceFinished() called. Options: %O',
+                options);
+
+            this.model.set({activeNodeInstance: null}, {silent: true});
+            this.model.trigger('change:activeNodeInstance');
+            
+            // Hide instance
+            logger.log('views/PageGame', '3. Hiding node instance');
+            this.regionNodeInstance.$el.addClass('hidden');
+            this.regionNodeInstance.close();
+
+            // show map
+            logger.log('views/PageGame', '4. Showing map');
+            //this.regionMap.$el.show();
+            this.regionMap.$el.css({ height: 100 });
         }
 
     });
@@ -1211,11 +1429,13 @@ define(
 define('Controller',[
     'backbone', 'marionette', 'logger', 'events',
     'models/appUser-object',
+    'models/Game',
     'views/PageHome',
     'views/PageGame'
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
+        Game,
 
         // include views here
         PageHome,
@@ -1231,8 +1451,7 @@ define('Controller',[
             //  regionMain parameter must be passed in, which specifies what 
             //  region to show. (NOTE: fire off events)
             var self = this;
-            logger.log('Controller', '%cController: %s',
-                'initialize() called');
+            logger.log('Controller', 'initialize() called');
 
             _.each(options.regions, function(region, key){
                 self[key] = region;
@@ -1256,8 +1475,7 @@ define('Controller',[
             // they will be redirected to the /me endpoint (set in html
             // head before anything loads)
             var self = this;
-            logger.log('Controller', '%cController: %s',
-                'showHome() called');
+            logger.log('Controller', 'showHome() called');
 
             // Otherwise, show the homepage
             this.currentRegion = new PageHome({});
@@ -1270,11 +1488,15 @@ define('Controller',[
         // Game
         // ------------------------------
         showGame: function controllerShowGame(){
-            logger.log('Controller', '%cController: %s',
-                'showGame() called');
+            logger.log('Controller', 'showGame() called');
 
-            this.currentRegion = new PageGame({});
+            // get game model from server(?)
+            this.currentRegion = new PageGame({
+                model: new Game({})
+            });
             this.regionMain.show(this.currentRegion);
+
+            return this;
         }
 
     });
@@ -1307,8 +1529,7 @@ define('appRouter',['backbone', 'marionette', 'logger', 'events'],
         // created don't create another one
         if(appRouter !== undefined ){ return appRouter; }
 
-        logger.log('appRouter', '%cappRouter: %s',
-            'creating appRouter');
+        logger.log('appRouter', 'creating appRouter');
 
         var controller = options.controller;
         if(!controller){ 
@@ -1323,14 +1544,12 @@ define('appRouter',['backbone', 'marionette', 'logger', 'events'],
         // setup global event handlers (allows code to trigger a page 
         // redirect without directly accessing router)
         events.on('appRouter:showHome', function(){
-            logger.log('appRouter', '%cappRouter: %s',
-                'appRouter:showHome event called');
+            logger.log('appRouter', 'appRouter:showHome event called');
             appRouter.navigate('/', {trigger: true});
         }, this);
 
         events.on('appRouter:showGame', function(){
-            logger.log('appRouter', '%cappRouter: %s',
-                'appRouter:showGame event called');
+            logger.log('appRouter', 'appRouter:showGame event called');
             appRouter.navigate('/game', {trigger: true});
         }, this);
 
