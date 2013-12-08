@@ -23,6 +23,10 @@ define(
 
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/Battle', 'initialize() called');
+            
+            // TODO: use entities from game model
+            console.log('>>>>', this.model.get('playerEntities'));
+
         },
 
 

@@ -129,7 +129,10 @@ define(
             // create node
             logger.log('views/PageGame', '3. Creating node instance: %O',
                 nodeInstance);
-            var nodeInstance = new nodeTypeViews[0]({});
+            var nodeInstance = new nodeTypeViews[0]({
+                // pass in game model
+                model: this.model 
+            });
 
             // update game model
             this.model.set({activeNodeInstance: nodeInstance}, {silent: true});
