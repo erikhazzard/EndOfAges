@@ -1,10 +1,12 @@
 .node {
-  fill: #336699;
-  stroke: #ffffff;
-  stroke-width: 2px; }
+  cursor: pointer; }
 
 #region-map {
   z-index: 100; }
+
+.entity {
+  fill: #336699;
+  stroke: #ffffff; }
 
 #region-node-instance-wrapper {
   background: #ffffff;

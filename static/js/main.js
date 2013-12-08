@@ -14,6 +14,8 @@ requirejs.config({
     
         // We're using lodash in place of underscore
         lodash: 'lib/lodash.compat',
+        
+        jwerty: 'lib/jwerty.min',
 
         backbone: 'lib/backbone',
         marionette: 'lib/marionette',
@@ -30,6 +32,11 @@ requirejs.config({
         'lodash': {
             exports: '_'
         },
+
+        'jwerty': {
+            exports: 'jwerty'
+        },
+
         'backbone': {
             //These script dependencies should be loaded before loading
             //backbone.js
@@ -66,6 +73,7 @@ require([
     //utils
     'logger', 
     'util/browserInfo',
+    'handleKeys',
 
     //app
     'app', 
@@ -80,6 +88,7 @@ require([
 
         logger, 
         browserInfo,
+        handleKeys,
 
         app, events,
 
@@ -136,6 +145,9 @@ require([
 
             app.router.navigate(route, true);
         });
+
+        // setup handle keys
+        handleKeys();
 
     });
 

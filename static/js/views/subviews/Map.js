@@ -65,7 +65,7 @@ define(
                     'xlink:href': '/static/img/map1-dark.png',
                     'preserveAspectRatio': 'none',
                     'class': 'fog', x: 0, y: 0,
-                    height: height, width: width
+                    height: '100%', width: '100%'
                     // fill with blacked out map
                 });
             // hull / visible area
@@ -74,7 +74,7 @@ define(
                     'xlink:href': '/static/img/map1.png',
                     'preserveAspectRatio': 'none',
                     'class': 'visibleArea', x: 0, y: 0,
-                    height: height, width: width
+                    height: '100%', width: '100%'
                 })
                 .style({ 
                     // fill with full version of map
@@ -166,6 +166,7 @@ define(
                 // Use an existing icon
                 .append('use')
                     .attr({
+                        'class': 'node',
                         'xlink:href':'#icon-tower',
                         x: function(d){
                             return (d.x * self.width) - 20;
