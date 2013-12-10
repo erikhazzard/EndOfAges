@@ -21,7 +21,7 @@ all: devJs
 dev: devJs 
 
 watchjs: 
-	@./util/scripts/when-changed.py static/js/*.js static/js/*/*.js static/js/*/*/*.js -c make devJs
+	@./util/scripts/when-changed.py static/js/*.js static/js/*/*.js static/js/*/*/*.js static/js/*/*/*/*.js -c make devJs
 watchsass:
 	@sass --watch static/css/main.scss:static/css/compiled/main.css
 

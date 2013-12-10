@@ -7,6 +7,7 @@
 // ===========================================================================
 // Use cluster
 var cluster = require('cluster');
+var numCPUs = require('os').cpus().length;
 
 // Listen for dying workers
 cluster.on('exit', function (worker) {
@@ -19,7 +20,7 @@ cluster.on('exit', function (worker) {
 
 if(cluster.isMaster){
     // Create 4 processes
-    for(var i = 0; i < 4; i++ ){
+    for(var i = 0; i < numCPUs; i++ ){
         cluster.fork();
     }
 } else {

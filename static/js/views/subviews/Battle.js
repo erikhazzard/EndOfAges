@@ -33,10 +33,11 @@
 // ===========================================================================
 define(
     [ 
-        'd3', 'backbone', 'marionette',
-        'logger', 'events'
+        'd3', 'backbone', 'marionette', 'logger', 'events',
+        'views/subviews/battle/AbilityList'
     ], function viewBattle(
-        d3, backbone, marionette, logger, events
+        d3, backbone, marionette, logger, events,
+        AbilityListView
     ){
 
     var BattleView = Backbone.Marionette.Layout.extend({
@@ -47,13 +48,25 @@ define(
             'click .finish-instance': 'finishInstance'
         },
 
+        regions: {
+            'regionAbility': '#region-battle-ability-wrapper'
+        },
+
         initialize: function battleViewInitialize(options){
-            logger.log('views/subviews/Battle', 'initialize() called');
-            
+            logger.log('views/subviews/Battle', 'initialize() called'); 
+            // keep track of the selected entity and the current target
+            this.selectedEntity = null;
+            // target should reset whenever entity changes
+            //  should be able to select own entities with 1 - n keys,
+            //      target with shift + n 
+            //  if target is null when an ability is attempted to be used,
+            //      user must select a target for the ability
+            this.target = null;
         },
 
         onShow: function battleOnShow(){
             // Render the scene
+            var self = this;
             logger.log('views/subviews/Battle', '1. onShow() called');
             
             // Setup svg
@@ -86,7 +99,9 @@ define(
                 });
 
             // --------------------------
-            // Draw entities
+            //
+            // Draw Player entities
+            //
             // --------------------------
             // TODO: use sprites
             logger.log('views/subviews/Battle', '4. setting up entities');
@@ -106,8 +121,13 @@ define(
                             },
                             height: entityHeight,
                             width: entityHeight
-                        });
+                        })
+                        .on('click', function(d,i){ return self.entitySelected(d,i); })
+                        .on('touchend', function(d,i){ return self.entitySelected(d,i); })
+                        .on('mouseenter',function(d,i){ return self.entityHoverStart(d,i); })
+                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(d,i); });
 
+            // draw enemies
             enemyEntities.selectAll('.enemyEntity')
                 .data(this.model.get('playerEntities').models)
                 .enter()
@@ -123,6 +143,48 @@ define(
                             height: entityHeight,
                             width: entityHeight
                         });
+        },
+
+        // entity interaction events
+        entitySelected: function(d,i){
+            // This triggers when an entity is selected - meaning, whenever
+            // a user selects an entity to use an ability or see more info
+            // about it. When this happens:
+            //  -Get the entity model from the selection
+            //  -Show the abilities for the entity
+            //  -Show more info
+            //  -Move the entity forward
+            //
+            //1. get model based on selected element
+            var model = this.model.get('playerEntities').models[i];
+            logger.log("views/subviews/Battle", 
+                "1. entity selected: %O : %O \n model: %O", d,i, model);
+            
+            //2. show abilities
+            logger.log("views/subviews/Battle",
+                "2. showing ability view");
+            var abilityView = new AbilityListView({
+                collection: model.get('abilities')
+            });
+            this.regionAbility.show(abilityView);
+
+
+            // 3. Move entity forward a bit
+
+
+            return this;
+        },
+        entityHoverStart: function(d,i){
+            //logger.log("views/subviews/Battle", 
+                //"entity hover start: %O : %O", d,i);
+
+            return this;
+        },
+        entityHoverEnd: function(d,i){
+            //logger.log("views/subviews/Battle", 
+                //"entity hover end: %O : %O", d,i);
+
+            return this;
         },
 
         // ------------------------------
