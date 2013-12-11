@@ -63,8 +63,11 @@ define(
 
             events.trigger('ability:activated', {
                 ability: this.model,
+
                 useCallback: function(err, options){
-                    // Todo: figure out if ability can be used
+                    // This callback is called immediately upon ability
+                    // usage. If it can be used, color it green; otherwise,
+                    // color it grey
                     var canBeUsed = options.canBeUsed;
 
                     // Can the ability be used? If not, add the use-invalid class

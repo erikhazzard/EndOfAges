@@ -26,7 +26,7 @@
 //
 //
 // States:
-//  There are two states: "normal" and "targetting".
+//  There are two states: "normal" and "ability".
 //      1. Normal (default): Player is able to select an entity and
 //      decide what ability to use.
 //      2. Targetting: After selecting an ability to use, player selects
@@ -80,10 +80,10 @@ define(
             //      target with shift + n 
             //  if target is null when an ability is attempted to be used,
             //      user must select a target for the ability
-            this.target = undefined;
+            this.selectedTarget = undefined;
 
             // keep track of the currently selected / active ability, used 
-            // when in targetting mode
+            // when in ability mode
             this.selectedAbility = null;
 
             // --------------------------
@@ -100,10 +100,13 @@ define(
             // --------------------------
             // Handle ability usage
             // --------------------------
-            this.listenTo(events, 'ability:activated', this.handleAbilityUsed);
+            this.listenTo(events, 'ability:activated', this.handleAbilityActivated);
         
             // handle state changes
             this.listenTo(this.model, 'change:state', this.stateChange);
+
+            // DEV: TODO: REMOVE
+            $('.state', this.$el).html(this.model.get('state'));
         },
 
         // ------------------------------
@@ -116,18 +119,21 @@ define(
 
             // TODO: do stuff based on state change
             if(state === 'normal'){
-                // From targetting to normal
+                // From ability to normal
                 
-            } else if (state === 'targetting'){
-                // From targetting to normal
+            } else if (state === 'ability'){
+                // From ability to normal
             }
+
+            // DEV: TODO: REMOVE
+            $('.state', this.$el).html(state);
         },
 
         // ------------------------------
         // Ability use handler
         // ------------------------------
-        handleAbilityUsed: function(options){
-            // When an ability is used, switch to targetting state
+        handleAbilityActivated: function(options){
+            // When an ability is used, switch to ability state
             //
             // This function is an event handler which is called when
             // an ability is attempted to be used. There are multiple
@@ -135,29 +141,48 @@ define(
             //
             // 1. Previously was in a normal state, player uses ability for
             // the first time to activate an ability
-            // 2. Player has 
+            // 2. Player has an ability active already, but has NOT selected
+            // a target. Player has tried to use the same ability
+            // 3. Player has an ability active already, but has NOT selected
+            // a target. Player has tried to use a different ability
             var ability = options.ability;
             var useCallback = options.useCallback;
+            
+            // If the same ability was attempted to be used, do nothing
             var canBeUsed = Math.random() < 0.5 ? true : false;
+            var canBeUsed = true;
 
             logger.log('views/subviews/Battle', 
-                '1. ability used: %O', ability);
+                '1. handleAbilityActivated: %O : canBeUsed: ', ability, canBeUsed);
 
+            // if the same ability was used, 'toggle' it by setting canBeUsed
+            // to false
+            if(this.selectedAbility === options.ability){
+                canBeUsed = false;
+                this.selectedAbility = null;
+            } else {
+                this.selectedAbility = options.ability;
+            }
 
             if(canBeUsed){
                 // The ability CAN be used
                 //
                 // Remove existing target
                 this.cancelTarget();
+                // change the state to ability. Now, when the user clicks on
+                // an entity, the ability will be used
+                this.model.set({ state: 'ability' });
 
-                // TODO: figure out if ability can be used
-                this.model.set({ state: 'targetting' });
+                // highlight the possible targets (whatever group)
+                // TODO: Highlight group of possible targets based on ability
+                // options.ability.get('validTargets') bla bla bla
             } else {
                 // The ability CAN NOT be used
                 this.cancelTarget();
             }
 
 
+            // call the useCallback
             if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
 
             return this;
@@ -182,10 +207,9 @@ define(
             else if (key === 'down' || key === 'j'){ targetIndex += 1; }
 
             var entities = this.model.get('playerEntities');
-            if(this.model.get('state') === 'targetting'){
+            if(this.model.get('state') === 'ability'){
                 entities = this.model.get('enemyEntities');
             }
-
             var modelsLength = entities.models.length;
 
             // loop around if the end is reached
@@ -199,7 +223,7 @@ define(
                 ' : Selecting entity: ' + targetIndex);
 
             // select the entity
-            this.selectEntity(targetIndex);
+            this.selectPlayerEntity(targetIndex);
 
             return this;
         },
@@ -290,10 +314,10 @@ define(
                             height: entityHeight,
                             width: entityHeight
                         })
-                        .on('click', function(d,i){ return self.selectEntity(i); })
-                        .on('touchend', function(d,i){ return self.selectEntity(i); })
-                        .on('mouseenter',function(d,i){ return self.entityHoverStart(i); })
-                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(i); });
+                        .on('click', function(d,i){ return self.selectPlayerEntity(i); })
+                        .on('touchend', function(d,i){ return self.selectPlayerEntity(i); })
+                        .on('mouseenter',function(d,i){ return self.entityHoverStart(i, 'player'); })
+                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(i, 'player'); });
 
             // draw enemies
             enemyEntities.selectAll('.enemy-entity')
@@ -310,21 +334,25 @@ define(
                             },
                             height: entityHeight,
                             width: entityHeight
-                        });
+                        })
+                        .on('click', function(d,i){ return self.selectEnemyEntity(i); })
+                        .on('touchend', function(d,i){ return self.selectEnemyEntity(i); })
+                        .on('mouseenter',function(d,i){ return self.entityHoverStart(i, 'enemy'); })
+                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(i, 'enemy'); });
 
             // After everything is rendered, selected first entity
-            this.selectEntity(0);
+            this.selectPlayerEntity(0);
 
             return this;
         },
 
 
-        // ---------------------------------------------------------------------
+        // =====================================================================
         //
         // Select Entity
         //
-        // ---------------------------------------------------------------------
-        selectEntity: function(i){
+        // =====================================================================
+        selectPlayerEntity: function(i){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
             // about it. 
@@ -332,7 +360,56 @@ define(
             // i: index of selected entity (matches with the order of
             // playerEntities.models)
             
-            // Select a new entity (no target mode)
+            // STATE: normal
+            if(this.model.get('state') === 'normal'){
+                this.selectPlayerEntityStateNormal(i);
+
+            } else if(this.model.get('state') === 'ability'){
+                // call the general select entity function to set the ability's
+                // target and use the ability
+                this.selectTarget(i, this.model.get('playerEntities').models);
+
+                // then, use the ability
+                this.useAbility();
+            }
+
+            return this;
+        },
+
+        // select Enemy entity
+        selectEnemyEntity: function(i){
+            if(this.model.get('state') === 'normal'){
+                // TODO: show more info on enemy?
+            } else if(this.model.get('state') === 'ability'){
+                // call the general select entity function to set the ability's
+                // target and use the ability
+                this.selectTarget(i, this.model.get('enemyEntities').models);
+
+                // then, use the ability
+                this.useAbility();
+            }
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // Select entity by state 
+        //
+        // ------------------------------
+        selectTarget: function(i, models){
+            // Sets the target based on the selected index in the model
+            var model = models[i];
+
+            // TODO: update svg elements
+            //
+            //
+            this.selectedTarget = model;
+            return this;
+        },
+
+        selectPlayerEntityStateNormal: function(i){
+            // Select a new entity 
             // --------------------------
             // overview:
             //  -Get the entity model from the selection
@@ -386,15 +463,34 @@ define(
             return this;
         },
 
-        entityHoverStart: function(d,i){
+        entityHoverStart: function(i, entityGroup){
             //logger.log("views/subviews/Battle", 
                 //"entity hover start: %O : %O", d,i);
 
             return this;
         },
-        entityHoverEnd: function(d,i){
+        entityHoverEnd: function(i, entityGroup){
             //logger.log("views/subviews/Battle", 
                 //"entity hover end: %O : %O", d,i);
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // Use ability
+        //
+        // ------------------------------
+        useAbility: function(){
+            // Uses whatever the active ability is on the target
+            logger.log("views/subviews/Battle", 
+                "1. useAbility(): using ability: %O on %O",
+                this.selectedAbility, this.selectedTarget);
+
+            // TODO: use ability
+
+            // Reset back to normal state
+            this.cancelTarget();
 
             return this;
         },

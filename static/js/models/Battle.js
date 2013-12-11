@@ -21,7 +21,7 @@ define(
         defaults: {
             id: 0,
     
-            // state can be either 'normal' or 'targetting'
+            // state can be either 'normal' or 'ability'
             state: 'normal',
 
             playerEntities: [],
