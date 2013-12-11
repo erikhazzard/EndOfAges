@@ -8,19 +8,23 @@
   fill: #336699;
   stroke: #ffffff; }
 
-.ability-list-wrapper .ability-item {
+.enemy-entity {
+  fill: #dd4444;
+  stroke: #ffffff; }
+
+.ability-list-wrapper .ability-item-wrapper {
   border: 1px solid #343434;
   float: left;
-  width: 200px;
+  width: 24%;
   background-color: transparent;
   -moz-transition: background-color 0.1s;
   -webkit-transition: background-color 0.1s;
   transition: background-color 0.1s; }
 
-.ability-list-wrapper .ability-item.use-invalid {
+.ability-list-wrapper .ability-item-wrapper.use-invalid {
   background-color: #cdcdcd; }
 
-.ability-list-wrapper .ability-item.use {
+.ability-list-wrapper .ability-item-wrapper.use {
   background-color: #44dd44; }
 
 #region-node-instance-wrapper {

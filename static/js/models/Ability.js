@@ -23,6 +23,12 @@ define(
             // castTime in seconds
             castTime: 4,
 
+            // validTargets specifies the entities the ability can be
+            // used on. for now, only 'enemy' or 'player' are valid targets. 
+            validTargets: 'enemy',
+        
+            // TODO: how to handle AoE?
+
             // effect is always an object that is always in the following
             // format:
             effect: function(options){

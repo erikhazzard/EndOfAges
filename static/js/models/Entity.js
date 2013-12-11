@@ -58,10 +58,13 @@ define(
             }, {silent: true});
 
             // Setup entity abilities
+            // TODO: get from server
             this.set({
                 abilities: new Abilities([
                     new Ability(),
-                    new Ability({ name: 'Spirit of Wolf ' + Math.random()})
+                    new Ability({ name: 'Spirit of Wolf'}),
+                    new Ability({ name: 'Fireball'}),
+                    new Ability({ name: 'Clarity'})
                 ])
             });
 

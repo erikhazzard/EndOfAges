@@ -19,6 +19,7 @@ define([
             'escape',
             'enter',
             'q','w','e','r',
+            'h','j','k','l',
             'backspace',
             'shift+up',
             'shift+down'

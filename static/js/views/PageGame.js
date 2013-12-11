@@ -15,6 +15,8 @@ define(
 
         // Map
         'models/Map',
+        'models/Battle',
+
         'views/subViews/Map',
         'views/subViews/Battle'
 
@@ -22,7 +24,8 @@ define(
         d3, backbone, marionette, 
         logger, events,
 
-        Map, MapView,
+        Map, Battle,
+        MapView,
         BattleView
     ){
 
@@ -122,16 +125,21 @@ define(
 
             // Get node type from options
             // TODO: Best place to put a mapping of node types to views?
-            var nodeTypeViews = [
-                BattleView
+            var nodeTypes = [
+                {view: BattleView, model: Battle}
             ];
 
             // create node
             logger.log('views/PageGame', '3. Creating node instance: %O',
                 nodeInstance);
-            var nodeInstance = new nodeTypeViews[0]({
+
+            var nodeInstance = new nodeTypes[0].view({
                 // pass in game model
-                model: this.model 
+                model: new nodeTypes[0].model({
+                    playerEntities: this.model.get('playerEntities')
+                    // TODO: get enemy entities
+                }),
+                gameModel: this.model 
             });
 
             // update game model

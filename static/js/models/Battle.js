@@ -1,52 +1,53 @@
 // ===========================================================================
 //
-//  Game
+//  Battle
 //
-//      This model manages a game
+//      This model manages an individual battle.
+//      Used to keep track of state, battle stats, etc.
 //
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL',
-
-        'collections/Entities', 'models/Entity'
+        'collections/Entities',
+        'models/Entity'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
-
         Entities, Entity
     ){
 
-    var Game = Backbone.Model.extend({
+    var Battle = Backbone.Model.extend({
         defaults: {
-            activeNodeInstance: null,
+            id: 0,
+    
+            // state can be either 'normal' or 'targetting'
+            state: 'normal',
 
-            // the player's party
-            playerEntities: null
+            playerEntities: [],
+            enemyEntities: []
+            
+            //TODO: keep track of stats
         },
 
         url: function getURL(){
-            var url = API_URL + 'user/game';
+            var url = API_URL + 'battle/' + this.get('id');
             return url;
         },
 
         initialize: function gameInitialize(){
-            logger.log('models/Game', 'initialize() called');
+            logger.log('models/Battle', 'initialize() called');
 
-            // TODO: setup entities
             this.set({
-                playerEntities: new Entities([
-                    new Entity({}),
+                enemyEntities: new Entities([
                     new Entity({}),
                     new Entity({}),
                     new Entity({})
                 ])
             }, {silent: true});
-            this.trigger('change:playerEntities');
-
             return this;
         }
     });
 
-    return Game;
+    return Battle;
 });

@@ -15,7 +15,7 @@ define(
 
     var AbilityItem = Backbone.Marionette.ItemView.extend({
         template: '#template-game-battle-ability',
-        'className': 'ability-item',
+        'className': 'ability-item-wrapper',
 
         serializeData: function(){
             return _.extend({
@@ -26,8 +26,7 @@ define(
 
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/battle/AbilityItem', 
-                'initialize() called for: ' + this.model.get('name') + 
-                ' model: %O', this.model);
+                'initialize() called for: ' + this.model.get('name'));
 
             // index is the index of this itemview in the collection
             this.index = options.index;
@@ -37,6 +36,17 @@ define(
 
             // handle keypress
             this.listenTo(events, 'keyPress:' + key, this.useAbility);
+
+            // handle battle related events
+            this.listenTo(events, 'ability:cancel', this.cancelAbility);
+
+            return this;
+        },
+
+        cancelAbility: function(options){
+            // called when the user pressed 'escape' or the ability cannot
+            // be used (trigged in the Battle controller view)
+            this.$el.removeClass('use');
             return this;
         },
 
@@ -51,29 +61,28 @@ define(
                 ' | key pressed: ' + options.key);
             
 
-            var canBeUsed = true;
+            events.trigger('ability:activated', {
+                ability: this.model,
+                useCallback: function(err, options){
+                    // Todo: figure out if ability can be used
+                    var canBeUsed = options.canBeUsed;
 
-            // Can the ability be used? If not, add the use-invalid class
-            if(!canBeUsed){
-                // Can NOT be used
-                this.$el.addClass('use-invalid');
-                this.$el.focus();
-                setTimeout(function(){
-                    self.$el.removeClass('use-invalid');
-                }, 100);
-            } else {
-                // CAN use
-                // add class
-                this.$el.addClass('use');
-                this.$el.focus();
-                setTimeout(function(){
-                    self.$el.removeClass('use');
-                }, 100);
-
-                // reset timer
-
-                // perform effect
-            }
+                    // Can the ability be used? If not, add the use-invalid class
+                    if(!canBeUsed){
+                        // Can NOT be used
+                        self.$el.addClass('use-invalid');
+                        self.$el.focus();
+                        setTimeout(function(){
+                            self.$el.removeClass('use-invalid');
+                        }, 100);
+                    } else {
+                        // CAN use
+                        // add class
+                        self.$el.addClass('use');
+                        self.$el.focus();
+                    }
+                }
+            });
 
             return this;
         }

@@ -25,6 +25,14 @@
 //      6. Eneemy surrenders
 //
 //
+// States:
+//  There are two states: "normal" and "targetting".
+//      1. Normal (default): Player is able to select an entity and
+//      decide what ability to use.
+//      2. Targetting: After selecting an ability to use, player selects
+//      the entity they want to use the ability on
+//
+//
 // View overview
 // --------------------------------------
 //  This view renders the battle scene and acts as a controller for the battle.
@@ -57,7 +65,12 @@ define(
         },
 
         initialize: function battleViewInitialize(options){
-            logger.log('views/subviews/Battle', 'initialize() called'); 
+            options = options || {};
+            this.gameModel = options.gameModel;
+
+            logger.log('views/subviews/Battle', 
+                '1. initialize() called. Model: %O : Game Model: %O', 
+                this.model, this.gameModel); 
             // keep track of the selected entity and the current target
             this.selectedEntityIndex = undefined;
             this.previouslySelectedEntityIndex = undefined;
@@ -69,32 +82,111 @@ define(
             //      user must select a target for the ability
             this.target = undefined;
 
+            // keep track of the currently selected / active ability, used 
+            // when in targetting mode
+            this.selectedAbility = null;
+
             // --------------------------
             // Handle user input - shortcut keys
             // --------------------------
             // Pressing up or down will cycle through the entities
             this.listenTo(events, 'keyPress:up', this.handleKeyUpdateSelection);
+            this.listenTo(events, 'keyPress:k', this.handleKeyUpdateSelection);
             this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
-            
+            this.listenTo(events, 'keyPress:j', this.handleKeyUpdateSelection);
+
+            this.listenTo(events, 'keyPress:escape', this.handleKeyEscape);
+
+            // --------------------------
+            // Handle ability usage
+            // --------------------------
+            this.listenTo(events, 'ability:activated', this.handleAbilityUsed);
+        
+            // handle state changes
+            this.listenTo(this.model, 'change:state', this.stateChange);
         },
 
         // ------------------------------
-        // Shortcut key callbacks
+        // Model state change
+        // ------------------------------
+        stateChange: function(model,state){
+            // Called when the model state changes
+            logger.log('views/subviews/Battle', 
+                '1. stateChange(): model state changed to: ' + state);
+
+            // TODO: do stuff based on state change
+            if(state === 'normal'){
+                // From targetting to normal
+                
+            } else if (state === 'targetting'){
+                // From targetting to normal
+            }
+        },
+
+        // ------------------------------
+        // Ability use handler
+        // ------------------------------
+        handleAbilityUsed: function(options){
+            // When an ability is used, switch to targetting state
+            //
+            // This function is an event handler which is called when
+            // an ability is attempted to be used. There are multiple
+            // things that can happen:
+            //
+            // 1. Previously was in a normal state, player uses ability for
+            // the first time to activate an ability
+            // 2. Player has 
+            var ability = options.ability;
+            var useCallback = options.useCallback;
+            var canBeUsed = Math.random() < 0.5 ? true : false;
+
+            logger.log('views/subviews/Battle', 
+                '1. ability used: %O', ability);
+
+
+            if(canBeUsed){
+                // The ability CAN be used
+                //
+                // Remove existing target
+                this.cancelTarget();
+
+                // TODO: figure out if ability can be used
+                this.model.set({ state: 'targetting' });
+            } else {
+                // The ability CAN NOT be used
+                this.cancelTarget();
+            }
+
+
+            if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // User input - Shortcut keys
+        //
         // ------------------------------
         handleKeyUpdateSelection: function(options){
             // disable scrolling with up / down arrow key
             options.e.preventDefault();
             var key = options.key;
 
-            // TODO: Handle different functions based on state?
+            // TODO: Handle different functions based on state
             var targetIndex = this.selectedEntityIndex;
             if(targetIndex === undefined){ targetIndex = -1; }
 
             // reverse up down - down key should go down the entity list
-            if(key === 'up'){ targetIndex -= 1; }
-            else if (key === 'down'){ targetIndex += 1; }
+            if(key === 'up' || key === 'k'){ targetIndex -= 1; }
+            else if (key === 'down' || key === 'j'){ targetIndex += 1; }
 
-            var modelsLength = this.model.get('playerEntities').models.length;
+            var entities = this.model.get('playerEntities');
+            if(this.model.get('state') === 'targetting'){
+                entities = this.model.get('enemyEntities');
+            }
+
+            var modelsLength = entities.models.length;
 
             // loop around if the end is reached
             if(targetIndex >= modelsLength){
@@ -112,9 +204,33 @@ define(
             return this;
         },
 
+        handleKeyEscape: function(options){
+            // When escape is pressed, it should return to the
+            // normal battle state
+            options.e.preventDefault();
+            var key = options.key;
+
+            logger.log('views/subviews/Battle', '1. got key press : ' + key);
+
+            this.cancelTarget();
+            return this;
+        },
+
+        cancelTarget: function(){
+            // return to default state
+            logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
+
+            events.trigger('ability:cancel');
+            this.model.set({
+                state: 'normal'
+            });
+            return this;
+        },
 
         // ------------------------------
+        //
         // Render / Show
+        //
         // ------------------------------
         onShow: function battleOnShow(){
             // Render the scene
@@ -160,13 +276,13 @@ define(
             var entityHeight = 60;
 
             // draw player entities
-            this.playerEntitiesEls = playerEntities.selectAll('.playerEntity')
+            this.playerEntitiesEls = playerEntities.selectAll('.player-entity')
                 .data(this.model.get('playerEntities').models)
                 .enter()
                     // TODO: draw sprites
                     .append('rect')
                         .attr({
-                            'class': 'playerEntity entity',
+                            'class': 'player-entity entity',
                             x: 20,
                             y: function(d,i){
                                 return 20 + (i * (entityHeight + 20));
@@ -180,13 +296,13 @@ define(
                         .on('mouseleave',function(d,i){ return self.entityHoverEnd(i); });
 
             // draw enemies
-            enemyEntities.selectAll('.enemyEntity')
-                .data(this.model.get('playerEntities').models)
+            enemyEntities.selectAll('.enemy-entity')
+                .data(this.model.get('enemyEntities').models)
                 .enter()
                     // TODO: draw sprites
                     .append('rect')
                         .attr({
-                            'class': 'enemyEntity entity',
+                            'class': 'enemy-entity entity',
                             // TODO: get width dynamically
                             x: 800 - entityHeight - 200,
                             y: function(d,i){
@@ -195,9 +311,19 @@ define(
                             height: entityHeight,
                             width: entityHeight
                         });
+
+            // After everything is rendered, selected first entity
+            this.selectEntity(0);
+
+            return this;
         },
 
-        // entity interaction events
+
+        // ---------------------------------------------------------------------
+        //
+        // Select Entity
+        //
+        // ---------------------------------------------------------------------
         selectEntity: function(i){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
@@ -217,7 +343,7 @@ define(
             // if the user selected the currently active entity, do nothing
             if(i === this.previouslySelectedEntityIndex){ 
                 logger.log("views/subviews/Battle", 
-                    'entity selected: same entity selected, exiting');
+                    '0. entity selected: same entity selected, exiting');
                 return false; 
             } 
 
@@ -243,12 +369,15 @@ define(
 
             // move entity
             logger.log("views/subviews/Battle", "4. moving entity");
-            d3.select(this.playerEntitiesEls[0][i]).attr({ x: 200 });
+            d3.select(this.playerEntitiesEls[0][i])
+                .transition()
+                .attr({ transform: 'translate(120 0)' });
 
             // move back previously selected entity
             if(this.previouslySelectedEntityIndex !== undefined){
                 d3.select(this.playerEntitiesEls[0][this.previouslySelectedEntityIndex])
-                    .attr({ x: 40 });
+                    .transition()
+                    .attr({ transform: ''});
             }
 
             // update the previously selected entity

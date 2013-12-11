@@ -388,6 +388,7 @@ define('handleKeys',[
             'escape',
             'enter',
             'q','w','e','r',
+            'h','j','k','l',
             'backspace',
             'shift+up',
             'shift+down'
@@ -823,6 +824,12 @@ define(
             // castTime in seconds
             castTime: 4,
 
+            // validTargets specifies the entities the ability can be
+            // used on. for now, only 'enemy' or 'player' are valid targets. 
+            validTargets: 'enemy',
+        
+            // TODO: how to handle AoE?
+
             // effect is always an object that is always in the following
             // format:
             effect: function(options){
@@ -949,10 +956,13 @@ define(
             }, {silent: true});
 
             // Setup entity abilities
+            // TODO: get from server
             this.set({
                 abilities: new Abilities([
                     new Ability(),
-                    new Ability({ name: 'Spirit of Wolf ' + Math.random()})
+                    new Ability({ name: 'Spirit of Wolf'}),
+                    new Ability({ name: 'Fireball'}),
+                    new Ability({ name: 'Clarity'})
                 ])
             });
 
@@ -1029,7 +1039,6 @@ define(
             // TODO: setup entities
             this.set({
                 playerEntities: new Entities([
-                    new Entity({}),
                     new Entity({}),
                     new Entity({}),
                     new Entity({}),
@@ -1227,6 +1236,60 @@ define(
 
         });
         return Map;
+});
+
+// ===========================================================================
+//
+//  Battle
+//
+//      This model manages an individual battle.
+//      Used to keep track of state, battle stats, etc.
+//
+// ===========================================================================
+define(
+    'models/Battle',[ 'backbone', 'marionette', 'logger',
+        'events', 'd3', 'util/API_URL',
+        'collections/Entities',
+        'models/Entity'
+    ], function MapModel(
+        Backbone, Marionette, logger,
+        events, d3, API_URL,
+        Entities, Entity
+    ){
+
+    var Battle = Backbone.Model.extend({
+        defaults: {
+            id: 0,
+    
+            // state can be either 'normal' or 'targetting'
+            state: 'normal',
+
+            playerEntities: [],
+            enemyEntities: []
+            
+            //TODO: keep track of stats
+        },
+
+        url: function getURL(){
+            var url = API_URL + 'battle/' + this.get('id');
+            return url;
+        },
+
+        initialize: function gameInitialize(){
+            logger.log('models/Battle', 'initialize() called');
+
+            this.set({
+                enemyEntities: new Entities([
+                    new Entity({}),
+                    new Entity({}),
+                    new Entity({})
+                ])
+            }, {silent: true});
+            return this;
+        }
+    });
+
+    return Battle;
 });
 
 // ===========================================================================
@@ -1619,7 +1682,7 @@ define(
 
     var AbilityItem = Backbone.Marionette.ItemView.extend({
         template: '#template-game-battle-ability',
-        'className': 'ability-item',
+        'className': 'ability-item-wrapper',
 
         serializeData: function(){
             return _.extend({
@@ -1630,8 +1693,7 @@ define(
 
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/battle/AbilityItem', 
-                'initialize() called for: ' + this.model.get('name') + 
-                ' model: %O', this.model);
+                'initialize() called for: ' + this.model.get('name'));
 
             // index is the index of this itemview in the collection
             this.index = options.index;
@@ -1641,6 +1703,17 @@ define(
 
             // handle keypress
             this.listenTo(events, 'keyPress:' + key, this.useAbility);
+
+            // handle battle related events
+            this.listenTo(events, 'ability:cancel', this.cancelAbility);
+
+            return this;
+        },
+
+        cancelAbility: function(options){
+            // called when the user pressed 'escape' or the ability cannot
+            // be used (trigged in the Battle controller view)
+            this.$el.removeClass('use');
             return this;
         },
 
@@ -1655,29 +1728,28 @@ define(
                 ' | key pressed: ' + options.key);
             
 
-            var canBeUsed = true;
+            events.trigger('ability:activated', {
+                ability: this.model,
+                useCallback: function(err, options){
+                    // Todo: figure out if ability can be used
+                    var canBeUsed = options.canBeUsed;
 
-            // Can the ability be used? If not, add the use-invalid class
-            if(!canBeUsed){
-                // Can NOT be used
-                this.$el.addClass('use-invalid');
-                this.$el.focus();
-                setTimeout(function(){
-                    self.$el.removeClass('use-invalid');
-                }, 100);
-            } else {
-                // CAN use
-                // add class
-                this.$el.addClass('use');
-                this.$el.focus();
-                setTimeout(function(){
-                    self.$el.removeClass('use');
-                }, 100);
-
-                // reset timer
-
-                // perform effect
-            }
+                    // Can the ability be used? If not, add the use-invalid class
+                    if(!canBeUsed){
+                        // Can NOT be used
+                        self.$el.addClass('use-invalid');
+                        self.$el.focus();
+                        setTimeout(function(){
+                            self.$el.removeClass('use-invalid');
+                        }, 100);
+                    } else {
+                        // CAN use
+                        // add class
+                        self.$el.addClass('use');
+                        self.$el.focus();
+                    }
+                }
+            });
 
             return this;
         }
@@ -1776,6 +1848,14 @@ define(
 //      6. Eneemy surrenders
 //
 //
+// States:
+//  There are two states: "normal" and "targetting".
+//      1. Normal (default): Player is able to select an entity and
+//      decide what ability to use.
+//      2. Targetting: After selecting an ability to use, player selects
+//      the entity they want to use the ability on
+//
+//
 // View overview
 // --------------------------------------
 //  This view renders the battle scene and acts as a controller for the battle.
@@ -1808,7 +1888,12 @@ define(
         },
 
         initialize: function battleViewInitialize(options){
-            logger.log('views/subviews/Battle', 'initialize() called'); 
+            options = options || {};
+            this.gameModel = options.gameModel;
+
+            logger.log('views/subviews/Battle', 
+                '1. initialize() called. Model: %O : Game Model: %O', 
+                this.model, this.gameModel); 
             // keep track of the selected entity and the current target
             this.selectedEntityIndex = undefined;
             this.previouslySelectedEntityIndex = undefined;
@@ -1820,32 +1905,111 @@ define(
             //      user must select a target for the ability
             this.target = undefined;
 
+            // keep track of the currently selected / active ability, used 
+            // when in targetting mode
+            this.selectedAbility = null;
+
             // --------------------------
             // Handle user input - shortcut keys
             // --------------------------
             // Pressing up or down will cycle through the entities
             this.listenTo(events, 'keyPress:up', this.handleKeyUpdateSelection);
+            this.listenTo(events, 'keyPress:k', this.handleKeyUpdateSelection);
             this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
-            
+            this.listenTo(events, 'keyPress:j', this.handleKeyUpdateSelection);
+
+            this.listenTo(events, 'keyPress:escape', this.handleKeyEscape);
+
+            // --------------------------
+            // Handle ability usage
+            // --------------------------
+            this.listenTo(events, 'ability:activated', this.handleAbilityUsed);
+        
+            // handle state changes
+            this.listenTo(this.model, 'change:state', this.stateChange);
         },
 
         // ------------------------------
-        // Shortcut key callbacks
+        // Model state change
+        // ------------------------------
+        stateChange: function(model,state){
+            // Called when the model state changes
+            logger.log('views/subviews/Battle', 
+                '1. stateChange(): model state changed to: ' + state);
+
+            // TODO: do stuff based on state change
+            if(state === 'normal'){
+                // From targetting to normal
+                
+            } else if (state === 'targetting'){
+                // From targetting to normal
+            }
+        },
+
+        // ------------------------------
+        // Ability use handler
+        // ------------------------------
+        handleAbilityUsed: function(options){
+            // When an ability is used, switch to targetting state
+            //
+            // This function is an event handler which is called when
+            // an ability is attempted to be used. There are multiple
+            // things that can happen:
+            //
+            // 1. Previously was in a normal state, player uses ability for
+            // the first time to activate an ability
+            // 2. Player has 
+            var ability = options.ability;
+            var useCallback = options.useCallback;
+            var canBeUsed = Math.random() < 0.5 ? true : false;
+
+            logger.log('views/subviews/Battle', 
+                '1. ability used: %O', ability);
+
+
+            if(canBeUsed){
+                // The ability CAN be used
+                //
+                // Remove existing target
+                this.cancelTarget();
+
+                // TODO: figure out if ability can be used
+                this.model.set({ state: 'targetting' });
+            } else {
+                // The ability CAN NOT be used
+                this.cancelTarget();
+            }
+
+
+            if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // User input - Shortcut keys
+        //
         // ------------------------------
         handleKeyUpdateSelection: function(options){
             // disable scrolling with up / down arrow key
             options.e.preventDefault();
             var key = options.key;
 
-            // TODO: Handle different functions based on state?
+            // TODO: Handle different functions based on state
             var targetIndex = this.selectedEntityIndex;
             if(targetIndex === undefined){ targetIndex = -1; }
 
             // reverse up down - down key should go down the entity list
-            if(key === 'up'){ targetIndex -= 1; }
-            else if (key === 'down'){ targetIndex += 1; }
+            if(key === 'up' || key === 'k'){ targetIndex -= 1; }
+            else if (key === 'down' || key === 'j'){ targetIndex += 1; }
 
-            var modelsLength = this.model.get('playerEntities').models.length;
+            var entities = this.model.get('playerEntities');
+            if(this.model.get('state') === 'targetting'){
+                entities = this.model.get('enemyEntities');
+            }
+
+            var modelsLength = entities.models.length;
 
             // loop around if the end is reached
             if(targetIndex >= modelsLength){
@@ -1863,9 +2027,33 @@ define(
             return this;
         },
 
+        handleKeyEscape: function(options){
+            // When escape is pressed, it should return to the
+            // normal battle state
+            options.e.preventDefault();
+            var key = options.key;
+
+            logger.log('views/subviews/Battle', '1. got key press : ' + key);
+
+            this.cancelTarget();
+            return this;
+        },
+
+        cancelTarget: function(){
+            // return to default state
+            logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
+
+            events.trigger('ability:cancel');
+            this.model.set({
+                state: 'normal'
+            });
+            return this;
+        },
 
         // ------------------------------
+        //
         // Render / Show
+        //
         // ------------------------------
         onShow: function battleOnShow(){
             // Render the scene
@@ -1911,13 +2099,13 @@ define(
             var entityHeight = 60;
 
             // draw player entities
-            this.playerEntitiesEls = playerEntities.selectAll('.playerEntity')
+            this.playerEntitiesEls = playerEntities.selectAll('.player-entity')
                 .data(this.model.get('playerEntities').models)
                 .enter()
                     // TODO: draw sprites
                     .append('rect')
                         .attr({
-                            'class': 'playerEntity entity',
+                            'class': 'player-entity entity',
                             x: 20,
                             y: function(d,i){
                                 return 20 + (i * (entityHeight + 20));
@@ -1931,13 +2119,13 @@ define(
                         .on('mouseleave',function(d,i){ return self.entityHoverEnd(i); });
 
             // draw enemies
-            enemyEntities.selectAll('.enemyEntity')
-                .data(this.model.get('playerEntities').models)
+            enemyEntities.selectAll('.enemy-entity')
+                .data(this.model.get('enemyEntities').models)
                 .enter()
                     // TODO: draw sprites
                     .append('rect')
                         .attr({
-                            'class': 'enemyEntity entity',
+                            'class': 'enemy-entity entity',
                             // TODO: get width dynamically
                             x: 800 - entityHeight - 200,
                             y: function(d,i){
@@ -1946,9 +2134,19 @@ define(
                             height: entityHeight,
                             width: entityHeight
                         });
+
+            // After everything is rendered, selected first entity
+            this.selectEntity(0);
+
+            return this;
         },
 
-        // entity interaction events
+
+        // ---------------------------------------------------------------------
+        //
+        // Select Entity
+        //
+        // ---------------------------------------------------------------------
         selectEntity: function(i){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
@@ -1968,7 +2166,7 @@ define(
             // if the user selected the currently active entity, do nothing
             if(i === this.previouslySelectedEntityIndex){ 
                 logger.log("views/subviews/Battle", 
-                    'entity selected: same entity selected, exiting');
+                    '0. entity selected: same entity selected, exiting');
                 return false; 
             } 
 
@@ -1994,12 +2192,15 @@ define(
 
             // move entity
             logger.log("views/subviews/Battle", "4. moving entity");
-            d3.select(this.playerEntitiesEls[0][i]).attr({ x: 200 });
+            d3.select(this.playerEntitiesEls[0][i])
+                .transition()
+                .attr({ transform: 'translate(120 0)' });
 
             // move back previously selected entity
             if(this.previouslySelectedEntityIndex !== undefined){
                 d3.select(this.playerEntitiesEls[0][this.previouslySelectedEntityIndex])
-                    .attr({ x: 40 });
+                    .transition()
+                    .attr({ transform: ''});
             }
 
             // update the previously selected entity
@@ -2052,6 +2253,8 @@ define(
 
         // Map
         'models/Map',
+        'models/Battle',
+
         'views/subViews/Map',
         'views/subViews/Battle'
 
@@ -2059,7 +2262,8 @@ define(
         d3, backbone, marionette, 
         logger, events,
 
-        Map, MapView,
+        Map, Battle,
+        MapView,
         BattleView
     ){
 
@@ -2159,16 +2363,21 @@ define(
 
             // Get node type from options
             // TODO: Best place to put a mapping of node types to views?
-            var nodeTypeViews = [
-                BattleView
+            var nodeTypes = [
+                {view: BattleView, model: Battle}
             ];
 
             // create node
             logger.log('views/PageGame', '3. Creating node instance: %O',
                 nodeInstance);
-            var nodeInstance = new nodeTypeViews[0]({
+
+            var nodeInstance = new nodeTypes[0].view({
                 // pass in game model
-                model: this.model 
+                model: new nodeTypes[0].model({
+                    playerEntities: this.model.get('playerEntities')
+                    // TODO: get enemy entities
+                }),
+                gameModel: this.model 
             });
 
             // update game model
