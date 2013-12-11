@@ -8,3 +8,20 @@
 // Ability
 //
 // --------------------------------------
+.ability-list-wrapper .ability-item {
+    border: 1px solid #343434;
+    float: left;
+    width: 200px;
+  
+    background-color:transparent;
+    -moz-transition:background-color 0.1s;
+    -webkit-transition:background-color 0.1s;
+    transition:background-color 0.1s;
+}
+
+.ability-list-wrapper .ability-item.use-invalid {
+    background-color: #cdcdcd;
+}
+.ability-list-wrapper .ability-item.use {
+    background-color: #44dd44;
+}

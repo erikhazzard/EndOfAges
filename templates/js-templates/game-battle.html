@@ -1,3 +1,6 @@
+{{ include battle/ability.html }}
+{{ include battle/entity.html }}
+
 <script id='template-game-battle' type='text/template'>
     Thar be a battle
 
@@ -13,14 +16,9 @@
         </svg>
     </div>
 
+    <!-- Entity info -->
+    <div id='region-battle-entity-wrapper'></div>
+
     <!-- Ability menu -->
     <div id='region-battle-ability-wrapper'></div>
-</script>
-
-<script id='template-game-battle-ability' type='text/template'>
-    {{// This template shows the abilities for the currently selected entity }}
-    <div class='ability-wrapper'>
-        <h4><%= name %></h4>
-        <%= index %>
-    </div>
 </script>

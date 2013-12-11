@@ -940,6 +940,7 @@ define(
             // TODO: get attributes from server
             // set attributes and base attributes from server
             this.set({
+                name: 'Soandso' + Math.random(),
                 attributes: new EntityAttributes(),
                 baseAttributes: new EntityAttributes()
             }, {silent: true});
@@ -1570,6 +1571,12 @@ define(
                 'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
 
+            // only use filters if lowRes mode is not true
+            var filter = '';
+            if(CONFIG && !CONFIG.lowRes){
+                filter = 'url(#map-filter)';
+            }
+
             this.maskPath.selectAll('.visibleNode')
                 .data(this.vertices)
                 .enter()
@@ -1578,7 +1585,7 @@ define(
                         'class': 'visibleNode',
                         cx: function(d){ return d[0]; },
                         cy: function(d){ return d[1]; },
-                        filter: 'url(#map-filter)',
+                        filter: filter,
                         r: 80
                     }).style({
                         fill: '#ffffff'   
@@ -1609,7 +1616,7 @@ define(
 
     var AbilityItem = Backbone.Marionette.ItemView.extend({
         template: '#template-game-battle-ability',
-        'className': 'game-battle-wrapper',
+        'className': 'ability-item',
 
         serializeData: function(){
             return _.extend({
@@ -1639,10 +1646,35 @@ define(
             // hotkey. If the ability can't be used yet, do nothing
             // TODO: global timer? for each entity? pass in entity for this
             // ability?
+            var self = this;
             logger.log('views/subviews/battle/AbilityItem', 
                 'ability used! ' + this.model.get('name') + 
                 ' | key pressed: ' + key);
             
+
+            var canBeUsed = true;
+
+            // Can the ability be used? If not, add the use-invalid class
+            if(!canBeUsed){
+                // Can NOT be used
+                this.$el.addClass('use-invalid');
+                this.$el.focus();
+                setTimeout(function(){
+                    self.$el.removeClass('use-invalid');
+                }, 100);
+            } else {
+                // CAN use
+                // add class
+                this.$el.addClass('use');
+                this.$el.focus();
+                setTimeout(function(){
+                    self.$el.removeClass('use');
+                }, 100);
+
+                // reset timer
+
+                // perform effect
+            }
 
             return this;
         }
@@ -1671,7 +1703,7 @@ define(
 
     var AbilityList = Backbone.Marionette.CollectionView.extend({
         itemView: AbilityItem,
-        'className': 'game-battle-wrapper',
+        'className': 'ability-list-wrapper',
 
         itemViewOptions: function(model){
             return {index: this.collection.indexOf(model)};
@@ -1686,6 +1718,32 @@ define(
     });
 
     return AbilityList;
+});
+
+// ===========================================================================
+//
+// Battle - Entity info subview
+//      Entity battle related info (health, magic, timer, etc) 
+//
+// ===========================================================================
+define(
+    'views/subviews/battle/Entity',[ 
+        'd3', 'backbone', 'marionette', 'logger', 'events'
+    ], function viewBattleAbility(
+        d3, backbone, marionette, logger, events
+    ){
+
+    var Entity = Backbone.Marionette.Layout.extend({
+        template: '#template-game-battle-entity',
+
+        initialize: function(){
+            logger.log('views/subviews/battle/Entity', 
+                'initialize called');
+            return this;
+        }
+    });
+
+    return Entity;
 });
 
 // ===========================================================================
@@ -1724,10 +1782,12 @@ define(
 define(
     'views/subViews/Battle',[ 
         'd3', 'backbone', 'marionette', 'logger', 'events',
-        'views/subviews/battle/AbilityList'
+        'views/subviews/battle/AbilityList',
+        'views/subviews/battle/Entity'
     ], function viewBattle(
         d3, backbone, marionette, logger, events,
-        AbilityListView
+        AbilityListView,
+        EntityInfoView
     ){
 
     var BattleView = Backbone.Marionette.Layout.extend({
@@ -1739,19 +1799,23 @@ define(
         },
 
         regions: {
+            'regionEntity': '#region-battle-entity-wrapper',
             'regionAbility': '#region-battle-ability-wrapper'
         },
 
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/Battle', 'initialize() called'); 
             // keep track of the selected entity and the current target
-            this.selectedEntity = null;
+            this.selectedEntity = undefined;
+            this.selectedEntityIndex = undefined;
+            this.previouslySelectedEntity = undefined;
+
             // target should reset whenever entity changes
             //  should be able to select own entities with 1 - n keys,
             //      target with shift + n 
             //  if target is null when an ability is attempted to be used,
             //      user must select a target for the ability
-            this.target = null;
+            this.target = undefined;
         },
 
         onShow: function battleOnShow(){
@@ -1798,7 +1862,7 @@ define(
             var entityHeight = 60;
 
             // draw player entities
-            playerEntities.selectAll('.playerEntity')
+            this.playerEntitiesEls = playerEntities.selectAll('.playerEntity')
                 .data(this.model.get('playerEntities').models)
                 .enter()
                     // TODO: draw sprites
@@ -1812,10 +1876,10 @@ define(
                             height: entityHeight,
                             width: entityHeight
                         })
-                        .on('click', function(d,i){ return self.entitySelected(d,i); })
-                        .on('touchend', function(d,i){ return self.entitySelected(d,i); })
-                        .on('mouseenter',function(d,i){ return self.entityHoverStart(d,i); })
-                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(d,i); });
+                        .on('click', function(d,i){ return self.entitySelected(i); })
+                        .on('touchend', function(d,i){ return self.entitySelected(i); })
+                        .on('mouseenter',function(d,i){ return self.entityHoverStart(i); })
+                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(i); });
 
             // draw enemies
             enemyEntities.selectAll('.enemyEntity')
@@ -1836,34 +1900,59 @@ define(
         },
 
         // entity interaction events
-        entitySelected: function(d,i){
+        entitySelected: function(i){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
-            // about it. When this happens:
+            // about it. 
+            // this context: this current Battle model
+            // i: index of selected entity (matches with the order of
+            // playerEntities.models)
+            
+            // Select a new entity (no target mode)
+            // --------------------------
+            // overview:
             //  -Get the entity model from the selection
             //  -Show the abilities for the entity
             //  -Show more info
             //  -Move the entity forward
-            //
+
             //1. get model based on selected element
             var model = this.model.get('playerEntities').models[i];
             logger.log("views/subviews/Battle", 
-                "1. entity selected: %O : %O \n model: %O", d,i, model);
-            
-            //2. show abilities
-            logger.log("views/subviews/Battle",
-                "2. showing ability view");
+                "1. entity selected: %O \n model: %O", i, model);
+
+            // update the selected entity
+            this.selectedEntity = model;
+            this.selectedEntityIndex = i;
+
+            // show abilities
+            logger.log("views/subviews/Battle", "2. showing ability view");
             var abilityView = new AbilityListView({
                 collection: model.get('abilities')
             });
             this.regionAbility.show(abilityView);
 
+            // show entity info
+            logger.log("views/subviews/Battle", "3. showing entity info");
+            var entityInfoView = new EntityInfoView({ model: model });
+            this.regionEntity.show(entityInfoView);
 
-            // 3. Move entity forward a bit
+            // move entity
+            logger.log("views/subviews/Battle", "4. moving entity");
+            d3.select(this.playerEntitiesEls[0][i]).attr({ x: 200 });
 
+            // move back previously selected entity
+            if(this.previouslySelectedEntity !== undefined){
+                d3.select(this.playerEntitiesEls[0][this.previouslySelectedEntity])
+                    .attr({ x: 40 });
+            }
+
+            // update the previously selected entity
+            this.previouslySelectedEntity = i;
 
             return this;
         },
+
         entityHoverStart: function(d,i){
             //logger.log("views/subviews/Battle", 
                 //"entity hover start: %O : %O", d,i);

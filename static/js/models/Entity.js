@@ -52,6 +52,7 @@ define(
             // TODO: get attributes from server
             // set attributes and base attributes from server
             this.set({
+                name: 'Soandso' + Math.random(),
                 attributes: new EntityAttributes(),
                 baseAttributes: new EntityAttributes()
             }, {silent: true});

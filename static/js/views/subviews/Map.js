@@ -207,6 +207,12 @@ define(
                 'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
 
+            // only use filters if lowRes mode is not true
+            var filter = '';
+            if(CONFIG && !CONFIG.lowRes){
+                filter = 'url(#map-filter)';
+            }
+
             this.maskPath.selectAll('.visibleNode')
                 .data(this.vertices)
                 .enter()
@@ -215,7 +221,7 @@ define(
                         'class': 'visibleNode',
                         cx: function(d){ return d[0]; },
                         cy: function(d){ return d[1]; },
-                        filter: 'url(#map-filter)',
+                        filter: filter,
                         r: 80
                     }).style({
                         fill: '#ffffff'   

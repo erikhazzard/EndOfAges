@@ -17,7 +17,7 @@ define(
 
     var AbilityList = Backbone.Marionette.CollectionView.extend({
         itemView: AbilityItem,
-        'className': 'game-battle-wrapper',
+        'className': 'ability-list-wrapper',
 
         itemViewOptions: function(model){
             return {index: this.collection.indexOf(model)};

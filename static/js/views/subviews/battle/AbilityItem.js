@@ -15,7 +15,7 @@ define(
 
     var AbilityItem = Backbone.Marionette.ItemView.extend({
         template: '#template-game-battle-ability',
-        'className': 'game-battle-wrapper',
+        'className': 'ability-item',
 
         serializeData: function(){
             return _.extend({
@@ -45,10 +45,35 @@ define(
             // hotkey. If the ability can't be used yet, do nothing
             // TODO: global timer? for each entity? pass in entity for this
             // ability?
+            var self = this;
             logger.log('views/subviews/battle/AbilityItem', 
                 'ability used! ' + this.model.get('name') + 
                 ' | key pressed: ' + key);
             
+
+            var canBeUsed = true;
+
+            // Can the ability be used? If not, add the use-invalid class
+            if(!canBeUsed){
+                // Can NOT be used
+                this.$el.addClass('use-invalid');
+                this.$el.focus();
+                setTimeout(function(){
+                    self.$el.removeClass('use-invalid');
+                }, 100);
+            } else {
+                // CAN use
+                // add class
+                this.$el.addClass('use');
+                this.$el.focus();
+                setTimeout(function(){
+                    self.$el.removeClass('use');
+                }, 100);
+
+                // reset timer
+
+                // perform effect
+            }
 
             return this;
         }
