@@ -40,7 +40,7 @@ define(
             return this;
         },
 
-        useAbility: function(key){
+        useAbility: function(options){
             // Called when either the user clicks on the ability or presses the 
             // hotkey. If the ability can't be used yet, do nothing
             // TODO: global timer? for each entity? pass in entity for this
@@ -48,7 +48,7 @@ define(
             var self = this;
             logger.log('views/subviews/battle/AbilityItem', 
                 'ability used! ' + this.model.get('name') + 
-                ' | key pressed: ' + key);
+                ' | key pressed: ' + options.key);
             
 
             var canBeUsed = true;

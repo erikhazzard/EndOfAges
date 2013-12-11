@@ -406,7 +406,10 @@ define('handleKeys',[
                             //don't reload page
                             e.preventDefault();
                         }
-                        events.trigger('keyPress:' + key, key);
+                        events.trigger('keyPress:' + key, {
+                            key: key,
+                            e: e
+                        });
                     }
 
                     //return the event
@@ -1641,7 +1644,7 @@ define(
             return this;
         },
 
-        useAbility: function(key){
+        useAbility: function(options){
             // Called when either the user clicks on the ability or presses the 
             // hotkey. If the ability can't be used yet, do nothing
             // TODO: global timer? for each entity? pass in entity for this
@@ -1649,7 +1652,7 @@ define(
             var self = this;
             logger.log('views/subviews/battle/AbilityItem', 
                 'ability used! ' + this.model.get('name') + 
-                ' | key pressed: ' + key);
+                ' | key pressed: ' + options.key);
             
 
             var canBeUsed = true;
@@ -1795,6 +1798,7 @@ define(
         'className': 'game-battle-wrapper',
 
         events: {
+            // UI User input
             'click .finish-instance': 'finishInstance'
         },
 
@@ -1806,9 +1810,8 @@ define(
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/Battle', 'initialize() called'); 
             // keep track of the selected entity and the current target
-            this.selectedEntity = undefined;
             this.selectedEntityIndex = undefined;
-            this.previouslySelectedEntity = undefined;
+            this.previouslySelectedEntityIndex = undefined;
 
             // target should reset whenever entity changes
             //  should be able to select own entities with 1 - n keys,
@@ -1816,8 +1819,54 @@ define(
             //  if target is null when an ability is attempted to be used,
             //      user must select a target for the ability
             this.target = undefined;
+
+            // --------------------------
+            // Handle user input - shortcut keys
+            // --------------------------
+            // Pressing up or down will cycle through the entities
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpdateSelection);
+            this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
+            
         },
 
+        // ------------------------------
+        // Shortcut key callbacks
+        // ------------------------------
+        handleKeyUpdateSelection: function(options){
+            // disable scrolling with up / down arrow key
+            options.e.preventDefault();
+            var key = options.key;
+
+            // TODO: Handle different functions based on state?
+            var targetIndex = this.selectedEntityIndex;
+            if(targetIndex === undefined){ targetIndex = -1; }
+
+            // reverse up down - down key should go down the entity list
+            if(key === 'up'){ targetIndex -= 1; }
+            else if (key === 'down'){ targetIndex += 1; }
+
+            var modelsLength = this.model.get('playerEntities').models.length;
+
+            // loop around if the end is reached
+            if(targetIndex >= modelsLength){
+                targetIndex = 0;
+            } else if( targetIndex < 0) {
+                targetIndex = modelsLength - 1;
+            }
+            logger.log('views/subviews/Battle', 
+                '1. got key press : ' + key + 
+                ' : Selecting entity: ' + targetIndex);
+
+            // select the entity
+            this.selectEntity(targetIndex);
+
+            return this;
+        },
+
+
+        // ------------------------------
+        // Render / Show
+        // ------------------------------
         onShow: function battleOnShow(){
             // Render the scene
             var self = this;
@@ -1876,8 +1925,8 @@ define(
                             height: entityHeight,
                             width: entityHeight
                         })
-                        .on('click', function(d,i){ return self.entitySelected(i); })
-                        .on('touchend', function(d,i){ return self.entitySelected(i); })
+                        .on('click', function(d,i){ return self.selectEntity(i); })
+                        .on('touchend', function(d,i){ return self.selectEntity(i); })
                         .on('mouseenter',function(d,i){ return self.entityHoverStart(i); })
                         .on('mouseleave',function(d,i){ return self.entityHoverEnd(i); });
 
@@ -1900,7 +1949,7 @@ define(
         },
 
         // entity interaction events
-        entitySelected: function(i){
+        selectEntity: function(i){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
             // about it. 
@@ -1915,6 +1964,13 @@ define(
             //  -Show the abilities for the entity
             //  -Show more info
             //  -Move the entity forward
+            //
+            // if the user selected the currently active entity, do nothing
+            if(i === this.previouslySelectedEntityIndex){ 
+                logger.log("views/subviews/Battle", 
+                    'entity selected: same entity selected, exiting');
+                return false; 
+            } 
 
             //1. get model based on selected element
             var model = this.model.get('playerEntities').models[i];
@@ -1922,7 +1978,6 @@ define(
                 "1. entity selected: %O \n model: %O", i, model);
 
             // update the selected entity
-            this.selectedEntity = model;
             this.selectedEntityIndex = i;
 
             // show abilities
@@ -1942,13 +1997,13 @@ define(
             d3.select(this.playerEntitiesEls[0][i]).attr({ x: 200 });
 
             // move back previously selected entity
-            if(this.previouslySelectedEntity !== undefined){
-                d3.select(this.playerEntitiesEls[0][this.previouslySelectedEntity])
+            if(this.previouslySelectedEntityIndex !== undefined){
+                d3.select(this.playerEntitiesEls[0][this.previouslySelectedEntityIndex])
                     .attr({ x: 40 });
             }
 
             // update the previously selected entity
-            this.previouslySelectedEntity = i;
+            this.previouslySelectedEntityIndex = i;
 
             return this;
         },

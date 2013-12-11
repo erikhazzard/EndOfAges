@@ -37,7 +37,10 @@ define([
                             //don't reload page
                             e.preventDefault();
                         }
-                        events.trigger('keyPress:' + key, key);
+                        events.trigger('keyPress:' + key, {
+                            key: key,
+                            e: e
+                        });
                     }
 
                     //return the event
