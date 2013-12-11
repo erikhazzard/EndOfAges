@@ -845,6 +845,13 @@ define(
                 //
                 // TODO: how to call a damage / heal method? Same method?
                 //      how to do AoE damage? 
+                logger.log('models/Ability', 
+                    '>> DEFTAUL ABILITY USED : %O', options);
+                options.target.takeDamage({
+                    type: 'combat',
+                    subType: 'crushing',
+                    damage: 10
+                });
             },
 
             visualEffect: function(options){
@@ -965,6 +972,24 @@ define(
                     new Ability({ name: 'Clarity'})
                 ])
             });
+
+            return this;
+        },
+
+        // Take / Deal damage
+        takeDamage: function(options){
+            // TODO: document, think of structure
+            logger.log('models/Entity', '1. takeDamage() : options: %O',
+                options);
+            var damage = 0;
+
+            // TODO: process damage based on passed in damage and type and this
+            // entity's stats
+            damage = options.damage;
+
+            var attrs = this.get('attributes');
+            var curHealth = attrs.get('health');
+            attrs.set({ health: curHealth - damage });
 
             return this;
         }
@@ -1899,6 +1924,7 @@ define(
                 this.model, this.gameModel); 
             // keep track of the selected entity and the current target
             this.selectedEntityIndex = undefined;
+            this.selectedEntity = undefined;
             this.previouslySelectedEntityIndex = undefined;
 
             // target should reset whenever entity changes
@@ -2193,10 +2219,12 @@ define(
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
                 // target and use the ability
-                this.selectTarget(i, this.model.get('playerEntities').models);
+                var target = this.selectTarget(i, 
+                    this.model.get('playerEntities').models);
 
                 // then, use the ability
-                this.useAbility();
+                // TODO: think of call structure
+                this.useAbility(target, i, 'player');
             }
 
             return this;
@@ -2209,10 +2237,11 @@ define(
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
                 // target and use the ability
-                this.selectTarget(i, this.model.get('enemyEntities').models);
+                var target = this.selectTarget(i, 
+                    this.model.get('enemyEntities').models);
 
                 // then, use the ability
-                this.useAbility();
+                this.useAbility(target, i, 'enemy');
             }
 
             return this;
@@ -2225,13 +2254,16 @@ define(
         // ------------------------------
         selectTarget: function(i, models){
             // Sets the target based on the selected index in the model
+            logger.log("views/subviews/Battle", 
+                '1. selectTarget : i: %O : model : %O', i, models[i]);
             var model = models[i];
 
             // TODO: update svg elements
             //
             //
             this.selectedTarget = model;
-            return this;
+
+            return this.selectedTarget;
         },
 
         selectPlayerEntityStateNormal: function(i){
@@ -2257,6 +2289,7 @@ define(
 
             // update the selected entity
             this.selectedEntityIndex = i;
+            this.selectedEntity = model;
 
             // show abilities
             logger.log("views/subviews/Battle", "2. showing ability view");
@@ -2307,13 +2340,19 @@ define(
         // Use ability
         //
         // ------------------------------
-        useAbility: function(){
+        useAbility: function(target, i, group){
+            // TODO: think of call structure
+            //
             // Uses whatever the active ability is on the target
             logger.log("views/subviews/Battle", 
                 "1. useAbility(): using ability: %O on %O",
-                this.selectedAbility, this.selectedTarget);
+                this.selectedAbility);
 
             // TODO: use ability
+            this.selectedAbility.get('effect')({
+                target: target,
+                source: this.selectedEntity
+            });
 
             // Reset back to normal state
             this.cancelTarget();

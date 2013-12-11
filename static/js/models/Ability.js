@@ -44,6 +44,13 @@ define(
                 //
                 // TODO: how to call a damage / heal method? Same method?
                 //      how to do AoE damage? 
+                logger.log('models/Ability', 
+                    '>> DEFTAUL ABILITY USED : %O', options);
+                options.target.takeDamage({
+                    type: 'combat',
+                    subType: 'crushing',
+                    damage: 10
+                });
             },
 
             visualEffect: function(options){

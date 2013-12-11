@@ -69,6 +69,24 @@ define(
             });
 
             return this;
+        },
+
+        // Take / Deal damage
+        takeDamage: function(options){
+            // TODO: document, think of structure
+            logger.log('models/Entity', '1. takeDamage() : options: %O',
+                options);
+            var damage = 0;
+
+            // TODO: process damage based on passed in damage and type and this
+            // entity's stats
+            damage = options.damage;
+
+            var attrs = this.get('attributes');
+            var curHealth = attrs.get('health');
+            attrs.set({ health: curHealth - damage });
+
+            return this;
         }
 
     });
