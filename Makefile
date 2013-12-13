@@ -50,7 +50,7 @@ sass:
 test: setup-test test-mocha
 setup-test: 
 	@echo "Clearing test DB"
-	@mongo quintTest --eval "db.dropDatabase();"
+	@mongo EoATest --eval "db.dropDatabase();"
 	@redis-cli flushdb
 	@echo "Seeding test DB"
 	@NODE_ENV=test && node util/scripts/insertData.js

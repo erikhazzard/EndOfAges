@@ -14,13 +14,14 @@ require('../../conf/configure')();
 
 var winston = require('winston');
 require('../../conf/configure-winston')();
-
-require('../../lib/models/Question');
 var db = require('../../lib/database');
 
-// data
-var questions = require('./questions.js');
-var Question = db.model('Question');
+//// data
+//require('../../lib/models/Model');
+//var ModelTarget = db.model('Model');
+
+// NOTE: for now, there's no seed data
+return process.exit();
 
 // --------------------------------------
 // Setup save queue
@@ -47,8 +48,9 @@ queue.empty = function(err,res){
 // --------------------------------------
 // Setup data
 // --------------------------------------
-_.each(questions, function(datum){
-    // Create a question model for each question
-    var question = new Question(datum);
-    queue.push(question);
-});
+//var data = []; // read from file
+//_.each(data, function(datum){
+    //// Create a question model for each question
+    //var model = new Model(datum);
+    //queue.push(model);
+//});
