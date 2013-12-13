@@ -1851,7 +1851,10 @@ define(
 
 // ===========================================================================
 //
-// Battle subview
+// Battle Controller / View
+//
+//  TODO: Break up view and controller logic
+//
 //
 //      View for a battle. Sub views contains in the Combat subfolder
 //
@@ -1865,6 +1868,11 @@ define(
 //      has a party (a collection of entities). The player's entities are
 //      managed in the Game model object's 'playerEntities' property (a 
 //      collection of entity models)
+//
+// "Game" Loop
+//      This battle controller contains a game loop, used to keep track of when
+//      abilities can be used, buffs expire, etc. All abilities and timers
+//      are express to the player in terms of seconds
 //
 //
 // End states:
@@ -2096,6 +2104,7 @@ define(
             // return to default state
             logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
 
+            this.selectedAbility = null;
             events.trigger('ability:cancel');
             this.model.set({
                 state: 'normal'
