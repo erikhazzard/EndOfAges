@@ -3,6 +3,7 @@
 // Battle Controller / View
 //
 //  TODO: Break up view and controller logic
+//  TODO: Should transitions instead use the global game timer?
 //
 //
 //      View for a battle. Sub views contains in the Combat subfolder
@@ -47,43 +48,6 @@
 //
 //
 // ===========================================================================
-
-
-//// scratch:
-//function getTimestamp() {
-    //return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
-//}
-
-//function frame() {
-    //now = getTimestamp();
-    //// cap time if requestAnimFrame is stalled (e.g., user switches tab)
-    //dt = dt + Math.min(1, (now - last) / 1000);
-    //while(dt > step) {
-        //dt = dt - step;
-        //update(step);
-    //}
-    //render(dt);
-    //last = now;
-    //requestAnimationFrame(frame);
-//}
-
-
-//var now,
-    //dt = 0,
-    //last = timestamp(),
-    //step = 1/60;
-
-//function update(dt){
-    //console.log(">>>> update", dt);
-//}
-
-//function render(dt){
-    //console.log(">>>> render", dt);
-//}
-
-
-
-
 define(
     [ 
         'd3', 'backbone', 'marionette', 'logger', 'events',
@@ -95,6 +59,16 @@ define(
         EntityInfoView
     ){
 
+    // Utility functions
+    function getTimestamp() {
+        return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
+    }
+
+    // =======================================================================
+    //
+    // Battle view
+    //
+    // =======================================================================
     var BattleView = Backbone.Marionette.Layout.extend({
         template: '#template-game-battle',
         'className': 'game-battle-wrapper',
@@ -118,6 +92,7 @@ define(
                 this.model, this.gameModel); 
             // keep track of the selected entity and the current target
             this.selectedEntityIndex = undefined;
+            this.selectedEntityGroup = undefined;
             this.selectedEntity = undefined;
             this.previouslySelectedEntityIndex = undefined;
 
@@ -153,11 +128,48 @@ define(
 
             // DEV: TODO: REMOVE
             $('.state', this.$el).html(this.model.get('state'));
+
+            // Setup timers
+            this.timerNow = null;
+            this.timerDt = 0;
+            this.timerLast = getTimestamp();
+            // units to increment timer by. Use 1/60th of a second. This is
+            // the same unit used across the game 
+            this.timerStep = 1/60;
         },
 
-        // ------------------------------
+        // ==============================
+        //
+        // Timer
+        //
+        // ==============================
+        timerFrame: function battleTimerFrame(){
+            this.timerNow = getTimestamp();
+            // cap time if requestAnimFrame is stalled (e.g., user switches tab)
+            dt = dt + Math.min(1, (now - last) / 1000);
+            while(dt > step) {
+                dt = dt - step;
+                this.timerUpdate(step);
+            }
+            this.timerRender(dt);
+            last = now;
+            requestAnimationFrame(this.timerFrame);
+        },
+
+        timerRender: function battleTimerRender(){
+
+        },
+
+        timerUpdate: function battleTimerUpdate(){
+
+        },
+
+
+        // ==============================
+        //
         // Model state change
-        // ------------------------------
+        //
+        // ==============================
         stateChange: function(model,state){
             // Called when the model state changes
             logger.log('views/subviews/Battle', 
@@ -634,6 +646,7 @@ define(
 
             // update the selected entity
             this.selectedEntityIndex = i;
+            this.selectedEntityGroup = 'player';
             this.selectedEntity = model;
 
             // show abilities
@@ -711,7 +724,7 @@ define(
             this.startTimerAnimation({
                 index: this.selectedEntityIndex,
                 value: this.selectedAbility.get('timeCost'),
-                entityGroup: entityGroup
+                entityGroup: this.selectedEntityGroup
             });
 
             // TODO: use ability
