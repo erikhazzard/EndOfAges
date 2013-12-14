@@ -12,6 +12,14 @@
   fill: #dd4444;
   stroke: #ffffff; }
 
+.timer-bar-border {
+  fill: none;
+  stroke: #343434; }
+
+.timer-bar {
+  fill: #ffffff;
+  stroke: none; }
+
 .ability-list-wrapper .ability-item-wrapper {
   border: 1px solid #343434;
   float: left;

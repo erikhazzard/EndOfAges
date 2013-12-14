@@ -20,8 +20,14 @@ define(
             // how much power the ability costs to use
             powerCost: 10,
         
-            // castTime in seconds
-            castTime: 4,
+            // How long must the player wait until they can use this ability?
+            // in 1/60th seconds
+            castTime: 60 * 2,
+
+            // How much this ability costs in time units. Normally, this
+            // is the same as the cast time
+            // in 1/60th seconds
+            timeCost: 60 * 2,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 

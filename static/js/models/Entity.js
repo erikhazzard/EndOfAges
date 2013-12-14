@@ -28,6 +28,11 @@ define(
             owner: null,
             name: 'Soandso' + Math.random(),
 
+            // Timer properties
+            //---------------------------
+            // timer is measured in steps of 1/60th seconds
+            timerLimit: 60 * 5,  // 10 seconds (60 * n seconds)
+
             //---------------------------
             //Entity attributes
             //---------------------------
@@ -57,9 +62,12 @@ define(
                 baseAttributes: new EntityAttributes()
             }, {silent: true});
 
+
             // Setup entity abilities
-            // TODO: get from server
             this.set({
+                // TODO: DEV: remove random maxTimer
+                //timerLimit: 60 * (Math.random() * 20 | 0),
+                // TODO: get from server
                 abilities: new Abilities([
                     new Ability(),
                     new Ability({ name: 'Spirit of Wolf'}),

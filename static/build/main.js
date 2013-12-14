@@ -821,8 +821,14 @@ define(
             // how much power the ability costs to use
             powerCost: 10,
         
-            // castTime in seconds
-            castTime: 4,
+            // How long must the player wait until they can use this ability?
+            // in 1/60th seconds
+            castTime: 60 * 2,
+
+            // How much this ability costs in time units. Normally, this
+            // is the same as the cast time
+            // in 1/60th seconds
+            timeCost: 60 * 2,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
@@ -933,6 +939,11 @@ define(
             owner: null,
             name: 'Soandso' + Math.random(),
 
+            // Timer properties
+            //---------------------------
+            // timer is measured in steps of 1/60th seconds
+            timerLimit: 60 * 5,  // 10 seconds (60 * n seconds)
+
             //---------------------------
             //Entity attributes
             //---------------------------
@@ -962,9 +973,12 @@ define(
                 baseAttributes: new EntityAttributes()
             }, {silent: true});
 
+
             // Setup entity abilities
-            // TODO: get from server
             this.set({
+                // TODO: DEV: remove random maxTimer
+                //timerLimit: 60 * (Math.random() * 20 | 0),
+                // TODO: get from server
                 abilities: new Abilities([
                     new Ability(),
                     new Ability({ name: 'Spirit of Wolf'}),
@@ -1901,16 +1915,17 @@ define(
 
 
 //// scratch:
-//function timestamp() {
+//function getTimestamp() {
     //return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
 //}
 
 //function frame() {
-    //now = timestamp();
+    //now = getTimestamp();
+    //// cap time if requestAnimFrame is stalled (e.g., user switches tab)
     //dt = dt + Math.min(1, (now - last) / 1000);
     //while(dt > step) {
-    //dt = dt - step;
-    //update(step);
+        //dt = dt - step;
+        //update(step);
     //}
     //render(dt);
     //last = now;
@@ -1919,10 +1934,17 @@ define(
 
 
 //var now,
-//dt = 0,
-//last = timestamp(),
-//step = 1/60;
+    //dt = 0,
+    //last = timestamp(),
+    //step = 1/60;
 
+//function update(dt){
+    //console.log(">>>> update", dt);
+//}
+
+//function render(dt){
+    //console.log(">>>> render", dt);
+//}
 
 
 
@@ -2022,7 +2044,13 @@ define(
         // Ability use handler
         // ------------------------------
         handleAbilityActivated: function(options){
-            // When an ability is used, switch to ability state
+            // This function sets the model's state to either 'ability' or
+            // 'normal' (by means of calling cancelTarget())
+            //
+            // When an ability is activated, switch to ability state
+            //
+            //  NOTE: Actual checking for ability effect usage is checked in
+            //  useAbility.
             //
             // This function is an event handler which is called when
             // an ability is attempted to be used. There are multiple
@@ -2034,30 +2062,38 @@ define(
             // a target. Player has tried to use the same ability
             // 3. Player has an ability active already, but has NOT selected
             // a target. Player has tried to use a different ability
+            //
             var ability = options.ability;
             var useCallback = options.useCallback;
             
-            // If the same ability was attempted to be used, do nothing
-            var canBeUsed = Math.random() < 0.5 ? true : false;
+            //// If the same ability was attempted to be used, do nothing
+            //var canBeUsed = Math.random() < 0.5 ? true : false;
             var canBeUsed = true;
 
             logger.log('views/subviews/Battle', 
-                '1. handleAbilityActivated: %O : canBeUsed: ', ability, canBeUsed);
+                '1. handleAbilityActivated: %O : canBeUsed: %O', ability, canBeUsed);
 
+            // Toggle ability on / off
+            // --------------------------
             // if the same ability was used, 'toggle' it by setting canBeUsed
             // to false
             if(this.selectedAbility === options.ability){
                 canBeUsed = false;
-                this.selectedAbility = null;
-            } else {
-                this.selectedAbility = options.ability;
+                ability = null;
             }
 
+            // Remove existing target
+            // --------------------------
+            this.cancelTarget();
+
+            // Use ability if it can be used
+            // --------------------------
             if(canBeUsed){
                 // The ability CAN be used
-                //
-                // Remove existing target
-                this.cancelTarget();
+
+                // Set the selected ability
+                this.selectedAbility = ability;
+
                 // change the state to ability. Now, when the user clicks on
                 // an entity, the ability will be used
                 this.model.set({ state: 'ability' });
@@ -2065,11 +2101,7 @@ define(
                 // highlight the possible targets (whatever group)
                 // TODO: Highlight group of possible targets based on ability
                 // options.ability.get('validTargets') bla bla bla
-            } else {
-                // The ability CAN NOT be used
-                this.cancelTarget();
-            }
-
+            } 
 
             // call the useCallback
             if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
@@ -2141,11 +2173,11 @@ define(
             return this;
         },
 
-        // ------------------------------
+        // ---------------------------------------------------------------------
         //
         // Render / Show
         //
-        // ------------------------------
+        // ---------------------------------------------------------------------
         onShow: function battleOnShow(){
             // Render the scene
             var self = this;
@@ -2154,6 +2186,23 @@ define(
             // Setup svg
             var svg = d3.select('#battle');
             var wrapper = svg.append('g');
+
+            // entity props
+            var entityHeight = 60;
+            var entityWidth = entityHeight;
+
+            // Setup scales for each entity
+            // --------------------------
+            // TODO: Is this the best way todo this?
+            this.playerEntityTimeScales= [];
+            _.each(this.model.get('playerEntities').models, function(model){
+                self.playerEntityTimeScales.push(
+                    d3.scale.linear()
+                    .domain([ 0, model.get('timerLimit')])
+                    .range([ 0, entityWidth ])
+                );
+            });
+
 
             // --------------------------
             // setup groups
@@ -2186,31 +2235,88 @@ define(
             //
             // --------------------------
             // TODO: use sprites
+            // TODO: text effect that comes up from entity when damaged or healed
             logger.log('views/subviews/Battle', '4. setting up entities');
-            var entityHeight = 60;
+            var playerModels = this.model.get('playerEntities').models;
 
-            // draw player entities
-            this.playerEntitiesEls = playerEntities.selectAll('.player-entity')
-                .data(this.model.get('playerEntities').models)
-                .enter()
-                    // TODO: draw sprites
-                    .append('rect')
-                        .attr({
-                            'class': 'player-entity entity',
-                            x: 20,
-                            y: function(d,i){
-                                return 20 + (i * (entityHeight + 20));
-                            },
-                            height: entityHeight,
-                            width: entityHeight
-                        })
-                        .on('click', function(d,i){ return self.selectPlayerEntity(i); })
-                        .on('touchend', function(d,i){ return self.selectPlayerEntity(i); })
-                        .on('mouseenter',function(d,i){ return self.entityHoverStart(i, 'player'); })
-                        .on('mouseleave',function(d,i){ return self.entityHoverEnd(i, 'player'); });
+            // Setup the wrapper group. This is not ever directly manipulated
+            this.playerEntityGroupsWrapper = playerEntities.selectAll('.entity-group')
+                .data(playerModels)
+                .enter().append('g')
+                    .attr({ 
+                        'class': 'entity-group-wrapper' ,
+                        // transform the entire group to set the entity position
+                        transform: function(d,i){
+                            return "translate(" + [
+                                20, 
+                                20 + (i * (entityHeight + 20))
+                            ] + ")";
+                        }
+                    });
+    
+            // setup the individual player groups. This group is transformed
+            // left / right when a player selects an entity. All other entity
+            // specific visuals are contained in this group
+            this.playerEntityGroups = this.playerEntityGroupsWrapper.append('g')
+                .attr({ 'class': 'entity-group' });
 
+            // PLAYER SPRITE / image
+            // --------------------------
+            this.playerEntityEls = this.playerEntityGroups
+                // TODO : Use sprites
+                .append('rect')
+                    .attr({
+                        'class': 'player-entity entity',
+                        height: entityHeight,
+                        width: entityWidth
+                    })
+                    .on('click', function(d,i){ return self.selectPlayerEntity(i); })
+                    .on('touchend', function(d,i){ return self.selectPlayerEntity(i); })
+                    .on('mouseenter',function(d,i){ return self.entityHoverStart(i, 'player'); })
+                    .on('mouseleave',function(d,i){ return self.entityHoverEnd(i, 'player'); });
+
+            //timer bar group
+            //===========================
+            //  draw a group for each bar (frame + bar)
+            var playerTimerGroups = this.playerEntityGroups
+                .append('g').attr({ 'class': 'entity-timer' });
+
+            // frame / border (TODO: Use image)
+            playerTimerGroups.append('rect')
+                .attr({
+                    'class': 'timer-bar-border',
+                    x: 0,
+                    y: 0,
+                    width: entityWidth,
+                    height: 10
+                });
+    
+            // actual timer bar that updates
+            this.playerTimerBars = playerTimerGroups.append('rect')
+                .attr({
+                    'class': 'timer-bar',
+                    x: 0,
+                    y: 0,
+                    width: 0,
+                    height: 10
+                });
+
+            // timer animation
+            // --------------------------
+            // start the timer bar animation for each entity
+            _.each(this.playerTimerBars[0], function(bar, i){
+                self.startTimerAnimation.call(self, {
+                    index: i,
+                    entityGroup: 'player'
+                });
+            });
+
+            // ==========================
+            //
             // draw enemies
-            enemyEntities.selectAll('.enemy-entity')
+            //
+            // ==========================
+            this.enemyEntitiesEls = enemyEntities.selectAll('.enemy-entity')
                 .data(this.model.get('enemyEntities').models)
                 .enter()
                     // TODO: draw sprites
@@ -2218,12 +2324,12 @@ define(
                         .attr({
                             'class': 'enemy-entity entity',
                             // TODO: get width dynamically
-                            x: 800 - entityHeight - 200,
+                            x: 800 - entityWidth - 200,
                             y: function(d,i){
                                 return 20 + (i * (entityHeight + 20));
                             },
                             height: entityHeight,
-                            width: entityHeight
+                            width: entityWidth
                         })
                         .on('click', function(d,i){ return self.selectEnemyEntity(i); })
                         .on('touchend', function(d,i){ return self.selectEnemyEntity(i); })
@@ -2236,6 +2342,64 @@ define(
             return this;
         },
 
+        // =====================================================================
+        //
+        // timer animation
+        //
+        // =====================================================================
+        startTimerAnimation: function(options){
+            // Starts (or restarts) the timer animation, transitioning the 
+            // bar's width to width of the entity scale.
+            //
+            logger.log("views/subviews/Battle", 
+                'startTimerAnimation: << started : %O', options);
+
+            // check options
+            options = options || {};
+            if(options.value === undefined){ options.value = 0; }
+
+            if(options.index === undefined ||
+                !options.entityGroup){
+                logger.error("views/subviews/Battle : startTimerAnimation : " +
+                    'invalid parameters passed in: %O', options);
+                return false;
+            }
+
+            // get bar from passed in index
+            var bar = this.playerTimerBars[0][options.index];
+            var d3sel = d3.select(bar);
+
+            // get bar width from the entity scale
+            var width = this.playerEntityTimeScales[
+                options.index].range()[1];
+            var models = this.model.get(options.entityGroup + 'Entities').models;
+
+            //1. Reset bar width
+            d3sel.transition()
+                .ease('linear')
+                .duration(0)
+                .attr({ 
+                    // starting bar width based on value
+                    width: (d3sel.attr('width') - this[options.entityGroup + 'EntityTimeScales'][
+                        options.index](options.value))
+                }).each('end', function(){
+                    // 2. After bar is reset, transition to specified width
+                    //
+                    // timerLimit is measured in 1/60 seconds, so convert
+                    // to MS
+                    var duration = ( (models[options.index].get('timerLimit') - 
+                        options.value) / 60 ) * 1000;
+
+                    // transition the bar width to the end of the range
+                    // --------------------------
+                    d3sel.transition()
+                        .ease('linear')
+                        .duration( duration )
+                        .attr({ width: width });
+                });
+
+            return this;
+        },
 
         // =====================================================================
         //
@@ -2262,7 +2426,11 @@ define(
 
                 // then, use the ability
                 // TODO: think of call structure
-                this.useAbility(target, i, 'player');
+                this.useAbility({
+                    target: target, 
+                    index: i, 
+                    entityGroup: 'player'
+                });
             }
 
             return this;
@@ -2279,7 +2447,11 @@ define(
                     this.model.get('enemyEntities').models);
 
                 // then, use the ability
-                this.useAbility(target, i, 'enemy');
+                this.useAbility({
+                    target: target,
+                    index: i, 
+                    entityGroup: 'enemy'
+                });
             }
 
             return this;
@@ -2305,7 +2477,7 @@ define(
         },
 
         selectPlayerEntityStateNormal: function(i){
-            // Select a new entity 
+            // Select an entity at passed in index in the normal state
             // --------------------------
             // overview:
             //  -Get the entity model from the selection
@@ -2341,15 +2513,17 @@ define(
             var entityInfoView = new EntityInfoView({ model: model });
             this.regionEntity.show(entityInfoView);
 
-            // move entity
+            // move entity group forward
             logger.log("views/subviews/Battle", "4. moving entity");
-            d3.select(this.playerEntitiesEls[0][i])
+            var d3selection = d3.select(this.playerEntityGroups[0][i]);
+            d3selection
                 .transition()
-                .attr({ transform: 'translate(120 0)' });
+                .attr({ transform: 'translate(100)' });
 
             // move back previously selected entity
             if(this.previouslySelectedEntityIndex !== undefined){
-                d3.select(this.playerEntitiesEls[0][this.previouslySelectedEntityIndex])
+                d3.select(this.playerEntityGroups[0][
+                this.previouslySelectedEntityIndex])
                     .transition()
                     .attr({ transform: ''});
             }
@@ -2373,18 +2547,37 @@ define(
             return this;
         },
 
-        // ------------------------------
+        // ==============================
         //
         // Use ability
         //
-        // ------------------------------
-        useAbility: function(target, i, group){
+        // ==============================
+        useAbility: function(options){
             // TODO: think of call structure
+            options = options || {};
+
+            var target = options.target;
+            var i = options.index;
+            var entityGroup = options.entityGroup;
+
+            // TODO: check if ability can be used
+            // If the battle's timer is LESS than the castTime attribute, do 
+            // nothing
+            //
             //
             // Uses whatever the active ability is on the target
             logger.log("views/subviews/Battle", 
                 "1. useAbility(): using ability: %O on %O",
-                this.selectedAbility);
+                this.selectedAbility, 
+                target);
+
+            // reset the timer
+            // TODO: different between entity index and enemy
+            this.startTimerAnimation({
+                index: this.selectedEntityIndex,
+                value: this.selectedAbility.get('timeCost'),
+                entityGroup: entityGroup
+            });
 
             // TODO: use ability
             this.selectedAbility.get('effect')({
@@ -2398,11 +2591,11 @@ define(
             return this;
         },
 
-        // ------------------------------
+        // ==============================
         //
-        // User interaction
+        // User UI interaction
         //
-        // ------------------------------
+        // ==============================
         finishInstance: function finishInstance(){
             events.trigger('node:instanceFinished');
         }
