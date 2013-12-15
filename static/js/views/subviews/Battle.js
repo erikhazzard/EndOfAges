@@ -130,7 +130,10 @@ define(
                 self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyUpdateSelection);
             });
 
+            // escape pressed
             this.listenTo(events, 'keyPress:escape', this.handleKeyEscape);
+            // space pressed (pause)
+            this.listenTo(events, 'keyPress:space', this.togglePause);
 
             // --------------------------
             // Handle ability usage
@@ -164,6 +167,13 @@ define(
         // Timer
         //
         // ==============================
+        pauseTimer: function(){
+            // pauses the timer by setting isTimerActive to false.
+            // After this is called, runTimer() must be called to run the
+            // timer again
+            this.isTimerActive = false;
+        }, 
+
         runTimer: function battleRunTimer(){
             // This is called to kicked off the game loop for the battle.
             // Store variables the battleFrame loop function will access
@@ -249,6 +259,94 @@ define(
             return this;
         },
 
+        togglePause: function pause(options){
+            // This pauses all timers and animations, effectively pausing
+            // the battle. When the battle is paused, abilities cannot be
+            // used. 
+            //
+            // Players may select an entity and mouse over to target entities
+            //
+            var self = this;
+
+            options = options || {};
+            if(options.e){
+                options.e.preventDefault();
+                options.e.stopPropagation();
+            }
+
+            // Already paused, UNPAUSE
+            // ----------------------
+            if(this.model.get('state') === 'pause'){
+                this._unpause();
+            } else {
+                this._pause();
+            }
+
+            return false;
+        },
+
+        _pause: function _pause(){
+            // PAUSE
+            // ----------------------
+            logger.log('views/subviews/Battle', 
+                '1. togglePause(): PAUSING');
+
+            // cancel target and pause
+            this.cancelTarget();
+
+            this.model.set({
+                state: 'pause',
+                previousState: this.model.get('previousState')
+            });
+            
+            // pause animations
+            d3.selectAll('#battle .timer-bar').transition().duration(0);
+
+            // stop the timer
+            this.pauseTimer();
+            return this;
+        },
+
+        _unpause: function _unpause(){
+            // Called to pause the game state and animations
+            //
+            var self = this;
+            logger.log('views/subviews/Battle', 
+                '1. togglePause(): UNPAUSING');
+
+            this.model.set({
+                state: 'normal'
+            });
+
+            // resumse all animations
+            var e = d3.select("#time");
+            var sel = d3.selectAll('#battle .timer-bar');
+
+            // for each selection, update transition
+            _.each(sel[0], function(el){
+                $el = d3.select(el);
+                var entityGroup = $el.attr('data-entityGroup');
+                var index = $el.attr('data-index');
+                var val = self[entityGroup + 'EntityTimers'][index];
+
+                var duration = ( 
+                    self.model.get(entityGroup + 'Entities').models[index].get('timerLimit') - val
+                ) * 1000;
+
+                $el.transition().ease('linear') 
+                    .duration( duration )
+                    .attr({
+                        'data-duration': duration,
+                        'data-time': 1,
+                        'width': $el.attr('data-endWidth')
+                    });
+            });
+
+            // reset timer
+            this.runTimer();
+            return this;
+        },
+
         // ==============================
         //
         // Model state change
@@ -303,10 +401,16 @@ define(
             //
             var ability = options.ability;
             var useCallback = options.useCallback;
-            
+
             logger.log('views/subviews/Battle', 
                 '1. handleAbilityActivated: %O', ability);
 
+            // Do nothing if game is paused
+            if(this.model.get('state') === 'pause'){
+                logger.log('views/subviews/Battle', '2. game paused, returning');
+                return false;
+            }
+            
             var canBeUsed = false;
 
             // Check usage based on timer
@@ -433,9 +537,14 @@ define(
             // When escape is pressed, it should return to the
             // normal battle state
             options.e.preventDefault();
-            var key = options.key;
 
+            var key = options.key;
             logger.log('views/subviews/Battle', '1. got key press : ' + key);
+
+            //If in pause, switch back
+            if(this.model.get('state') === 'pause'){
+                return this.togglePause();
+            }
 
             this.cancelTarget();
             return this;
@@ -613,7 +722,7 @@ define(
                 // actual timer bar that updates
                 self[entityGroup + 'TimerBars'] = timerGroup.append('rect')
                     .attr({
-                        'class': 'timer-bar',
+                        'class': 'timer-bar ' + entityGroup,
                         x: 0,
                         y: 0,
                         width: 0,
@@ -664,7 +773,8 @@ define(
         // =====================================================================
         startTimerAnimation: function(options){
             // Starts (or restarts) the timer animation, transitioning the 
-            // bar's width to width of the entity scale.
+            // bar's width to width of the entity scale. This happens to
+            // all timer bars on a per entity level
             //
             // Options: {Object}
             //  value: {Number} Value to start the count at (must be calculated 
@@ -695,9 +805,6 @@ define(
 
             // get widths
             // --------------------------
-            //var startWidth = (d3sel.attr('width') - 
-                //this[options.entityGroup + 'EntityTimeScales'][options.index](
-                //options.value));
             var startWidth = this[options.entityGroup + 'EntityTimeScales'][options.index](options.value);
             startWidth = startWidth >= 0 ? startWidth: 0;
 
@@ -712,23 +819,33 @@ define(
                 .duration(0)
                 .attr({ 
                     // starting bar width based on value
-                    width: startWidth
+                    width: startWidth,
+                    'data-time': 0,
+                    'data-index': options.index,
+                    'data-entityGroup': entityGroup
                 }).each('end', function(){
                     // 2. After bar is reset, transition to specified width
-                    //
-                    // timerLimit is measured in 1/60 seconds, so convert
-                    // to MS
                     var duration = ( 
-                        (models[options.index].get('timerLimit') - 
-                        //options.value) / 60 ) * 1000;
-                        options.value)) * 1000;
+                        models[options.index].get('timerLimit') - options.value
+                    ) * 1000;
+
+                    // keep track of duration and end width for pausing
+                    // we multiply data-time by data-duration to get the
+                    // time left
+                    d3sel.attr({ 
+                        'data-duration': duration,
+                        'data-endWidth': endWidth 
+                    });
 
                     // transition the bar width to the end of the range
                     // --------------------------
                     d3sel.transition()
                         .ease('linear')
                         .duration( duration )
-                        .attr({ width: endWidth });
+                        .attr({ 
+                            width: endWidth,
+                            'data-time': 1
+                        });
                 });
 
             return this;
@@ -944,7 +1061,8 @@ define(
                 this.selectedAbility, 
                 target);
 
-            var entityTime = this.playerEntityTimers[this.selectedEntityIndex];
+            // TODO : use selected entity index for enemies
+            var entityTime = this[entityGroup + 'EntityTimers'][this.selectedEntityIndex];
 
             // If the intended target is not in the ability's usable target 
             // group, cannot use the ability

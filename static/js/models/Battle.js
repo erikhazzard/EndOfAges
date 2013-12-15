@@ -21,8 +21,9 @@ define(
         defaults: {
             id: 0,
     
-            // state can be either 'normal' or 'ability'
+            // state can be either 'normal' or 'ability' or 'pause'
             state: 'normal',
+            previousState: 'normal',
 
             // NOTE: player entities are passed in
             playerEntities: [],
