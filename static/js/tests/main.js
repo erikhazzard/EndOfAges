@@ -76,13 +76,15 @@ require(['events',
     mocha.setup('bdd');
     logger.options.logLevel = [
         'error'
+        , 'views/subviews/Battle'
     ];
 
     //-----------------------------------
     //Tests go here
     //-----------------------------------
     require([
-        ], function(){
+        'tests/views/subviews/Battle'
+        ], function( ){
 
         //Start runner
         mocha.run();

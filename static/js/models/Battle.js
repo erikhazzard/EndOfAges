@@ -24,6 +24,7 @@ define(
             // state can be either 'normal' or 'ability'
             state: 'normal',
 
+            // NOTE: player entities are passed in
             playerEntities: [],
             enemyEntities: []
             
@@ -38,6 +39,8 @@ define(
         initialize: function gameInitialize(){
             logger.log('models/Battle', 'initialize() called');
 
+            // TODO: get entities from game model
+            
             this.set({
                 enemyEntities: new Entities([
                     new Entity({}),

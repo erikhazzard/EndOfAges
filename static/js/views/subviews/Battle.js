@@ -84,6 +84,7 @@ define(
         },
 
         initialize: function battleViewInitialize(options){
+            var self = this;
             options = options || {};
             this.gameModel = options.gameModel;
 
@@ -95,6 +96,9 @@ define(
             this.selectedEntityGroup = undefined;
             this.selectedEntity = undefined;
             this.previouslySelectedEntityIndex = undefined;
+
+            // set references for entities
+            this.playerEntityModels = this.model.get('playerEntities').models;
 
             // target should reset whenever entity changes
             //  should be able to select own entities with 1 - n keys,
@@ -129,13 +133,21 @@ define(
             // DEV: TODO: REMOVE
             $('.state', this.$el).html(this.model.get('state'));
 
-            // Setup timers
-            this.timerNow = null;
-            this.timerDt = 0;
-            this.timerLast = getTimestamp();
-            // units to increment timer by. Use 1/60th of a second. This is
-            // the same unit used across the game 
-            this.timerStep = 1/60;
+            // Timer / Game loop 
+            // --------------------------
+            // Keep track of entity times
+            //  TODO: keep track of time for each entity
+            this.playerEntityTimers = [ ];
+            _.each(this.playerEntityModels, function(model){
+                self.playerEntityTimers.push(0);
+            });
+            
+            // used to pause or cancel timer
+            this.isTimerActive= false;
+        },
+
+        onBeforeClose: function close(){
+            self.isTimerActive = false;
         },
 
         // ==============================
@@ -143,27 +155,83 @@ define(
         // Timer
         //
         // ==============================
-        timerFrame: function battleTimerFrame(){
-            this.timerNow = getTimestamp();
-            // cap time if requestAnimFrame is stalled (e.g., user switches tab)
-            dt = dt + Math.min(1, (now - last) / 1000);
-            while(dt > step) {
-                dt = dt - step;
-                this.timerUpdate(step);
+        runTimer: function battleRunTimer(){
+            // This is called to kicked off the game loop for the battle.
+            // Store variables the battleFrame loop function will access
+            //
+            // Note: This is called as one of the last actions in the onShow()
+            // method
+            var self = this,
+                
+                timerNow = null,
+                timerDt = 0,
+                timerLast = getTimestamp(),
+
+                fps = 50,
+                timerStep = 1 / fps,
+
+                slow = 1, // slow factor
+                slowStep = slow * timerStep,
+
+                timerRender = this.timerRender,
+                timerUpdate = this.timerUpdate;
+
+            this.timerFps = fps;
+            // when runTimer is called, set the timer to be active
+            this.isTimerActive = true;
+
+            function battleFrame(){
+                // This function is called each frame. Call render() to keep
+                // render state up to date, call update() on a fixed time
+                //
+                timerNow = getTimestamp();
+                // cap time if requestAnimFrame is stalled (e.g., user switches tab)
+                timerDt = timerDt + Math.min(
+                    1, (timerNow - timerLast) / 1000);
+
+                while(timerDt > timerStep) {
+                    // Only call update when delta is greater than the timer step
+                    // to maintain constant calls
+                    timerDt = timerDt - timerStep;
+                    timerUpdate.call(self, timerStep);
+                }
+
+                // always call render though, so we can draw things properly
+                timerRender.call(self, timerDt);
+                timerLast = timerNow;
+
+                if(self.isTimerActive){
+                    requestAnimationFrame(battleFrame);
+                }
             }
-            this.timerRender(dt);
-            last = now;
-            requestAnimationFrame(this.timerFrame);
+
+            this.start = new Date();
+            requestAnimationFrame(battleFrame);
+            return this;
         },
 
-        timerRender: function battleTimerRender(){
-
+        timerRender: function battleTimerRender(dt){
+            // if we wanted to update the battle scene
         },
 
-        timerUpdate: function battleTimerUpdate(){
+        timerUpdate: function battleTimerUpdate(dt){
+            // Fixed update function. Called to update the timer for each
+            // entity. This only increments entity timers and triggers events
+            // for ability usage
+            var self = this;
+            _.each(this.playerEntityTimers, function(val,index){
+                // increase timer
+                //  timerLimit is measured in seconds , multiply by 100
+                if( val < 
+                    self.playerEntityModels[index].attributes.timerLimit * 100
+                    ){
+                    self.playerEntityTimers[index] += 1;
+                }
+            });
+            self.$timerEl.html(this.playerEntityTimers.join(' | '));
 
+            return this;
         },
-
 
         // ==============================
         //
@@ -320,15 +388,20 @@ define(
             return this;
         },
 
-        // ---------------------------------------------------------------------
+        // =====================================================================
         //
         // Render / Show
         //
-        // ---------------------------------------------------------------------
+        // =====================================================================
         onShow: function battleOnShow(){
             // Render the scene
             var self = this;
+            // TODO: remove timer el for dev
+            this.$timerEl = $('.timer', this.$el);
+
             logger.log('views/subviews/Battle', '1. onShow() called');
+
+            this.runTimer();
             
             // Setup svg
             var svg = d3.select('#battle');
@@ -338,11 +411,18 @@ define(
             var entityHeight = 60;
             var entityWidth = entityHeight;
 
+            // update models
+            this.playerEntityModels = this.model.get('playerEntities').models;
+            this.playerEntityTimers = [ ];
+            _.each(this.playerEntityModels, function(model){
+                self.playerEntityTimers.push(0);
+            });
+
             // Setup scales for each entity
             // --------------------------
             // TODO: Is this the best way todo this?
             this.playerEntityTimeScales= [];
-            _.each(this.model.get('playerEntities').models, function(model){
+            _.each(this.playerEntityModels, function(model){
                 self.playerEntityTimeScales.push(
                     d3.scale.linear()
                     .domain([ 0, model.get('timerLimit')])
@@ -384,11 +464,10 @@ define(
             // TODO: use sprites
             // TODO: text effect that comes up from entity when damaged or healed
             logger.log('views/subviews/Battle', '4. setting up entities');
-            var playerModels = this.model.get('playerEntities').models;
 
             // Setup the wrapper group. This is not ever directly manipulated
             this.playerEntityGroupsWrapper = playerEntities.selectAll('.entity-group')
-                .data(playerModels)
+                .data(this.playerEntityModels)
                 .enter().append('g')
                     .attr({ 
                         'class': 'entity-group-wrapper' ,
@@ -446,17 +525,7 @@ define(
                     y: 0,
                     width: 0,
                     height: 10
-                });
-
-            // timer animation
-            // --------------------------
-            // start the timer bar animation for each entity
-            _.each(this.playerTimerBars[0], function(bar, i){
-                self.startTimerAnimation.call(self, {
-                    index: i,
-                    entityGroup: 'player'
-                });
-            });
+                }); 
 
             // ==========================
             //
@@ -483,6 +552,20 @@ define(
                         .on('mouseenter',function(d,i){ return self.entityHoverStart(i, 'enemy'); })
                         .on('mouseleave',function(d,i){ return self.entityHoverEnd(i, 'enemy'); });
 
+            // --------------------------
+            // Game loop related
+            // --------------------------
+            // Kick off the timer
+            this.runTimer();
+
+            // start the timer bar animation for each entity
+            _.each(this.playerTimerBars[0], function(bar, i){
+                self.startTimerAnimation.call(self, {
+                    index: i,
+                    entityGroup: 'player'
+                });
+            });
+
             // After everything is rendered, selected first entity
             this.selectPlayerEntity(0);
 
@@ -497,6 +580,12 @@ define(
         startTimerAnimation: function(options){
             // Starts (or restarts) the timer animation, transitioning the 
             // bar's width to width of the entity scale.
+            //
+            // Options: {Object}
+            //  value: {Number} Value to start the count at (must be calculated 
+            //      by caller based on the ability value and value left in timer
+            //  index: {Number} index of entity
+            //  entityGroup: {String} 'player' or 'enemy'
             //
             logger.log("views/subviews/Battle", 
                 'startTimerAnimation: << started : %O', options);
@@ -515,11 +604,20 @@ define(
             // get bar from passed in index
             var bar = this.playerTimerBars[0][options.index];
             var d3sel = d3.select(bar);
+            var models = this.model.get(options.entityGroup + 'Entities').models;
+
+            // get widths
+            // --------------------------
+            //var startWidth = (d3sel.attr('width') - 
+                //this[options.entityGroup + 'EntityTimeScales'][options.index](
+                //options.value));
+            var startWidth = this[options.entityGroup + 'EntityTimeScales'][options.index](options.value);
+            startWidth = startWidth >= 0 ? startWidth: 0;
 
             // get bar width from the entity scale
-            var width = this.playerEntityTimeScales[
+            var endWidth = this.playerEntityTimeScales[
                 options.index].range()[1];
-            var models = this.model.get(options.entityGroup + 'Entities').models;
+            endWidth = endWidth >= 0 ? endWidth : 0;
 
             //1. Reset bar width
             d3sel.transition()
@@ -527,22 +625,23 @@ define(
                 .duration(0)
                 .attr({ 
                     // starting bar width based on value
-                    width: (d3sel.attr('width') - this[options.entityGroup + 'EntityTimeScales'][
-                        options.index](options.value))
+                    width: startWidth
                 }).each('end', function(){
                     // 2. After bar is reset, transition to specified width
                     //
                     // timerLimit is measured in 1/60 seconds, so convert
                     // to MS
-                    var duration = ( (models[options.index].get('timerLimit') - 
-                        options.value) / 60 ) * 1000;
+                    var duration = ( 
+                        (models[options.index].get('timerLimit') - 
+                        //options.value) / 60 ) * 1000;
+                        options.value)) * 1000;
 
                     // transition the bar width to the end of the range
                     // --------------------------
                     d3sel.transition()
                         .ease('linear')
                         .duration( duration )
-                        .attr({ width: width });
+                        .attr({ width: endWidth });
                 });
 
             return this;
@@ -635,7 +734,7 @@ define(
             // if the user selected the currently active entity, do nothing
             if(i === this.previouslySelectedEntityIndex){ 
                 logger.log("views/subviews/Battle", 
-                    '0. entity selected: same entity selected, exiting');
+                    '0. entity selected: same entity selected, exiting : i : %O', i);
                 return false; 
             } 
 
@@ -705,36 +804,56 @@ define(
             options = options || {};
 
             var target = options.target;
-            var i = options.index;
+            var index = options.index;
             var entityGroup = options.entityGroup;
 
-            // TODO: check if ability can be used
-            // If the battle's timer is LESS than the castTime attribute, do 
-            // nothing
-            //
-            //
             // Uses whatever the active ability is on the target
             logger.log("views/subviews/Battle", 
                 "1. useAbility(): using ability: %O on %O",
                 this.selectedAbility, 
                 target);
 
-            // reset the timer
-            // TODO: different between entity index and enemy
-            this.startTimerAnimation({
-                index: this.selectedEntityIndex,
-                value: this.selectedAbility.get('timeCost'),
-                entityGroup: this.selectedEntityGroup
-            });
+            var entityTime = this.playerEntityTimers[index];
 
-            // TODO: use ability
-            this.selectedAbility.get('effect')({
-                target: target,
-                source: this.selectedEntity
-            });
+            // TODO: check if ability can be used
+            // --------------------------
+            // If the battle's timer is LESS than the castTime attribute, do 
+            // nothing
+            if(entityTime < this.selectedAbility.get('castTime')){
+               // can NOT use
+               // TODO: visual effect
+                logger.log("views/subviews/Battle", 
+                    "2. CANNNOT use ability! Time: %O / %O", entityTime, 
+                    this.selectedAbility.get('castTime'));
 
-            // Reset back to normal state
-            this.cancelTarget();
+            } else {
+                logger.log("views/subviews/Battle", 
+                    "2. USING ability! Time: %O / %O", entityTime, 
+                    this.selectedAbility.get('castTime'));
+
+                // update the timer
+                // --------------------------
+                this.playerEntityTimers[index] -= this.selectedAbility.get('timeCost');
+
+                // reset animation
+                // --------------------------
+                // TODO: different between entity index and enemy
+                this.startTimerAnimation({
+                    index: this.selectedEntityIndex,
+                    value: entityTime - this.selectedAbility.get('timeCost'),
+                    entityGroup: this.selectedEntityGroup
+                });
+
+                // TODO: use ability
+                // --------------------------
+                this.selectedAbility.get('effect')({
+                    target: target,
+                    source: this.selectedEntity
+                });
+
+                // Reset back to normal state
+                this.cancelTarget();
+            }
 
             return this;
         },

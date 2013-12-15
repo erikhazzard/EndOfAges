@@ -30,8 +30,8 @@ define(
 
             // Timer properties
             //---------------------------
-            // timer is measured in steps of 1/60th seconds
-            timerLimit: 60 * 5,  // 10 seconds (60 * n seconds)
+            // timer is measured in seconds
+            timerLimit: 10,
 
             //---------------------------
             //Entity attributes
