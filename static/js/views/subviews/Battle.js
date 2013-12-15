@@ -267,10 +267,17 @@ define(
             // This function sets the model's state to either 'ability' or
             // 'normal' (by means of calling cancelTarget())
             //
-            // When an ability is activated, switch to ability state
+            // parameters: 
+            //  options: {Object} with keys:
+            //      ability: {Object} ability object
+            //      //TODO: Rename to activateCallback or something
+            //      useCallback: {Object} callback to call after using an 
+            //      ability
             //
-            //  NOTE: Actual checking for ability effect usage is checked in
-            //  useAbility.
+            // When an ability is activated:
+            //  1. check if ability can be used (check entity timer with passed 
+            //  entity)
+            //  2. switch ability state
             //
             // This function is an event handler which is called when
             // an ability is attempted to be used. There are multiple
@@ -286,12 +293,21 @@ define(
             var ability = options.ability;
             var useCallback = options.useCallback;
             
-            //// If the same ability was attempted to be used, do nothing
-            //var canBeUsed = Math.random() < 0.5 ? true : false;
-            var canBeUsed = true;
-
             logger.log('views/subviews/Battle', 
-                '1. handleAbilityActivated: %O : canBeUsed: %O', ability, canBeUsed);
+                '1. handleAbilityActivated: %O', ability);
+
+            var canBeUsed = false;
+
+            // Check usage based on timer
+            var entityTime = this.playerEntityTimers[this.selectedEntityIndex];
+            if(entityTime >= ability.get('castTime')){
+                logger.log('views/subviews/Battle', 
+                    'handleAbilityActivated  : CAN be used');
+                canBeUsed = true;
+            } else {
+                logger.log('views/subviews/Battle', 
+                    'handleAbilityActivated  : CANNOT be used');
+            }
 
             // Toggle ability on / off
             // --------------------------
