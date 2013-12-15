@@ -1,5 +1,6 @@
 {{ include battle/ability.html }}
-{{ include battle/entity.html }}
+{{ include battle/selected-entity-info.html }}
+{{ include battle/intended-target-info.html }}
 
 <script id='template-game-battle' type='text/template'>
     {{// Dev: show state }}
@@ -20,8 +21,11 @@
     </div>
 
     <!-- Entity info -->
-    <div id='region-battle-entity-wrapper'></div>
+    <div id='region-battle-selected-entity-wrapper'></div>
 
     <!-- Ability menu -->
     <div id='region-battle-ability-wrapper'></div>
+
+    <!-- Hover Intended Target info -->
+    <div id='region-battle-intended-target-wrapper'></div>
 </script>

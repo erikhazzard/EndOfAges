@@ -8,26 +8,6 @@
         preserveAspectRation='xMinYMin'
         xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
         >
-            <defs>
-                <filter id="map-filter" x="-0.15000001" y="-0.15000001" width="1.3" height="1.3" color-interpolation-filters="sRGB" >
-                    <feGaussianBlur stdDeviation="4" in="SourceGraphic" result="result1" id="feGaussianBlur4202" />
-                    <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="4" result="result0" id="feTurbulence4204" />
-                    <feDisplacementMap in2="result0" scale="20" xChannelSelector="R" yChannelSelector="G" in="result1" result="result2" id="feDisplacementMap4206" />
-                    <feGaussianBlur stdDeviation="3" in="SourceGraphic" result="result4" id="feGaussianBlur4208" />
-                    <feComposite in2="result2" operator="arithmetic" k1="1.5" k2="-0.25" k3="0.5" k4="0" in="result4" result="result5" id="feComposite4210" />
-                </filter>
-
-            <filter x="-0.15000001" y="-0.15000001" width="1.3" height="1.3" color-interpolation-filters="sRGB" id="filter4066">
-                  <feTurbulence result="result4" seed="0" numOctaves="4" baseFrequency="0.04" type="fractalNoise" id="feTurbulence4068" />
-                  <feDisplacementMap in2="result4" scale="10" xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" result="result3" id="feDisplacementMap4070" />
-                  <feDiffuseLighting in="result4" result="result1" surfaceScale="2" diffuseConstant="1" lighting-color="#e9e6d7" id="feDiffuseLighting4072">
-                    <feDistantLight elevation="40" azimuth="235" id="feDistantLight4074" />
-                  </feDiffuseLighting>
-                  <feComposite in2="result1" operator="in" in="result3" result="result2" id="feComposite4076" />
-                  <feComposite in2="result1" operator="arithmetic" k1="1.7" k2="0" k3="0" k4="0" result="result5" id="feComposite4078" />
-                  <feBlend in2="result3" mode="normal" in="result5" id="feBlend4080" /> 
-            </filter>
-        </defs>
         </svg>
     </div>
 

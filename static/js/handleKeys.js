@@ -20,6 +20,8 @@ define([
             'enter',
             'q','w','e','r',
             'h','j','k','l',
+            '1', '2', '3', '4', '5', '6',
+            'shift+1', 'shift+2', 'shift+3', 'shift+4', 'shift+5', 'shift+6',
             'backspace',
             'shift+up',
             'shift+down'

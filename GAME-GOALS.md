@@ -5,3 +5,7 @@
 
 These two goals are woven together. The sense, experience, of exploration
 requires an egaged imagination. Believabiliy is fundemental.
+
+
+3. Different views - Map, Battle, Group, Shop
+    In group window, should be able to level up entities, select skills, etc.
