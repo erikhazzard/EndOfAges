@@ -35,6 +35,10 @@
 .ability-list-wrapper .ability-item-wrapper.use {
   background-color: #44dd44; }
 
+.pause-blocker.active {
+  fill: #ababab !important;
+  opacity: 0.6 !important; }
+
 #region-node-instance-wrapper {
   background: #ffffff;
   bottom: 0;

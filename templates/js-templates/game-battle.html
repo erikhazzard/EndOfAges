@@ -3,12 +3,13 @@
 {{ include battle/intended-target-info.html }}
 
 <script id='template-game-battle' type='text/template'>
-    {{// Dev: show state }}
-    State: <span class='state'></span> 
-
-    entity timer: <span class='timer'></span>
 
     <button class='finish-instance btn btn-large'>Finish</button>
+    <button class='btn-pause btn btn-large'>Pause</button>
+
+    {{// Dev: show state }}
+    State: <span class='state'></span> 
+    entity timer: <span class='timer'></span>
 
     <!-- Battle scene -->
     <div id='battle-wrapper' style='width: 1000px; height: 500px;'>

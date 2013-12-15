@@ -78,7 +78,8 @@ define(
 
         events: {
             // UI User input
-            'click .finish-instance': 'finishInstance'
+            'click .finish-instance': 'finishInstance',
+            'click .btn-pause': 'togglePause'
         },
 
         regions: {
@@ -291,9 +292,13 @@ define(
             logger.log('views/subviews/Battle', 
                 '1. togglePause(): PAUSING');
 
+            // Show pause message
+            d3.select('#battle .pause-blocker').classed('active', true);
+
             // cancel target and pause
             this.cancelTarget();
 
+            // set state
             this.model.set({
                 state: 'pause',
                 previousState: this.model.get('previousState')
@@ -314,6 +319,10 @@ define(
             logger.log('views/subviews/Battle', 
                 '1. togglePause(): UNPAUSING');
 
+            // remove blocker
+            d3.select('#battle .pause-blocker').classed('active', false);
+
+            // set state
             this.model.set({
                 state: 'normal'
             });
@@ -619,6 +628,11 @@ define(
             var background = wrapper.append('g')
                 .attr({ 'class': 'background' });
 
+            // add pause block
+            wrapper.append('rect')
+                .attr({ 'class': 'pause-blocker', x: 0, y: 0, width: '100%', height: '100%' })
+                .style({ fill: 'none' });
+
             var entityGroups = {
                 player: wrapper.append('g')
                     .attr({ 'class': 'playerEntities' }),
@@ -881,7 +895,8 @@ define(
             var i = options.index;
             
             // STATE: normal
-            if(this.model.get('state') === 'normal'){
+            var state = this.model.get('state');
+            if(state === 'normal' || state === 'pause'){
                 this.selectPlayerEntityStateNormal({index: options.index});
 
             } else if(this.model.get('state') === 'ability'){
