@@ -1913,6 +1913,12 @@ define(
 //  TODO: Break up view and controller logic
 //  TODO: Should transitions instead use the global game timer?
 //  TODO: Clean up code
+//  TODO: PAUSE FUNCTIONALITY
+//      -Should be able to select an ability when not in pause mode,
+//      pause, unpause, then use it (cannot now)
+//      -Should be able to select an ability in pause mode
+//      -Abilities should have a way to trigger remember action and trigger
+//      afterwards (BIG)
 //
 //
 //      View for a battle. Sub views contains in the Combat subfolder
@@ -2054,13 +2060,6 @@ define(
 
             // Timer / Game loop 
             // --------------------------
-            // Keep track of entity times
-            //  TODO: keep track of time for each entity
-            this.playerEntityTimers = [ ];
-            _.each(this.playerEntityModels, function(model){
-                self.playerEntityTimers.push(0);
-            });
-            
             // used to pause or cancel timer
             this.isTimerActive = false;
         },
@@ -2985,7 +2984,7 @@ define(
                 target);
 
             // TODO : use selected entity index for enemies
-            var entityTime = this[entityGroup + 'EntityTimers'][this.selectedEntityIndex];
+            var entityTime = this[this.selectedEntityGroup + 'EntityTimers'][this.selectedEntityIndex];
 
             // If the intended target is not in the ability's usable target 
             // group, cannot use the ability
