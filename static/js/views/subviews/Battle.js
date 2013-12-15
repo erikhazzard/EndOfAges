@@ -143,11 +143,13 @@ define(
             });
             
             // used to pause or cancel timer
-            this.isTimerActive= false;
+            this.isTimerActive = false;
         },
 
         onBeforeClose: function close(){
-            self.isTimerActive = false;
+            logger.log('views/subviews/Battle', 'onBeforeClose() called');
+            this.isTimerActive = false;
+            return this;
         },
 
         // ==============================
@@ -200,8 +202,11 @@ define(
                 timerRender.call(self, timerDt);
                 timerLast = timerNow;
 
+
                 if(self.isTimerActive){
                     requestAnimationFrame(battleFrame);
+                } else {
+                    return false;
                 }
             }
 
@@ -223,9 +228,9 @@ define(
                 // increase timer
                 //  timerLimit is measured in seconds , multiply by 100
                 if( val < 
-                    self.playerEntityModels[index].attributes.timerLimit * 100
-                    ){
-                    self.playerEntityTimers[index] += 1;
+                self.playerEntityModels[index].attributes.timerLimit
+                ){
+                    self.playerEntityTimers[index] += 0.01;
                 }
             });
             self.$timerEl.html(this.playerEntityTimers.join(' | '));
