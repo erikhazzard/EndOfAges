@@ -1,0 +1,32 @@
+{{ include battle/ability.html }}
+{{ include battle/selected-entity-info.html }}
+{{ include battle/intended-target-info.html }}
+
+<script id='template-game-battle' type='text/template'>
+
+    <button class='finish-instance btn btn-large'>Finish</button>
+    <button class='btn-pause btn btn-large'>Pause</button>
+
+    {{// Dev: show state }}
+    State: <span class='state'></span> 
+    entity timer: <span class='timer'></span>
+
+    <!-- Battle scene -->
+    <div id='battle-wrapper' style='width: 1000px; height: 500px;'>
+        <svg id='battle' 
+            style='width:100%; height: 100%;'
+            viewBox='0 0 1000 500'
+            preserveAspectRation='xMinYMin'
+            xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
+        </svg>
+    </div>
+
+    <!-- Entity info -->
+    <div id='region-battle-selected-entity-wrapper'></div>
+
+    <!-- Ability menu -->
+    <div id='region-battle-ability-wrapper'></div>
+
+    <!-- Hover Intended Target info -->
+    <div id='region-battle-intended-target-wrapper'></div>
+</script>

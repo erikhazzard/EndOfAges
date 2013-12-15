@@ -1,0 +1,10 @@
+{{ include game-battle.html }}
+{{ include game-map.html }}
+
+<script id='template-page-game' type='text/template'>
+    {{// active node instance - a battle, shop, etc. Will always appear over the map }}
+    <div id='region-node-instance-wrapper' class='hidden'></div>
+
+    {{// Map }}
+    <div id='region-map'></div>
+</script>

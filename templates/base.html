@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>End of Ages</title>
+
+    <meta name="description" content="Quint - the Personality Genome Project">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+
+    <link rel="shortcut icon" href="/static/resources/favicon.ico" />
+
+    <!-- bootstrap -->
+    <link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css' />
+    <link rel='stylesheet' href='/static/css/compiled/bootstrap.min.css' />
+
+    <!-- CSS -->
+    <link rel='stylesheet' href='{{= STATIC_URL }}css/compiled/main.css' />
+
+    <!-- font awesome -->
+    <link rel='stylesheet' href='//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.min.css' />
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class='navbar navbar-default navbar-fixed-top'>
+        <div class='container site-container'>
+            <div class='row-nonresponsive'>
+                <h1 class='navbar-item quint-brand'>
+                    <a class='' href="/">
+                        <!--             <span class='logo'>End of Ages</span> -->
+                    </a>
+                </h1>
+            </div>
+            <!-- Login -->
+            <div id='region-auth' class='hidden-sm'></div>
+
+          </div>
+        </div>
+    </div>
+    <div class='navbar-spacer'></div>
+
+    <!-- ========================================== 
+    Pages
+    =========================================== -->
+    <div class='container site-container'>
+        <div id='region-main'>
+            {{/* NOTE: Everything here is replaced when views are rendered. 
+                We get the page from the server, so do a little pre-rendering
+                if possible
+            */}}
+            {{// PRELOAD Pages }}
+            {{ if(page === 'home'){ }}
+                {{ include js-templates/page-home-preload.html }}
+            {{ } else if (page === 'game'){ }}
+                {{ include js-templates/page-game-preload.html }}
+            {{ } }}
+        </div>
+    </div>
+
+<!-- ============================================ 
+    Pages / Underscore templates
+    =============================================== -->
+{{ include js-templates/all.html }}
+
+<!-- ============================================== 
+    Scripts
+    ================================================= -->
+<script>
+    var CONFIG = {
+        // for dev, disbale filters and high quality stuff
+        lowRes: true
+    };
+</script>
+<script src="{{= STATIC_URL }}js/lib/require-jquery.min.js"
+        data-main="{{= STATIC_URL }}build/main"></script>
+
+<!-- ============================================== 
+    THIRD PARTY SCRIPTS 
+    ================================================= -->
+<!-- GA 
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-44968377-1', 'quint.com');
+    ga('send', 'pageview');
+</script>
+-->
+
+<!-- סּ_סּ brought to you by {{= HOST_NAME }} with a bit of hash:{{= GIT_COMMIT_HASH }} -->
+</body>
+</html>

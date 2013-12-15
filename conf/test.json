@@ -1,0 +1,9 @@
+{
+    "facebook": {
+        "callbackURL": "http://localhost:8000/api/auth/facebook/callback",
+        "scope": [ "email", "user_about_me"]
+    },
+    "database": {
+        "db": "mongodb://localhost/endofagestest"
+    }
+}

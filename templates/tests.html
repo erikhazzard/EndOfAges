@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Client Tests</title>
+
+<!-- bootstrap -->
+<link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css' />
+<link rel='stylesheet' href='/static/css/compiled/bootstrap.min.css' />
+<link rel='stylesheet' href='{{= STATIC_URL }}css/compiled/main.css' />
+
+
+    <link rel="stylesheet" href="/static/css/compiled/mocha.css"/>
+</head>
+<body>
+    <div id="mocha"></div>
+    
+    <div id='region-auth' class='hidden-sm'></div>
+    <div class='container site-container'>
+        <div id='region-main'>
+            {{/* NOTE: Everything here is replaced when views are rendered. 
+                We get the page from the server, so do a little pre-rendering
+                if possible
+            */}}
+            {{// PRELOAD Pages }}
+            {{ if(page === 'home'){ }}
+                {{ include js-templates/page-home-preload.html }}
+            {{ } else if (page === 'game'){ }}
+                {{ include js-templates/page-game-preload.html }}
+            {{ } }}
+        </div>
+    </div>
+        
+        
+    <!-- ============================================ 
+        Pages / Underscore templates
+        =============================================== -->
+    {{ include js-templates/all.html }}
+
+    <!-- ============================================== 
+        Scripts
+        ================================================= -->
+    <script>
+        var CONFIG = {
+            // for dev, disbale filters and high quality stuff
+            lowRes: true
+        };
+    </script>
+    
+    
+    <script src="{{= STATIC_URL }}js/lib/require-jquery.min.js"
+        data-main="{{= STATIC_URL }}js/tests/main.js"></script>
+<!-- סּ_סּ brought to you by {{= HOST_NAME }} with a bit of hash:{{= GIT_COMMIT_HASH }} -->
+</body>
+</html>
