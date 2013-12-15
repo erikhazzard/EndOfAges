@@ -2591,7 +2591,7 @@ define(
                                 transform: function(d,i){
                                     return "translate(" + [
                                         entityGroupX, 
-                                        20 + (i * (entityHeight + 20))
+                                        20 + (i * (entityHeight + 40))
                                     ] + ")";
                                 }
                             });
@@ -2624,8 +2624,60 @@ define(
                         return self.entityHoverEnd({index:i, entityGroup: entityGroup});
                     });
 
-                //timer bar group
-                //===========================
+                // Health Bars
+                // ======================
+                // Draw bars
+                var healthGroups = groups.append('g')
+                    .attr({ 'class': 'battle-entity-health ' + entityGroup });
+
+                var healthBarHeight = 10;
+                // frame / border (TODO: Use image)
+                healthGroups.append('rect')
+                    .attr({
+                        'class': 'health-bar-border ' + entityGroup,
+                        x: 0,
+                        y: entityHeight + 10,
+                        width: entityWidth,
+                        height: healthBarHeight
+                    });
+        
+                // actual health bar that updates
+                healthGroups.append('rect')
+                    .attr({
+                        'class': 'health-bar ' + entityGroup,
+                        x: 0,
+                        y: entityHeight + 10,
+                        height: healthBarHeight,
+                        width: function(d, i){
+                            var model = self.model.get(
+                                entityGroup + 'Entities').models[i];
+                            var maxHealth = model.get('attributes')
+                                .get('maxHealth');
+                            var health = model.get('attributes').get('health');
+                            var d3this = d3.select(this);
+
+                            var healthScale = d3.scale.linear()
+                                .domain([0, maxHealth])
+                                .range([0, entityWidth]);
+                    
+                            // when health changes, update width
+                            self.listenTo(model.get('attributes'), 
+                                'change:health',
+                                function updateHealth(model, health){
+                                d3this.attr({
+                                    width: healthScale(health)
+                                });
+                            })
+
+                            return healthScale(health);
+                        }
+                    }); 
+
+                //
+                // Listen for health updates
+
+                // timer bar group
+                // ======================
                 //  draw a group for each bar (frame + bar)
                 var timerGroup = groups
                     .append('g').attr({ 'class': 'entity-timer ' + entityGroup });

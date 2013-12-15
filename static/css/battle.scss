@@ -9,6 +9,20 @@
 
 // --------------------------------------
 //
+// health bar
+//
+// --------------------------------------
+.battle-entity-health .health-bar {
+    fill: #dd2222;
+}
+
+.battle-entity-health .health-bar-border {
+    fill: none;
+    stroke: #ffffff;
+}
+
+// --------------------------------------
+//
 // Timer
 //
 // --------------------------------------
