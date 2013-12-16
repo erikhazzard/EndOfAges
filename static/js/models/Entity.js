@@ -24,6 +24,12 @@ define(
             // abilities will be a collection of ability models
             abilities: null,
 
+            // effects active on the entity (e.g., buffs or DoTs)
+            activeEffects: [],
+
+            // entity can be either alive or dead (can be revived with spell)
+            isAlive: true,
+
             //User object which owns this entity
             owner: null,
             name: 'Soandso' + Math.random(),
@@ -92,7 +98,22 @@ define(
 
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
-            attrs.set({ health: curHealth - damage });
+            var newHealth = curHealth - damage;
+
+            // TODO: check if there are any buffs that protect from death
+
+            // If the health drops below 0, the target is dead
+            if(newHealth <= 0){ newHealth = 0; }
+
+            // update the health
+            attrs.set({ health: newHealth });
+
+            // if health falls below 0, kill entity
+            if(newHealth <= 0){
+                this.set({ isAlive: false });
+                // trigger global event to let listeners know entity died
+                events.trigger('entity:died', {model: this});
+            }
 
             return this;
         }

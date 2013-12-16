@@ -25,16 +25,16 @@ define(
             // This SHOULD always be greater than or equal to than the timeCost
             //  (e.g., if you need to wait 3 seconds to cast it but the cost is 4
             //  seconds, you'll have negative time)
-            castTime: 5,
+            castTime: 1,
 
             // How much this ability costs in time units. Normally, this
             // is the same as the cast time
-            // in 1/60th seconds
-            timeCost: 5,
+            // Measured in seconds
+            timeCost: 1,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
-            validTargets: 'enemy',
+            validTargets: ['enemy', 'player'],
         
             // TODO: how to handle AoE?
 
@@ -58,7 +58,7 @@ define(
                 options.target.takeDamage({
                     type: 'combat',
                     subType: 'crushing',
-                    damage: 10
+                    damage: 40
                 });
             },
 

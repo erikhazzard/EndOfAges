@@ -132,7 +132,7 @@ define(
             this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
             this.listenTo(events, 'keyPress:j', this.handleKeyUpdateSelection);
 
-            _.each([1,2,3,4,6], function(key){
+            _.each([1,2,3,4,6], function eachKey(key){
                 self.listenTo(events, 'keyPress:' + key, self.handleKeyUpdateSelection);
                 self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyUpdateSelection);
             });
@@ -149,6 +149,10 @@ define(
         
             // handle state changes
             this.listenTo(this.model, 'change:state', this.stateChange);
+
+            // Handle entity death
+            // --------------------------
+            this.listenTo(events, 'entity:died', this.entityDied);
 
             // Timer / Game loop 
             // --------------------------
@@ -167,7 +171,7 @@ define(
         // Timer
         //
         // ==============================
-        pauseTimer: function(){
+        pauseTimer: function pauseTimer(){
             // pauses the timer by setting isTimerActive to false.
             // After this is called, runTimer() must be called to run the
             // timer again
@@ -240,14 +244,26 @@ define(
         },
 
         timerUpdate: function battleTimerUpdate(dt){
+            // Update each entity's timer
+            // TODO: do DoT effects? other time based effects?
+            //
             // Fixed update function. Called to update the timer for each
             // entity. This only increments entity timers and triggers events
             // for ability usage
+            //
             var self = this;
-            _.each(['player', 'enemy'], function(entityGroup){
-                _.each(self[entityGroup + 'EntityTimers'], function(val,index){
+            _.each(['player', 'enemy'], function timerEachGroup(entityGroup){
+                _.each(self[entityGroup + 'EntityTimers'], function timerEachEntityTimer(val,index){
+                    var model = self.model.attributes[entityGroup + 'Entities'].models[index];
+
+                    // if entity is dead, do nothing
+                    if(!model.attributes.isAlive){
+                        self[entityGroup + 'EntityTimers'][index] = 0;
+                        return false;
+                    }
+
                     // increase timer
-                    if( val < self.model.attributes[entityGroup + 'Entities'].models[index].attributes.timerLimit){
+                    if( val < model.attributes.timerLimit){
                         // increase the timer by the timer step - e.g., if FPS is
                         // 60, each update tick is 1/60
                         self[entityGroup + 'EntityTimers'][index] += self.timerStep;
@@ -331,7 +347,7 @@ define(
             var sel = d3.selectAll('#battle .timer-bar');
 
             // for each selection, update transition
-            _.each(sel[0], function(el){
+            _.each(sel[0], function unpauseEachSelection(el){
                 $el = d3.select(el);
                 var entityGroup = $el.attr('data-entityGroup');
                 var index = $el.attr('data-index');
@@ -360,7 +376,7 @@ define(
         // Model state change
         //
         // ==============================
-        stateChange: function(model,state){
+        stateChange: function stateChange(model,state){
             // Called when the model state changes
             logger.log('views/subviews/Battle', 
                 '1. stateChange(): model state changed to: ' + state);
@@ -380,7 +396,7 @@ define(
         // ------------------------------
         // Ability use handler
         // ------------------------------
-        handleAbilityActivated: function(options){
+        handleAbilityActivated: function handleAbilityActivated(options){
             // This function sets the model's state to either 'ability' or
             // 'normal' (by means of calling cancelTarget())
             //
@@ -473,7 +489,7 @@ define(
         // User input - Shortcut keys
         //
         // ------------------------------
-        handleKeyUpdateSelection: function(options){
+        handleKeyUpdateSelection: function handleKeyUpdateSelection(options){
             // This function selects an entity based on a keypress. 
             // j / k and up / down select next or previous entity the
             // player controls, as does the 1 - 4 keys
@@ -541,7 +557,7 @@ define(
             return this;
         },
 
-        handleKeyEscape: function(options){
+        handleKeyEscape: function handleKeyEscape(options){
             // When escape is pressed, it should return to the
             // normal battle state
             options.e.preventDefault();
@@ -558,7 +574,7 @@ define(
             return this;
         },
 
-        cancelTarget: function(){
+        cancelTarget: function cancelTarget(){
             // return to default state
             logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
 
@@ -598,13 +614,13 @@ define(
 
             // Setup timer and time scales for each group
             // --------------------------
-            _.each(['player', 'enemy'], function(entityGroup){
+            _.each(['player', 'enemy'], function setupTimers(entityGroup){
                 // TODO: don't repeat enemy / player(?) Use a single collection(?)
                 self[entityGroup + 'EntityTimers'] = [];
                 self[entityGroup + 'EntityTimeScales'] = [];
                 var models = self.model.get(entityGroup + 'Entities').models;
 
-                _.each(models, function(model){
+                _.each(models, function timerEachModel(model){
                     // setup timer for each entity
                     self[entityGroup + 'EntityTimers'].push(0);
 
@@ -680,7 +696,7 @@ define(
                             .attr({ 
                                 'class': 'entity-group-wrapper ' + entityGroup,
                                 // transform the entire group to set the entity position
-                                transform: function(d,i){
+                                transform: function groupsWrapperTransform(d,i){
                                     return "translate(" + [
                                         entityGroupX, 
                                         20 + (i * (entityHeight + 40))
@@ -703,16 +719,16 @@ define(
                         height: entityHeight,
                         width: entityWidth
                     })
-                    .on('click', function(d,i){ 
+                    .on('click', function entityClicked(d,i){ 
                         return self.selectEntity({index: i, entityGroup: entityGroup});
                     })
-                    .on('touchend', function(d,i){ 
+                    .on('touchend', function entityTouchEnd(d,i){ 
                         return self.selectEntity({index: i, entityGroup: entityGroup});
                     })
-                    .on('mouseenter',function(d,i){ 
+                    .on('mouseenter',function entityMouseEnter(d,i){ 
                         return self.entityHoverStart({index: i, entityGroup: entityGroup});
                     })
-                    .on('mouseleave',function(d,i){ 
+                    .on('mouseleave',function entityMouseLeave(d,i){ 
                         return self.entityHoverEnd({index:i, entityGroup: entityGroup});
                     });
 
@@ -740,7 +756,7 @@ define(
                         x: 0,
                         y: entityHeight + 10,
                         height: healthBarHeight,
-                        width: function(d, i){
+                        width: function healthSetWidth(d, i){
                             var model = self.model.get(
                                 entityGroup + 'Entities').models[i];
                             var maxHealth = model.get('attributes')
@@ -750,23 +766,22 @@ define(
 
                             var healthScale = d3.scale.linear()
                                 .domain([0, maxHealth])
-                                .range([0, entityWidth]);
+                                .range([0, entityWidth])
+                                .clamp(true);
                     
-                            // when health changes, update width
+                            // when health changes, update width of health bar
                             self.listenTo(model.get('attributes'), 
                                 'change:health',
                                 function updateHealth(model, health){
-                                d3this.attr({
-                                    width: healthScale(health)
-                                });
-                            })
+                                    d3this.transition().attr({
+                                        width: healthScale(health)
+                                    });
+                            });
 
+                            // set current width based on model health
                             return healthScale(health);
                         }
                     }); 
-
-                //
-                // Listen for health updates
 
                 // timer bar group
                 // ======================
@@ -814,10 +829,10 @@ define(
             this.runTimer();
 
             // start the timer bar animation for each entity
-            _.each(['player', 'enemy'], function(entityGroup){
+            _.each(['player', 'enemy'], function startTimers(entityGroup){
                 var bars = self[entityGroup + 'TimerBars'][0];
 
-                _.each(bars, function(bar, i){
+                _.each(bars, function eachTimerBar(bar, i){
                     self.startTimerAnimation.call(self, {
                         index: i,
                         entityGroup: entityGroup
@@ -836,7 +851,7 @@ define(
         // timer animation
         //
         // =====================================================================
-        startTimerAnimation: function(options){
+        startTimerAnimation: function startTimerAnimation(options){
             // Starts (or restarts) the timer animation, transitioning the 
             // bar's width to width of the entity scale. This happens to
             // all timer bars on a per entity level
@@ -888,7 +903,7 @@ define(
                     'data-time': 0,
                     'data-index': options.index,
                     'data-entityGroup': entityGroup
-                }).each('end', function(){
+                }).each('end', function startTimerAnimationTransitionEnd(){
                     // 2. After bar is reset, transition to specified width
                     var duration = ( 
                         models[options.index].get('timerLimit') - options.value
@@ -921,7 +936,7 @@ define(
         // Select Entity
         //
         // =====================================================================
-        selectEntity: function(options){
+        selectEntity: function selectEntity(options){
             // This is a proxy function that will call the corresponding select
             // entity type function based on the passed in entityGroup
             options = options || {};
@@ -935,7 +950,7 @@ define(
             }
         },
 
-        selectPlayerEntity: function(options){
+        selectPlayerEntity: function selectPlayerEntity(options){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
             // about it. 
@@ -969,7 +984,7 @@ define(
         },
 
         // select Enemy entity
-        selectEnemyEntity: function(options){
+        selectEnemyEntity: function selectEnemyEntity(options){
             options = options || {};
             var i = options.index;
             
@@ -997,7 +1012,7 @@ define(
         // Select entity by state 
         //
         // ------------------------------
-        selectTarget: function(i, models){
+        selectTarget: function selectTarget(i, models){
             // Sets the target based on the selected index in the model
             logger.log("views/subviews/Battle", 
                 '1. selectTarget : i: %O : model : %O', i, models[i]);
@@ -1011,7 +1026,7 @@ define(
             return this.selectedTarget;
         },
 
-        selectPlayerEntityStateNormal: function(options){
+        selectPlayerEntityStateNormal: function selectPlayerStateNormal(options){
             // Select an entity at passed in index in the normal state
             // --------------------------
             // overview:
@@ -1073,13 +1088,13 @@ define(
             return this;
         },
 
-        entityHoverStart: function(options){
+        entityHoverStart: function entityHoverStart(options){
             //logger.log("views/subviews/Battle", "entity hover start: %O : %O", d,i);
             this.setIntendedTarget(options);
 
             return this;
         },
-        entityHoverEnd: function(options){
+        entityHoverEnd: function entityHoverEnd(options){
             //logger.log("views/subviews/Battle", "entity hover end: %O : %O", d,i);
             this.clearIntendedTarget();
 
@@ -1092,19 +1107,37 @@ define(
         //
         // ------------------------------
         setIntendedTarget: function setIntendedTarget(options){
+            // Sets the intended target. The intended target specifies which
+            // entity the spell could be cast on. 
+            // Options: 
+            //      entityGroup: {string} 'player' or 'enemy'
+            //      index: {number} index of entity in entity group
+            //
+            this.intendedTarget = {
+                index: options.index,
+                entityGroup: options.entityGroup
+            };
+
             logger.log("views/subviews/Battle", 
                 "1. setIntendedTarget : options: %O", options);
+
             var model = this.model.get(options.entityGroup + 'Entities')
                 .models[options.index];
-
             var infoView = new IntendedTargetInfoView({ model: model });
             this.regionIntendedTarget.show(infoView);
 
             return this;
         },
 
-        clearIntendedTarget: function(){
+        clearIntendedTarget: function clearIntendedTarget(){
+            // Clears out the intended target info window
+            logger.log("views/subviews/Battle", 
+                "1. clearIntendedTarget : previous target: %O", 
+                this.intendedTarget);
+
             this.regionIntendedTarget.close();
+            this.intendedTarget = null;
+
             return this;
         },
 
@@ -1113,7 +1146,7 @@ define(
         // Use ability
         //
         // ==============================
-        useAbility: function(options){
+        useAbility: function battleUseAbility(options){
             // TODO: think of call structure
             options = options || {};
 
@@ -1184,6 +1217,41 @@ define(
                 // Reset back to normal state
                 this.cancelTarget();
             }
+
+            return this;
+        },
+
+        // ==============================
+        // death 
+        // ==============================
+        entityDied: function battleEntityDied(options){
+            // Called when an entity dies
+            // options: {Object} consisting of 
+            //  entity: {Object} entity object
+            var self = this;
+
+            logger.log("views/subviews/Battle", 
+                "1. entityDied() : options: %O", options);
+            
+            // Reset timer animation
+            // Get index
+            var index;
+            var group = '';
+
+            // get the index and entity group so we can do some animation
+            _.each(['player', 'enemy'], function deathGroup(entityGroup){
+                var tmpIndex = self.model.get(entityGroup + 'Entities').indexOf(options.model);
+                if(tmpIndex !== -1){
+                    index = tmpIndex;
+                    group = entityGroup;
+                }
+            });
+
+            // Stop transition, reset timer width to 0
+            d3.select(this[group + 'TimerBars'][0][index])
+                .transition()
+                .duration(100)
+                .attr({ width: 0 });
 
             return this;
         },
