@@ -998,6 +998,26 @@ define(
                 ])
             });
 
+            // Listen when health drops to 0 or below, trigger entity
+            // death event
+            this.listenTo(
+                this.get('attributes'), 
+                'change:health', 
+                this.healthCallback);
+
+            return this;
+        },
+
+        healthCallback: function healthCallback(model, health){
+            logger.log('models/Entity', '1. healthCallback() : health ' + health);
+
+            if(health <= 0){
+                logger.log('models/Entity', '2. entity is dead!');
+                this.set({ isAlive: false });
+                // trigger global event to let listeners know entity died
+                this.trigger('entity:died', {model: this});
+            }
+
             return this;
         },
 
@@ -1023,13 +1043,8 @@ define(
 
             // update the health
             attrs.set({ health: newHealth });
-
-            // if health falls below 0, kill entity
-            if(newHealth <= 0){
-                this.set({ isAlive: false });
-                // trigger global event to let listeners know entity died
-                events.trigger('entity:died', {model: this});
-            }
+            // death event is called in the `healthCallback`, which is called
+            // whenever health changes
 
             return this;
         }
@@ -1044,7 +1059,7 @@ define(
 //  Entities Collection
 //
 //      This collection contains entities - i.e., it is the members in
-//      a player's (or enemy's) party 
+//      a player's or enemy's party 
 //
 // ===========================================================================
 define(
@@ -1058,8 +1073,45 @@ define(
     var Entities = Backbone.Collection.extend({
         model: Entity,
 
-        initialize: function(){
+        initialize: function(models, options){
+            var self = this;
             logger.log('collections/Entities', 'initialize() called');
+
+            // store the entity group ('player' or 'enemy')
+            options = options || {};
+            if(options.group){
+                this.group = options.group;
+            }
+
+            // When an entity dies, listen for the event
+            _.each(models, function(model){
+                self.listenTo(model, 'entity:died', self.entityDied);
+            });
+        },
+
+        entityDied: function(options){
+            // This is called whenever an individual entity in the collection
+            // dies. If all entities have died, trigger the corresponding event
+            var self = this;
+            logger.log('collections/Entities', 
+                '1. entityDied() called');
+
+            // if all the entities are dead, trigger event
+            var numDead = 0;
+            _.each(this.models, function(model){
+                if(!model.get('isAlive')){
+                    numDead += 1;
+                }
+            });
+
+            if(numDead === this.models.length){
+                logger.log('collections/Entities', 
+                '2. All entities are dead. triggering entityGroup:defeated');
+
+                this.trigger('entityGroup:defeated', { collection: this });
+            }
+
+            return this;
         }
     });
 
@@ -1860,6 +1912,28 @@ define(
             logger.log('views/subviews/battle/AbilityList', 
             'initialize() called');
 
+            // keep track of what entity this ability list is for
+            this.entityModel = options.entityModel;
+
+            // if an entity died when this view is rendered, update the template
+            this.listenTo(this.entityModel, 'entity:died', this.entityDied);
+            return this;
+        },
+
+        onShow: function(){
+            if(!this.entityModel.get('isAlive')){
+                this.$el.append('<div class="entity-dead"></div>');
+            }
+
+            return this;
+        },
+
+        entityDied: function entityDied(options){
+            logger.log('views/subviews/battle/AbilityList', 
+            'entityDied() : bluring abilities');
+
+            this.$el.append('<div class="entity-dead"></div>');
+
             return this;
         }
     });
@@ -1954,6 +2028,13 @@ define(
 //      has a party (a collection of entities). The player's entities are
 //      managed in the Game model object's 'playerEntities' property (a 
 //      collection of entity models)
+//
+// Win condition:
+//      When all enemy entities are dead. 
+//      Anytime an entity dies, the entity:died event is triggered. When all
+//      entities in a group die, the 'entityGroup:defeated' event is triggered
+//      (from the entity group collection), passing in the group
+//
 //
 // "Game" Loop
 //      This battle controller contains a game loop, used to keep track of when
@@ -2079,20 +2160,51 @@ define(
             // handle state changes
             this.listenTo(this.model, 'change:state', this.stateChange);
 
-            // Handle entity death
-            // --------------------------
-            this.listenTo(events, 'entity:died', this.entityDied);
-
             // Timer / Game loop 
             // --------------------------
             // used to pause or cancel timer
             this.isTimerActive = false;
+
+            // NOTE: death listeners are setup in onShow
+            //
+            return this;
         },
 
         onBeforeClose: function close(){
             logger.log('views/subviews/Battle', 'onBeforeClose() called');
             this.isTimerActive = false;
             return this;
+        },
+
+        entityGroupDied: function entityGroupDied(options){
+            // When the entire enemy group has died, you win
+            console.log(">>>>>>>>>>>>>>>> entity group died ", options);
+            alert("so win.");
+            return this;
+        },
+
+        setupDeathListeners: function battleSetupDeathListeners(){
+            // Note: This is called in onShow, after all entities are ready
+            //
+            // This sets up death listeners for each entity, along with
+            // the entire group defeat listener
+            var self = this;
+
+            _.each(['player', 'enemy'], function eachModelSetup(group){
+                // For each model, listen for an individual death
+                var collection = self.model.get(group + 'Entities');
+                
+                _.each(collection.models, function(model){
+                    self.listenTo( model, 'entity:died', self.entityDied);
+                });
+
+                // For the entire collection, listen when the group is defeated
+                // (this is either a win or lose state)
+                self.listenTo(
+                    collection,
+                    'entityGroup:defeated', 
+                    self.entityGroupDied);
+            });
         },
 
         // ==============================
@@ -2172,8 +2284,10 @@ define(
             // if we wanted to update the battle scene
         },
 
+        // TIMER UPDATE
+        // ------------------------------
         timerUpdate: function battleTimerUpdate(dt){
-            // Update each entity's timer
+            // Update each entity's timer. This is the main update function
             // TODO: do DoT effects? other time based effects?
             //
             // Fixed update function. Called to update the timer for each
@@ -2181,7 +2295,11 @@ define(
             // for ability usage
             //
             var self = this;
+
+            // 1. Update timers
             _.each(['player', 'enemy'], function timerEachGroup(entityGroup){
+
+                // For each model in each group, increase the timer
                 _.each(self[entityGroup + 'EntityTimers'], function timerEachEntityTimer(val,index){
                     var model = self.model.attributes[entityGroup + 'Entities'].models[index];
 
@@ -2190,16 +2308,24 @@ define(
                         self[entityGroup + 'EntityTimers'][index] = 0;
                     } else {
                         // Entity is alive, increase timer
+                        //
                         // increase timer
                         if( val < model.attributes.timerLimit){
                             // increase the timer by the timer step - e.g., if FPS is
                             // 60, each update tick is 1/60
                             self[entityGroup + 'EntityTimers'][index] += self.timerStep;
                         }
+
                     }
                 });
             });
-            self.$timerEl.html(this.playerEntityTimers.join(' | '));
+
+            // 2. TODO: AI Logic hooks into this timer
+
+            // 3. Update info views
+            this.$selectedEntityInfoTimer.html(
+                this.playerEntityTimers[this.selectedEntityIndex]
+            );
 
             return this;
         },
@@ -2540,6 +2666,10 @@ define(
             // --------------------------
             this.playerEntityModels = this.model.get('playerEntities').models;
 
+            // --------------------------
+            // Handle entity death
+            // --------------------------
+            this.setupDeathListeners();
 
             // Setup timer and time scales for each group
             // --------------------------
@@ -2769,8 +2899,21 @@ define(
                 });
             });
 
-            // After everything is rendered, selected first entity
-            this.selectPlayerEntity({index:0});
+            // After everything is rendered, select first living entity
+            var firstAliveEntity = 0;
+            var i = 0;
+            var models = this.model.get('playerEntities').models;
+            while(i < models.length){
+                if(models[i].get('isAlive')){ 
+                    firstAliveEntity = i;
+                    break;
+                }
+                i++;
+            }
+            logger.log("views/subviews/Battle", 
+                "selected first living entity: index: " + i);
+
+            this.selectPlayerEntity({index:firstAliveEntity});
 
             return this;
         },
@@ -2792,7 +2935,7 @@ define(
             //  entityGroup: {String} 'player' or 'enemy'
             //
             logger.log("views/subviews/Battle", 
-                'startTimerAnimation: << started : %O', options);
+                '1. startTimerAnimation: << started : %O', options);
 
             // check options
             options = options || {};
@@ -2811,6 +2954,13 @@ define(
             var bar = this[entityGroup + 'TimerBars'][0][options.index];
             var d3sel = d3.select(bar);
             var models = this.model.get(options.entityGroup + 'Entities').models;
+            var targetModel = models[options.index];
+
+            if(!targetModel.get('isAlive')){ 
+                logger.log("views/subviews/Battle", 
+                    "2. target model is not alive, not starting animation");
+                return false;
+            }
 
             // get widths
             // --------------------------
@@ -2835,7 +2985,7 @@ define(
                 }).each('end', function startTimerAnimationTransitionEnd(){
                     // 2. After bar is reset, transition to specified width
                     var duration = ( 
-                        models[options.index].get('timerLimit') - options.value
+                        targetModel.get('timerLimit') - options.value
                     ) * 1000;
 
                     // keep track of duration and end width for pausing
@@ -2984,10 +3134,12 @@ define(
             this.selectedEntityGroup = 'player';
             this.selectedEntity = model;
 
-            // show abilities
+            // show abilities for this entity. Create new AbilityList view
+            // --------------------------
             logger.log("views/subviews/Battle", "2. showing ability view");
             var abilityView = new AbilityListView({
-                collection: model.get('abilities')
+                collection: model.get('abilities'),
+                entityModel: model
             });
             this.regionAbility.show(abilityView);
 
@@ -2995,6 +3147,9 @@ define(
             logger.log("views/subviews/Battle", "3. showing entity info");
             var entityInfoView = new SelectedEntityInfoView({ model: model });
             this.regionSelectedEntity.show(entityInfoView);
+            
+            // update info view el for timer updates
+            this.$selectedEntityInfoTimer = $('.timer', entityInfoView.$el);
 
             // move entity group forward
             logger.log("views/subviews/Battle", "4. moving entity");
@@ -3156,16 +3311,19 @@ define(
         },
 
         // ==============================
-        // death 
+        // 
+        // Entity death 
+        //
         // ==============================
         entityDied: function battleEntityDied(options){
             // Called when an entity dies
             // options: {Object} consisting of 
-            //  entity: {Object} entity object
+            //  model: {Object} entity object
             var self = this;
 
             logger.log("views/subviews/Battle", 
                 "1. entityDied() : options: %O", options);
+
             
             // Reset timer animation
             // Get index
@@ -3182,10 +3340,12 @@ define(
             });
 
             // Stop transition, reset timer width to 0
-            d3.select(this[group + 'TimerBars'][0][index])
-                .transition()
-                .duration(100)
-                .attr({ width: 0 });
+            if(this[group + 'TimerBars']){
+                d3.select(this[group + 'TimerBars'][0][index])
+                    .transition()
+                    .duration(100)
+                    .attr({ width: 0 });
+            }
 
             return this;
         },

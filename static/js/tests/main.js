@@ -16,12 +16,16 @@ requirejs.config({
         lodash: 'lib/lodash.compat',
         
         jwerty: 'lib/jwerty.min',
+        sinon: 'lib/sinon',
 
         backbone: 'lib/backbone',
         marionette: 'lib/marionette',
         bootstrap: 'lib/bootstrap'
     },
     shim: {
+        'sinon': {
+            exports: 'sinon'
+        },
         'jquery-ui': {
             deps: ['jquery'], 
             exports: '$'
@@ -66,8 +70,8 @@ requirejs.config({
 //========================================
 require(['events',
         'logger',
-        'require', 'lib/chai', 'lib/mocha'], 
-        function(events, logger, require, chai){
+        'require', 'lib/chai', 'lib/mocha', 'sinon'], 
+        function(events, logger, require, chai, sinon){
 
     assert = chai.assert;
     should = chai.should();
@@ -76,6 +80,7 @@ require(['events',
     mocha.setup('bdd');
     logger.options.logLevel = [
         'error'
+        , 'collections/Entities'
         , 'views/subviews/Battle'
     ];
 
@@ -83,7 +88,8 @@ require(['events',
     //Tests go here
     //-----------------------------------
     require([
-        'tests/views/subviews/Battle'
+        'tests/collections/Entities'
+        , 'tests/views/subviews/Battle'
         ], function( ){
 
         //Start runner

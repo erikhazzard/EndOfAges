@@ -82,6 +82,26 @@ define(
                 ])
             });
 
+            // Listen when health drops to 0 or below, trigger entity
+            // death event
+            this.listenTo(
+                this.get('attributes'), 
+                'change:health', 
+                this.healthCallback);
+
+            return this;
+        },
+
+        healthCallback: function healthCallback(model, health){
+            logger.log('models/Entity', '1. healthCallback() : health ' + health);
+
+            if(health <= 0){
+                logger.log('models/Entity', '2. entity is dead!');
+                this.set({ isAlive: false });
+                // trigger global event to let listeners know entity died
+                this.trigger('entity:died', {model: this});
+            }
+
             return this;
         },
 
@@ -107,13 +127,8 @@ define(
 
             // update the health
             attrs.set({ health: newHealth });
-
-            // if health falls below 0, kill entity
-            if(newHealth <= 0){
-                this.set({ isAlive: false });
-                // trigger global event to let listeners know entity died
-                events.trigger('entity:died', {model: this});
-            }
+            // death event is called in the `healthCallback`, which is called
+            // whenever health changes
 
             return this;
         }

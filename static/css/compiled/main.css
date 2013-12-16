@@ -27,14 +27,26 @@
   fill: #ffffff;
   stroke: none; }
 
-.ability-list-wrapper .ability-item-wrapper {
-  border: 1px solid #343434;
-  float: left;
-  width: 24%;
-  background-color: transparent;
-  -moz-transition: background-color 0.1s;
-  -webkit-transition: background-color 0.1s;
-  transition: background-color 0.1s; }
+.ability-list-wrapper {
+  min-height: 150px;
+  position: relative; }
+  .ability-list-wrapper .ability-item-wrapper {
+    border: 1px solid #343434;
+    float: left;
+    width: 24%;
+    background-color: transparent;
+    -moz-transition: background-color 0.1s;
+    -webkit-transition: background-color 0.1s;
+    transition: background-color 0.1s; }
+  .ability-list-wrapper .entity-dead {
+    background: #343434;
+    bottom: 0;
+    left: 0;
+    opacity: 0.7;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999; }
 
 .ability-list-wrapper .ability-item-wrapper.use-invalid {
   background-color: #cdcdcd; }
