@@ -2185,17 +2185,17 @@ define(
                 _.each(self[entityGroup + 'EntityTimers'], function timerEachEntityTimer(val,index){
                     var model = self.model.attributes[entityGroup + 'Entities'].models[index];
 
-                    // if entity is dead, do nothing
                     if(!model.attributes.isAlive){
+                        // if entity is dead, do nothing
                         self[entityGroup + 'EntityTimers'][index] = 0;
-                        return false;
-                    }
-
-                    // increase timer
-                    if( val < model.attributes.timerLimit){
-                        // increase the timer by the timer step - e.g., if FPS is
-                        // 60, each update tick is 1/60
-                        self[entityGroup + 'EntityTimers'][index] += self.timerStep;
+                    } else {
+                        // Entity is alive, increase timer
+                        // increase timer
+                        if( val < model.attributes.timerLimit){
+                            // increase the timer by the timer step - e.g., if FPS is
+                            // 60, each update tick is 1/60
+                            self[entityGroup + 'EntityTimers'][index] += self.timerStep;
+                        }
                     }
                 });
             });
@@ -3080,7 +3080,6 @@ define(
             options = options || {};
 
             var target = options.target;
-            var targetIndex = options.targetIndex;
             var entityGroup = options.entityGroup;
 
             // Uses whatever the active ability is on the target
@@ -3095,7 +3094,12 @@ define(
             // If the intended target is not in the ability's usable target 
             // group, cannot use the ability
             var validTarget = this.selectedAbility.get('validTargets');
-            if(validTarget !== entityGroup && validTarget.indexOf(entityGroup) === -1){
+            // 1. check that target is valid (either enemy or player)
+            if( (validTarget !== entityGroup && validTarget.indexOf(entityGroup) === -1) ||
+                // check if target is dead
+                ( !target.get('isAlive') && validTarget.indexOf('dead') === -1 )
+            ){
+                //
                 // Cannot use because the entity group of the intended target 
                 // is not valid
                 logger.log("views/subviews/Battle", 
@@ -3111,13 +3115,14 @@ define(
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
             if(entityTime < this.selectedAbility.get('castTime')){
-               // can NOT use
+               // >>>> CAN NOT use (timer not met)
                // TODO: visual effect
                 logger.log("views/subviews/Battle", 
                     "2. CANNNOT use ability! Time: %O / %O", entityTime, 
                     this.selectedAbility.get('castTime'));
 
             } else {
+               // >>>> CAN use (timer met)
                 logger.log("views/subviews/Battle", 
                     "2. USING ability! Time: %O / %O", entityTime, 
                     this.selectedAbility.get('castTime'));
