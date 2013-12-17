@@ -44,9 +44,15 @@ define(
             
             this.set({
                 enemyEntities: new Entities([
-                    new Entity({}),
-                    new Entity({}),
-                    new Entity({})
+                    new Entity({
+                        sprite: 'tiger' 
+                    }),
+                    new Entity({
+                        sprite: 'darkelf'
+                    }),
+                    new Entity({
+                        sprite: 'tiger' 
+                    })
                 ])
             }, {silent: true});
             return this;

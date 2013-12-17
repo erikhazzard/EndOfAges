@@ -55,7 +55,9 @@ define(
                 //      how to do AoE damage? 
                 logger.log('models/Ability', 
                     '>> DEFTAUL ABILITY USED : %O', options);
-                options.target.takeDamage({
+
+                // return the amount of damage dealt
+                return options.target.takeDamage({
                     type: 'combat',
                     subType: 'crushing',
                     damage: 40

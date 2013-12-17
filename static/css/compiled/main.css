@@ -19,6 +19,11 @@
   fill: none;
   stroke: #ffffff; }
 
+.entity-group-text {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-shadow: 0 0 2px #ffffff; }
+
 .timer-bar-border {
   fill: none;
   stroke: #343434; }

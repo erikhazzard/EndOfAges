@@ -27,6 +27,9 @@ define(
             // effects active on the entity (e.g., buffs or DoTs)
             activeEffects: [],
 
+            // name of the base sprite
+            sprite: 'man1',
+
             // entity can be either alive or dead (can be revived with spell)
             isAlive: true,
 
@@ -116,6 +119,9 @@ define(
             // entity's stats
             damage = options.damage;
 
+            // TODO: process damage
+            damage = damage;
+
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
             var newHealth = curHealth - damage;
@@ -130,7 +136,7 @@ define(
             // death event is called in the `healthCallback`, which is called
             // whenever health changes
 
-            return this;
+            return damage;
         }
 
     });

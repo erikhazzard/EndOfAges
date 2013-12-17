@@ -658,6 +658,8 @@ define(
             // entity props
             var entityHeight = 60;
             var entityWidth = entityHeight;
+            this.entityHeight = entityHeight;
+            this.entityWidth = entityWidth;
 
             // update models
             // --------------------------
@@ -724,12 +726,12 @@ define(
                 });
 
             logger.log('views/subviews/Battle', '4. setting up entities');
+
             // ==========================
             //
             // Draw Player entities
             //
-            // --------------------------
-            // TODO: use sprites
+            // ==========================
             // TODO: text effect that comes up from entity when damaged or healed
 
             // TODO: Clean up code
@@ -755,7 +757,7 @@ define(
                                 transform: function groupsWrapperTransform(d,i){
                                     return "translate(" + [
                                         entityGroupX, 
-                                        20 + (i * (entityHeight + 40))
+                                        40 + (i * (entityHeight + entityHeight ))
                                     ] + ")";
                                 }
                             });
@@ -766,12 +768,26 @@ define(
                 var groups = self[entityGroup + 'EntityGroups'] = groupsWrapper.append('g')
                     .attr({ 'class': 'entity-group ' + entityGroup });
 
+                // --------------------------
                 // PLAYER SPRITE / image
                 // --------------------------
-                // TODO : Use sprites
-                groups.append('rect')
+                // TODO : figure out better way to handle sprites
+                self[entityGroup + 'EntitySprites'] = groups.append('image')
                     .attr({
                         'class': entityGroup + '-entity entity',
+                        'transform': function(d,i){
+                            var transform = '';
+                            if(entityGroup === 'enemy'){
+                                transform = 'translate(' + [
+                                    entityWidth, 0
+                                ] + ') scale(-1 1)';
+                            }
+                            return transform;
+                        },
+                        'xlink:href': function(d, i){
+                            return "/static/img/characters/" + 
+                                d.attributes.sprite + '.gif';
+                        }, 
                         height: entityHeight,
                         width: entityWidth
                     })
@@ -788,8 +804,9 @@ define(
                         return self.entityHoverEnd({index:i, entityGroup: entityGroup});
                     });
 
+                // ----------------------
                 // Health Bars
-                // ======================
+                // ----------------------
                 // Draw bars
                 var healthGroups = groups.append('g')
                     .attr({ 'class': 'battle-entity-health ' + entityGroup });
@@ -800,7 +817,7 @@ define(
                     .attr({
                         'class': 'health-bar-border ' + entityGroup,
                         x: 0,
-                        y: entityHeight + 10,
+                        y: entityHeight + 5,
                         width: entityWidth,
                         height: healthBarHeight
                     });
@@ -810,7 +827,7 @@ define(
                     .attr({
                         'class': 'health-bar ' + entityGroup,
                         x: 0,
-                        y: entityHeight + 10,
+                        y: entityHeight + 5,
                         height: healthBarHeight,
                         width: function healthSetWidth(d, i){
                             var model = self.model.get(
@@ -839,11 +856,15 @@ define(
                         }
                     }); 
 
+                // ----------------------
                 // timer bar group
-                // ======================
+                // ----------------------
                 //  draw a group for each bar (frame + bar)
                 var timerGroup = groups
-                    .append('g').attr({ 'class': 'entity-timer ' + entityGroup });
+                    .append('g').attr({ 
+                        'class': 'entity-timer ' + entityGroup,
+                        'transform': 'translate(0, -10)'
+                    });
 
                 // frame / border (TODO: Use image)
                 timerGroup.append('rect')
@@ -864,6 +885,14 @@ define(
                         width: 0,
                         height: 10
                     }); 
+
+                // ----------------------
+                // Damage Text animation
+                // ----------------------
+                self[entityGroup + 'EntityDamageText'] = groups.append('text')
+                    .attr({ 
+                        'class': 'entity-group-text ' + entityGroup 
+                    });
 
                 return this;
             }
@@ -1232,7 +1261,8 @@ define(
             options = options || {};
 
             var target = options.target;
-            var entityGroup = options.entityGroup;
+            var targetEntityGroup = options.entityGroup;
+            var targetIndex = options.targetIndex;
 
             // Uses whatever the active ability is on the target
             logger.log("views/subviews/Battle", 
@@ -1247,7 +1277,7 @@ define(
             // group, cannot use the ability
             var validTarget = this.selectedAbility.get('validTargets');
             // 1. check that target is valid (either enemy or player)
-            if( (validTarget !== entityGroup && validTarget.indexOf(entityGroup) === -1) ||
+            if( (validTarget !== targetEntityGroup && validTarget.indexOf(targetEntityGroup) === -1) ||
                 // check if target is dead
                 ( !target.get('isAlive') && validTarget.indexOf('dead') === -1 )
             ){
@@ -1295,10 +1325,33 @@ define(
                 // use ability
                 // --------------------------
                 // get effect function and call it
-                this.selectedAbility.get('effect')({
+                var damageDealt = this.selectedAbility.get('effect')({
                     target: target,
                     source: this.selectedEntity
                 });
+
+                // show damage text
+                var $damageText = d3.select(
+                    this[targetEntityGroup + 'EntityDamageText'][0][targetIndex]
+                );
+                $damageText.transition()
+                    .duration(0)
+                    .attr({ 
+                        y: 0, 
+                        opacity: 0.2 })
+                    .text(damageDealt);
+
+                $damageText.transition().delay(10)
+                    .duration(100)
+                    .attr({ 
+                        y: -30,
+                        opacity: 1 
+                    })
+                    .each('end', function(){
+                        $damageText.transition().delay(100)
+                            .duration(100)
+                            .attr({ opacity: 0 });
+                    });
 
                 // Reset back to normal state
                 this.cancelTarget();
@@ -1338,14 +1391,43 @@ define(
 
             // Stop transition, reset timer width to 0
             if(this[group + 'TimerBars']){
+                // stop bars
                 d3.select(this[group + 'TimerBars'][0][index])
                     .transition()
                     .duration(100)
                     .attr({ width: 0 });
+
+                // flip entity
+                d3.select(this[group + 'EntitySprites'][0][index])
+                    .transition()
+                    .attr({
+                        transform: function(){
+                            var transform = '';
+                            transform = 'translate(' + [
+                                0, self.entityHeight ] + 
+                                ') scale(' + [
+                                    1, -1
+                                ] + ')';
+
+                            if(group === 'enemy'){
+                                transform = 'translate(' + [
+                                    self.entityWidth, self.entityHeight ] + 
+                                    ') scale(' + [
+                                        -1, -1
+                                    ] + ')';
+                            }
+                           return transform;
+                        },
+                        opacity: 0.7
+                    });
             }
 
             return this;
         },
+
+        // ------------------------------
+        // TODO: Revive entity
+        // ------------------------------
 
         // ==============================
         //
