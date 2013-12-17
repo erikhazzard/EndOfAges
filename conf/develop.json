@@ -7,6 +7,6 @@
         "db": "mongodb://localhost/endofages"
     },
     "app": {
-        "port": 80
+        "port": 8337
     }
 }
