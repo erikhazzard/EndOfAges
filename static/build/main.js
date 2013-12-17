@@ -1772,10 +1772,11 @@ define(
                 'updateVisible() called. Updating fog of war');
             this.vertices = this.getVertices(this.model.get('nodes'));
 
-            // only use filters if lowRes mode is not true
             var filter = '';
+
+            // only use filters if lowRes mode is not true
             if(CONFIG && !CONFIG.lowRes){
-                filter = 'url(#map-filter)';
+                filter = 'url(#filter-map)';
             }
 
             this.maskPath.selectAll('.visibleNode')
