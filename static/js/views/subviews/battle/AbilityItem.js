@@ -24,6 +24,13 @@ define(
             }, this.model.toJSON());
         },
 
+        // When this element is interaction with, use the corresponding
+        // ability
+        events: {
+            'click': 'useAbility',
+            'touchend': 'useAbility'
+        },
+
         initialize: function battleViewInitialize(options){
             logger.log('views/subviews/battle/AbilityItem', 
                 'initialize() called for: ' + this.model.get('name'));
