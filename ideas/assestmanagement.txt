@@ -1,0 +1,11 @@
+Types of assests:
+    1. Map backgrounds
+    2. Character sprites
+    3. ability effects
+    4. UI images
+
+
+
+
+
+
