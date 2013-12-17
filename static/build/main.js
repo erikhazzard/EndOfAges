@@ -3276,6 +3276,7 @@ define(
         useAbility: function battleUseAbility(options){
             // TODO: think of call structure
             options = options || {};
+            var self = this;
 
             var target = options.target;
             var targetEntityGroup = options.entityGroup;
@@ -3340,6 +3341,20 @@ define(
                     entityGroup: this.selectedEntityGroup
                 });
 
+                // do a little effect on the entity
+                // --------------------------
+                var $entitySel = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
+                    .attr({ x: -20 });
+
+                $entitySel.transition().duration(500)
+                    .ease('elastic')
+                    .attr({
+                        x: 0
+                    });
+                
+                // TODO: do a spell effect
+                // --------------------------
+
                 // --------------------------
                 // use ability
                 // --------------------------
@@ -3349,34 +3364,23 @@ define(
                     source: this.selectedEntity
                 });
 
-
-                // TODO: do a spell effect
                 // --------------------------
-                
-
-                // do a little effect on the entity
+                // Reset back to normal state
                 // --------------------------
-                var $entitySel = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
-                    .attr({ x: -20 });
+                this.cancelTarget();
 
-                $entitySel.transition().duration(1000)
-                    .ease('elastic')
-                    .attr({
-                        x: 0
-                    });
-
-
+                // --------------------------
                 // show damage text
                 // --------------------------
                 var $damageText = d3.select(
-                    this[targetEntityGroup + 'EntityDamageText'][0][targetIndex]
+                    self[targetEntityGroup + 'EntityDamageText'][0][targetIndex]
                 );
 
                 // first, start text at bottom of entity and set text
                 $damageText.classed('damage', true);
                 $damageText
                     .attr({ 
-                        y: this.entityHeight - 10, 
+                        y: self.entityHeight - 10, 
                         opacity: 0.2 
                     })
                     .text('-' + damageDealt);
@@ -3395,8 +3399,6 @@ define(
                             .attr({  opacity: 0 });
                     });
 
-                // Reset back to normal state
-                this.cancelTarget();
             }
 
             return this;
@@ -3432,37 +3434,38 @@ define(
             });
 
             // Stop transition, reset timer width to 0
-            if(this[group + 'TimerBars']){
-                // stop bars
-                d3.select(this[group + 'TimerBars'][0][index])
-                    .transition()
-                    .duration(100)
-                    .attr({ width: 0 });
+            // stop bars
+            d3.select(this[group + 'TimerBars'][0][index])
+                .transition()
+                .duration(100)
+                .attr({ width: 0 });
 
-                // flip entity
-                d3.select(this[group + 'EntitySprites'][0][index])
-                    .transition()
-                    .attr({
-                        transform: function(){
-                            var transform = '';
+            // flip entity
+            d3.select(this[group + 'EntitySprites'][0][index])
+                .transition()
+                .duration(500)
+                .delay(200)
+                .attr({
+                    transform: function(){
+                        console.log("<><><>");
+                        var transform = '';
+                        transform = 'translate(' + [
+                            0, self.entityHeight ] + 
+                            ') scale(' + [
+                                1, -1
+                            ] + ')';
+
+                        if(group === 'enemy'){
                             transform = 'translate(' + [
-                                0, self.entityHeight ] + 
+                                self.entityWidth, self.entityHeight ] + 
                                 ') scale(' + [
-                                    1, -1
+                                    -1, -1
                                 ] + ')';
-
-                            if(group === 'enemy'){
-                                transform = 'translate(' + [
-                                    self.entityWidth, self.entityHeight ] + 
-                                    ') scale(' + [
-                                        -1, -1
-                                    ] + ')';
-                            }
-                           return transform;
-                        },
-                        opacity: 0.7
-                    });
-            }
+                        }
+                        return transform;
+                    },
+                    opacity: 0.7
+                });
 
             return this;
         },
