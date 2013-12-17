@@ -21,8 +21,11 @@
 
 .entity-group-text {
   font-size: 1.5em;
-  font-weight: bold;
-  text-shadow: 0 0 2px #ffffff; }
+  font-weight: bold; }
+
+.entity-group-text.damage {
+  fill: #dd3333;
+  stroke: #990000; }
 
 .timer-bar-border {
   fill: none;

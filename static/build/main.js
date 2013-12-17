@@ -3097,7 +3097,7 @@ define(
                 // TODO: think of call structure
                 this.useAbility({
                     target: target, 
-                    index: i, 
+                    targetIndex: i, 
                     entityGroup: 'player'
                 });
             }
@@ -3331,6 +3331,7 @@ define(
                 this.playerEntityTimers[this.selectedEntityIndex] -= 
                     this.selectedAbility.get('timeCost');
 
+                // --------------------------
                 // reset animation
                 // --------------------------
                 this.startTimerAnimation({
@@ -3339,6 +3340,7 @@ define(
                     entityGroup: this.selectedEntityGroup
                 });
 
+                // --------------------------
                 // use ability
                 // --------------------------
                 // get effect function and call it
@@ -3347,27 +3349,50 @@ define(
                     source: this.selectedEntity
                 });
 
+
+                // TODO: do a spell effect
+                // --------------------------
+                
+
+                // do a little effect on the entity
+                // --------------------------
+                var $entitySel = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
+                    .attr({ x: -20 });
+
+                $entitySel.transition().duration(1000)
+                    .ease('elastic')
+                    .attr({
+                        x: 0
+                    });
+
+
                 // show damage text
+                // --------------------------
                 var $damageText = d3.select(
                     this[targetEntityGroup + 'EntityDamageText'][0][targetIndex]
                 );
-                $damageText.transition()
-                    .duration(0)
-                    .attr({ 
-                        y: 0, 
-                        opacity: 0.2 })
-                    .text(damageDealt);
 
-                $damageText.transition().delay(10)
-                    .duration(100)
+                // first, start text at bottom of entity and set text
+                $damageText.classed('damage', true);
+                $damageText
                     .attr({ 
-                        y: -30,
+                        y: this.entityHeight - 10, 
+                        opacity: 0.2 
+                    })
+                    .text('-' + damageDealt);
+
+                // then, fade in text and float it up
+                $damageText.transition()
+                    .duration(200)
+                    .attr({ 
+                        y: -10,
                         opacity: 1 
                     })
                     .each('end', function(){
-                        $damageText.transition().delay(100)
-                            .duration(100)
-                            .attr({ opacity: 0 });
+                        // when that's done, fade it out
+                        $damageText.transition().delay(300)
+                            .duration(300)
+                            .attr({  opacity: 0 });
                     });
 
                 // Reset back to normal state
