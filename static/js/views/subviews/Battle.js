@@ -939,9 +939,80 @@ define(
             logger.log("views/subviews/Battle", 
                 "selected first living entity: index: " + i);
 
+            // select first living player
             this.selectPlayerEntity({index:firstAliveEntity});
 
+
+            // --------------------------
+            // show damage text whenever entitiy's health changes
+            // --------------------------
+            _.each(['player', 'enemy'], function healthGroup(entityGroup){
+                var models = self.model.get(entityGroup + 'Entities').models;
+                _.each(models, function setupHealthCallback(model, index){
+                    self.listenTo(
+                        model.get('attributes'), 
+                        'change:health', 
+                        // model changes get passed in the model and the
+                        // changed attribute value
+                        function callShowText(model, health){
+                            return self.showTextEffectOnHealthChange.call(
+                                self, {
+                                    model: model,
+                                    health: health,
+                                    index: index,
+                                    entityGroup: entityGroup
+                                }
+                            );
+                        });
+                });
+            });
+            window.z = this;
+
             return this;
+        },
+
+        showTextEffectOnHealthChange: function showTextEffect(options){
+            // This is called whenever any entity's health is changed.
+            // The text will be styled based on the difference
+            options = options || {};
+            logger.log("views/subviews/Battle", 
+                "1. showTextEffectOnHealthChange() : options: %O",
+                options); 
+            var self = this;
+            var model = options.model;
+            var index = options.index;
+            var entityGroup = options.entityGroup;
+            var difference = options.health - model._previousAttributes.health;
+
+            // This is called whenever any entity's health is modified
+            var $damageText = d3.select(
+                self[entityGroup + 'EntityDamageText'][0][index]
+            );
+
+            // first, start text at bottom of entity and set text
+            //  will have either 'positive damage' or 'negative damage' classes
+            $damageText.classed((difference < 0 ? 'negative' : 'positive') + ' damage', true);
+
+            $damageText
+                .attr({ 
+                    y: self.entityHeight - 10, 
+                    opacity: 0.2 
+                })
+                .text((difference < 0 ? '' : '+') + difference);
+
+            // then, fade in text and float it up
+            $damageText.transition()
+                .duration(200)
+                .attr({ 
+                    y: -10,
+                    opacity: 1 
+                })
+                .each('end', function(){
+                    // when that's done, fade it out
+                    $damageText.transition().delay(300)
+                        .duration(300)
+                        .attr({  opacity: 0 });
+                });
         },
 
         // =====================================================================
@@ -1342,7 +1413,8 @@ define(
                 // use ability
                 // --------------------------
                 // get effect function and call it
-                var damageDealt = this.selectedAbility.get('effect')({
+                // TODO: multiple targets 
+                this.selectedAbility.effect({
                     target: target,
                     source: this.selectedEntity
                 });
@@ -1351,37 +1423,6 @@ define(
                 // Reset back to normal state
                 // --------------------------
                 this.cancelTarget();
-
-                // --------------------------
-                // show damage text
-                // --------------------------
-                var $damageText = d3.select(
-                    self[targetEntityGroup + 'EntityDamageText'][0][targetIndex]
-                );
-
-                // first, start text at bottom of entity and set text
-                $damageText.classed('damage', true);
-                $damageText
-                    .attr({ 
-                        y: self.entityHeight - 10, 
-                        opacity: 0.2 
-                    })
-                    .text('-' + damageDealt);
-
-                // then, fade in text and float it up
-                $damageText.transition()
-                    .duration(200)
-                    .attr({ 
-                        y: -10,
-                        opacity: 1 
-                    })
-                    .each('end', function(){
-                        // when that's done, fade it out
-                        $damageText.transition().delay(300)
-                            .duration(300)
-                            .attr({  opacity: 0 });
-                    });
-
             }
 
             return this;

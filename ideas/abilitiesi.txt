@@ -1,0 +1,11 @@
+Each ability has at least one elemental type
+
+Abilities should be able to both heal and do damage
+
+Abilities should scale in power / effects with level
+    -can be 'upgraded' to have more effects
+        -can create composite abilities by chaining multiple ability effects
+
+    -entities store their own copy of an ability, as they can modify them
+
+-As abilities level up, so do their power costs

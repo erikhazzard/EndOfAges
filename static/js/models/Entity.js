@@ -10,13 +10,15 @@ define(
         'events', 'd3', 'util/API_URL',
         'models/EntityAttributes',
         'collections/Abilities',
-        'models/Ability'
+        'models/Ability',
+        'models/data-abilities'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         EntityAttributes,
         Abilities,
-        Ability
+        Ability,
+        ABILITIES
     ){
 
     var Entity = Backbone.Model.extend({
@@ -78,10 +80,8 @@ define(
                 //timerLimit: 60 * (Math.random() * 20 | 0),
                 // TODO: get from server
                 abilities: new Abilities([
-                    new Ability(),
-                    new Ability({ name: 'Spirit of Wolf'}),
-                    new Ability({ name: 'Fireball'}),
-                    new Ability({ name: 'Clarity'})
+                    ABILITIES.magicmissle,
+                    ABILITIES.fireball
                 ])
             });
 
@@ -113,11 +113,9 @@ define(
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeDamage() : options: %O',
                 options);
-            var damage = 0;
-
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
-            damage = options.damage;
+            var damage = options.amount;
 
             // TODO: process damage
             damage = damage;
