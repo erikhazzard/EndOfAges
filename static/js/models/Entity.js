@@ -81,7 +81,8 @@ define(
                 // TODO: get from server
                 abilities: new Abilities([
                     ABILITIES.magicmissle,
-                    ABILITIES.fireball
+                    ABILITIES.fireball,
+                    ABILITIES.minorhealing
                 ])
             });
 
@@ -122,12 +123,15 @@ define(
 
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
+            var maxHealth = attrs.get('maxHealth');
             var newHealth = curHealth - damage;
 
             // TODO: check if there are any buffs that protect from death
 
             // If the health drops below 0, the target is dead
             if(newHealth <= 0){ newHealth = 0; }
+            // limit health
+            if(newHealth > maxHealth){ newHealth = maxHealth; }
 
             // update the health
             attrs.set({ health: newHealth });
@@ -135,6 +139,38 @@ define(
             // whenever health changes
 
             return damage;
+        },
+        
+        // an ability that does healing
+        takeHeal: function(options){
+            // TODO: document, think of structure
+            logger.log('models/Entity', '1. takeHeal() : options: %O',
+                options);
+            // TODO: process damage based on passed in damage and type and this
+            // entity's stats
+            var amount = options.amount;
+
+            // TODO: process healing
+            amount = amount;
+
+            var attrs = this.get('attributes');
+            var curHealth = attrs.get('health');
+            var maxHealth = attrs.get('maxHealth');
+            var newHealth = curHealth + amount;
+
+            // TODO: check if there are any buffs that protect from death
+
+            // If the health drops below 0, the target is dead
+            if(newHealth <= 0){ newHealth = 0; }
+            // limit health
+            if(newHealth > maxHealth){ newHealth = maxHealth; }
+
+            // update the health
+            attrs.set({ health: newHealth });
+            // death event is called in the `healthCallback`, which is called
+            // whenever health changes
+
+            return amount;
         }
 
     });

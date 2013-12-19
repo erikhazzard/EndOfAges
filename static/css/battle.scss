@@ -27,9 +27,13 @@
     font-size: 1.5em;
     font-weight: bold;
 }
-.entity-group-text.damage {
+.entity-group-text.damage.negative {
     fill: #dd3333;
     stroke: #990000;
+}
+.entity-group-text.damage.positive {
+    fill: #33dd33;
+    stroke: #009900;
 }
 
 // --------------------------------------

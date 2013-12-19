@@ -847,7 +847,7 @@ define(
         
             // Damage
             // --------------------------
-            damage: 20,
+            damage: undefined,
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
             damageTarget: 'target',
@@ -894,7 +894,7 @@ define(
             // in targets
             // return the amount of damage dealt
             if(this.get('damage')){
-                options[this.get('healTarget')].takeDamage({
+                options[this.get('damageTarget')].takeDamage({
                     type: this.get('type'),
                     subType: this.get('subType'),
                     amount: this.get('damage')
@@ -902,10 +902,10 @@ define(
             }
 
             if(this.get('heal')){
-                options[this.get('healTarget')].takeDamage({
+                options[this.get('healTarget')].takeHeal({
                     type: this.get('type'),
                     subType: this.get('subType'),
-                    amount: this.get('damage')
+                    amount: this.get('heal')
                 });
             }
         },
@@ -976,26 +976,45 @@ define(
     'models/data-abilities',[ 'events', 'logger', 'models/Ability' ], function(
         events, logger, Ability
     ){
+    // TODO: think of structure.
+    // Maybe instead of damage and heal, `amount` is used, and a separate
+    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
+    // DoT, buff, etc. type spell
+
     // Here be abilities. This would be loaded in a DB and entities would
     // get abilities from server
     var abilities = {
         'fireball': new Ability({
+            name: 'Fireball',
             castTime: 4,
             timeCost: 4,
             powerCost: 8,
-            validTargets: ['enemy'],
+            validTargets: ['enemy', 'player'],
             type: 'magic',
             subType: 'fire',
             damage: 40
         }),
         'magicmissle': new Ability({
+            name: 'Magic Missle',
             castTime: 2,
             timeCost: 2,
             powerCost: 4,
-            validTargets: ['enemy'],
+            validTargets: ['enemy', 'player'],
             type: 'magic',
             subType: 'arcane',
-            damage: 20
+            damage: 20,
+            heal: 10,
+            healTarget: 'source'
+        }),
+        'minorhealing': new Ability({
+            name: 'Minor Healing',
+            castTime: 1,
+            timeCost: 1,
+            powerCost: 1,
+            validTargets: ['enemy', 'player'],
+            type: 'magic',
+            subType: 'light',
+            heal: 10
         })
     };
 
@@ -1086,7 +1105,8 @@ define(
                 // TODO: get from server
                 abilities: new Abilities([
                     ABILITIES.magicmissle,
-                    ABILITIES.fireball
+                    ABILITIES.fireball,
+                    ABILITIES.minorhealing
                 ])
             });
 
@@ -1127,12 +1147,15 @@ define(
 
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
+            var maxHealth = attrs.get('maxHealth');
             var newHealth = curHealth - damage;
 
             // TODO: check if there are any buffs that protect from death
 
             // If the health drops below 0, the target is dead
             if(newHealth <= 0){ newHealth = 0; }
+            // limit health
+            if(newHealth > maxHealth){ newHealth = maxHealth; }
 
             // update the health
             attrs.set({ health: newHealth });
@@ -1140,6 +1163,38 @@ define(
             // whenever health changes
 
             return damage;
+        },
+        
+        // an ability that does healing
+        takeHeal: function(options){
+            // TODO: document, think of structure
+            logger.log('models/Entity', '1. takeHeal() : options: %O',
+                options);
+            // TODO: process damage based on passed in damage and type and this
+            // entity's stats
+            var amount = options.amount;
+
+            // TODO: process healing
+            amount = amount;
+
+            var attrs = this.get('attributes');
+            var curHealth = attrs.get('health');
+            var maxHealth = attrs.get('maxHealth');
+            var newHealth = curHealth + amount;
+
+            // TODO: check if there are any buffs that protect from death
+
+            // If the health drops below 0, the target is dead
+            if(newHealth <= 0){ newHealth = 0; }
+            // limit health
+            if(newHealth > maxHealth){ newHealth = maxHealth; }
+
+            // update the health
+            attrs.set({ health: newHealth });
+            // death event is called in the `healthCallback`, which is called
+            // whenever health changes
+
+            return amount;
         }
 
     });
@@ -2955,10 +3010,21 @@ define(
                             // when health changes, update width of health bar
                             self.listenTo(model.get('attributes'), 
                                 'change:health',
-                                function updateHealth(model, health){
-                                    d3this.transition().attr({
-                                        width: healthScale(health)
-                                    });
+                                function updateHealth(returnedModel, health){
+                                    // called when health updates
+                                    // NOTE: if the entity is dead, don't
+                                    // update the bar
+                                    if(model.get('isAlive')){
+                                        d3this.transition().attr({
+                                            width: healthScale(health)
+                                        });
+                                    } else {
+                                        // entity is dead, make sure health
+                                        // is at 0 and cancel existing transitions
+                                        d3this.transition().duration(0).attr({
+                                            width: healthScale(0)
+                                        });
+                                    }
                             });
 
                             // set current width based on model health
@@ -2999,10 +3065,9 @@ define(
                 // ----------------------
                 // Damage Text animation
                 // ----------------------
-                self[entityGroup + 'EntityDamageText'] = groups.append('text')
-                    .attr({ 
-                        'class': 'entity-group-text ' + entityGroup 
-                    });
+                // There can be multiple text elements at once, anytime health
+                // changes create a floating text element for it
+                self[entityGroup + 'EntityDamageTextGroups'] = groups.append('g');
 
                 return this;
             }
@@ -3096,8 +3161,13 @@ define(
 
             // This is called whenever any entity's health is modified
             var $damageText = d3.select(
-                self[entityGroup + 'EntityDamageText'][0][index]
-            );
+                self[entityGroup + 'EntityDamageTextGroups'][0][index]
+            ).append('text')
+                .attr({
+                    'class': 'entity-group-text ' + entityGroup,
+                    // position it based on positive / negative health change
+                    x: difference < 0 ? -25 : 25
+                });
 
             // first, start text at bottom of entity and set text
             //  will have either 'positive damage' or 'negative damage' classes
@@ -3470,7 +3540,9 @@ define(
                     "2. useAbility(): CANNOT use, invalid target");
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
-                events.trigger('battle:useAbility:invalidTarget');
+                events.trigger('battle:useAbility:invalidTarget', {
+                    ability: this.selectedAbility    
+                });
                 return false; 
             }
 
@@ -3507,6 +3579,7 @@ define(
 
                 // do a little effect on the entity
                 // --------------------------
+                // TODO: do it differently based on spell type (damage, heal)
                 var $entitySel = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
                     .attr({ x: -20 });
 

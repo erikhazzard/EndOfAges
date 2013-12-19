@@ -44,7 +44,7 @@ define(
         
             // Damage
             // --------------------------
-            damage: 20,
+            damage: undefined,
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
             damageTarget: 'target',
@@ -91,7 +91,7 @@ define(
             // in targets
             // return the amount of damage dealt
             if(this.get('damage')){
-                options[this.get('healTarget')].takeDamage({
+                options[this.get('damageTarget')].takeDamage({
                     type: this.get('type'),
                     subType: this.get('subType'),
                     amount: this.get('damage')
@@ -99,10 +99,10 @@ define(
             }
 
             if(this.get('heal')){
-                options[this.get('healTarget')].takeDamage({
+                options[this.get('healTarget')].takeHeal({
                     type: this.get('type'),
                     subType: this.get('subType'),
-                    amount: this.get('damage')
+                    amount: this.get('heal')
                 });
             }
         },

@@ -845,10 +845,21 @@ define(
                             // when health changes, update width of health bar
                             self.listenTo(model.get('attributes'), 
                                 'change:health',
-                                function updateHealth(model, health){
-                                    d3this.transition().attr({
-                                        width: healthScale(health)
-                                    });
+                                function updateHealth(returnedModel, health){
+                                    // called when health updates
+                                    // NOTE: if the entity is dead, don't
+                                    // update the bar
+                                    if(model.get('isAlive')){
+                                        d3this.transition().attr({
+                                            width: healthScale(health)
+                                        });
+                                    } else {
+                                        // entity is dead, make sure health
+                                        // is at 0 and cancel existing transitions
+                                        d3this.transition().duration(0).attr({
+                                            width: healthScale(0)
+                                        });
+                                    }
                             });
 
                             // set current width based on model health
@@ -889,10 +900,9 @@ define(
                 // ----------------------
                 // Damage Text animation
                 // ----------------------
-                self[entityGroup + 'EntityDamageText'] = groups.append('text')
-                    .attr({ 
-                        'class': 'entity-group-text ' + entityGroup 
-                    });
+                // There can be multiple text elements at once, anytime health
+                // changes create a floating text element for it
+                self[entityGroup + 'EntityDamageTextGroups'] = groups.append('g');
 
                 return this;
             }
@@ -986,8 +996,13 @@ define(
 
             // This is called whenever any entity's health is modified
             var $damageText = d3.select(
-                self[entityGroup + 'EntityDamageText'][0][index]
-            );
+                self[entityGroup + 'EntityDamageTextGroups'][0][index]
+            ).append('text')
+                .attr({
+                    'class': 'entity-group-text ' + entityGroup,
+                    // position it based on positive / negative health change
+                    x: difference < 0 ? -25 : 25
+                });
 
             // first, start text at bottom of entity and set text
             //  will have either 'positive damage' or 'negative damage' classes
@@ -1360,7 +1375,9 @@ define(
                     "2. useAbility(): CANNOT use, invalid target");
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
-                events.trigger('battle:useAbility:invalidTarget');
+                events.trigger('battle:useAbility:invalidTarget', {
+                    ability: this.selectedAbility    
+                });
                 return false; 
             }
 
@@ -1397,6 +1414,7 @@ define(
 
                 // do a little effect on the entity
                 // --------------------------
+                // TODO: do it differently based on spell type (damage, heal)
                 var $entitySel = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
                     .attr({ x: -20 });
 
