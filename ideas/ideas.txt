@@ -1,0 +1,4 @@
+12/17
+-----
+Proceduaral story generation. How can the exploration be procedurally generated?
+Possibly including generation of creatures? Places?

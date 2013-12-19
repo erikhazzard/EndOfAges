@@ -1,0 +1,8 @@
+after losing, show a summary page that includes a generated story about the 
+player's game
+
+maybe include comparisons to other adventures?
+
+breakdown of units, what was effective? damage done by unit, DPS?
+
+a generated infographic-like image of how well the player performed

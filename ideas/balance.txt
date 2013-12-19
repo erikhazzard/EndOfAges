@@ -1,0 +1,1 @@
+Balance by looking at damage taken / health left? Closeness to losing? Harder / easier based on that?
