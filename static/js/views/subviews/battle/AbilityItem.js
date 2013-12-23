@@ -15,7 +15,7 @@ define(
 
     var AbilityItem = Backbone.Marionette.ItemView.extend({
         template: '#template-game-battle-ability',
-        'className': 'ability-item-wrapper',
+        'className': 'ability-item-wrapper inactive',
 
         serializeData: function(){
             return _.extend({
@@ -32,6 +32,7 @@ define(
         },
 
         initialize: function battleViewInitialize(options){
+            var self = this;
             logger.log('views/subviews/battle/AbilityItem', 
                 'initialize() called for: ' + this.model.get('name'));
 
@@ -47,6 +48,9 @@ define(
             // handle battle related events
             this.listenTo(events, 'ability:cancel', this.cancelAbility);
 
+            this.listenTo(this.model, 'abilityActive', this.setAbilityActive);
+            this.listenTo(this.model, 'abilityInactive', this.setAbilityInactive);
+
             return this;
         },
 
@@ -57,6 +61,22 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // timer updates
+        // ------------------------------
+        setAbilityActive: function(){
+            this.$el.removeClass('inactive');
+            this.$el.addClass('active');
+        },
+        setAbilityInactive: function(){
+            console.log("!!!!!!!!!!!!!!!!!!!!!!");
+            this.$el.removeClass('active');
+            this.$el.addClass('inactive');
+        },
+
+        // ------------------------------
+        // Use ability
+        // ------------------------------
         useAbility: function(options){
             // Called when either the user clicks on the ability or presses the 
             // hotkey. If the ability can't be used yet, do nothing

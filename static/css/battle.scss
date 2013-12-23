@@ -81,13 +81,18 @@
         top: 0;
         z-index: 999;
     }
-}
 
-.ability-list-wrapper .ability-item-wrapper.use-invalid {
-    background-color: #cdcdcd;
-}
-.ability-list-wrapper .ability-item-wrapper.use {
-    background-color: #44dd44;
+    .ability-item-wrapper.inactive {
+        background: #a0a0a0;
+    }
+
+    .ability-item-wrapper.use-invalid {
+        background-color: #cdcdcd;
+    }
+    .ability-item-wrapper.use {
+        background-color: #44dd44;
+    }
+
 }
 
 // --------------------------------------

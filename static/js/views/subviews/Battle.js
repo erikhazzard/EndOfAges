@@ -128,7 +128,7 @@ define(
 
             // keep track of the currently selected / active ability, used 
             // when in ability mode
-            this.selectedAbility = null;
+            this.selectedAbility = null
 
             // --------------------------
             // Handle user input - shortcut keys
@@ -295,14 +295,16 @@ define(
 
             // 1. Update timers
             _.each(['player', 'enemy'], function timerEachGroup(entityGroup){
+                var models = self.model.attributes[entityGroup + 'Entities'].models;
 
                 // For each model in each group, increase the timer
                 _.each(self[entityGroup + 'EntityTimers'], function timerEachEntityTimer(val,index){
-                    var model = self.model.attributes[entityGroup + 'Entities'].models[index];
+                    var model = models[index];
 
                     if(!model.attributes.isAlive){
                         // if entity is dead, do nothing
                         self[entityGroup + 'EntityTimers'][index] = 0;
+
                     } else {
                         // Entity is alive, increase timer
                         //
@@ -313,6 +315,13 @@ define(
                             self[entityGroup + 'EntityTimers'][index] += self.timerStep;
                         }
 
+                        // check abilities use timers
+                        if(entityGroup === 'player' && model === self.selectedEntity){
+                            // on the selected ability list view, call checkTimer
+                            // which will update the ability list item ui
+                            self.currentAbilityListView.checkTimer(
+                                self[entityGroup + 'EntityTimers'][index]);
+                        }
                     }
                 });
             });
@@ -1249,11 +1258,13 @@ define(
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
             logger.log("views/subviews/Battle", "2. showing ability view");
-            var abilityView = new AbilityListView({
+            var abilityListView = new AbilityListView({
                 collection: model.get('abilities'),
                 entityModel: model
             });
-            this.regionAbility.show(abilityView);
+            // store ref to ability list view so we can show active abilities
+            this.currentAbilityListView = abilityListView;
+            this.regionAbility.show(abilityListView);
 
             // show entity info
             logger.log("views/subviews/Battle", "3. showing entity info");

@@ -1958,7 +1958,7 @@ define(
 
     var AbilityItem = Backbone.Marionette.ItemView.extend({
         template: '#template-game-battle-ability',
-        'className': 'ability-item-wrapper',
+        'className': 'ability-item-wrapper inactive',
 
         serializeData: function(){
             return _.extend({
@@ -1975,6 +1975,7 @@ define(
         },
 
         initialize: function battleViewInitialize(options){
+            var self = this;
             logger.log('views/subviews/battle/AbilityItem', 
                 'initialize() called for: ' + this.model.get('name'));
 
@@ -1990,6 +1991,9 @@ define(
             // handle battle related events
             this.listenTo(events, 'ability:cancel', this.cancelAbility);
 
+            this.listenTo(this.model, 'abilityActive', this.setAbilityActive);
+            this.listenTo(this.model, 'abilityInactive', this.setAbilityInactive);
+
             return this;
         },
 
@@ -2000,6 +2004,22 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // timer updates
+        // ------------------------------
+        setAbilityActive: function(){
+            this.$el.removeClass('inactive');
+            this.$el.addClass('active');
+        },
+        setAbilityInactive: function(){
+            console.log("!!!!!!!!!!!!!!!!!!!!!!");
+            this.$el.removeClass('active');
+            this.$el.addClass('inactive');
+        },
+
+        // ------------------------------
+        // Use ability
+        // ------------------------------
         useAbility: function(options){
             // Called when either the user clicks on the ability or presses the 
             // hotkey. If the ability can't be used yet, do nothing
@@ -2071,6 +2091,7 @@ define(
         },
 
         initialize: function battleViewInitialize(options){
+            var self = this;
             logger.log('views/subviews/battle/AbilityList', 
             'initialize() called');
 
@@ -2079,6 +2100,14 @@ define(
 
             // if an entity died when this view is rendered, update the template
             this.listenTo(this.entityModel, 'entity:died', this.entityDied);
+
+            // keep track of the active (usable) abilities (abilities that are 
+            // usable, the timer has past the castTime)
+            this.activeAbilities = {};
+            _.each(this.collection.models, function(model){
+                self.activeAbilities[model.cid] = false; 
+            });
+
             return this;
         },
 
@@ -2090,7 +2119,43 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // Game events
+        // ------------------------------
+        checkTimer: function checkTimer(time){
+            // called on each loop iteration. Check the abilities 
+            // and triggers a change event if necessary
+            var self = this;
+
+            _.each(this.collection.models, function(ability){
+                // see if ability is usable. if so, trigger a change event
+                // if necessary (which abilityItem view listens for)
+
+                // if the activeAbilities ability has an inverse equality,
+                // change the equality and trigger an event on the ability
+                // model
+                if(time < ability.attributes.castTime){
+                    // CANNOT use
+                    //
+                    if(self.activeAbilities[ability.cid]){ 
+                        console.log("><><><> NOOOOO", time, ability.cid);
+                        self.activeAbilities[ability.cid] = false;
+                        ability.trigger('abilityInactive');
+                    }
+                } else {
+                    // CAN use
+                    if(!self.activeAbilities[ability.cid]){ 
+                        self.activeAbilities[ability.cid] = true;
+                        ability.trigger('abilityActive');
+                    }
+                }
+            });
+
+            return this;
+        },
+
         entityDied: function entityDied(options){
+            // called when an entitiy dies
             logger.log('views/subviews/battle/AbilityList', 
             'entityDied() : bluring abilities');
 
@@ -2293,7 +2358,7 @@ define(
 
             // keep track of the currently selected / active ability, used 
             // when in ability mode
-            this.selectedAbility = null;
+            this.selectedAbility = null
 
             // --------------------------
             // Handle user input - shortcut keys
@@ -2460,14 +2525,16 @@ define(
 
             // 1. Update timers
             _.each(['player', 'enemy'], function timerEachGroup(entityGroup){
+                var models = self.model.attributes[entityGroup + 'Entities'].models;
 
                 // For each model in each group, increase the timer
                 _.each(self[entityGroup + 'EntityTimers'], function timerEachEntityTimer(val,index){
-                    var model = self.model.attributes[entityGroup + 'Entities'].models[index];
+                    var model = models[index];
 
                     if(!model.attributes.isAlive){
                         // if entity is dead, do nothing
                         self[entityGroup + 'EntityTimers'][index] = 0;
+
                     } else {
                         // Entity is alive, increase timer
                         //
@@ -2478,6 +2545,13 @@ define(
                             self[entityGroup + 'EntityTimers'][index] += self.timerStep;
                         }
 
+                        // check abilities use timers
+                        if(entityGroup === 'player' && model === self.selectedEntity){
+                            // on the selected ability list view, call checkTimer
+                            // which will update the ability list item ui
+                            self.currentAbilityListView.checkTimer(
+                                self[entityGroup + 'EntityTimers'][index]);
+                        }
                     }
                 });
             });
@@ -3414,11 +3488,13 @@ define(
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
             logger.log("views/subviews/Battle", "2. showing ability view");
-            var abilityView = new AbilityListView({
+            var abilityListView = new AbilityListView({
                 collection: model.get('abilities'),
                 entityModel: model
             });
-            this.regionAbility.show(abilityView);
+            // store ref to ability list view so we can show active abilities
+            this.currentAbilityListView = abilityListView;
+            this.regionAbility.show(abilityListView);
 
             // show entity info
             logger.log("views/subviews/Battle", "3. showing entity info");
