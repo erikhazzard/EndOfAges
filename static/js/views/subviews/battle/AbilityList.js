@@ -71,7 +71,6 @@ define(
                     // CANNOT use
                     //
                     if(self.activeAbilities[ability.cid]){ 
-                        console.log("><><><> NOOOOO", time, ability.cid);
                         self.activeAbilities[ability.cid] = false;
                         ability.trigger('abilityInactive');
                     }

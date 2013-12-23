@@ -1105,8 +1105,8 @@ define(
                 // TODO: get from server
                 abilities: new Abilities([
                     ABILITIES.magicmissle,
-                    ABILITIES.fireball,
-                    ABILITIES.minorhealing
+                    ABILITIES.minorhealing,
+                    ABILITIES.fireball
                 ])
             });
 
@@ -2012,7 +2012,6 @@ define(
             this.$el.addClass('active');
         },
         setAbilityInactive: function(){
-            console.log("!!!!!!!!!!!!!!!!!!!!!!");
             this.$el.removeClass('active');
             this.$el.addClass('inactive');
         },
@@ -2138,7 +2137,6 @@ define(
                     // CANNOT use
                     //
                     if(self.activeAbilities[ability.cid]){ 
-                        console.log("><><><> NOOOOO", time, ability.cid);
                         self.activeAbilities[ability.cid] = false;
                         ability.trigger('abilityInactive');
                     }

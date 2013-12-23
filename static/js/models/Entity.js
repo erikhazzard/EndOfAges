@@ -81,8 +81,8 @@ define(
                 // TODO: get from server
                 abilities: new Abilities([
                     ABILITIES.magicmissle,
-                    ABILITIES.fireball,
-                    ABILITIES.minorhealing
+                    ABILITIES.minorhealing,
+                    ABILITIES.fireball
                 ])
             });
 

@@ -69,7 +69,6 @@ define(
             this.$el.addClass('active');
         },
         setAbilityInactive: function(){
-            console.log("!!!!!!!!!!!!!!!!!!!!!!");
             this.$el.removeClass('active');
             this.$el.addClass('inactive');
         },
