@@ -277,7 +277,11 @@ define(
                         // TODO: some % chance to randomly select
 
                         // Check if entity is dead or untargettable
-                        if(target.get('isAlive')){
+                        // TODO: target selection for heals
+                        //  should target guy with lowest health
+                        if(target.get('isAlive') && 
+                            target.get('attributes').get('health') < 
+                            target.get('attributes').get('maxHealth')){
                             found = true;
                             break;
                         }
