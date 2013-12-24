@@ -1054,7 +1054,8 @@ define(
             activeEffects: [],
 
             // name of the base sprite
-            sprite: 'man1',
+            // TODO: Should this be here?
+            sprite: 'man1', 
 
             // entity can be either alive or dead (can be revived with spell)
             isAlive: true,
@@ -1078,7 +1079,18 @@ define(
             //Base attributes (copied over when a game starts to allow
             //  for buffs / debuffs)
             //---------------------------
-            baseAttributes: {}
+            baseAttributes: {},
+
+            // AI Related
+            // --------------------------
+            // list of enemies and their aggro. Key is entity ID, value is
+            // aggro value
+            aggroList: {},
+            
+            // ability the entity desires to use. Is handled by the AI
+            // function, may change before using (e.g., if health changes)
+            desiredAbility: null
+           
         },
         
         url: function getURL(){
@@ -1195,6 +1207,25 @@ define(
             // whenever health changes
 
             return amount;
+        },
+
+        // ------------------------------
+        // AI 
+        // TODO: Don't put this here
+        // ------------------------------
+        handleAI: function handleAI(time){
+            // called each tick to control AI
+            // Note: using this.attributes instead of this.get() for performance
+            
+            // Select ability to use if one isn't already selected
+            var ability = this.attributes.desiredAbility;
+
+            if(!ability){
+                ability = this.attributes.abilities.models[
+                    Math.random() * this.attributes.abilities.models.length | 0
+                ];
+            }
+            
         }
 
     });
@@ -2356,7 +2387,16 @@ define(
 
             // keep track of the currently selected / active ability, used 
             // when in ability mode
-            this.selectedAbility = null
+            this.selectedAbility = null;
+
+            // --------------------------
+            // Ability use callback
+            // --------------------------
+            //events.on(this.useAbility({
+                    //target: target,
+                    //targetIndex: i, 
+                    //entityGroup: 'enemy'
+                //});
 
             // --------------------------
             // Handle user input - shortcut keys
@@ -2391,7 +2431,7 @@ define(
             this.isTimerActive = false;
 
             // NOTE: death listeners are setup in onShow
-            //
+            
             return this;
         },
 
@@ -2530,12 +2570,14 @@ define(
                     var model = models[index];
 
                     if(!model.attributes.isAlive){
+                        // DEAD
+                        // --------------
                         // if entity is dead, do nothing
                         self[entityGroup + 'EntityTimers'][index] = 0;
 
                     } else {
-                        // Entity is alive, increase timer
-                        //
+                        // ALIVE
+                        // --------------
                         // increase timer
                         if( val < model.attributes.timerLimit){
                             // increase the timer by the timer step - e.g., if FPS is
@@ -2546,18 +2588,32 @@ define(
                             self[entityGroup + 'EntityTimers'][index] = 0;
                         }
 
-                        // check abilities use timers
-                        if(entityGroup === 'player' && model === self.selectedEntity){
-                            // on the selected ability list view, call checkTimer
-                            // which will update the ability list item ui
-                            self.currentAbilityListView.checkTimer(
-                                self[entityGroup + 'EntityTimers'][index]);
+                        if(entityGroup === 'player'){
+                            // PLAYER 
+                            // ----------
+                            // check abilities use timers for UI
+                            // - Selected Entity - UI
+                            if(model === self.selectedEntity){
+                                // on the selected ability list view, call checkTimer
+                                // which will update the ability list item ui
+                                self.currentAbilityListView.checkTimer(
+                                    self[entityGroup + 'EntityTimers'][index]);
+                            }
+
+                            // If auto attack is enabled, let AI decide behavior
+                        } else {
+                            // ENEMY
+                            // ----------
+                            // AI for enemy
+                            // TODO: don't do the battle AI logic in the model
+                            // Pass in the current time
+                            model.handleAI(self[entityGroup + 'EntityTimers'][index] );
                         }
+
                     }
                 });
             });
 
-            // 2. TODO: AI Logic hooks into this timer
 
             // 3. Update info views
             this.$selectedEntityInfoTimer.html(
@@ -3589,23 +3645,49 @@ define(
             options = options || {};
             var self = this;
 
+            // TARGET
             var target = options.target;
             var targetEntityGroup = options.entityGroup;
             var targetIndex = options.targetIndex;
 
+            // SOURCE 
+            // By default, is the selected entity
+            //
+            // set the source entity index ( the entity using the ability )
+            var sourceEntityIndex = options.sourceEntityIndex;
+            if(sourceEntityIndex === undefined){
+                sourceEntityIndex = this.selectedEntityIndex;
+            }
+            var sourceEntityGroup = options.sourceEntityGroup;
+            if(sourceEntityGroup === undefined){
+                sourceEntityGroup = this.selectedEntityGroup;
+            }
+            var sourceEntity = this.model.get(sourceEntityGroup + 'Entities')
+                .models[sourceEntityIndex];
+
+            var selectedAbility = options.ability;
+            if(selectedAbility === undefined){
+                selectedAbility = this.selectedAbility;
+            }
+
+            // --------------------------
+            // Use the ability
+            // --------------------------
             // Uses whatever the active ability is on the target
             logger.log("views/subviews/Battle", 
                 "1. useAbility(): using ability: %O on %O",
-                this.selectedAbility, 
+                selectedAbility, 
                 target);
 
             // TODO : use selected entity index for enemies
-            var entityTime = this[this.selectedEntityGroup + 'EntityTimers'][this.selectedEntityIndex];
+            var entityTime = this[sourceEntityGroup + 'EntityTimers'][
+                sourceEntityIndex];
 
             // If the intended target is not in the ability's usable target 
             // group, cannot use the ability
-            var validTarget = this.selectedAbility.get('validTargets');
-            // 1. check that target is valid (either enemy or player)
+            var validTarget = selectedAbility.get('validTargets');
+
+            // check that target is valid (either enemy or player)
             if( (validTarget !== targetEntityGroup && validTarget.indexOf(targetEntityGroup) === -1) ||
                 // check if target is dead
                 ( !target.get('isAlive') && validTarget.indexOf('dead') === -1 )
@@ -3618,40 +3700,40 @@ define(
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
                 events.trigger('battle:useAbility:invalidTarget', {
-                    ability: this.selectedAbility    
+                    ability: selectedAbility    
                 });
+
                 return false; 
             }
 
-            // TODO: check if ability can be used
-            // --------------------------
+
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
-            if(entityTime < this.selectedAbility.get('castTime')){
+            if(entityTime < selectedAbility.get('castTime')){
                // >>>> CAN NOT use (timer not met)
-               // TODO: visual effect
+               // TODO: visual spell effect
                 logger.log("views/subviews/Battle", 
                     "2. CANNNOT use ability! Time: %O / %O", entityTime, 
-                    this.selectedAbility.get('castTime'));
+                    selectedAbility.get('castTime'));
 
             } else {
                // >>>> CAN use (timer met)
                 logger.log("views/subviews/Battle", 
                     "2. USING ability! Time: %O / %O", entityTime, 
-                    this.selectedAbility.get('castTime'));
+                    selectedAbility.get('castTime'));
 
                 // update the timer
                 // --------------------------
-                this.playerEntityTimers[this.selectedEntityIndex] -= 
-                    this.selectedAbility.get('timeCost');
+                this[entityGroup + 'EntityTimers'][sourceEntityIndex] -= 
+                    selectedAbility.get('timeCost');
 
                 // --------------------------
                 // reset animation
                 // --------------------------
                 this.startTimerAnimation({
-                    index: this.selectedEntityIndex,
-                    value: entityTime - this.selectedAbility.get('timeCost'),
-                    entityGroup: this.selectedEntityGroup
+                    index: sourceEntityIndex,
+                    value: entityTime - selectedAbility.get('timeCost'),
+                    entityGroup: sourceEntityGroup
                 });
 
                 // do a little effect on the entity
@@ -3676,7 +3758,7 @@ define(
                 // TODO: multiple targets 
                 this.selectedAbility.effect({
                     target: target,
-                    source: this.selectedEntity
+                    source: sourceEntity
                 });
 
                 // --------------------------

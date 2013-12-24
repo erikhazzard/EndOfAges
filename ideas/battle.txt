@@ -1,0 +1,37 @@
+How to choose abilities?
+
+
+# Selecting Ability
+Entity has a "target ability" it wants to use. Is chosen after using an ability 
+or when the battle starts. 
+    -At (random) pick an ability, based on health and aggro list and potentially
+    the health of enemies in the shit list, but this may be too difficult:
+        if an enemy attacks someone lower on the list because their health
+        is low.  Will need to take into account aggro / threat
+
+-When health change, call the ability selection logic again
+-Chance to randomly select ability after selecting the best one
+
+
+-% Chance to want to flee
+
+# Aggro
+
+# Battle Value
+
+
+----
+# Combat Logic
+Where should it live? 
+
+1. Model
+    -On a per model basis. Benefit : can have custom behavior PER entity
+
+2. Separate Combat controller 
+    -More general, separates out logic from model. How to have a custom 
+    battle function though?
+    -Ideally, the combat AI part would be a sort of sub method of the combat
+    controller / view. 
+
+Need to decrease timer when an ability is used
+    -Could use a global event or a view (or combat controller) specific event

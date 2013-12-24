@@ -30,7 +30,8 @@ define(
             activeEffects: [],
 
             // name of the base sprite
-            sprite: 'man1',
+            // TODO: Should this be here?
+            sprite: 'man1', 
 
             // entity can be either alive or dead (can be revived with spell)
             isAlive: true,
@@ -54,7 +55,18 @@ define(
             //Base attributes (copied over when a game starts to allow
             //  for buffs / debuffs)
             //---------------------------
-            baseAttributes: {}
+            baseAttributes: {},
+
+            // AI Related
+            // --------------------------
+            // list of enemies and their aggro. Key is entity ID, value is
+            // aggro value
+            aggroList: {},
+            
+            // ability the entity desires to use. Is handled by the AI
+            // function, may change before using (e.g., if health changes)
+            desiredAbility: null
+           
         },
         
         url: function getURL(){
@@ -171,6 +183,25 @@ define(
             // whenever health changes
 
             return amount;
+        },
+
+        // ------------------------------
+        // AI 
+        // TODO: Don't put this here
+        // ------------------------------
+        handleAI: function handleAI(time){
+            // called each tick to control AI
+            // Note: using this.attributes instead of this.get() for performance
+            
+            // Select ability to use if one isn't already selected
+            var ability = this.attributes.desiredAbility;
+
+            if(!ability){
+                ability = this.attributes.abilities.models[
+                    Math.random() * this.attributes.abilities.models.length | 0
+                ];
+            }
+            
         }
 
     });
