@@ -2542,6 +2542,9 @@ define(
                             // 60, each update tick is 1/60
                             self[entityGroup + 'EntityTimers'][index] += self.timerStep;
                         }
+                        if ( val < 0){
+                            self[entityGroup + 'EntityTimers'][index] = 0;
+                        }
 
                         // check abilities use timers
                         if(entityGroup === 'player' && model === self.selectedEntity){
