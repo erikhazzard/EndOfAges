@@ -65,7 +65,10 @@ define(
             
             // ability the entity desires to use. Is handled by the AI
             // function, may change before using (e.g., if health changes)
-            desiredAbility: null
+            desiredAbility: null,
+
+            // desired target is the intended target to use the ability on
+            desiredTarget: null
            
         },
         
@@ -189,19 +192,124 @@ define(
         // AI 
         // TODO: Don't put this here
         // ------------------------------
-        handleAI: function handleAI(time){
+        getAbilityAI: function getAbilityAI(){
+            // selects an ability based on health, enemy health, etc
+            var models = this.attributes.abilities.models;
+            var ability = models[ (Math.random() * models.length)|0 ];
+
+            // if entity health is dropped below, use a healing spell
+            if(this.get('attributes').get('health') < 20){
+                ability = models[1];
+            }
+
+            this.set({'desiredAbility': ability});
+            return ability;
+        }, 
+
+        handleAI: function handleAI(time, battle){
+            // TODO: yuck don't put this here. How to handle battle context?
+            //
+            //
             // called each tick to control AI
             // Note: using this.attributes instead of this.get() for performance
             
             // Select ability to use if one isn't already selected
             var ability = this.attributes.desiredAbility;
+            var models = null;
+            var i = 0;
+            var target = null;
+            var targetIndex, targetGroup;
 
             if(!ability){
-                ability = this.attributes.abilities.models[
-                    Math.random() * this.attributes.abilities.models.length | 0
-                ];
+                // No ability already chosen? Select one at random
+                // TODO: don't do it randomly
+                ability = this.getAbilityAI();
             }
-            
+
+            // Use the ability
+            if(time >= ability.attributes.castTime){
+                // ----------------------
+                // 1. make sure ability is still the right one
+                // ----------------------
+                this.getAbilityAI();
+                ability = this.attributes.desiredAbility;
+
+                // make sure the ability can be cast
+                if(time < ability.attributes.castTime){
+                    return false;
+                }
+
+                // ----------------------
+                // 2. set desired target
+                // ----------------------
+
+                // TODO: target based on ability
+                // (don't target enemy for healing spells)
+               
+                if(ability.attributes.damage){
+                    // 1: Target enemy
+                    // TODO: get target based on aggro
+                    models = battle.get('playerEntities').models;
+                    while(true){
+                        // TODO: go down aggro list instead of randomly selecting
+                        target = models[Math.random() * models.length | 0]; 
+                        // TODO: some % chance to randomly select
+
+                        // Check if entity is dead or untargettable
+                        if(target.get('isAlive')){
+                            found = true;
+                            break;
+                        }
+
+                        // make sure to avoid endless loop
+                        i++;
+                        if(i > 10){ break; }
+                    }
+                    targetIndex = battle.get('playerEntities').indexOf(target), 
+                    targetGroup = 'player';
+
+                } else if (ability.attributes.heal){
+                    // Target self group
+                    models = battle.get('enemyEntities').models;
+                    while(true){
+                        // TODO: go down aggro list instead of randomly selecting
+                        target = models[Math.random() * models.length | 0]; 
+                        // TODO: some % chance to randomly select
+
+                        // Check if entity is dead or untargettable
+                        if(target.get('isAlive')){
+                            found = true;
+                            break;
+                        }
+
+                        // make sure to avoid endless loop
+                        i++;
+                        if(i > 10){ break; }
+                    }
+                    targetIndex = battle.get('enemyEntities').indexOf(target), 
+                    targetGroup = 'enemy';
+
+                }
+
+                // ----------------------
+                // 2. trigger event to use ability
+                // ----------------------
+                // TODO: make sure this isn't used over and over
+                events.trigger('useAbility', {
+                    target: target,
+                    targetIndex: targetIndex,
+                    entityGroup: targetGroup,
+
+                    sourceEntityIndex: battle.get('enemyEntities').indexOf(this),
+                    sourceEntityGroup: 'enemy',
+                    ability: ability
+                });
+
+                // clear out desirect ability
+                this.set('desiredAbility', null);
+            }
+
+            return this;
         }
 
     });

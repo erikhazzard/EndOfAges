@@ -133,11 +133,8 @@ define(
             // --------------------------
             // Ability use callback
             // --------------------------
-            //events.on(this.useAbility({
-                    //target: target,
-                    //targetIndex: i, 
-                    //entityGroup: 'enemy'
-                //});
+            // TODO: Better way to handle this? Have in own controller
+            this.listenTo(events, 'useAbility', this.useAbility);
 
             // --------------------------
             // Handle user input - shortcut keys
@@ -182,10 +179,27 @@ define(
             return this;
         },
 
-        entityGroupDied: function entityGroupDied(options){
+        // ------------------------------
+        // Death related
+        // ------------------------------
+        enemyGroupDied: function enemyGroupDied(options){
             // When the entire enemy group has died, you win
+
+            // stop timer
+            this.isTimerActive = false;
+
             console.log(">>>>>>>>>>>>>>>> entity group died ", options);
             alert("so win.");
+            return this;
+        },
+        playerGroupDied: function playerGroupDied(options){
+            // When the entire enemy group has died, you win
+
+            // stop timer
+            this.isTimerActive = false;
+
+            console.log(">>>>>>>>>>>>>>>> entity group died ", options);
+            alert("so lose.");
             return this;
         },
 
@@ -209,7 +223,7 @@ define(
                 self.listenTo(
                     collection,
                     'entityGroup:defeated', 
-                    self.entityGroupDied);
+                    self[group + 'GroupDied']);
             });
         },
 
@@ -348,7 +362,16 @@ define(
                             // AI for enemy
                             // TODO: don't do the battle AI logic in the model
                             // Pass in the current time
-                            model.handleAI(self[entityGroup + 'EntityTimers'][index] );
+                            // TODO: don't use math random for this, handle
+                            // timer delays another way
+                            if(Math.random() < 0.2){
+                                model.handleAI(
+                                    // time
+                                    self[entityGroup + 'EntityTimers'][index],
+                                    // battle model
+                                    self.model
+                                );
+                            }
                         }
 
                     }
@@ -1406,6 +1429,8 @@ define(
             var sourceEntity = this.model.get(sourceEntityGroup + 'Entities')
                 .models[sourceEntityIndex];
 
+            // ABILITY
+            // get selected ability from passed in ability
             var selectedAbility = options.ability;
             if(selectedAbility === undefined){
                 selectedAbility = this.selectedAbility;
@@ -1419,6 +1444,13 @@ define(
                 "1. useAbility(): using ability: %O on %O",
                 selectedAbility, 
                 target);
+
+            // check that selected ability is an ability
+            if(!selectedAbility){
+                logger.log("views/subviews/Battle", 
+                    "x. useAbility(): CANNOT use, invalid ability");
+                return false;
+            }
 
             // TODO : use selected entity index for enemies
             var entityTime = this[sourceEntityGroup + 'EntityTimers'][
@@ -1437,7 +1469,7 @@ define(
                 // Cannot use because the entity group of the intended target 
                 // is not valid
                 logger.log("views/subviews/Battle", 
-                    "2. useAbility(): CANNOT use, invalid target");
+                    "x. useAbility(): CANNOT use, invalid target");
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
                 events.trigger('battle:useAbility:invalidTarget', {
@@ -1451,11 +1483,14 @@ define(
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
             if(entityTime < selectedAbility.get('castTime')){
-               // >>>> CAN NOT use (timer not met)
-               // TODO: visual spell effect
+                // >>>> CAN NOT use (timer not met)
+                // TODO: visual spell effect
+                // TODO: multiple targets 
                 logger.log("views/subviews/Battle", 
                     "2. CANNNOT use ability! Time: %O / %O", entityTime, 
                     selectedAbility.get('castTime'));
+
+                return false;
 
             } else {
                // >>>> CAN use (timer met)
@@ -1465,7 +1500,7 @@ define(
 
                 // update the timer
                 // --------------------------
-                this[entityGroup + 'EntityTimers'][sourceEntityIndex] -= 
+                this[sourceEntityGroup + 'EntityTimers'][sourceEntityIndex] -= 
                     selectedAbility.get('timeCost');
 
                 // --------------------------
@@ -1497,7 +1532,7 @@ define(
                 // --------------------------
                 // get effect function and call it
                 // TODO: multiple targets 
-                this.selectedAbility.effect({
+                selectedAbility.effect({
                     target: target,
                     source: sourceEntity
                 });
