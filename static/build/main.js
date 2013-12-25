@@ -998,12 +998,12 @@ define(
             name: 'Magic Missle',
             castTime: 2,
             timeCost: 2,
-            powerCost: 4,
+            powerCost: 6,
             validTargets: ['enemy', 'player'],
             type: 'magic',
             subType: 'arcane',
-            damage: 20,
-            heal: 10,
+            damage: 15,
+            heal: 5,
             healTarget: 'source'
         }),
         'minorhealing': new Ability({
