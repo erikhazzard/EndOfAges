@@ -1008,13 +1008,34 @@ define(
         }),
         'minorhealing': new Ability({
             name: 'Minor Healing',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 3,
+            timeCost: 3,
+            powerCost: 3,
+            validTargets: ['enemy', 'player'],
+            type: 'magic',
+            subType: 'light',
+            heal: 15
+        }),
+
+        'flamelick': new Ability({
+            name: 'Flamelick',
+            castTime: 3,
+            timeCost: 3,
+            powerCost: 4,
+            validTargets: ['enemy', 'player'],
+            type: 'magic',
+            subType: 'fire',
+            damage: 10
+        }),
+        'trivialhealing': new Ability({
+            name: 'Trivial Healing',
+            castTime: 3,
+            timeCost: 3,
             powerCost: 1,
             validTargets: ['enemy', 'player'],
             type: 'magic',
             subType: 'light',
-            heal: 10
+            heal: 5
         })
     };
 
@@ -1101,7 +1122,7 @@ define(
             return url;
         },
 
-        initialize: function gameInitialize(){
+        initialize: function gameInitialize(options){
             logger.log('models/Entity', 'initialize() called');
 
             // TODO: get attributes from server
@@ -1114,16 +1135,19 @@ define(
 
 
             // Setup entity abilities
-            this.set({
-                // TODO: DEV: remove random maxTimer
-                //timerLimit: 60 * (Math.random() * 20 | 0),
+            if(!options.abilities){
                 // TODO: get from server
-                abilities: new Abilities([
-                    ABILITIES.magicmissle,
-                    ABILITIES.minorhealing,
-                    ABILITIES.fireball
-                ])
-            });
+                this.set({
+                    // TODO: DEV: remove random maxTimer
+                    //timerLimit: 60 * (Math.random() * 20 | 0),
+                    // TODO: get from server
+                    abilities: new Abilities([
+                        ABILITIES.magicmissle,
+                        ABILITIES.minorhealing,
+                        ABILITIES.fireball
+                    ])
+                });
+            }
 
             // Listen when health drops to 0 or below, trigger entity
             // death event
@@ -1658,11 +1682,15 @@ define(
     'models/Battle',[ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
-        'models/Entity'
+        'models/Entity',
+        'collections/Abilities',
+        'models/data-abilities'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
-        Entities, Entity
+        Entities, Entity,
+        Abilities,
+        ABILITIES
     ){
 
     var Battle = Backbone.Model.extend({
@@ -1693,13 +1721,25 @@ define(
             this.set({
                 enemyEntities: new Entities([
                     new Entity({
-                        sprite: 'tiger' 
+                        sprite: 'tiger',
+                        abilities: new Abilities([
+                            ABILITIES.flamelick,
+                            ABILITIES.trivialhealing
+                        ])
                     }),
                     new Entity({
-                        sprite: 'darkelf'
+                        sprite: 'darkelf',
+                        abilities: new Abilities([
+                            ABILITIES.flamelick,
+                            ABILITIES.trivialhealing
+                        ])
                     }),
                     new Entity({
-                        sprite: 'tiger' 
+                        sprite: 'tiger',
+                        abilities: new Abilities([
+                            ABILITIES.flamelick,
+                            ABILITIES.trivialhealing
+                        ])
                     })
                 ])
             }, {silent: true});
@@ -3789,9 +3829,15 @@ define(
             // By default, is the selected entity
             //
             // set the source entity index ( the entity using the ability )
+            //
+            // NOTE: if no source was passed in, assume the source is from the
+            // player
+            var playerUsedAbility = false;
+
             var sourceEntityIndex = options.sourceEntityIndex;
             if(sourceEntityIndex === undefined){
                 sourceEntityIndex = this.selectedEntityIndex;
+                playerUsedAbility = true;
             }
             var sourceEntityGroup = options.sourceEntityGroup;
             if(sourceEntityGroup === undefined){
@@ -3911,7 +3957,9 @@ define(
                 // --------------------------
                 // Reset back to normal state
                 // --------------------------
-                this.cancelTarget();
+                if(playerUsedAbility){
+                    this.cancelTarget();
+                }
             }
 
             return this;
@@ -3936,6 +3984,9 @@ define(
             // Get index
             var index;
             var group = '';
+
+            // cancel target
+            this.cancelTarget();
 
             // get the index and entity group so we can do some animation
             _.each(['player', 'enemy'], function deathGroup(entityGroup){

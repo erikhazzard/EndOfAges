@@ -42,13 +42,34 @@ define(
         }),
         'minorhealing': new Ability({
             name: 'Minor Healing',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 3,
+            timeCost: 3,
+            powerCost: 3,
+            validTargets: ['enemy', 'player'],
+            type: 'magic',
+            subType: 'light',
+            heal: 15
+        }),
+
+        'flamelick': new Ability({
+            name: 'Flamelick',
+            castTime: 3,
+            timeCost: 3,
+            powerCost: 4,
+            validTargets: ['enemy', 'player'],
+            type: 'magic',
+            subType: 'fire',
+            damage: 10
+        }),
+        'trivialhealing': new Ability({
+            name: 'Trivial Healing',
+            castTime: 3,
+            timeCost: 3,
             powerCost: 1,
             validTargets: ['enemy', 'player'],
             type: 'magic',
             subType: 'light',
-            heal: 10
+            heal: 5
         })
     };
 

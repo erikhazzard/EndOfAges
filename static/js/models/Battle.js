@@ -10,11 +10,15 @@ define(
     [ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
-        'models/Entity'
+        'models/Entity',
+        'collections/Abilities',
+        'models/data-abilities'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
-        Entities, Entity
+        Entities, Entity,
+        Abilities,
+        ABILITIES
     ){
 
     var Battle = Backbone.Model.extend({
@@ -45,13 +49,25 @@ define(
             this.set({
                 enemyEntities: new Entities([
                     new Entity({
-                        sprite: 'tiger' 
+                        sprite: 'tiger',
+                        abilities: new Abilities([
+                            ABILITIES.flamelick,
+                            ABILITIES.trivialhealing
+                        ])
                     }),
                     new Entity({
-                        sprite: 'darkelf'
+                        sprite: 'darkelf',
+                        abilities: new Abilities([
+                            ABILITIES.flamelick,
+                            ABILITIES.trivialhealing
+                        ])
                     }),
                     new Entity({
-                        sprite: 'tiger' 
+                        sprite: 'tiger',
+                        abilities: new Abilities([
+                            ABILITIES.flamelick,
+                            ABILITIES.trivialhealing
+                        ])
                     })
                 ])
             }, {silent: true});

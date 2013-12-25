@@ -1418,9 +1418,15 @@ define(
             // By default, is the selected entity
             //
             // set the source entity index ( the entity using the ability )
+            //
+            // NOTE: if no source was passed in, assume the source is from the
+            // player
+            var playerUsedAbility = false;
+
             var sourceEntityIndex = options.sourceEntityIndex;
             if(sourceEntityIndex === undefined){
                 sourceEntityIndex = this.selectedEntityIndex;
+                playerUsedAbility = true;
             }
             var sourceEntityGroup = options.sourceEntityGroup;
             if(sourceEntityGroup === undefined){
@@ -1540,7 +1546,9 @@ define(
                 // --------------------------
                 // Reset back to normal state
                 // --------------------------
-                this.cancelTarget();
+                if(playerUsedAbility){
+                    this.cancelTarget();
+                }
             }
 
             return this;
@@ -1565,6 +1573,9 @@ define(
             // Get index
             var index;
             var group = '';
+
+            // cancel target
+            this.cancelTarget();
 
             // get the index and entity group so we can do some animation
             _.each(['player', 'enemy'], function deathGroup(entityGroup){

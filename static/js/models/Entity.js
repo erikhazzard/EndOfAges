@@ -77,7 +77,7 @@ define(
             return url;
         },
 
-        initialize: function gameInitialize(){
+        initialize: function gameInitialize(options){
             logger.log('models/Entity', 'initialize() called');
 
             // TODO: get attributes from server
@@ -90,16 +90,19 @@ define(
 
 
             // Setup entity abilities
-            this.set({
-                // TODO: DEV: remove random maxTimer
-                //timerLimit: 60 * (Math.random() * 20 | 0),
+            if(!options.abilities){
                 // TODO: get from server
-                abilities: new Abilities([
-                    ABILITIES.magicmissle,
-                    ABILITIES.minorhealing,
-                    ABILITIES.fireball
-                ])
-            });
+                this.set({
+                    // TODO: DEV: remove random maxTimer
+                    //timerLimit: 60 * (Math.random() * 20 | 0),
+                    // TODO: get from server
+                    abilities: new Abilities([
+                        ABILITIES.magicmissle,
+                        ABILITIES.minorhealing,
+                        ABILITIES.fireball
+                    ])
+                });
+            }
 
             // Listen when health drops to 0 or below, trigger entity
             // death event
