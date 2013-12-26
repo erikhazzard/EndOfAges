@@ -59,6 +59,8 @@ define(
 
             // AI Related
             // --------------------------
+            aiDelay: 0,
+
             // list of enemies and their aggro. Key is entity ID, value is
             // aggro value
             aggroList: {},
@@ -88,6 +90,9 @@ define(
                 baseAttributes: new EntityAttributes()
             }, {silent: true});
 
+
+            // TODO: get AIdelay from server
+            this.set({ aiDelay: Math.random() * 2.5 });
 
             // Setup entity abilities
             if(!options.abilities){
@@ -134,15 +139,15 @@ define(
                 options);
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
-            var damage = options.amount;
+            var damage = options.amount * -1;
 
             // TODO: process damage
-            damage = damage;
 
+            // update attributes
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
             var maxHealth = attrs.get('maxHealth');
-            var newHealth = curHealth - damage;
+            var newHealth = curHealth + damage;
 
             // TODO: check if there are any buffs that protect from death
 
@@ -191,10 +196,12 @@ define(
             return amount;
         },
 
-        // ------------------------------
+        // ==============================
+        //
         // AI 
+        //
         // TODO: Don't put this here
-        // ------------------------------
+        // ==============================
         getAbilityAI: function getAbilityAI(){
             // selects an ability based on health, enemy health, etc
             var models = this.attributes.abilities.models;
@@ -210,7 +217,8 @@ define(
         }, 
 
         handleAI: function handleAI(time, battle){
-            // TODO: yuck don't put this here. How to handle battle context?
+            // TODO: don't put this here. How to handle battle context?
+            // TODO: this is ugly, rework this, updates battle AI, use aggrolist
             //
             //
             // called each tick to control AI
@@ -222,6 +230,7 @@ define(
             var i = 0;
             var target = null;
             var targetIndex, targetGroup;
+            var targets, model, len;
 
             if(!ability){
                 // No ability already chosen? Select one at random
@@ -230,10 +239,17 @@ define(
             }
 
             // Use the ability
-            if(time >= ability.attributes.castTime){
+            if(time >= ability.attributes.castTime && 
+                // TODO: handle AI delay differently?
+                // aiDelay is how long to delay using an ability
+                time >= (ability.attributes.castTime + this.attributes.aiDelay)
+            ){
                 // ----------------------
                 // 1. make sure ability is still the right one
                 // ----------------------
+                // get the ability to use (it might change between selecting
+                // the ability the first time and when the entity can cast it)
+                // TODO: this might get screwy with the aiDelay...
                 this.getAbilityAI();
                 ability = this.attributes.desiredAbility;
 
@@ -272,27 +288,37 @@ define(
                     targetGroup = 'player';
 
                 } else if (ability.attributes.heal){
-                    // Target self group
+                    // TODO: Target self group
                     models = battle.get('enemyEntities').models;
-                    while(true){
-                        // TODO: go down aggro list instead of randomly selecting
-                        target = models[Math.random() * models.length | 0]; 
-                        // TODO: some % chance to randomly select
+                    // TODO: instead of agro list, use a healing list
+                    //  entities that have the lowest health should be healed
+                    //  first
+                    targets = [];
+
+                    for(i=0,len=models.length;i<len;i++){
+                        model = models[i];
 
                         // Check if entity is dead or untargettable
-                        // TODO: target selection for heals
-                        //  should target guy with lowest health
-                        if(target.get('isAlive') && 
-                            target.get('attributes').get('health') < 
-                            target.get('attributes').get('maxHealth')){
-                            found = true;
-                            break;
+                        if(model.get('isAlive') && 
+                            model.get('attributes').get('health') < 
+                            model.get('attributes').get('maxHealth')){
+                            targets.push({
+                                health: model.get('attributes').get('health'),
+                                index: i
+                            });
                         }
-
-                        // make sure to avoid endless loop
-                        i++;
-                        if(i > 10){ break; }
                     }
+                    // sort by lowest health
+                    targets = _.sortBy(targets, 'health');
+
+                    // if there are no targets to heal, then return false so
+                    // a new ability can be selected
+                    if(targets.length === 0){ return false; }
+
+                    // set the target as the first entity in the heal list
+                    target = models[targets[0].index];
+
+                    // set the target index and group
                     targetIndex = battle.get('enemyEntities').indexOf(target), 
                     targetGroup = 'enemy';
 

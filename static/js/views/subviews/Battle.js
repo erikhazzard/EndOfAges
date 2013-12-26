@@ -145,6 +145,15 @@ define(
             this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
             this.listenTo(events, 'keyPress:j', this.handleKeyUpdateSelection);
 
+            // do something on left / right key ?
+            // TODO: this?
+            this.listenTo(events, 'keyPress:left', function(options){
+                options.e.preventDefault();
+            });
+            this.listenTo(events, 'keyPress:right', function(options){
+                options.e.preventDefault();
+            });
+
             _.each([1,2,3,4,6], function eachKey(key){
                 self.listenTo(events, 'keyPress:' + key, self.handleKeyUpdateSelection);
                 self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyUpdateSelection);
@@ -362,16 +371,12 @@ define(
                             // AI for enemy
                             // TODO: don't do the battle AI logic in the model
                             // Pass in the current time
-                            // TODO: don't use math random for this, handle
-                            // timer delays another way
-                            if(Math.random() < 0.2){
-                                model.handleAI(
-                                    // time
-                                    self[entityGroup + 'EntityTimers'][index],
-                                    // battle model
-                                    self.model
-                                );
-                            }
+                            model.handleAI(
+                                // time
+                                self[entityGroup + 'EntityTimers'][index],
+                                // battle model
+                                self.model
+                            );
                         }
 
                     }
@@ -605,6 +610,9 @@ define(
             // This function selects an entity based on a keypress. 
             // j / k and up / down select next or previous entity the
             // player controls, as does the 1 - 4 keys
+            //
+            // To select an enemy : use keys 1 - n
+            // To select a player entity : use keys shift + 1 - n
 
             // disable page scrolling with up / down arrow key
             options.e.preventDefault();
@@ -618,20 +626,22 @@ define(
             // reverse up down - down key should go down the entity list
             if(key === 'up' || key === 'k'){ targetIndex -= 1; }
             else if (key === 'down' || key === 'j'){ targetIndex += 1; }
-
-            // if the user is trying to select an enemy 
-            // (note: must be in ability mode)
-            else if(key.match(/^shift\+[0-9]/)){ 
-                if(this.model.get('state') === 'ability'){
-                    targetIndex = +(key.replace('shift+', '')) - 1;
-                    entityGroup = 'enemy';
-                } else { return false; }
+            else if(key.match(/^shift\+[0-9]+/)){ 
+                // If the keys are number keys, select the specific entity 
+                // for the player
+                targetIndex = +(key.replace('shift+', '')) - 1;
             }
-
-            // If the keys are number keys, select the specific entity for the
-            // player
-            else if(key.match(/1|2|3|4/)){
-                targetIndex = +key - 1;
+            else if(key.match(/[0-9]+/)){
+                // if the user is trying to select an enemy 
+                // (note: must be in ability mode)
+                if(this.model.get('state') === 'ability'){
+                    targetIndex = +key - 1;
+                    entityGroup = 'enemy';
+                } else { 
+                    // when the user is not in ability mode, do nothing when
+                    // 1 - n key is pressed
+                    return false;
+                }
             } 
 
             logger.log('views/subviews/Battle', 
@@ -820,7 +830,30 @@ define(
                                         40 + (i * (entityHeight + entityHeight ))
                                     ] + ")";
                                 }
+                            })
+                            .on('click', function entityClicked(d,i){ 
+                                return self.selectEntity({index: i, entityGroup: entityGroup});
+                            })
+                            .on('touchend', function entityTouchEnd(d,i){ 
+                                return self.selectEntity({index: i, entityGroup: entityGroup});
+                            })
+                            .on('mouseenter',function entityMouseEnter(d,i){ 
+                                return self.entityHoverStart({index: i, entityGroup: entityGroup});
+                            })
+                            .on('mouseleave',function entityMouseLeave(d,i){ 
+                                return self.entityHoverEnd({index:i, entityGroup: entityGroup});
                             });
+
+                // Append an invisible rect for interaction
+                //  this is a large rect behind the sprites that allows the user
+                //  to click / tap it
+                groupsWrapper.append('rect')
+                    .attr({
+                        opacity: 0,
+                        x: -entityWidth, y: -15,
+                        width: entityWidth + 150,
+                        height: entityHeight + 25
+                    });
         
                 // setup the individual player groups. This group is transformed
                 // left / right when a player selects an entity. All other entity
@@ -851,18 +884,6 @@ define(
                         height: entityHeight,
                         width: entityWidth
                     })
-                    .on('click', function entityClicked(d,i){ 
-                        return self.selectEntity({index: i, entityGroup: entityGroup});
-                    })
-                    .on('touchend', function entityTouchEnd(d,i){ 
-                        return self.selectEntity({index: i, entityGroup: entityGroup});
-                    })
-                    .on('mouseenter',function entityMouseEnter(d,i){ 
-                        return self.entityHoverStart({index: i, entityGroup: entityGroup});
-                    })
-                    .on('mouseleave',function entityMouseLeave(d,i){ 
-                        return self.entityHoverEnd({index:i, entityGroup: entityGroup});
-                    });
 
                 // ----------------------
                 // Health Bars
@@ -1406,6 +1427,7 @@ define(
         // ==============================
         useAbility: function battleUseAbility(options){
             // TODO: think of call structure
+            // TODO: Move forward entity when ability is used
             options = options || {};
             var self = this;
 
@@ -1517,31 +1539,51 @@ define(
                     value: entityTime - selectedAbility.get('timeCost'),
                     entityGroup: sourceEntityGroup
                 });
-
-                // do a little effect on the entity
-                // --------------------------
-                // TODO: do it differently based on spell type (damage, heal)
-                var $entitySel = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
-                    .attr({ x: -20 });
-
-                $entitySel.transition().duration(500)
-                    .ease('elastic')
-                    .attr({
-                        x: 0
-                    });
                 
-                // TODO: do a spell effect
-                // --------------------------
-
                 // --------------------------
                 // use ability
                 // --------------------------
                 // get effect function and call it
                 // TODO: multiple targets 
-                selectedAbility.effect({
+                var healthChange = selectedAbility.effect({
                     target: target,
                     source: sourceEntity
                 });
+
+                // TODO: do a spell effect
+                // --------------------------
+
+                // Do an effect on entity
+                // --------------------------
+
+                // only move the entity if it's not selected by the player
+                if(this.selectedEntity !== sourceEntity){
+                    // Move the SOURCE entity to the left / right, indiciating
+                    // the entity used an ability
+                    d3.select(this[sourceEntityGroup + 'EntityGroups'][0][sourceEntityIndex])
+                        .transition()
+                        .attr({ transform: 'translate(' + [
+                                (sourceEntityGroup === 'enemy' ? -100 : 100), 
+                                0] + ')' })
+                            .transition()
+                                .attr({ transform: 'translate(0 0)' });
+
+                }
+
+                // Do a movement event on the TARGET entity
+                d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
+                    .attr({
+                        // wiggle the entity left / right or up / down depending
+                        // if the ability has negative or positive damage
+                        x: healthChange < 0 ? -30 : 0,
+                        y: healthChange > 0 ? -20 : 0
+                    })
+                        .transition()
+                        .duration(500)
+                        .ease('elastic')
+                        .attr({
+                            x: 0, y: 0
+                        });
 
                 // --------------------------
                 // Reset back to normal state

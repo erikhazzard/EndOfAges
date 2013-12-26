@@ -86,25 +86,29 @@ define(
                 '>> DEFAULT ABILITY USED : this: %O, options: %O', 
                 this,
                 options);
+            var amount = 0;
 
-            // TODO: To damange multiple targets, just call it on the passed
+            // TODO: To damage or heal multiple targets, just call it on the passed
             // in targets
-            // return the amount of damage dealt
+            // NOTE: Handle heal effect first
+            if(this.get('heal')){
+                amount = options[this.get('healTarget')].takeHeal({
+                    type: this.get('type'),
+                    subType: this.get('subType'),
+                    amount: this.get('heal')
+                });
+            }
+
+            // Then, handle damage effect
             if(this.get('damage')){
-                options[this.get('damageTarget')].takeDamage({
+                amount = options[this.get('damageTarget')].takeDamage({
                     type: this.get('type'),
                     subType: this.get('subType'),
                     amount: this.get('damage')
                 });
             }
 
-            if(this.get('heal')){
-                options[this.get('healTarget')].takeHeal({
-                    type: this.get('type'),
-                    subType: this.get('subType'),
-                    amount: this.get('heal')
-                });
-            }
+            return amount;
         },
         
         url: function getURL(){
