@@ -1640,9 +1640,11 @@ define(
             // flip entity
             d3.select(this[group + 'EntitySprites'][0][index])
                 .transition()
-                // NOTE: TODO: need to have a delay of however long the 
-                // wiggle animation takes
-                .delay(300)
+                // NOTE: TODO: should have a small delay. NOTE: If another
+                // transition happens after this, this may get cancelled out
+                // (e.g., if in useAbility() a transitions occurs it would
+                // cancel this one)
+                .delay(100)
                 .duration(500)
                 .attr({
                     transform: function(){
