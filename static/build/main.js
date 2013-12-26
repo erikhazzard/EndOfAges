@@ -3255,7 +3255,7 @@ define(
 
                 // if enemy entities, place near edge of map
                 // TODO: get map width
-                var entityGroupX = (entityGroup === 'player' ? 20 : 400);
+                var entityGroupX = (entityGroup === 'player' ? 40 : 500);
 
                 // Setup the wrapper group. This is not ever directly manipulated
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
@@ -3324,7 +3324,7 @@ define(
                         }, 
                         height: entityHeight,
                         width: entityWidth
-                    })
+                    });
 
                 // ----------------------
                 // Health Bars
@@ -3991,14 +3991,21 @@ define(
                     source: sourceEntity
                 });
 
-                // TODO: do a spell effect
+                // --------------------------
+                // Reset back to normal state
+                // --------------------------
+                if(playerUsedAbility){
+                    this.cancelTarget();
+                }
+
+                // TODO: do a spell effect (always do it, even if entity is
+                // dead)
                 // --------------------------
 
-                // Do an effect on entity
+                // Do an effect on entity (only if they're alive
                 // --------------------------
-
                 // only move the entity if it's not selected by the player
-                if(this.selectedEntity !== sourceEntity){
+                if(this.selectedEntity !== sourceEntity && sourceEntity.get('isAlive')){
                     // Move the SOURCE entity to the left / right, indiciating
                     // the entity used an ability
                     d3.select(this[sourceEntityGroup + 'EntityGroups'][0][sourceEntityIndex])
@@ -4012,25 +4019,20 @@ define(
                 }
 
                 // Do a movement event on the TARGET entity
-                d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
-                    .attr({
-                        // wiggle the entity left / right or up / down depending
-                        // if the ability has negative or positive damage
-                        x: healthChange < 0 ? -30 : 0,
-                        y: healthChange > 0 ? -20 : 0
-                    })
-                        .transition()
-                        .duration(500)
-                        .ease('elastic')
+                if(target.get('isAlive')){
+                    d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
                         .attr({
-                            x: 0, y: 0
-                        });
-
-                // --------------------------
-                // Reset back to normal state
-                // --------------------------
-                if(playerUsedAbility){
-                    this.cancelTarget();
+                            // wiggle the entity left / right or up / down depending
+                            // if the ability has negative or positive damage
+                            x: healthChange < 0 ? -25: 0,
+                            y: healthChange > 0 ? -20 : 0
+                        })
+                            .transition()
+                            .duration(520)
+                            .ease('elastic')
+                            .attr({
+                                x: 0, y: 0
+                            });
                 }
             }
 
@@ -4079,11 +4081,12 @@ define(
             // flip entity
             d3.select(this[group + 'EntitySprites'][0][index])
                 .transition()
+                // NOTE: TODO: need to have a delay of however long the 
+                // wiggle animation takes
+                .delay(300)
                 .duration(500)
-                .delay(200)
                 .attr({
                     transform: function(){
-                        console.log("<><><>");
                         var transform = '';
                         transform = 'translate(' + [
                             0, self.entityHeight ] + 
