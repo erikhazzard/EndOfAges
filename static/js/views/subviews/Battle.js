@@ -385,7 +385,7 @@ define(
 
 
             // 3. Update info views
-            this.$selectedEntityInfoTimer.html(
+            this.entityInfoView.updateTimer(
                 this.playerEntityTimers[this.selectedEntityIndex]
             );
 
@@ -1340,11 +1340,8 @@ define(
 
             // show entity info
             logger.log("views/subviews/Battle", "3. showing entity info");
-            var entityInfoView = new SelectedEntityInfoView({ model: model });
-            this.regionSelectedEntity.show(entityInfoView);
-            
-            // update info view el for timer updates
-            this.$selectedEntityInfoTimer = $('.timer', entityInfoView.$el);
+            this.entityInfoView = new SelectedEntityInfoView({ model: model });
+            this.regionSelectedEntity.show(this.entityInfoView);
 
             // move entity group forward
             logger.log("views/subviews/Battle", "4. moving entity");

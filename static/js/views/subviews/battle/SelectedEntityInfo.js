@@ -19,8 +19,33 @@ define(
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'initialize called');
 
-            this.listenTo(this.model.get('attributes'), 'change', this.render);
-            this.listenTo(this.model.get('baseAttributes'), 'change', this.render);
+            this.listenTo(this.model.get('attributes'), 'change', this.rerender);
+            this.listenTo(this.model.get('baseAttributes'), 'change', this.rerender);
+            return this;
+        },
+        onBeforeClose: function(){
+            logger.log('views/subviews/battle/SelectedEntityInfo', 
+                '[x] closing');
+        },
+
+        onShow: function infoOnShow(){
+            logger.log('views/subviews/battle/SelectedEntityInfo', 
+                'onShow() called');
+
+            this.$timerNode = $('.timer', this.$el)[0];
+            return this;
+        },
+
+        rerender: function infoRerender(){
+            this.render();
+            this.onShow();
+            return this;
+        },
+
+        updateTimer: function infoUpdateTimer(time){
+            // called by the battle controller, the current game time is
+            // passed in
+            this.$timerNode.innerHTML = time;
             return this;
         }
     });

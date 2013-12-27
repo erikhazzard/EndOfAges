@@ -134,7 +134,7 @@ define("d3", (function (global) {
 //    To change logger options:
 //            LOGGER.options.logLevel = 'all' // ( or true ) - Shows ALL messages
 //            LOGGER.options.logLevel = ['error', 'debug'] // only shows the types 
-//                                                                                                             passed in
+//              passed in
 //
 //            LOGGER.options.storeHistory = true | false
 //    To access history:
@@ -150,6 +150,9 @@ define('logger',['d3'], function(d3) {
         d3.scale.category20(),
         d3.scale.category10()
     ];
+
+    // remember lastGroup
+    var LAST_GROUP = null;
 
     // values of found colors, to check for same colors
     var foundColors = ['#dd4444'];
@@ -236,8 +239,16 @@ define('logger',['d3'], function(d3) {
             var len = args.length;
             var newArgs = Array.prototype.slice.call(args);
 
+            // close group if the groups aren't the same
+            if(type !== LAST_GROUP){
+                console.groupEnd();
+                // start a group
+                console.group(type);
+                LAST_GROUP = type;
+            }
+
+
             // NOTE: this will only add color to %c specified strings
-            ////if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
 
             // Add color to everything
             if(newArgs[1] && typeof newArgs[1] === 'string'){
@@ -313,10 +324,16 @@ define('logger',['d3'], function(d3) {
         }
         if (!window.console) {
             window.console = {
-                log: function() {
+                log: function consoleLog() {
                     return {};
                 }
             };
+        }
+        if (!window.console.group) {
+            window.console.group = function consoleGroup() {};
+        }
+        if (!window.console.error) {
+            window.console.error = function consoleError() {};
         }
         window.onerror = function(msg, url, line) {
             LOGGER.error(msg, url, line);
@@ -2400,8 +2417,33 @@ define(
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'initialize called');
 
-            this.listenTo(this.model.get('attributes'), 'change', this.render);
-            this.listenTo(this.model.get('baseAttributes'), 'change', this.render);
+            this.listenTo(this.model.get('attributes'), 'change', this.rerender);
+            this.listenTo(this.model.get('baseAttributes'), 'change', this.rerender);
+            return this;
+        },
+        onBeforeClose: function(){
+            logger.log('views/subviews/battle/SelectedEntityInfo', 
+                '[x] closing');
+        },
+
+        onShow: function infoOnShow(){
+            logger.log('views/subviews/battle/SelectedEntityInfo', 
+                'onShow() called');
+
+            this.$timerNode = $('.timer', this.$el)[0];
+            return this;
+        },
+
+        rerender: function infoRerender(){
+            this.render();
+            this.onShow();
+            return this;
+        },
+
+        updateTimer: function infoUpdateTimer(time){
+            // called by the battle controller, the current game time is
+            // passed in
+            this.$timerNode.innerHTML = time;
             return this;
         }
     });
@@ -2826,7 +2868,7 @@ define(
 
 
             // 3. Update info views
-            this.$selectedEntityInfoTimer.html(
+            this.entityInfoView.updateTimer(
                 this.playerEntityTimers[this.selectedEntityIndex]
             );
 
@@ -3781,11 +3823,8 @@ define(
 
             // show entity info
             logger.log("views/subviews/Battle", "3. showing entity info");
-            var entityInfoView = new SelectedEntityInfoView({ model: model });
-            this.regionSelectedEntity.show(entityInfoView);
-            
-            // update info view el for timer updates
-            this.$selectedEntityInfoTimer = $('.timer', entityInfoView.$el);
+            this.entityInfoView = new SelectedEntityInfoView({ model: model });
+            this.regionSelectedEntity.show(this.entityInfoView);
 
             // move entity group forward
             logger.log("views/subviews/Battle", "4. moving entity");
@@ -4574,7 +4613,8 @@ require([
     //// log errors:
     logger.options.logLevel = [ 
         'error',
-        'Controller'
+        'Controller',
+        'views/subviews/battle/SelectedEntityInfo'
     ];
 
     //// log EVERYTHING:

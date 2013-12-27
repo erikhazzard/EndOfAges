@@ -12,7 +12,7 @@
 //    To change logger options:
 //            LOGGER.options.logLevel = 'all' // ( or true ) - Shows ALL messages
 //            LOGGER.options.logLevel = ['error', 'debug'] // only shows the types 
-//                                                                                                             passed in
+//              passed in
 //
 //            LOGGER.options.storeHistory = true | false
 //    To access history:
@@ -28,6 +28,9 @@ define(['d3'], function(d3) {
         d3.scale.category20(),
         d3.scale.category10()
     ];
+
+    // remember lastGroup
+    var LAST_GROUP = null;
 
     // values of found colors, to check for same colors
     var foundColors = ['#dd4444'];
@@ -114,8 +117,16 @@ define(['d3'], function(d3) {
             var len = args.length;
             var newArgs = Array.prototype.slice.call(args);
 
+            // close group if the groups aren't the same
+            if(type !== LAST_GROUP){
+                console.groupEnd();
+                // start a group
+                console.group(type);
+                LAST_GROUP = type;
+            }
+
+
             // NOTE: this will only add color to %c specified strings
-            ////if(newArgs[1] && newArgs[1].indexOf('%c') !== -1){
 
             // Add color to everything
             if(newArgs[1] && typeof newArgs[1] === 'string'){
@@ -191,10 +202,16 @@ define(['d3'], function(d3) {
         }
         if (!window.console) {
             window.console = {
-                log: function() {
+                log: function consoleLog() {
                     return {};
                 }
             };
+        }
+        if (!window.console.group) {
+            window.console.group = function consoleGroup() {};
+        }
+        if (!window.console.error) {
+            window.console.error = function consoleError() {};
         }
         window.onerror = function(msg, url, line) {
             LOGGER.error(msg, url, line);
