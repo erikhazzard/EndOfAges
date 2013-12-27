@@ -572,11 +572,9 @@ define(
 
             // Toggle ability on / off
             // --------------------------
-            // if the same ability was used, 'toggle' it by setting canBeUsed
-            // to false
+            // if same ability was used, do nothing
             if(this.selectedAbility === options.ability){
-                canBeUsed = false;
-                ability = null;
+                return false;
             }
 
             // Remove existing target
