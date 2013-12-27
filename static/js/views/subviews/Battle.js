@@ -727,6 +727,7 @@ define(
             // Setup svg
             var svg = d3.select('#battle');
             var wrapper = svg.append('g');
+            this.$wrapper = wrapper;
 
             // entity props
             var entityHeight = 60;

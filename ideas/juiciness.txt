@@ -1,0 +1,9 @@
+Battle Juiciness
+-----------------------------------------
+
+-Damage Effects
+    Should have a different effect based on the target / source
+        -damage to YOUR entities should be distinguishable from damage to enemy
+        -Flash screen red based on intensity of damage if you're damaged?
+        
+        -when you get damaged, screen should shake
