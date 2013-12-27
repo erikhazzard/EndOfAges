@@ -114,8 +114,7 @@ require([
     //// log errors:
     logger.options.logLevel = [ 
         'error',
-        'Controller',
-        'views/subviews/battle/SelectedEntityInfo'
+        'Controller'
     ];
 
     //// log EVERYTHING:

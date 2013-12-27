@@ -383,7 +383,6 @@ define(
                 });
             });
 
-
             // 3. Update info views
             this.entityInfoView.updateTimer(
                 this.playerEntityTimers[this.selectedEntityIndex]
@@ -392,6 +391,12 @@ define(
             return this;
         },
 
+
+        // ------------------------------
+        //
+        // PAUSE 
+        //
+        // ------------------------------
         togglePause: function pause(options){
             // This pauses all timers and animations, effectively pausing
             // the battle. When the battle is paused, abilities cannot be
@@ -425,7 +430,7 @@ define(
                 '1. togglePause(): PAUSING');
 
             // Show pause message
-            d3.select('#battle .pause-blocker').classed('active', true);
+            this.$pauseBlocker.classed('active', true);
 
             // cancel target and pause
             this.cancelTarget();
@@ -452,7 +457,7 @@ define(
                 '1. togglePause(): UNPAUSING');
 
             // remove blocker
-            d3.select('#battle .pause-blocker').classed('active', false);
+            this.$pauseBlocker.classed('active', false);
 
             // set state
             this.model.set({
@@ -772,10 +777,22 @@ define(
                 .attr({ 'class': 'background' });
 
             // add pause block
-            wrapper.append('rect')
+            this.$pauseBlocker = wrapper.append('rect')
                 .attr({ 'class': 'pause-blocker', x: 0, y: 0, width: '100%', height: '100%' })
                 .style({ fill: 'none' });
 
+            // damage / heal effect flash
+            this.$healthEffectBlocker = wrapper.append('rect')
+                .attr({ 'class': 'health-blocker', x: 0, y: 0, 
+                    width: '100%', height: '100%' })
+                .style({ fill: 'none', opacity: 0 });
+
+            this.$deathEffectBlocker = wrapper.append('rect')
+                .attr({ 'class': 'health-blocker', x: 0, y: 0, 
+                    width: '100%', height: '100%' })
+                .style({ fill: 'none', opacity: 0 });
+
+            // setup groups for entities
             var entityGroups = {
                 player: wrapper.append('g')
                     .attr({ 'class': 'playerEntities' }),
@@ -1046,7 +1063,7 @@ define(
                         // model changes get passed in the model and the
                         // changed attribute value
                         function callShowText(model, health){
-                            return self.showTextEffectOnHealthChange.call(
+                            return self.showEffectOnHealthChange.call(
                                 self, {
                                     model: model,
                                     health: health,
@@ -1062,19 +1079,41 @@ define(
             return this;
         },
 
-        showTextEffectOnHealthChange: function showTextEffect(options){
+        showEffectOnHealthChange: function showTextEffect(options){
             // This is called whenever any entity's health is changed.
+            // Text will appear, along with the screen flashing
+            //
             // The text will be styled based on the difference
+            //
+            // options:
+            //      model: {Object} the `attributes` model of the entity model
             options = options || {};
             logger.log("views/subviews/Battle", 
-                "1. showTextEffectOnHealthChange() : options: %O",
+                "1. showEffectOnHealthChange() : options: %O",
                 options); 
+
             var self = this;
             var model = options.model;
             var index = options.index;
             var entityGroup = options.entityGroup;
             var difference = options.health - model._previousAttributes.health;
 
+            var intensity = (Math.abs(difference) / model.attributes.health) * 0.2;
+
+            // Show flash
+            // --------------------------
+            if(entityGroup === 'player' && difference < 0){
+                // flash a damage effect
+                this.$healthEffectBlocker.transition()
+                    .ease('elastic')
+                    .style({ fill: '#dd0000', opacity: intensity })
+                    .transition()
+                    .ease('elastic')
+                        .style({ fill: '', opacity: 0 });
+            }
+
+            // Show text
+            // --------------------------
             // This is called whenever any entity's health is modified
             var $damageText = d3.select(
                 self[entityGroup + 'EntityDamageTextGroups'][0][index]
@@ -1602,6 +1641,8 @@ define(
         // ==============================
         entityDied: function battleEntityDied(options){
             // Called when an entity dies
+            // TODO : pass in index and whatnot
+            //
             // options: {Object} consisting of 
             //  model: {Object} entity object
             var self = this;
@@ -1627,6 +1668,17 @@ define(
                 }
             });
 
+            // Flash screen
+            // --------------------------
+            this.$deathEffectBlocker.transition()
+                .ease('elastic')
+                .style({ fill: '#dd0000', opacity: 1 })
+                .transition()
+                .ease('linear')
+                    .style({ fill: '', opacity: 0 });
+
+            // update timer / sprites
+            // --------------------------
             // Stop transition, reset timer width to 0
             // stop bars
             d3.select(this[group + 'TimerBars'][0][index])
