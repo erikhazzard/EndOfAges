@@ -2733,7 +2733,7 @@ define(
                 // For each model, listen for an individual death
                 var collection = self.model.get(group + 'Entities');
                 
-                _.each(collection.models, function(model){
+                _.each(collection.models, function deathListener(model){
                     self.listenTo( model, 'entity:died', self.entityDied);
                 });
 
@@ -3244,6 +3244,10 @@ define(
         handleMouseWheel: function(e){
             // When the mousewheel is scrolled, determine if it's up or down,
             // then select the player's entity above or below the current one
+            // stop scrolling on the page
+            if(e){
+                e.preventDefault();
+            }
 
             var direction = 'up';
             if(e.originalEvent.wheelDelta < 0){
@@ -3636,10 +3640,11 @@ define(
                         'change:health', 
                         // model changes get passed in the model and the
                         // changed attribute value
-                        function callShowText(model, health){
+                        function callShowText(attrModel, health){
                             return self.showEffectOnHealthChange.call(
                                 self, {
-                                    model: model,
+                                    entityModel: model,
+                                    model: attrModel,
                                     health: health,
                                     index: index,
                                     entityGroup: entityGroup
@@ -3667,23 +3672,53 @@ define(
                 options); 
 
             var self = this;
-            var model = options.model;
+            var model = options.model; // attribute model (health / stats / etc)
+            var entityModel = options.entityModel;
             var index = options.index;
             var entityGroup = options.entityGroup;
             var difference = options.health - model._previousAttributes.health;
 
-            var intensity = (Math.abs(difference) / model.attributes.health) * 0.2;
-
             // Show flash
             // --------------------------
+            // Show a red flash whenever the player takes damage
             if(entityGroup === 'player' && difference < 0){
-                // flash a damage effect
                 this.$healthEffectBlocker.transition()
                     .ease('elastic')
-                    .style({ fill: '#dd0000', opacity: intensity })
+                    .style({ fill: '#dd0000', 
+                        opacity: d3.scale.linear()
+                            .domain([ 0, -model.attributes.maxHealth ])
+                            .range([ 0.2, 0.9 ])
+                            (difference)
+                    })
                     .transition()
                     .ease('elastic')
                         .style({ fill: '', opacity: 0 });
+            }
+
+            // Wiggle 
+            // --------------------------
+            // Do a wiggle event on the entity
+            var intensityDamageScale = d3.scale.linear()
+                .domain([ 0, -model.attributes.maxHealth ])
+                .range([ -20, -70 ]);
+            var intensityHealScale = d3.scale.linear()
+                .domain([ 0, model.attributes.maxHealth ])
+                .range([ -10, -40 ]);
+
+            if(entityModel.get('isAlive')){
+                d3.select(this[entityGroup + 'EntitySprites'][0][index])
+                    .attr({
+                        // wiggle the entity left / right or up / down depending
+                        // if the ability has negative or positive damage
+                        x: difference < 0 ? intensityDamageScale(difference) : 0,
+                        y: difference > 0 ? intensityHealScale(difference) : 0
+                    })
+                        .transition()
+                        .duration(520)
+                        .ease('elastic')
+                        .attr({
+                            x: 0, y: 0
+                        });
             }
 
             // Show text
@@ -4156,7 +4191,7 @@ define(
                 // --------------------------
                 // get effect function and call it
                 // TODO: multiple targets 
-                var healthChange = selectedAbility.effect({
+                selectedAbility.effect({
                     target: target,
                     source: sourceEntity
                 });
@@ -4186,23 +4221,6 @@ define(
                             .transition()
                                 .attr({ transform: 'translate(0 0)' });
 
-                }
-
-                // Do a movement event on the TARGET entity
-                if(target.get('isAlive')){
-                    d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetIndex])
-                        .attr({
-                            // wiggle the entity left / right or up / down depending
-                            // if the ability has negative or positive damage
-                            x: healthChange < 0 ? -25: 0,
-                            y: healthChange > 0 ? -20 : 0
-                        })
-                            .transition()
-                            .duration(520)
-                            .ease('elastic')
-                            .attr({
-                                x: 0, y: 0
-                            });
                 }
             }
 
@@ -4245,12 +4263,17 @@ define(
 
             // Flash screen
             // --------------------------
-            this.$deathEffectBlocker.transition()
-                .ease('elastic')
-                .style({ fill: '#dd0000', opacity: 1 })
-                .transition()
-                .ease('linear')
-                    .style({ fill: '', opacity: 0 });
+            if(group === 'player'){
+                // Only flash for player entity deaths
+                this.$deathEffectBlocker.transition()
+                    .ease('elastic')
+                    .style({ fill: '#dd0000', opacity: 1 })
+                    .transition()
+                    .ease('linear')
+                        .style({ fill: '', opacity: 0 });
+            } else {
+                // TODO: play a sound or show some effect when enemy dies
+            }
 
             // update timer / sprites
             // --------------------------
