@@ -69,9 +69,10 @@ requirejs.config({
 //Setup tests
 //========================================
 require(['events',
+        'util/d3plugins', // always load d3 plugins, extends d3 object
         'logger',
         'require', 'lib/chai', 'lib/mocha', 'sinon'], 
-        function(events, logger, require, chai, sinon){
+        function(events, d3plugins, logger, require, chai, sinon){
 
     assert = chai.assert;
     should = chai.should();

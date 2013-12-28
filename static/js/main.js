@@ -69,6 +69,7 @@ require([
     //libs
     'jquery',
     'backbone', 'marionette', 'bootstrap',
+    'util/d3plugins', // always load d3 plugins, extends d3 object
 
     //utils
     'logger', 
@@ -85,6 +86,7 @@ require([
     function main(
         $, 
         Backbone, marionette, bootstrap,
+        d3plugins,
 
         logger, 
         browserInfo,
