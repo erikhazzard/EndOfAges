@@ -4,13 +4,25 @@
 #region-map {
   z-index: 100; }
 
-.entity {
-  fill: #336699;
-  stroke: #ffffff; }
+.entity-group-wrapper {
+  cursor: pointer; }
 
-.enemy-entity {
-  fill: #dd4444;
-  stroke: #ffffff; }
+.target-indicator {
+  opacity: 0;
+  fill: #343434;
+  fill-opacity: 0.5;
+  stroke: #ffffff;
+  stroke-opacity: 0.5;
+  stroke-width: 2px; }
+
+.state-ability.selected-ability-damage .target-indicator {
+  fill: #dd2222; }
+
+.state-ability.selected-ability-heal .target-indicator {
+  fill: #22dd22; }
+
+.entity-hover .target-indicator {
+  opacity: 1; }
 
 .battle-entity-health .health-bar {
   fill: #dd2222; }

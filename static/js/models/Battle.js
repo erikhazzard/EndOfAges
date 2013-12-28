@@ -29,6 +29,11 @@ define(
             state: 'normal',
             previousState: 'normal',
 
+            // ability the player currently has selected
+            // TODO: not sure this is the best way to handle this, how to
+            // allow auto attacks? does this affect it?
+            playerSelectedAbility: null,
+
             // NOTE: player entities are passed in
             playerEntities: [],
             enemyEntities: []

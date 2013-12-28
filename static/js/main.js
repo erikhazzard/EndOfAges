@@ -115,6 +115,7 @@ require([
     logger.options.logLevel = [ 
         'error',
         'Controller'
+        //,'views/subviews/Battle'
     ];
 
     //// log EVERYTHING:

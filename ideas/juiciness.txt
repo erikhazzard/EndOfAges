@@ -7,3 +7,5 @@ Battle Juiciness
         -Flash screen red based on intensity of damage if you're damaged?
         
         -when you get damaged, screen should shake
+
+    -flash idea: gradient on left / right?

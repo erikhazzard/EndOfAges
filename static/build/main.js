@@ -1748,6 +1748,11 @@ define(
             state: 'normal',
             previousState: 'normal',
 
+            // ability the player currently has selected
+            // TODO: not sure this is the best way to handle this, how to
+            // allow auto attacks? does this affect it?
+            playerSelectedAbility: null,
+
             // NOTE: player entities are passed in
             playerEntities: [],
             enemyEntities: []
@@ -2620,19 +2625,15 @@ define(
             //      user must select a target for the ability
             this.selectedTarget = undefined;
 
-            // keep track of the currently selected / active ability, used 
-            // when in ability mode
-            this.selectedAbility = null;
-
             // --------------------------
             // Ability use callback
             // --------------------------
             // TODO: Better way to handle this? Have in own controller
             this.listenTo(events, 'useAbility', this.useAbility);
 
-            // --------------------------
+            // ==========================
             // Handle user input - shortcut keys
-            // --------------------------
+            // ==========================
             // Pressing up or down will cycle through the entities
             this.listenTo(events, 'keyPress:up', this.handleKeyUpdateSelection);
             this.listenTo(events, 'keyPress:k', this.handleKeyUpdateSelection);
@@ -2665,6 +2666,17 @@ define(
         
             // handle state changes
             this.listenTo(this.model, 'change:state', this.stateChange);
+            this.listenTo(this.model, 'change:selectedAbility', this.selectedAbilityChange);
+
+            // ==========================
+            // Scroll input
+            // ==========================
+            // use this in favor of function.prototype.bind for larger browser
+            // support
+            this.handleMouseWheelProxy = function(e){
+                self.handleMouseWheel(e);
+            };
+            $(window).on('mousewheel', this.handleMouseWheelProxy);
 
             // Timer / Game loop 
             // --------------------------
@@ -2678,6 +2690,10 @@ define(
 
         onBeforeClose: function close(){
             logger.log('views/subviews/Battle', 'onBeforeClose() called');
+
+            // remove mouse wheel listener
+            $(window).off('mousewheel', this.handleMouseWheelProxy);
+
             this.isTimerActive = false;
             return this;
         },
@@ -2989,20 +3005,46 @@ define(
 
         // ==============================
         //
-        // Model state change
+        // Battle Model Changes
         //
         // ==============================
+        selectedAbilityChange: function selectedAbilityChange(model, ability){
+            // When the player's selected ability changes, change the SVG wrapper
+            logger.log('views/subviews/Battle', 
+                '1. abilityChange(): ability changed to %O', ability);
+            var type = null;
+
+            if(ability){
+                // TODO: more damage types? DOTs?
+                if(ability.get('damage')){ type = 'selected-ability-damage'; }
+                else if(ability.get('heal')){ type = 'selected-ability-heal'; }
+            }
+
+            // remove classes
+            // TODO: if more types, add them here
+            this.$wrapper.classed('selected-ability-damage selected-ability-heal', false);
+
+            if(type){ this.$wrapper.classed(type, true); }
+
+            return this;
+        },
+
         stateChange: function stateChange(model,state){
             // Called when the model state changes
             logger.log('views/subviews/Battle', 
                 '1. stateChange(): model state changed to: ' + state);
 
+            // remove all classes
+            this.$wrapper.classed('state-normal state-ability', false);
+
             // TODO: do stuff based on state change
             if(state === 'normal'){
                 // From ability to normal
+                this.$wrapper.classed('state-normal', true);
                 
             } else if (state === 'ability'){
                 // From ability to normal
+                this.$wrapper.classed('state-ability', true);
             }
 
             // DEV: TODO: REMOVE
@@ -3067,7 +3109,7 @@ define(
             // Toggle ability on / off
             // --------------------------
             // if same ability was used, do nothing
-            if(this.selectedAbility === options.ability){
+            if(this.model.get('selectedAbility') === options.ability){
                 return false;
             }
 
@@ -3081,7 +3123,7 @@ define(
                 // The ability CAN be used
 
                 // Set the selected ability
-                this.selectedAbility = ability;
+                this.model.set({selectedAbility: ability},{silent:false});
 
                 // change the state to ability. Now, when the user clicks on
                 // an entity, the ability will be used
@@ -3098,11 +3140,11 @@ define(
             return this;
         },
 
-        // ------------------------------
+        // ==============================
         //
         // User input - Shortcut keys
         //
-        // ------------------------------
+        // ==============================
         handleKeyUpdateSelection: function handleKeyUpdateSelection(options){
             // This function selects an entity based on a keypress. 
             // j / k and up / down select next or previous entity the
@@ -3112,7 +3154,10 @@ define(
             // To select a player entity : use keys shift + 1 - n
 
             // disable page scrolling with up / down arrow key
-            options.e.preventDefault();
+            if(options.e){
+                options.e.preventDefault();
+            }
+
             var key = options.key;
             var entityGroup = 'player';
 
@@ -3193,11 +3238,31 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // mouse scroll event
+        // ------------------------------
+        handleMouseWheel: function(e){
+            // When the mousewheel is scrolled, determine if it's up or down,
+            // then select the player's entity above or below the current one
+
+            var direction = 'up';
+            if(e.originalEvent.wheelDelta < 0){
+                direction = 'down';
+            }
+
+            this.handleKeyUpdateSelection({key: direction});
+            return this;
+        },
+
+        // ------------------------------
+        // Cancel target
+        // ------------------------------
         cancelTarget: function cancelTarget(){
             // return to default state
             logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
 
-            this.selectedAbility = null;
+            this.model.set({selectedAbility: null}, {silent:false});
+
             events.trigger('ability:cancel');
             this.model.set({
                 state: 'normal'
@@ -3326,7 +3391,9 @@ define(
                 // TODO: get map width
                 var entityGroupX = (entityGroup === 'player' ? 40 : 500);
 
-                // Setup the wrapper group. This is not ever directly manipulated
+                // Setup the wrapper group
+                // Whenever interaction happens with it, select or hover the 
+                // entity
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
                     entityGroup].selectAll('.entity-group')
                         .data(self.model.get(entityGroup + 'Entities').models)
@@ -3348,9 +3415,11 @@ define(
                                 return self.selectEntity({index: i, entityGroup: entityGroup});
                             })
                             .on('mouseenter',function entityMouseEnter(d,i){ 
+                                d3.select(this).classed('entity-hover', true);
                                 return self.entityHoverStart({index: i, entityGroup: entityGroup});
                             })
                             .on('mouseleave',function entityMouseLeave(d,i){ 
+                                d3.select(this).classed('entity-hover', false);
                                 return self.entityHoverEnd({index:i, entityGroup: entityGroup});
                             });
 
@@ -3370,6 +3439,18 @@ define(
                 // specific visuals are contained in this group
                 var groups = self[entityGroup + 'EntityGroups'] = groupsWrapper.append('g')
                     .attr({ 'class': 'entity-group ' + entityGroup });
+
+                // ----------------------
+                // Targetting Ring
+                // ----------------------
+                self[entityGroup + 'EntityTargetRings'] = groups.append('ellipse')
+                    .attr({
+                        'class': entityGroup + '-target-indicator target-indicator',
+                        cy: entityHeight/1.2,
+                        cx: entityWidth/1.9,
+                        ry: 15,
+                        rx: entityWidth/1.5
+                    });
 
                 // --------------------------
                 // PLAYER SPRITE / image
@@ -3987,10 +4068,11 @@ define(
                 .models[sourceEntityIndex];
 
             // ABILITY
-            // get selected ability from passed in ability
+            // get selected ability from the user's selected ability
             var selectedAbility = options.ability;
+
             if(selectedAbility === undefined){
-                selectedAbility = this.selectedAbility;
+                selectedAbility = this.model.get('selectedAbility');
             }
 
             // --------------------------
@@ -4676,6 +4758,7 @@ require([
     logger.options.logLevel = [ 
         'error',
         'Controller'
+        //,'views/subviews/Battle'
     ];
 
     //// log EVERYTHING:
