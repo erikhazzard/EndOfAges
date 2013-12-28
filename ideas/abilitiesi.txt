@@ -9,3 +9,5 @@ Abilities should scale in power / effects with level
     -entities store their own copy of an ability, as they can modify them
 
 -As abilities level up, so do their power costs
+
+-Does an ability get stronger the longer you wait to use it?

@@ -1,0 +1,10 @@
+The game creates an experience, but it is not the experience.
+
+What is the intended experience this game aims to create?
+
+-Sense of exploration
+-Picking a combination of characters / spells and progressing, using their
+combinations. Like picking a party structure in EQ or choosing the right party
+in FF
+-Progression - getting weapons / armor, leveling up, upgrading skills
+    -Customizing characters - upgrade skills?

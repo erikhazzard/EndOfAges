@@ -1,6 +1,13 @@
-
+Idea 1:
 You can rest / camp, the % that you heal is based on the type of item you use (e.g., a tent and campfire heal fast but maybe a % chance to be seen). 
 You can rest as much as you want, but after each rest there is a chance to be either ambushed (high) or visited by a group of traveling adventurers (low).  The latter might involve an actual player's party that has travelled through that node before?
 
 Each time you travel to a new map node, you regain some % of health and ability power.
 
+
+Idea 2:
+Health regens automatically, some other currency is used between battles.
+    -Armor durability, # of times an ultimate spell can be used?
+    -money?
+    -Something that you would not want to lose over the course of the game, but
+    could be replinished at a price
