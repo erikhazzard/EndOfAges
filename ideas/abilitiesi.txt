@@ -11,3 +11,8 @@ Abilities should scale in power / effects with level
 -As abilities level up, so do their power costs
 
 -Does an ability get stronger the longer you wait to use it?
+
+# Ability Cast Duration / Interupptions
+Should abilities be able to be interuppted?
+Should you be able to use another ability when you're in the middle of using
+an ability?

@@ -95,6 +95,9 @@ define(
                 this,
                 options);
             var amount = 0;
+            var delay = this.get('castDuration') * 1000;
+            // TODO: lower delay if the target has some sort of delay reducting
+            // stats
 
             // TODO: To damage or heal multiple targets, just call it on the passed
             // in targets
@@ -105,6 +108,10 @@ define(
             // should be called on a delay, the delay being the `castDuration`.
             // If a spell takes 2 seconds to cast, the effect shouldn't occur
             // until 2 seconds after it was activated
+            //
+            // TODO: How to precent takeHeal() or takeDamage from doing anything
+            // if the ability is interuppted? Set some property on this model?
+            // Check property in the takeXX() function?
             if(this.get('heal')){
                 setTimeout(function effectHealDelay(){
                     amount = options[self.get('healTarget')].takeHeal({
@@ -114,7 +121,7 @@ define(
                         sourceAbility: self
                     });
                     if(options.callback){ options.callback(amount); }
-                }, this.get('castDuration') * 1000);
+                }, delay);
                 // note: multiply castDuration by 1000 (it's in seconds, we
                 // need to get milliseconds)
             }
@@ -129,7 +136,7 @@ define(
                         sourceAbility: self
                     });
                     if(options.callback){ options.callback(amount); }
-                }, this.get('castDuration') * 1000);
+                }, delay);
             }
 
             return amount;
