@@ -44,6 +44,14 @@ a {
   }
 }
 
+// Make all SVG elements unselectable
+svg {
+    -moz-user-select: none; 
+    -webkit-user-select: none; 
+    -ms-user-select:none; 
+    user-select:none;
+}
+
 .preload-content {
   text-align: center;
   color: #999;

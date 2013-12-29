@@ -18,9 +18,13 @@ define(
             name: 'Magic Missle',
             // ID of the effect element
             effectId: null,
-            effectDuration: 500,
+
+            // castDuration - measured in seconds
+            // how long the spell takes to cast
+            castDuration: 0.5,
 
             // how much power the ability costs to use
+            // TODO: probably won't use power
             powerCost: 10,
         
             // How long must the player wait until they can use this ability
@@ -83,7 +87,8 @@ define(
             //  source: source of effect
             //      {Object} - an entity
             //
-            // The function body will be unique to each effect
+            // The function body may be unique to each effect
+            var self = this;
             //
             logger.log('models/Ability', 
                 '>> DEFAULT ABILITY USED : this: %O, options: %O', 
@@ -93,24 +98,38 @@ define(
 
             // TODO: To damage or heal multiple targets, just call it on the passed
             // in targets
+            //
             // NOTE: Handle heal effect first
+            //
+            // NOTE: The takeHeal / takeDamage methods on the target entity
+            // should be called on a delay, the delay being the `castDuration`.
+            // If a spell takes 2 seconds to cast, the effect shouldn't occur
+            // until 2 seconds after it was activated
             if(this.get('heal')){
-                amount = options[this.get('healTarget')].takeHeal({
-                    type: this.get('type'),
-                    subType: this.get('subType'),
-                    amount: this.get('heal'),
-                    sourceAbility: this
-                });
+                setTimeout(function effectHealDelay(){
+                    amount = options[self.get('healTarget')].takeHeal({
+                        type: self.get('type'),
+                        subType: self.get('subType'),
+                        amount: self.get('heal'),
+                        sourceAbility: self
+                    });
+                    if(options.callback){ options.callback(amount); }
+                }, this.get('castDuration') * 1000);
+                // note: multiply castDuration by 1000 (it's in seconds, we
+                // need to get milliseconds)
             }
 
             // Then, handle damage effect
             if(this.get('damage')){
-                amount = options[this.get('damageTarget')].takeDamage({
-                    type: this.get('type'),
-                    subType: this.get('subType'),
-                    amount: this.get('damage'),
-                    sourceAbility: this
-                });
+                setTimeout(function effectDamageDelay(){
+                    amount = options[self.get('damageTarget')].takeDamage({
+                        type: self.get('type'),
+                        subType: self.get('subType'),
+                        amount: self.get('damage'),
+                        sourceAbility: self
+                    });
+                    if(options.callback){ options.callback(amount); }
+                }, this.get('castDuration') * 1000);
             }
 
             return amount;

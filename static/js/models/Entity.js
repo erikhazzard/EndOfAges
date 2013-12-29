@@ -137,6 +137,13 @@ define(
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeDamage() : options: %O',
                 options);
+
+            // if entity is dead, do nothing
+            if(!this.get('isAlive')){ 
+                logger.log('models/Entity', '[x] entity is dead');
+                return false; 
+            }
+
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
             var sourceAbility = options.sourceAbility;
@@ -173,6 +180,13 @@ define(
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeHeal() : options: %O',
                 options);
+
+            // if entity is dead, do nothing
+            if(!this.get('isAlive')){ 
+                logger.log('models/Entity', '[x] entity is dead');
+                return false; 
+            }
+
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
             var sourceAbility = options.sourceAbility;

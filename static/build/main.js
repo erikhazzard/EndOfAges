@@ -972,9 +972,13 @@ define(
             name: 'Magic Missle',
             // ID of the effect element
             effectId: null,
-            effectDuration: 500,
+
+            // castDuration - measured in seconds
+            // how long the spell takes to cast
+            castDuration: 0.5,
 
             // how much power the ability costs to use
+            // TODO: probably won't use power
             powerCost: 10,
         
             // How long must the player wait until they can use this ability
@@ -1037,7 +1041,8 @@ define(
             //  source: source of effect
             //      {Object} - an entity
             //
-            // The function body will be unique to each effect
+            // The function body may be unique to each effect
+            var self = this;
             //
             logger.log('models/Ability', 
                 '>> DEFAULT ABILITY USED : this: %O, options: %O', 
@@ -1047,24 +1052,38 @@ define(
 
             // TODO: To damage or heal multiple targets, just call it on the passed
             // in targets
+            //
             // NOTE: Handle heal effect first
+            //
+            // NOTE: The takeHeal / takeDamage methods on the target entity
+            // should be called on a delay, the delay being the `castDuration`.
+            // If a spell takes 2 seconds to cast, the effect shouldn't occur
+            // until 2 seconds after it was activated
             if(this.get('heal')){
-                amount = options[this.get('healTarget')].takeHeal({
-                    type: this.get('type'),
-                    subType: this.get('subType'),
-                    amount: this.get('heal'),
-                    sourceAbility: this
-                });
+                setTimeout(function effectHealDelay(){
+                    amount = options[self.get('healTarget')].takeHeal({
+                        type: self.get('type'),
+                        subType: self.get('subType'),
+                        amount: self.get('heal'),
+                        sourceAbility: self
+                    });
+                    if(options.callback){ options.callback(amount); }
+                }, this.get('castDuration') * 1000);
+                // note: multiply castDuration by 1000 (it's in seconds, we
+                // need to get milliseconds)
             }
 
             // Then, handle damage effect
             if(this.get('damage')){
-                amount = options[this.get('damageTarget')].takeDamage({
-                    type: this.get('type'),
-                    subType: this.get('subType'),
-                    amount: this.get('damage'),
-                    sourceAbility: this
-                });
+                setTimeout(function effectDamageDelay(){
+                    amount = options[self.get('damageTarget')].takeDamage({
+                        type: self.get('type'),
+                        subType: self.get('subType'),
+                        amount: self.get('damage'),
+                        sourceAbility: self
+                    });
+                    if(options.callback){ options.callback(amount); }
+                }, this.get('castDuration') * 1000);
             }
 
             return amount;
@@ -1347,6 +1366,13 @@ define(
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeDamage() : options: %O',
                 options);
+
+            // if entity is dead, do nothing
+            if(!this.get('isAlive')){ 
+                logger.log('models/Entity', '[x] entity is dead');
+                return false; 
+            }
+
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
             var sourceAbility = options.sourceAbility;
@@ -1383,6 +1409,13 @@ define(
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeHeal() : options: %O',
                 options);
+
+            // if entity is dead, do nothing
+            if(!this.get('isAlive')){ 
+                logger.log('models/Entity', '[x] entity is dead');
+                return false; 
+            }
+
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
             var sourceAbility = options.sourceAbility;
@@ -1923,21 +1956,21 @@ define(
                     new Entity({
                         sprite: 'tiger',
                         abilities: new Abilities([
-                            ABILITIES.magicmissle,
+                            ABILITIES.flamelick,
                             ABILITIES.trivialhealing
                         ])
                     }),
                     new Entity({
                         sprite: 'darkelf',
                         abilities: new Abilities([
-                            ABILITIES.magicmissle,
+                            ABILITIES.flamelick,
                             ABILITIES.trivialhealing
                         ])
                     }),
                     new Entity({
                         sprite: 'tiger',
                         abilities: new Abilities([
-                            ABILITIES.magicmissle,
+                            ABILITIES.flamelick,
                             ABILITIES.trivialhealing
                         ])
                     })
@@ -3683,7 +3716,6 @@ define(
                                     // update the bar
                                     if(model.get('isAlive')){
                                         d3this.transition()
-                                            .delay(changeOptions.sourceAbility.get('effectDuration'))
                                             .attr({
                                                 width: healthScale(health)
                                             });
@@ -3837,22 +3869,33 @@ define(
             var entityGroup = options.entityGroup;
             var difference = options.health - model._previousAttributes.health;
 
-            // start it right before the effect ends
-            var delay = options.changeOptions.sourceAbility.get('effectDuration') - 100;
-
             // Show flash
             // --------------------------
             // Show a red flash whenever the player takes damage
-            if(entityGroup === 'player' && difference < 0){
-                this.$healthEffectBlocker.transition()
-                    .delay(delay)
-                    .ease('elastic')
-                    .style({ fill: '#dd0000', 
-                        opacity: d3.scale.linear()
-                            .domain([ 0, -model.attributes.maxHealth ])
-                            .range([ 0.2, 0.9 ])
-                            (difference)
-                    })
+            var fill = '';
+            var opacity = '';
+
+            if(entityGroup === 'player'){
+                if(difference < 0){ 
+                    // If damage is done, flash the screen red
+                    fill = '#dd0000';
+                    opacity = d3.scale.linear()
+                        .domain([ 0, -model.attributes.maxHealth ])
+                        .range([ 0.2, 0.9 ])
+                        (difference);
+
+                } else { 
+                    // if entity is healed, flash the screen green
+                    fill = '#22dd22';
+                    opacity = d3.scale.linear()
+                        .domain([ 0, model.attributes.maxHealth ])
+                        .range([ 0.1, 0.8 ])
+                        (difference);
+                }
+                
+                // do the flash
+                this.$healthEffectBlocker.transition().ease('elastic')
+                    .style({ fill: fill, opacity: opacity })
                     .transition()
                     .ease('elastic')
                         .style({ fill: '', opacity: 0 });
@@ -3870,41 +3913,20 @@ define(
                 .range([ -10, -40 ]);
 
             if(entityModel.get('isAlive')){
-                // initiate the wiggle after a timeout. delaying and chaining
-                // the transitions don't seem to have the same effect
-                // TODO: look into this
-                setTimeout(function wiggle(){
-                    d3.select(self[entityGroup + 'EntitySprites'][0][index])
+                // initiate the wiggle 
+                d3.select(self[entityGroup + 'EntitySprites'][0][index])
+                    .attr({
+                        // wiggle the entity left / right or up / down depending
+                        // if the ability has negative or positive damage
+                        x: difference < 0 ? intensityDamageScale(difference) : 0,
+                        y: difference > 0 ? intensityHealScale(difference) : 0
+                    })
+                    .transition()
+                    .duration(520)
+                    .ease('elastic')
                         .attr({
-                            // wiggle the entity left / right or up / down depending
-                            // if the ability has negative or positive damage
-                            x: difference < 0 ? intensityDamageScale(difference) : 0,
-                            y: difference > 0 ? intensityHealScale(difference) : 0
-                        })
-                            .transition()
-                            .duration(520)
-                            .ease('elastic')
-                            .attr({
-                                x: 0, y: 0
-                            });
-                }, delay);
-
-                //// with transitions (doesn't work as well)
-                //d3.select(self[entityGroup + 'EntitySprites'][0][index])
-                    //.transition().duration(1).delay(delay)
-                    //.attr({
-                        //// wiggle the entity left / right or up / down depending
-                        //// if the ability has negative or positive damage
-                        //x: difference < 0 ? intensityDamageScale(difference) : 0,
-                        //y: difference > 0 ? intensityHealScale(difference) : 0
-                    //})
-                        //.transition()
-                        //.duration(520)
-                        //.ease('elastic')
-                        //.attr({
-                            //x: 0, y: 0
-                        //});
-
+                            x: 0, y: 0
+                        });
             }
 
             // Show text
@@ -3926,14 +3948,12 @@ define(
             $damageText
                 .attr({ 
                     y: self.entityHeight - 10,
-                    opacity: 0
+                    opacity: 0.2
                 })
                 .text((difference < 0 ? '' : '+') + difference);
 
             // then, fade in text and float it up
-            $damageText.transition().duration(1).delay(delay)
-                .attr({ opacity: 0.2 })
-                .transition().duration(200)
+            $damageText.transition().duration(200)
                     .attr({ y: -10, opacity: 1 })
                     // when that's done, fade it out
                     .transition()
@@ -4451,7 +4471,7 @@ define(
 
                     })
                         // then travel to the target
-                        .transition().duration(selectedAbility.attributes.effectDuration)
+                        .transition().duration(selectedAbility.attributes.castDuration * 1000)
                         .attr({
                             transform: 'translate(' + [
                                 // send to edge of either enemy or player
@@ -4459,7 +4479,8 @@ define(
                                 // get midpoints
                                 targetPos.top + ((targetPos.bottom - targetPos.top) / 2)
                                 ] + ') ' + scaleAmount
-                        }).each('end', function(){
+                        })
+                        .each('end', function(){
                             // remove the effect
                             // NOTE: the entity wiggle will happen in the 
                             // change:health callback

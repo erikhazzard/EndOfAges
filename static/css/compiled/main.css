@@ -111,6 +111,12 @@ a {
   a:hover {
     color: #0b6cea; }
 
+svg {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }
+
 .preload-content {
   text-align: center;
   color: #999;
