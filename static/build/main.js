@@ -3913,8 +3913,8 @@ define(
             // --------------------------
             // Do a wiggle event on the entity
             var intensityDamageScale = d3.scale.linear()
-                .domain([ 0, -model.attributes.maxHealth ])
-                .range([ -20, -70 ]);
+                .domain([ 0, -model.attributes.maxHealth * 0.9])
+                .range([ -20, -80 ]);
             var intensityHealScale = d3.scale.linear()
                 .domain([ 0, model.attributes.maxHealth ])
                 .range([ -10, -40 ]);
@@ -4470,6 +4470,7 @@ define(
 
                     // start in the middle of the source
                     $effect.attr({
+                        // set start position immediately
                         transform: 'translate(' + [
                             // get midpoints
                             sourcePos.left + ((sourcePos.right - sourcePos.left) / 2), 
@@ -4478,7 +4479,9 @@ define(
 
                     })
                         // then travel to the target
-                        .transition().duration(selectedAbility.attributes.castDuration * 1000)
+                        .transition()
+                        .ease('cubic-in')
+                        .duration(selectedAbility.attributes.castDuration * 1000) 
                         .attr({
                             transform: 'translate(' + [
                                 // send to edge of either enemy or player
