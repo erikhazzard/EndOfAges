@@ -4,6 +4,9 @@
 #region-map {
   z-index: 100; }
 
+#battle .effect-magicMissle path {
+  fill: #ffffff; }
+
 .entity-group-wrapper {
   cursor: pointer; }
 

@@ -20,6 +20,7 @@ define(
     var abilities = {
         'fireball': new Ability({
             name: 'Fireball',
+            effectId: 'fireball',
             castTime: 4,
             timeCost: 4,
             powerCost: 8,
@@ -30,6 +31,7 @@ define(
         }),
         'magicmissle': new Ability({
             name: 'Magic Missle',
+            effectId: 'magicMissle',
             castTime: 2,
             timeCost: 2,
             powerCost: 6,
@@ -42,6 +44,7 @@ define(
         }),
         'minorhealing': new Ability({
             name: 'Minor Healing',
+            effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
             powerCost: 3,
@@ -53,6 +56,7 @@ define(
 
         'flamelick': new Ability({
             name: 'Flamelick',
+            effectId: 'flamelick',
             castTime: 3,
             timeCost: 3,
             powerCost: 4,
@@ -63,6 +67,7 @@ define(
         }),
         'trivialhealing': new Ability({
             name: 'Trivial Healing',
+            effectId: 'trivialHealing',
             castTime: 3,
             timeCost: 3,
             powerCost: 1,

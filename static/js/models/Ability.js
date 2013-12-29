@@ -16,6 +16,9 @@ define(
     var Ability = Backbone.Model.extend({
         defaults: {
             name: 'Magic Missle',
+            // ID of the effect element
+            effectId: null,
+            effectDuration: 500,
 
             // how much power the ability costs to use
             powerCost: 10,
@@ -95,7 +98,8 @@ define(
                 amount = options[this.get('healTarget')].takeHeal({
                     type: this.get('type'),
                     subType: this.get('subType'),
-                    amount: this.get('heal')
+                    amount: this.get('heal'),
+                    sourceAbility: this
                 });
             }
 
@@ -104,7 +108,8 @@ define(
                 amount = options[this.get('damageTarget')].takeDamage({
                     type: this.get('type'),
                     subType: this.get('subType'),
-                    amount: this.get('damage')
+                    amount: this.get('damage'),
+                    sourceAbility: this
                 });
             }
 

@@ -1,0 +1,11 @@
+# Asset loading ideas
+-On server, have an endpoint that loads all svg assets, turn them into a single
+SVG doc, then return the doc
+-Client hits endpoint for the SVG doc (or is embedded on page load?), then all
+sprites / effects can be copied by selecting the proper element
+
+
+# Customizing sprites
+Weapons / armor / etc are also single sprites, creating a ssprite with the armor 
+and weapons is done by cloning the items and cloning the entity, then placing 
+them together

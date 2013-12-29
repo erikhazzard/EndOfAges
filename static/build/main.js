@@ -970,6 +970,9 @@ define(
     var Ability = Backbone.Model.extend({
         defaults: {
             name: 'Magic Missle',
+            // ID of the effect element
+            effectId: null,
+            effectDuration: 500,
 
             // how much power the ability costs to use
             powerCost: 10,
@@ -1049,7 +1052,8 @@ define(
                 amount = options[this.get('healTarget')].takeHeal({
                     type: this.get('type'),
                     subType: this.get('subType'),
-                    amount: this.get('heal')
+                    amount: this.get('heal'),
+                    sourceAbility: this
                 });
             }
 
@@ -1058,7 +1062,8 @@ define(
                 amount = options[this.get('damageTarget')].takeDamage({
                     type: this.get('type'),
                     subType: this.get('subType'),
-                    amount: this.get('damage')
+                    amount: this.get('damage'),
+                    sourceAbility: this
                 });
             }
 
@@ -1141,6 +1146,7 @@ define(
     var abilities = {
         'fireball': new Ability({
             name: 'Fireball',
+            effectId: 'fireball',
             castTime: 4,
             timeCost: 4,
             powerCost: 8,
@@ -1151,6 +1157,7 @@ define(
         }),
         'magicmissle': new Ability({
             name: 'Magic Missle',
+            effectId: 'magicMissle',
             castTime: 2,
             timeCost: 2,
             powerCost: 6,
@@ -1163,6 +1170,7 @@ define(
         }),
         'minorhealing': new Ability({
             name: 'Minor Healing',
+            effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
             powerCost: 3,
@@ -1174,6 +1182,7 @@ define(
 
         'flamelick': new Ability({
             name: 'Flamelick',
+            effectId: 'flamelick',
             castTime: 3,
             timeCost: 3,
             powerCost: 4,
@@ -1184,6 +1193,7 @@ define(
         }),
         'trivialhealing': new Ability({
             name: 'Trivial Healing',
+            effectId: 'trivialHealing',
             castTime: 3,
             timeCost: 3,
             powerCost: 1,
@@ -1339,6 +1349,7 @@ define(
                 options);
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
+            var sourceAbility = options.sourceAbility;
             var damage = options.amount * -1;
 
             // TODO: process damage
@@ -1357,7 +1368,10 @@ define(
             if(newHealth > maxHealth){ newHealth = maxHealth; }
 
             // update the health
-            attrs.set({ health: newHealth });
+            //  pass in the ability that caused the damage
+            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
+
+            // NOTE:
             // death event is called in the `healthCallback`, which is called
             // whenever health changes
 
@@ -1371,6 +1385,7 @@ define(
                 options);
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
+            var sourceAbility = options.sourceAbility;
             var amount = options.amount;
 
             // TODO: process healing
@@ -1389,9 +1404,8 @@ define(
             if(newHealth > maxHealth){ newHealth = maxHealth; }
 
             // update the health
-            attrs.set({ health: newHealth });
-            // death event is called in the `healthCallback`, which is called
-            // whenever health changes
+            //  pass in the ability that healed the entity
+            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
 
             return amount;
         },
@@ -1909,21 +1923,21 @@ define(
                     new Entity({
                         sprite: 'tiger',
                         abilities: new Abilities([
-                            ABILITIES.flamelick,
+                            ABILITIES.magicmissle,
                             ABILITIES.trivialhealing
                         ])
                     }),
                     new Entity({
                         sprite: 'darkelf',
                         abilities: new Abilities([
-                            ABILITIES.flamelick,
+                            ABILITIES.magicmissle,
                             ABILITIES.trivialhealing
                         ])
                     }),
                     new Entity({
                         sprite: 'tiger',
                         abilities: new Abilities([
-                            ABILITIES.flamelick,
+                            ABILITIES.magicmissle,
                             ABILITIES.trivialhealing
                         ])
                     })
@@ -2893,6 +2907,8 @@ define(
         }, 
 
         runTimer: function battleRunTimer(){
+            // TODO: ::: Can we put the timer in a web worker?
+            //
             // This is called to kicked off the game loop for the battle.
             // Store variables the battleFrame loop function will access
             //
@@ -3423,6 +3439,8 @@ define(
             
             // Setup svg
             var svg = d3.select('#battle');
+            this.$svg = svg;
+
             var wrapper = svg.append('g');
             this.$wrapper = wrapper;
 
@@ -3491,10 +3509,14 @@ define(
             // setup groups for entities
             var entityGroups = {
                 player: wrapper.append('g')
-                    .attr({ 'class': 'playerEntities' }),
+                    .attr({ 'class': 'player-entities' }),
                 enemy: wrapper.append('g')
-                    .attr({ 'class': 'enemyEntities' })
+                    .attr({ 'class': 'enemy-entities' })
             };
+
+            // Spell effect group - spell effects are appended here
+            this.$abilityEffects = wrapper.append('g')
+                .attr({ 'class': 'ability-effects' });
 
             // --------------------------
             // setup background
@@ -3655,14 +3677,16 @@ define(
                             // when health changes, update width of health bar
                             self.listenTo(model.get('attributes'), 
                                 'change:health',
-                                function updateHealth(returnedModel, health){
+                                function updateHealth(returnedModel, health, changeOptions){
                                     // called when health updates
                                     // NOTE: if the entity is dead, don't
                                     // update the bar
                                     if(model.get('isAlive')){
-                                        d3this.transition().attr({
-                                            width: healthScale(health)
-                                        });
+                                        d3this.transition()
+                                            .delay(changeOptions.sourceAbility.get('effectDuration'))
+                                            .attr({
+                                                width: healthScale(health)
+                                            });
                                     } else {
                                         // entity is dead, make sure health
                                         // is at 0 and cancel existing transitions
@@ -3774,14 +3798,15 @@ define(
                         'change:health', 
                         // model changes get passed in the model and the
                         // changed attribute value
-                        function callShowText(attrModel, health){
+                        function callShowText(attrModel, health, changeOptions){
                             return self.showEffectOnHealthChange.call(
                                 self, {
                                     entityModel: model,
                                     model: attrModel,
                                     health: health,
                                     index: index,
-                                    entityGroup: entityGroup
+                                    entityGroup: entityGroup,
+                                    changeOptions: changeOptions
                                 }
                             );
                         });
@@ -3812,11 +3837,15 @@ define(
             var entityGroup = options.entityGroup;
             var difference = options.health - model._previousAttributes.health;
 
+            // start it right before the effect ends
+            var delay = options.changeOptions.sourceAbility.get('effectDuration') - 100;
+
             // Show flash
             // --------------------------
             // Show a red flash whenever the player takes damage
             if(entityGroup === 'player' && difference < 0){
                 this.$healthEffectBlocker.transition()
+                    .delay(delay)
                     .ease('elastic')
                     .style({ fill: '#dd0000', 
                         opacity: d3.scale.linear()
@@ -3829,6 +3858,7 @@ define(
                         .style({ fill: '', opacity: 0 });
             }
 
+            // --------------------------
             // Wiggle 
             // --------------------------
             // Do a wiggle event on the entity
@@ -3840,19 +3870,41 @@ define(
                 .range([ -10, -40 ]);
 
             if(entityModel.get('isAlive')){
-                d3.select(this[entityGroup + 'EntitySprites'][0][index])
-                    .attr({
-                        // wiggle the entity left / right or up / down depending
-                        // if the ability has negative or positive damage
-                        x: difference < 0 ? intensityDamageScale(difference) : 0,
-                        y: difference > 0 ? intensityHealScale(difference) : 0
-                    })
-                        .transition()
-                        .duration(520)
-                        .ease('elastic')
+                // initiate the wiggle after a timeout. delaying and chaining
+                // the transitions don't seem to have the same effect
+                // TODO: look into this
+                setTimeout(function wiggle(){
+                    d3.select(self[entityGroup + 'EntitySprites'][0][index])
                         .attr({
-                            x: 0, y: 0
-                        });
+                            // wiggle the entity left / right or up / down depending
+                            // if the ability has negative or positive damage
+                            x: difference < 0 ? intensityDamageScale(difference) : 0,
+                            y: difference > 0 ? intensityHealScale(difference) : 0
+                        })
+                            .transition()
+                            .duration(520)
+                            .ease('elastic')
+                            .attr({
+                                x: 0, y: 0
+                            });
+                }, delay);
+
+                //// with transitions (doesn't work as well)
+                //d3.select(self[entityGroup + 'EntitySprites'][0][index])
+                    //.transition().duration(1).delay(delay)
+                    //.attr({
+                        //// wiggle the entity left / right or up / down depending
+                        //// if the ability has negative or positive damage
+                        //x: difference < 0 ? intensityDamageScale(difference) : 0,
+                        //y: difference > 0 ? intensityHealScale(difference) : 0
+                    //})
+                        //.transition()
+                        //.duration(520)
+                        //.ease('elastic')
+                        //.attr({
+                            //x: 0, y: 0
+                        //});
+
             }
 
             // Show text
@@ -3873,24 +3925,19 @@ define(
 
             $damageText
                 .attr({ 
-                    y: self.entityHeight - 10, 
-                    opacity: 0.2 
+                    y: self.entityHeight - 10,
+                    opacity: 0
                 })
                 .text((difference < 0 ? '' : '+') + difference);
 
             // then, fade in text and float it up
-            $damageText.transition()
-                .duration(200)
-                .attr({ 
-                    y: -10,
-                    opacity: 1 
-                })
-                .each('end', function(){
+            $damageText.transition().duration(1).delay(delay)
+                .attr({ opacity: 0.2 })
+                .transition().duration(200)
+                    .attr({ y: -10, opacity: 1 })
                     // when that's done, fade it out
-                    $damageText.transition().delay(300)
-                        .duration(300)
-                        .attr({  opacity: 0 });
-                });
+                    .transition()
+                        .duration(300).attr({  opacity: 0 });
         },
 
         // =====================================================================
@@ -4213,7 +4260,7 @@ define(
             // TARGET
             var target = options.target;
             var targetEntityGroup = options.entityGroup;
-            var targetIndex = options.targetIndex;
+            var targetEntityIndex = options.targetIndex;
 
             // SOURCE 
             // By default, is the selected entity
@@ -4340,8 +4387,88 @@ define(
                 // TODO: do a spell effect (always do it, even if entity is
                 // dead)
                 // --------------------------
+                // TODO: put this in a separate method
+                //
+                // effect needs a source and a target. each spell can have
+                // its own custom effect. 
+                // TODO: put this in model? model hold data, so it doesn't seem
+                // like view logic should be there, but placing it there
+                // would encapsulate all ability logic / effects which the
+                // view could call
+                // TODO: a spell may have multiple effect icons
 
-                // Do an effect on entity (only if they're alive
+                if(selectedAbility.attributes.effectId){
+                    // update the bounding rect
+                    this.wrapperBoundingRect = this.$svg.node().getBoundingClientRect();
+
+                    // get the position of the entity sprite
+                    var sourceRect = d3.select(this[sourceEntityGroup + 'EntitySprites'][0][sourceEntityIndex])
+                        .node()
+                        .getBoundingClientRect();
+                    var targetRect = d3.select(this[targetEntityGroup + 'EntitySprites'][0][targetEntityIndex])
+                        .node()
+                        .getBoundingClientRect();
+
+                    // get position relative to the battle svg they are contained in
+                    var targetPos = {};
+                    var sourcePos = {};
+
+                    // set the position based on the source / target bounding
+                    // rects and update the position
+                    _.each([[targetRect, targetPos], [sourceRect, sourcePos]],
+                        function(item){
+                        //item[0] is the bounding rect, item[1] is relative position
+                        item[1].top = item[0].top - self.wrapperBoundingRect.top;
+                        item[1].bottom = item[0].bottom - self.wrapperBoundingRect.top;
+                        item[1].left = item[0].left - self.wrapperBoundingRect.left;
+                        item[1].right = item[0].right - self.wrapperBoundingRect.left;
+                    });
+
+                    // TODO: rotate / flip effect based on source and target
+                    // if target and source are same group, flip the effect up or
+                    // down?
+                    var scaleAmount = '';
+                    if(sourceEntityGroup === 'enemy'){
+                        scaleAmount = 'scale(-1 1)';
+                    }
+
+                    // draw effect from target to source
+                    //
+                    // get a copy of the svg effect
+                    //  all effects should be wrapped in a svg element with id of
+                    //  `effect-spellName`, and the wrapper should have no attributes
+                    var $effect = d3.sticker('#effect-' + selectedAbility.attributes.effectId);
+                    // append it the ability effects group
+                    $effect = $effect(this.$abilityEffects);
+
+                    // start in the middle of the source
+                    $effect.attr({
+                        transform: 'translate(' + [
+                            // get midpoints
+                            sourcePos.left + ((sourcePos.right - sourcePos.left) / 2), 
+                            sourcePos.top + ((sourcePos.bottom - sourcePos.top) / 2)
+                            ] + ') ' + scaleAmount
+
+                    })
+                        // then travel to the target
+                        .transition().duration(selectedAbility.attributes.effectDuration)
+                        .attr({
+                            transform: 'translate(' + [
+                                // send to edge of either enemy or player
+                                targetEntityGroup === 'enemy' ? targetPos.left - 20 : targetPos.right + 20,
+                                // get midpoints
+                                targetPos.top + ((targetPos.bottom - targetPos.top) / 2)
+                                ] + ') ' + scaleAmount
+                        }).each('end', function(){
+                            // remove the effect
+                            // NOTE: the entity wiggle will happen in the 
+                            // change:health callback
+                            d3.select(this).remove();
+                        });
+                }
+
+
+                // Move the entity that used the ability forward
                 // --------------------------
                 // only move the entity if it's not selected by the player
                 if(this.selectedEntity !== sourceEntity && sourceEntity.get('isAlive')){

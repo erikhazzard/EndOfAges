@@ -56,21 +56,21 @@ define(
                     new Entity({
                         sprite: 'tiger',
                         abilities: new Abilities([
-                            ABILITIES.flamelick,
+                            ABILITIES.magicmissle,
                             ABILITIES.trivialhealing
                         ])
                     }),
                     new Entity({
                         sprite: 'darkelf',
                         abilities: new Abilities([
-                            ABILITIES.flamelick,
+                            ABILITIES.magicmissle,
                             ABILITIES.trivialhealing
                         ])
                     }),
                     new Entity({
                         sprite: 'tiger',
                         abilities: new Abilities([
-                            ABILITIES.flamelick,
+                            ABILITIES.magicmissle,
                             ABILITIES.trivialhealing
                         ])
                     })

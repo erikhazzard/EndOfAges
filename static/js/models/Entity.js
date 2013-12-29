@@ -139,6 +139,7 @@ define(
                 options);
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
+            var sourceAbility = options.sourceAbility;
             var damage = options.amount * -1;
 
             // TODO: process damage
@@ -157,7 +158,10 @@ define(
             if(newHealth > maxHealth){ newHealth = maxHealth; }
 
             // update the health
-            attrs.set({ health: newHealth });
+            //  pass in the ability that caused the damage
+            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
+
+            // NOTE:
             // death event is called in the `healthCallback`, which is called
             // whenever health changes
 
@@ -171,6 +175,7 @@ define(
                 options);
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
+            var sourceAbility = options.sourceAbility;
             var amount = options.amount;
 
             // TODO: process healing
@@ -189,9 +194,8 @@ define(
             if(newHealth > maxHealth){ newHealth = maxHealth; }
 
             // update the health
-            attrs.set({ health: newHealth });
-            // death event is called in the `healthCallback`, which is called
-            // whenever health changes
+            //  pass in the ability that healed the entity
+            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
 
             return amount;
         },
