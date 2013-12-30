@@ -1341,6 +1341,7 @@ define(
                 baseAttributes: new EntityAttributes()
             }, {silent: true});
 
+            // TODO: allow setting just some entity attribute attributes
 
             // TODO: get AIdelay from server
             this.set({ aiDelay: Math.random() * 2.5 });
@@ -1370,6 +1371,17 @@ define(
             return this;
         },
 
+        getScore: function getScore(){
+            // TODO: get a combat score for this entity based on abilities
+            // and states
+
+        },
+
+        // ==============================
+        //
+        // Take damage / heal functions
+        //
+        // ==============================
         healthCallback: function healthCallback(model, health){
             logger.log('models/Entity', '1. healthCallback() : health ' + health);
 
@@ -1471,17 +1483,15 @@ define(
         //
         // TODO: Don't put this here
         // ==============================
-        getAbilityAI: function getAbilityAI(){
+        getAbilityAI: function getAbilityAI(time){
             // selects an ability based on health, enemy health, etc
             var models = this.attributes.abilities.models;
+
+            // TODO: select ability based on health / timer / etc.
             var ability = models[ (Math.random() * models.length)|0 ];
 
-            // if entity health is dropped below, use a healing spell
-            if(this.get('attributes').get('health') < 20){
-                ability = models[1];
-            }
-
             this.set({'desiredAbility': ability});
+
             return ability;
         }, 
 
@@ -1504,11 +1514,11 @@ define(
             if(!ability){
                 // No ability already chosen? Select one at random
                 // TODO: don't do it randomly
-                ability = this.getAbilityAI();
+                ability = this.getAbilityAI(time);
             }
 
             // Use the ability
-            if(time >= ability.attributes.castTime && 
+            if(ability && time >= ability.attributes.castTime && 
                 // TODO: handle AI delay differently?
                 // aiDelay is how long to delay using an ability
                 time >= (ability.attributes.castTime + this.attributes.aiDelay)
@@ -1519,7 +1529,7 @@ define(
                 // get the ability to use (it might change between selecting
                 // the ability the first time and when the entity can cast it)
                 // TODO: this might get screwy with the aiDelay...
-                this.getAbilityAI();
+                this.getAbilityAI(time);
                 ability = this.attributes.desiredAbility;
 
                 // make sure the ability can be cast
@@ -1963,9 +1973,25 @@ define(
 
             // NOTE: player entities are passed in
             playerEntities: [],
-            enemyEntities: []
+            enemyEntities: [],
             
             //TODO: keep track of stats
+
+            // TODO: rewards
+            // These properties are set when model is created or pulled from
+            // server, won't change
+            rewardGold: 10,
+            rewardExp: 10,
+
+            // Item chances
+            // NOTE: item chances change based on the encounter
+            rewardItemChances: {
+                common: 0.2,
+                uncommon: 0.05,
+                teasured: 0.01,
+                legendary: 0.001,
+                epic: 0.00001
+            }
         },
 
         url: function getURL(){
@@ -1973,37 +1999,63 @@ define(
             return url;
         },
 
-        initialize: function gameInitialize(){
+        initialize: function gameInitialize(options){
             logger.log('models/Battle', 'initialize() called');
 
             // TODO: get entities from game model
             
-            this.set({
-                enemyEntities: new Entities([
-                    new Entity({
-                        sprite: 'tiger',
-                        abilities: new Abilities([
-                            ABILITIES.flamelick,
-                            ABILITIES.trivialhealing
-                        ])
-                    }),
-                    new Entity({
-                        sprite: 'darkelf',
-                        abilities: new Abilities([
-                            ABILITIES.flamelick,
-                            ABILITIES.trivialhealing
-                        ])
-                    }),
-                    new Entity({
-                        sprite: 'tiger',
-                        abilities: new Abilities([
-                            ABILITIES.flamelick,
-                            ABILITIES.trivialhealing
-                        ])
-                    })
-                ])
-            }, {silent: true});
+            var entities = [];
+            var abilities = [];
+            var i = 0;
+
+            if(!options.enemyEntities){
+                // generate random enemy entities
+                entities.push(this.getRandomEntity());
+                while(i<3) {
+                    if(Math.random() < 0.5){
+                        entities.push(this.getRandomEntity()); 
+                    }
+                    i++;
+                }
+
+                this.set({
+                    enemyEntities: new Entities(entities)
+                }, {silent: true});
+            }
+
+            // TODO: get reward stats
             return this;
+        },
+
+
+        getRandomEntity: function getRandomEntity(){
+            // Returns a randomly generate enemy entity
+            // TODO: make this more smarted, depending on player levels, etc.
+            var abilities = [];
+            var entity;
+            var sprites = ['tiger','man1', 'darkelf'];
+
+            if(Math.random() < 0.8){
+                abilities.push(ABILITIES.flamelick);
+            }
+            if(Math.random() < 0.6){
+                abilities.push(ABILITIES.trivialhealing);
+            }
+            if(Math.random() < 0.2){
+                abilities.push(ABILITIES.magicmissle);
+            }
+            if(Math.random() < 0.05){
+                abilities.push(ABILITIES.magicmissle);
+            }
+
+            // generate new entity
+            entity = new Entity({
+                sprite: sprites[ 
+                    Math.random() * sprites.length | 0],
+                abilities: new Abilities(abilities)
+            });
+
+            return entity;
         }
     });
 
@@ -2906,9 +2958,11 @@ define(
             return this;
         },
 
-        // ------------------------------
-        // Death related
-        // ------------------------------
+        // ==============================
+        //
+        // Win / Loss State
+        //
+        // ==============================
         enemyGroupDied: function enemyGroupDied(options){
             // When the entire enemy group has died, you win
 
@@ -2916,7 +2970,12 @@ define(
             this.isTimerActive = false;
 
             console.log(">>>>>>>>>>>>>>>> entity group died ", options);
-            alert("so win.");
+            var reward = {
+                gold: this.model.get('rewardGold'),
+                exp: this.model.get('rewardExp')
+            };
+
+            alert("so win." + JSON.stringify(reward));
             return this;
         },
         playerGroupDied: function playerGroupDied(options){
@@ -3899,7 +3958,6 @@ define(
                         });
                 });
             });
-            window.z = this;
 
             return this;
         },
@@ -4815,22 +4873,35 @@ define(
 
             // Get node type from options
             // TODO: Best place to put a mapping of node types to views?
-            var nodeTypes = [
-                {view: BattleView, model: Battle}
-            ];
+            //
+            var node = '';
+
+            // Valid node types:
+            //      battle, shop, rest, teasure, quest, etc.
+            // some % chance for each node
+            var rand = Math.random();
+            if(rand < 1){
+                node = 'battle';
+            } // TODO: other types
 
             // create node
             logger.log('views/PageGame', '3. Creating node instance: %O',
                 nodeInstance);
 
-            var nodeInstance = new nodeTypes[0].view({
-                // pass in game model
-                model: new nodeTypes[0].model({
-                    playerEntities: this.model.get('playerEntities')
-                    // TODO: get enemy entities
-                }),
-                gameModel: this.model 
-            });
+            var nodeInstance = null;
+            
+            // Setup node
+            // --------------------------
+            if(node === 'battle'){
+                nodeInstance = new BattleView({
+                    // pass in game model
+                    // TODO: get model from server, pass in playerEntities
+                    model: new Battle({
+                        playerEntities: this.model.get('playerEntities')
+                    }),
+                    gameModel: this.model 
+                });
+            }
 
             // update game model
             this.model.set({activeNodeInstance: nodeInstance}, {silent: true});

@@ -199,9 +199,11 @@ define(
             return this;
         },
 
-        // ------------------------------
-        // Death related
-        // ------------------------------
+        // ==============================
+        //
+        // Win / Loss State
+        //
+        // ==============================
         enemyGroupDied: function enemyGroupDied(options){
             // When the entire enemy group has died, you win
 
@@ -209,7 +211,12 @@ define(
             this.isTimerActive = false;
 
             console.log(">>>>>>>>>>>>>>>> entity group died ", options);
-            alert("so win.");
+            var reward = {
+                gold: this.model.get('rewardGold'),
+                exp: this.model.get('rewardExp')
+            };
+
+            alert("so win." + JSON.stringify(reward));
             return this;
         },
         playerGroupDied: function playerGroupDied(options){
@@ -1192,7 +1199,6 @@ define(
                         });
                 });
             });
-            window.z = this;
 
             return this;
         },

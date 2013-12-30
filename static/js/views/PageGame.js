@@ -125,22 +125,35 @@ define(
 
             // Get node type from options
             // TODO: Best place to put a mapping of node types to views?
-            var nodeTypes = [
-                {view: BattleView, model: Battle}
-            ];
+            //
+            var node = '';
+
+            // Valid node types:
+            //      battle, shop, rest, teasure, quest, etc.
+            // some % chance for each node
+            var rand = Math.random();
+            if(rand < 1){
+                node = 'battle';
+            } // TODO: other types
 
             // create node
             logger.log('views/PageGame', '3. Creating node instance: %O',
                 nodeInstance);
 
-            var nodeInstance = new nodeTypes[0].view({
-                // pass in game model
-                model: new nodeTypes[0].model({
-                    playerEntities: this.model.get('playerEntities')
-                    // TODO: get enemy entities
-                }),
-                gameModel: this.model 
-            });
+            var nodeInstance = null;
+            
+            // Setup node
+            // --------------------------
+            if(node === 'battle'){
+                nodeInstance = new BattleView({
+                    // pass in game model
+                    // TODO: get model from server, pass in playerEntities
+                    model: new Battle({
+                        playerEntities: this.model.get('playerEntities')
+                    }),
+                    gameModel: this.model 
+                });
+            }
 
             // update game model
             this.model.set({activeNodeInstance: nodeInstance}, {silent: true});

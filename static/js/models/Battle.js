@@ -36,9 +36,25 @@ define(
 
             // NOTE: player entities are passed in
             playerEntities: [],
-            enemyEntities: []
+            enemyEntities: [],
             
             //TODO: keep track of stats
+
+            // TODO: rewards
+            // These properties are set when model is created or pulled from
+            // server, won't change
+            rewardGold: 10,
+            rewardExp: 10,
+
+            // Item chances
+            // NOTE: item chances change based on the encounter
+            rewardItemChances: {
+                common: 0.2,
+                uncommon: 0.05,
+                teasured: 0.01,
+                legendary: 0.001,
+                epic: 0.00001
+            }
         },
 
         url: function getURL(){
@@ -46,37 +62,63 @@ define(
             return url;
         },
 
-        initialize: function gameInitialize(){
+        initialize: function gameInitialize(options){
             logger.log('models/Battle', 'initialize() called');
 
             // TODO: get entities from game model
             
-            this.set({
-                enemyEntities: new Entities([
-                    new Entity({
-                        sprite: 'tiger',
-                        abilities: new Abilities([
-                            ABILITIES.flamelick,
-                            ABILITIES.trivialhealing
-                        ])
-                    }),
-                    new Entity({
-                        sprite: 'darkelf',
-                        abilities: new Abilities([
-                            ABILITIES.flamelick,
-                            ABILITIES.trivialhealing
-                        ])
-                    }),
-                    new Entity({
-                        sprite: 'tiger',
-                        abilities: new Abilities([
-                            ABILITIES.flamelick,
-                            ABILITIES.trivialhealing
-                        ])
-                    })
-                ])
-            }, {silent: true});
+            var entities = [];
+            var abilities = [];
+            var i = 0;
+
+            if(!options.enemyEntities){
+                // generate random enemy entities
+                entities.push(this.getRandomEntity());
+                while(i<3) {
+                    if(Math.random() < 0.5){
+                        entities.push(this.getRandomEntity()); 
+                    }
+                    i++;
+                }
+
+                this.set({
+                    enemyEntities: new Entities(entities)
+                }, {silent: true});
+            }
+
+            // TODO: get reward stats
             return this;
+        },
+
+
+        getRandomEntity: function getRandomEntity(){
+            // Returns a randomly generate enemy entity
+            // TODO: make this more smarted, depending on player levels, etc.
+            var abilities = [];
+            var entity;
+            var sprites = ['tiger','man1', 'darkelf'];
+
+            if(Math.random() < 0.8){
+                abilities.push(ABILITIES.flamelick);
+            }
+            if(Math.random() < 0.6){
+                abilities.push(ABILITIES.trivialhealing);
+            }
+            if(Math.random() < 0.2){
+                abilities.push(ABILITIES.magicmissle);
+            }
+            if(Math.random() < 0.05){
+                abilities.push(ABILITIES.magicmissle);
+            }
+
+            // generate new entity
+            entity = new Entity({
+                sprite: sprites[ 
+                    Math.random() * sprites.length | 0],
+                abilities: new Abilities(abilities)
+            });
+
+            return entity;
         }
     });
 

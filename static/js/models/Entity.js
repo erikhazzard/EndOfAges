@@ -90,6 +90,7 @@ define(
                 baseAttributes: new EntityAttributes()
             }, {silent: true});
 
+            // TODO: allow setting just some entity attribute attributes
 
             // TODO: get AIdelay from server
             this.set({ aiDelay: Math.random() * 2.5 });
@@ -119,6 +120,17 @@ define(
             return this;
         },
 
+        getScore: function getScore(){
+            // TODO: get a combat score for this entity based on abilities
+            // and states
+
+        },
+
+        // ==============================
+        //
+        // Take damage / heal functions
+        //
+        // ==============================
         healthCallback: function healthCallback(model, health){
             logger.log('models/Entity', '1. healthCallback() : health ' + health);
 
@@ -220,17 +232,15 @@ define(
         //
         // TODO: Don't put this here
         // ==============================
-        getAbilityAI: function getAbilityAI(){
+        getAbilityAI: function getAbilityAI(time){
             // selects an ability based on health, enemy health, etc
             var models = this.attributes.abilities.models;
+
+            // TODO: select ability based on health / timer / etc.
             var ability = models[ (Math.random() * models.length)|0 ];
 
-            // if entity health is dropped below, use a healing spell
-            if(this.get('attributes').get('health') < 20){
-                ability = models[1];
-            }
-
             this.set({'desiredAbility': ability});
+
             return ability;
         }, 
 
@@ -253,11 +263,11 @@ define(
             if(!ability){
                 // No ability already chosen? Select one at random
                 // TODO: don't do it randomly
-                ability = this.getAbilityAI();
+                ability = this.getAbilityAI(time);
             }
 
             // Use the ability
-            if(time >= ability.attributes.castTime && 
+            if(ability && time >= ability.attributes.castTime && 
                 // TODO: handle AI delay differently?
                 // aiDelay is how long to delay using an ability
                 time >= (ability.attributes.castTime + this.attributes.aiDelay)
@@ -268,7 +278,7 @@ define(
                 // get the ability to use (it might change between selecting
                 // the ability the first time and when the entity can cast it)
                 // TODO: this might get screwy with the aiDelay...
-                this.getAbilityAI();
+                this.getAbilityAI(time);
                 ability = this.attributes.desiredAbility;
 
                 // make sure the ability can be cast
