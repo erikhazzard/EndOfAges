@@ -1798,7 +1798,138 @@ define(
     return PageHome;
 });
 
+// ===========================================================================
+//
+// data-map
+//
+//     Possible list of map node locations
+//     TODO: Pull from server when user loads a new map
+//
+// ===========================================================================
+define(
+    'models/data-map',[ 'events', 'logger' ], function(
+        events, logger
+    ){
+    // TODO: think of structure.
+    var MAP_NODES = {
+        // by map
+        map1: [
+            // First set of possible nodes
+            [
+                // id is the node id, x / y are the position on the map,
+                // nextNodes is an array of neighboring node indicies that the 
+                // player can travel to from the current node (directed edges)
+                // TODO: add types based on biome type (e.g., coastal, mountain)
+                { x: 205, y: 377, nextNodes: [1,2] },
+
+                { x: 269, y: 314, nextNodes: [3,4] },
+                { x: 342, y: 359, nextNodes: [5,6] },
+                
+                { x: 212, y: 247, nextNodes: [] },
+                { x: 296, y: 233, nextNodes: [] },
+
+                { x: 359, y: 294, nextNodes: [] },
+                { x: 435, y: 343, nextNodes: [] }
+            ]
+    
+            // Other sets
+        ]
+    };
+
+    return MAP_NODES;
+});
+
 define('lib/noise',[],function(){var Noise={};var ClassicalNoise=function(r){if(r==undefined)r=Math;this.grad3=[[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];this.p=[];for(var i=0;i<256;i++){this.p[i]=Math.floor(r.random()*256)}this.perm=[];for(var i=0;i<512;i++){this.perm[i]=this.p[i&255]}};ClassicalNoise.prototype.dot=function(g,x,y,z){return g[0]*x+g[1]*y+g[2]*z};ClassicalNoise.prototype.mix=function(a,b,t){return(1-t)*a+t*b};ClassicalNoise.prototype.fade=function(t){return t*t*t*(t*(t*6-15)+10)};ClassicalNoise.prototype.noise=function(x,y,z){var X=Math.floor(x);var Y=Math.floor(y);var Z=Math.floor(z);x=x-X;y=y-Y;z=z-Z;X=X&255;Y=Y&255;Z=Z&255;var gi000=this.perm[X+this.perm[Y+this.perm[Z]]]%12;var gi001=this.perm[X+this.perm[Y+this.perm[Z+1]]]%12;var gi010=this.perm[X+this.perm[Y+1+this.perm[Z]]]%12;var gi011=this.perm[X+this.perm[Y+1+this.perm[Z+1]]]%12;var gi100=this.perm[X+1+this.perm[Y+this.perm[Z]]]%12;var gi101=this.perm[X+1+this.perm[Y+this.perm[Z+1]]]%12;var gi110=this.perm[X+1+this.perm[Y+1+this.perm[Z]]]%12;var gi111=this.perm[X+1+this.perm[Y+1+this.perm[Z+1]]]%12;var n000=this.dot(this.grad3[gi000],x,y,z);var n100=this.dot(this.grad3[gi100],x-1,y,z);var n010=this.dot(this.grad3[gi010],x,y-1,z);var n110=this.dot(this.grad3[gi110],x-1,y-1,z);var n001=this.dot(this.grad3[gi001],x,y,z-1);var n101=this.dot(this.grad3[gi101],x-1,y,z-1);var n011=this.dot(this.grad3[gi011],x,y-1,z-1);var n111=this.dot(this.grad3[gi111],x-1,y-1,z-1);var u=this.fade(x);var v=this.fade(y);var w=this.fade(z);var nx00=this.mix(n000,n100,u);var nx01=this.mix(n001,n101,u);var nx10=this.mix(n010,n110,u);var nx11=this.mix(n011,n111,u);var nxy0=this.mix(nx00,nx10,v);var nxy1=this.mix(nx01,nx11,v);var nxyz=this.mix(nxy0,nxy1,w);return nxyz};var SimplexNoise=function(r){if(r==undefined)r=Math;this.grad3=[[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];this.p=[];for(var i=0;i<256;i++){this.p[i]=Math.floor(r.random()*256)}this.perm=[];for(var i=0;i<512;i++){this.perm[i]=this.p[i&255]}this.simplex=[[0,1,2,3],[0,1,3,2],[0,0,0,0],[0,2,3,1],[0,0,0,0],[0,0,0,0],[0,0,0,0],[1,2,3,0],[0,2,1,3],[0,0,0,0],[0,3,1,2],[0,3,2,1],[0,0,0,0],[0,0,0,0],[0,0,0,0],[1,3,2,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[1,2,0,3],[0,0,0,0],[1,3,0,2],[0,0,0,0],[0,0,0,0],[0,0,0,0],[2,3,0,1],[2,3,1,0],[1,0,2,3],[1,0,3,2],[0,0,0,0],[0,0,0,0],[0,0,0,0],[2,0,3,1],[0,0,0,0],[2,1,3,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[2,0,1,3],[0,0,0,0],[0,0,0,0],[0,0,0,0],[3,0,1,2],[3,0,2,1],[0,0,0,0],[3,1,2,0],[2,1,0,3],[0,0,0,0],[0,0,0,0],[0,0,0,0],[3,1,0,2],[0,0,0,0],[3,2,0,1],[3,2,1,0]]};SimplexNoise.prototype.dot=function(g,x,y){return g[0]*x+g[1]*y};SimplexNoise.prototype.noise=function(xin,yin){var n0,n1,n2;var F2=.5*(Math.sqrt(3)-1);var s=(xin+yin)*F2;var i=Math.floor(xin+s);var j=Math.floor(yin+s);var G2=(3-Math.sqrt(3))/6;var t=(i+j)*G2;var X0=i-t;var Y0=j-t;var x0=xin-X0;var y0=yin-Y0;var i1,j1;if(x0>y0){i1=1;j1=0}else{i1=0;j1=1}var x1=x0-i1+G2;var y1=y0-j1+G2;var x2=x0-1+2*G2;var y2=y0-1+2*G2;var ii=i&255;var jj=j&255;var gi0=this.perm[ii+this.perm[jj]]%12;var gi1=this.perm[ii+i1+this.perm[jj+j1]]%12;var gi2=this.perm[ii+1+this.perm[jj+1]]%12;var t0=.5-x0*x0-y0*y0;if(t0<0)n0=0;else{t0*=t0;n0=t0*t0*this.dot(this.grad3[gi0],x0,y0)}var t1=.5-x1*x1-y1*y1;if(t1<0)n1=0;else{t1*=t1;n1=t1*t1*this.dot(this.grad3[gi1],x1,y1)}var t2=.5-x2*x2-y2*y2;if(t2<0)n2=0;else{t2*=t2;n2=t2*t2*this.dot(this.grad3[gi2],x2,y2)}return 70*(n0+n1+n2)};SimplexNoise.prototype.noise3d=function(xin,yin,zin){var n0,n1,n2,n3;var F3=1/3;var s=(xin+yin+zin)*F3;var i=Math.floor(xin+s);var j=Math.floor(yin+s);var k=Math.floor(zin+s);var G3=1/6;var t=(i+j+k)*G3;var X0=i-t;var Y0=j-t;var Z0=k-t;var x0=xin-X0;var y0=yin-Y0;var z0=zin-Z0;var i1,j1,k1;var i2,j2,k2;if(x0>=y0){if(y0>=z0){i1=1;j1=0;k1=0;i2=1;j2=1;k2=0}else if(x0>=z0){i1=1;j1=0;k1=0;i2=1;j2=0;k2=1}else{i1=0;j1=0;k1=1;i2=1;j2=0;k2=1}}else{if(y0<z0){i1=0;j1=0;k1=1;i2=0;j2=1;k2=1}else if(x0<z0){i1=0;j1=1;k1=0;i2=0;j2=1;k2=1}else{i1=0;j1=1;k1=0;i2=1;j2=1;k2=0}}var x1=x0-i1+G3;var y1=y0-j1+G3;var z1=z0-k1+G3;var x2=x0-i2+2*G3;var y2=y0-j2+2*G3;var z2=z0-k2+2*G3;var x3=x0-1+3*G3;var y3=y0-1+3*G3;var z3=z0-1+3*G3;var ii=i&255;var jj=j&255;var kk=k&255;var gi0=this.perm[ii+this.perm[jj+this.perm[kk]]]%12;var gi1=this.perm[ii+i1+this.perm[jj+j1+this.perm[kk+k1]]]%12;var gi2=this.perm[ii+i2+this.perm[jj+j2+this.perm[kk+k2]]]%12;var gi3=this.perm[ii+1+this.perm[jj+1+this.perm[kk+1]]]%12;var t0=.6-x0*x0-y0*y0-z0*z0;if(t0<0)n0=0;else{t0*=t0;n0=t0*t0*this.dot(this.grad3[gi0],x0,y0,z0)}var t1=.6-x1*x1-y1*y1-z1*z1;if(t1<0)n1=0;else{t1*=t1;n1=t1*t1*this.dot(this.grad3[gi1],x1,y1,z1)}var t2=.6-x2*x2-y2*y2-z2*z2;if(t2<0)n2=0;else{t2*=t2;n2=t2*t2*this.dot(this.grad3[gi2],x2,y2,z2)}var t3=.6-x3*x3-y3*y3-z3*z3;if(t3<0)n3=0;else{t3*=t3;n3=t3*t3*this.dot(this.grad3[gi3],x3,y3,z3)}return 32*(n0+n1+n2+n3)};Noise.Classical=ClassicalNoise;Noise.Simplex=SimplexNoise;return Noise});
+// ===========================================================================
+//
+//  MapNode
+//
+//      A model for an individual map node
+//
+// ===========================================================================
+define(
+    'models/MapNode',[ 'backbone', 'logger',
+        'events', 'd3', 'util/API_URL'
+    ], function MapModel(
+        Backbone, logger,
+        events, API_URL
+    ){
+
+    var MapNode = Backbone.Model.extend({
+        defaults: {
+            x: 0,
+            y: 0,
+
+            // array of node indicies
+            nextNodes: [],
+
+            // if the user has visited the node yet
+            visited: false,
+            isCurrentNode: false,
+
+            biome: 'cave'
+        },
+
+        url: function getURL(){
+            var url = API_URL + 'map/node/' + this.cid;
+            return url;
+        },
+
+        initialize: function gameInitialize(){
+            logger.log('models/Node', 'initialize() called');
+            return this;
+        }
+    });
+
+    return MapNode;
+});
+
+// ===========================================================================
+//
+//  MapNodes
+//
+//      This collection contains MapNodes
+//
+// ===========================================================================
+define(
+    'collections/MapNodes',[ 'backbone', 'logger', 'events', 
+        'models/MapNode'
+    ], function MapNodesCollection(
+        Backbone, logger, events, 
+        MapNode
+    ){
+
+    var MapNodes = Backbone.Collection.extend({
+        model: MapNode,
+
+        initialize: function(models, options){
+            var self = this;
+            logger.log('collections/MapNodes', 'initialize() called');
+
+            // store the entity group ('player' or 'enemy')
+            options = options || {};
+
+            return this;
+        },
+
+        getCurrentNode: function getCurrentNode(){
+            // returns the currently active node model
+            var i=0;
+            var len = this.models.length;
+            var currentNode = null;
+
+            for(i=0;i<len;i++){
+                currentNode = this.models[i];
+                if(currentNode.get('isCurrentNode')){ break; }
+            }
+
+            return currentNode;
+        }
+    });
+
+    return MapNodes;
+});
+
 // ===========================================================================
 //
 //  Map
@@ -1811,23 +1942,27 @@ define(
         'events',
         'd3',
         'util/API_URL',
-        'lib/noise'
+        'models/data-map',
+        'lib/noise',
+        'models/MapNode',
+        'collections/MapNodes'
     ], function MapModel(
         Backbone, Marionette, logger,
         events,
         d3,
         API_URL,
-        Noise
+        MAP_NODES,
+        Noise,
+        MapNode,
+        MapNodes
     ){
 
         // This model defines a target map (non the app map)
         var Map = Backbone.Model.extend({
             defaults: {
-                // array of objects, as:
-                // { x: 0, y: 0, nodeId: xyz }
-                nodes: [],
-                // array of nodes user has visited
-                visited: [],
+                // collection of node objects
+                nodes: null,
+
                 background: '',
                 mapId: null
             },
@@ -1840,8 +1975,6 @@ define(
                 return url;
             },
 
-            tempNodes: [],
-
             initialize: function mapInitialize(){
                 var self = this;
 
@@ -1850,85 +1983,18 @@ define(
 
             generateMap: function mapGeneraterMap(){
                 // Generate nodes and background. This will live on the server
-                var len = 14 + Math.abs(Math.round(d3.random.normal(3, 1.5)()));
-                var nodes = [];
-                this.tempNodes = [];
+                
+                // get nodes from map data
+                // TODO: different set of nodes
+                var nodes = MAP_NODES.map1[0];
+                // first node is always visted (it's the current node)
+                nodes[0].visited = true;
+                nodes[0].isCurrentNode = true;
 
-                // randomly generate some nodes
-                for(var i=0; i<len; i++){
-                    nodes.push(this.generateNode(i));
-                }
-
-                // Normalize positions so we get a more even distribution
-                var maxX = _.max(nodes, function(d){ return d.x; });
-                var maxY = _.max(nodes, function(d){ return d.y; });
-
-                // add the difference so it extends to 1
-                // Make sure it's not too close to edge though, so use 0.95 
-                _.each(nodes, function(node){
-                    node.x += (0.95 - maxX.x);
-                    node.y += (0.95 - maxY.y);
-                });
-
-                this.set({ nodes: nodes }, {silent: true});
+                // create a collection of map nodes and store it
+                this.set({ nodes: new MapNodes(nodes) }, {silent: true});
                 this.trigger('change');
                 return this;
-            },
-
-            generateNode: function(i){
-                // generates a node. for each node, needs to check that it's not
-                // near an existing node
-                var self = this;
-                var rand = d3.random.normal(0.5, 0.3);
-                var simplex = new Noise.Simplex();
-
-                function getNum(x,y){
-                    var val = Math.abs(simplex.noise(x,y,i));
-                    //val = Math.random();
-                    if(val > 1){ val = Math.random(); }
-                    else if(val < 0.05){ val = Math.random(); }
-
-                    return val;
-                }
-                
-                function getNode(i){
-                    var node = {
-                        //x: getNum(),
-                        //y: getNum(),
-                        x: getNum(i,i*1000),
-                        y: getNum(i*1000,i),
-                        nodeId: i 
-                    };
-                    return node;
-                }
-
-                // Ensure that nodes aren't too close together
-                var node;
-                var distance = 1;
-                var furthestDist = 0;
-                var iterations = 1;
-                while(true){
-                    distance = 1;
-                    furthestDist = 0;
-                    node = getNode(i * iterations);
-                    if(self.tempNodes.length > 1){
-                        _.each(self.tempNodes, function(tempNode){
-                            var tmpDist = Math.sqrt(Math.pow(
-                                tempNode.x - node.x, 2) + Math.pow(
-                                tempNode.y - node.y, 2));
-                            if(tmpDist < distance){ distance = tmpDist; }
-                        });
-                        if(distance > 0.18){
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    iterations += 1;
-                }
-
-                this.tempNodes.push(node);
-                return node;
             }
 
         });
@@ -2074,23 +2140,27 @@ define(
         'events',
         'd3',
         'util/API_URL',
-        'lib/noise'
+        'models/data-map',
+        'lib/noise',
+        'models/MapNode',
+        'collections/MapNodes'
     ], function MapModel(
         Backbone, Marionette, logger,
         events,
         d3,
         API_URL,
-        Noise
+        MAP_NODES,
+        Noise,
+        MapNode,
+        MapNodes
     ){
 
         // This model defines a target map (non the app map)
         var Map = Backbone.Model.extend({
             defaults: {
-                // array of objects, as:
-                // { x: 0, y: 0, nodeId: xyz }
-                nodes: [],
-                // array of nodes user has visited
-                visited: [],
+                // collection of node objects
+                nodes: null,
+
                 background: '',
                 mapId: null
             },
@@ -2103,8 +2173,6 @@ define(
                 return url;
             },
 
-            tempNodes: [],
-
             initialize: function mapInitialize(){
                 var self = this;
 
@@ -2113,85 +2181,18 @@ define(
 
             generateMap: function mapGeneraterMap(){
                 // Generate nodes and background. This will live on the server
-                var len = 14 + Math.abs(Math.round(d3.random.normal(3, 1.5)()));
-                var nodes = [];
-                this.tempNodes = [];
+                
+                // get nodes from map data
+                // TODO: different set of nodes
+                var nodes = MAP_NODES.map1[0];
+                // first node is always visted (it's the current node)
+                nodes[0].visited = true;
+                nodes[0].isCurrentNode = true;
 
-                // randomly generate some nodes
-                for(var i=0; i<len; i++){
-                    nodes.push(this.generateNode(i));
-                }
-
-                // Normalize positions so we get a more even distribution
-                var maxX = _.max(nodes, function(d){ return d.x; });
-                var maxY = _.max(nodes, function(d){ return d.y; });
-
-                // add the difference so it extends to 1
-                // Make sure it's not too close to edge though, so use 0.95 
-                _.each(nodes, function(node){
-                    node.x += (0.95 - maxX.x);
-                    node.y += (0.95 - maxY.y);
-                });
-
-                this.set({ nodes: nodes }, {silent: true});
+                // create a collection of map nodes and store it
+                this.set({ nodes: new MapNodes(nodes) }, {silent: true});
                 this.trigger('change');
                 return this;
-            },
-
-            generateNode: function(i){
-                // generates a node. for each node, needs to check that it's not
-                // near an existing node
-                var self = this;
-                var rand = d3.random.normal(0.5, 0.3);
-                var simplex = new Noise.Simplex();
-
-                function getNum(x,y){
-                    var val = Math.abs(simplex.noise(x,y,i));
-                    //val = Math.random();
-                    if(val > 1){ val = Math.random(); }
-                    else if(val < 0.05){ val = Math.random(); }
-
-                    return val;
-                }
-                
-                function getNode(i){
-                    var node = {
-                        //x: getNum(),
-                        //y: getNum(),
-                        x: getNum(i,i*1000),
-                        y: getNum(i*1000,i),
-                        nodeId: i 
-                    };
-                    return node;
-                }
-
-                // Ensure that nodes aren't too close together
-                var node;
-                var distance = 1;
-                var furthestDist = 0;
-                var iterations = 1;
-                while(true){
-                    distance = 1;
-                    furthestDist = 0;
-                    node = getNode(i * iterations);
-                    if(self.tempNodes.length > 1){
-                        _.each(self.tempNodes, function(tempNode){
-                            var tmpDist = Math.sqrt(Math.pow(
-                                tempNode.x - node.x, 2) + Math.pow(
-                                tempNode.y - node.y, 2));
-                            if(tmpDist < distance){ distance = tmpDist; }
-                        });
-                        if(distance > 0.18){
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    iterations += 1;
-                }
-
-                this.tempNodes.push(node);
-                return node;
             }
 
         });
@@ -2204,6 +2205,7 @@ define(
 //
 //      View for the map
 //
+//  TODO: listen for node finish event, update current node in map model
 // ===========================================================================
 define(
     'views/subViews/Map',[ 
@@ -2294,7 +2296,9 @@ define(
         },
 
         // ------------------------------
+        //
         // Update Map
+        //
         // ------------------------------
         updateMap: function mapUpdate(){
             // Draws all nodes then updates the visible areas
@@ -2302,6 +2306,8 @@ define(
             logger.log('views/subviews/Map', 'updateMap() called');
 
             this.drawNodes();
+
+            // minor delay to delay SVG filter effect
             setTimeout(function(){
                 self.updateVisible.call(self);
             }, 20);
@@ -2309,103 +2315,134 @@ define(
             return this;
         },
 
+        
+        // ------------------------------
+        // Map Node interactions
+        // ------------------------------
+        nodeClicked: function nodeClicked(d,i){
+            // CLICK event
+            // callback when a node is interacted with
+            // TODO: What should happen?
+            logger.log('views/subviews/Map', '%s %O %O', 
+                'nodeClicked:', d, i);
+
+            // If the node is the current node OR the node has been visited,
+            // do nothing
+            if(d.node.get('isCurrentNode') || d.node.get('visited')){
+                logger.log('views/subviews/Map', '[x] already visited this node');
+                // TODO: do an effect
+                alert('Already visted this location');
+
+            } else {
+                // Can travel to the node
+                events.trigger('map:nodeClicked', {node: d, map: self.model});
+            }
+        },
+
+        // HOVER events
+        // --------------------------
+        nodeHoverStart: function nodeHoverStart(d,i){
+            logger.log('views/subviews/Map', '%s d:%O i:%O', 
+                'nodeHoverStart:', d, i);
+
+            // hover effect
+            d3.select(this).classed('node-hover', true);
+        },
+
+        nodeHoverEnd: function nodeHoverEnd(d,i){
+            logger.log('views/subviews/Map', '%s %O %O',
+                'nodeHoverEnd:', d, i);
+            d3.select(this).classed('node-hover', false);
+        },
+
+        // ------------------------------
+        //
+        // Draw nodes
+        //
+        // ------------------------------
         drawNodes: function mapDrawNodes(){
             // Draws all the nodes on the map
             var self = this;
             logger.log('views/subviews/Map', 'drawNodes() called');
 
-            // CLICK event
-            // --------------------------
-            function nodeClicked(d,i){
-                // callback when a node is interacted with
-                // TODO: What should happen?
-                logger.log('views/subviews/Map', '%s %O %O', 
-                    'nodeClicked:', d, i);
-                events.trigger('map:nodeClicked', {node: d, map: self.model});
-            }
-
-            // HOVER events
-            // --------------------------
-            function nodeHoverStart(d,i){
-                logger.log('views/subviews/Map', '%s d:%O i:%O', 
-                    'nodeHoverStart:', d, i);
-
-                // hover effect
-                d3.select(this).attr({
-                    'xlink:href':'#icon-tower-hover'
-                });
-            }
-            function nodeHoverEnd(d,i){
-                logger.log('views/subviews/Map', '%s %O %O',
-                    'nodeHoverEnd:', d, i);
-                // dehover
-                d3.select(this).attr({
-                    'xlink:href':'#icon-tower'
-                });
-            }
-
             // TODO: Use different images?
             // Draw nodes
             var nodes = this.map.selectAll('.node')
-                .data(this.model.get('nodes'))
-                .enter()
+                .data(this.getVisibleNodes(this.model.get('nodes')));
 
-                // Draw circles
-                ////.append('circle')
-                    ////.attr({
-                        ////'class': 'node',
-                        ////cx: function(d){
-                            ////return d.x * self.width;
-                        ////},
-                        ////cy: function(d){
-                            ////return d.y * self.height;
-                        ////},
-                        ////r: 10
-                    ////})
-
-                // Use an existing icon
-                .append('use')
+            // Draw circles
+            nodes.enter()
+                .append('circle')
                     .attr({
-                        'class': 'node',
-                        'xlink:href':'#icon-tower',
-                        x: function(d){
-                            return (d.x * self.width) - 20;
+                        'class': function(d){
+                            var cssClass = 'map-node';
+                            if(d.node.get('visited')){
+                                cssClass += ' node-visited';
+                            }
+                            if(d.node.get('isCurrentNode')){
+                                cssClass += ' current-node';
+                            }
+                            
+                            return cssClass;
                         },
-                        y: function(d){
-                            return (d.y * self.height) - 20;
-                        }
+                        cx: function(d){ return d.x; },
+                        cy: function(d){ return d.y; },
+                        r: 10
                     })
-                    .on('mouseenter', nodeHoverStart)
-                    .on('mouseleave', nodeHoverEnd)
+                    .on('mouseenter', this.nodeHoverStart)
+                    .on('mouseleave', this.nodeHoverEnd)
+                    .on('touchend', this.nodeClicked)
+                    .on('click', this.nodeClicked);
 
-                    .on('touchend', nodeClicked)
-                    .on('click', nodeClicked);
+            nodes.exit().remove();
+
+            // TODO: Draw a path from ALL the visited nodes
+            // TODO: draw a path to all the nextNodes
         },
 
-        getVertices: function mapGetVerticies(nodes){
-            // takes in an array of nodes and returns an array of
-            // [x,y] pairs
+        getVisibleNodes: function mapGetVisibleNodes(nodes){
+            // takes in an array of nodes and returns an array of [x,y] pairs
+            // 
             // TODO: get only the visible vertices
             var self = this;
             var vertices = [];
 
-            _.each(nodes, function(d){
-                var x = d.x;
-                var y = d.y;
+            // push the current node's neighbors
+            _.each(nodes.getCurrentNode().get('nextNodes'), function(nodeIndex){
+                var node = nodes.models[nodeIndex];
 
-                //if(Math.random() < 0.4){
-                    vertices.push([ x * self.width, y * self.height ]);
-                //}
+                vertices.push({
+                    x: node.attributes.x * (self.width/800), 
+                    y: node.attributes.y * (self.height/400),
+                    node: node
+                });
+            });
+
+            // push all visted nodes
+            _.each(nodes.models, function(d){
+                var x = d.attributes.x;
+                var y = d.attributes.y;
+
+                if(d.attributes.visited){
+                    vertices.push({
+                        x: x * (self.width/800), 
+                        y: y * (self.height/400),
+                        node: d
+                    });
+                }
             });
 
             return vertices;
         }, 
 
+        // ------------------------------
+        // Hide the fog for visible nodes
+        // ------------------------------
         updateVisible: function mapGenerateHull(){
             // Updates the the visible area, based on nodes
             logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
-            this.vertices = this.getVertices(this.model.get('nodes'));
+            this.vertices = this.getVisibleNodes(this.model.get('nodes'));
 
             var filter = '';
 
@@ -2420,8 +2457,8 @@ define(
                 .append('circle')
                     .attr({
                         'class': 'visibleNode',
-                        cx: function(d){ return d[0]; },
-                        cy: function(d){ return d[1]; },
+                        cx: function(d){ return d.x; },
+                        cy: function(d){ return d.y; },
                         filter: filter,
                         r: 80
                     }).style({

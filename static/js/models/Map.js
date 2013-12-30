@@ -10,23 +10,27 @@ define(
         'events',
         'd3',
         'util/API_URL',
-        'lib/noise'
+        'models/data-map',
+        'lib/noise',
+        'models/MapNode',
+        'collections/MapNodes'
     ], function MapModel(
         Backbone, Marionette, logger,
         events,
         d3,
         API_URL,
-        Noise
+        MAP_NODES,
+        Noise,
+        MapNode,
+        MapNodes
     ){
 
         // This model defines a target map (non the app map)
         var Map = Backbone.Model.extend({
             defaults: {
-                // array of objects, as:
-                // { x: 0, y: 0, nodeId: xyz }
-                nodes: [],
-                // array of nodes user has visited
-                visited: [],
+                // collection of node objects
+                nodes: null,
+
                 background: '',
                 mapId: null
             },
@@ -39,8 +43,6 @@ define(
                 return url;
             },
 
-            tempNodes: [],
-
             initialize: function mapInitialize(){
                 var self = this;
 
@@ -49,85 +51,18 @@ define(
 
             generateMap: function mapGeneraterMap(){
                 // Generate nodes and background. This will live on the server
-                var len = 14 + Math.abs(Math.round(d3.random.normal(3, 1.5)()));
-                var nodes = [];
-                this.tempNodes = [];
+                
+                // get nodes from map data
+                // TODO: different set of nodes
+                var nodes = MAP_NODES.map1[0];
+                // first node is always visted (it's the current node)
+                nodes[0].visited = true;
+                nodes[0].isCurrentNode = true;
 
-                // randomly generate some nodes
-                for(var i=0; i<len; i++){
-                    nodes.push(this.generateNode(i));
-                }
-
-                // Normalize positions so we get a more even distribution
-                var maxX = _.max(nodes, function(d){ return d.x; });
-                var maxY = _.max(nodes, function(d){ return d.y; });
-
-                // add the difference so it extends to 1
-                // Make sure it's not too close to edge though, so use 0.95 
-                _.each(nodes, function(node){
-                    node.x += (0.95 - maxX.x);
-                    node.y += (0.95 - maxY.y);
-                });
-
-                this.set({ nodes: nodes }, {silent: true});
+                // create a collection of map nodes and store it
+                this.set({ nodes: new MapNodes(nodes) }, {silent: true});
                 this.trigger('change');
                 return this;
-            },
-
-            generateNode: function(i){
-                // generates a node. for each node, needs to check that it's not
-                // near an existing node
-                var self = this;
-                var rand = d3.random.normal(0.5, 0.3);
-                var simplex = new Noise.Simplex();
-
-                function getNum(x,y){
-                    var val = Math.abs(simplex.noise(x,y,i));
-                    //val = Math.random();
-                    if(val > 1){ val = Math.random(); }
-                    else if(val < 0.05){ val = Math.random(); }
-
-                    return val;
-                }
-                
-                function getNode(i){
-                    var node = {
-                        //x: getNum(),
-                        //y: getNum(),
-                        x: getNum(i,i*1000),
-                        y: getNum(i*1000,i),
-                        nodeId: i 
-                    };
-                    return node;
-                }
-
-                // Ensure that nodes aren't too close together
-                var node;
-                var distance = 1;
-                var furthestDist = 0;
-                var iterations = 1;
-                while(true){
-                    distance = 1;
-                    furthestDist = 0;
-                    node = getNode(i * iterations);
-                    if(self.tempNodes.length > 1){
-                        _.each(self.tempNodes, function(tempNode){
-                            var tmpDist = Math.sqrt(Math.pow(
-                                tempNode.x - node.x, 2) + Math.pow(
-                                tempNode.y - node.y, 2));
-                            if(tmpDist < distance){ distance = tmpDist; }
-                        });
-                        if(distance > 0.18){
-                            break;
-                        }
-                    } else {
-                        break;
-                    }
-                    iterations += 1;
-                }
-
-                this.tempNodes.push(node);
-                return node;
             }
 
         });

@@ -20,7 +20,7 @@ define(
                 // nextNodes is an array of neighboring node indicies that the 
                 // player can travel to from the current node (directed edges)
                 // TODO: add types based on biome type (e.g., coastal, mountain)
-                { x: 255, y: 387, nextNodes: [1,2] },
+                { x: 205, y: 377, nextNodes: [1,2] },
 
                 { x: 269, y: 314, nextNodes: [3,4] },
                 { x: 342, y: 359, nextNodes: [5,6] },

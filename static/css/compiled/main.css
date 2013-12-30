@@ -1,8 +1,14 @@
-.node {
-  cursor: pointer; }
-
 #region-map {
   z-index: 100; }
+
+#map .map-node {
+  cursor: pointer;
+  stroke: #ffffff;
+  stroke-width: 2px; }
+#map .node-hover {
+  fill: #f0f0f0; }
+#map .node-visited {
+  fill: #22dd22; }
 
 #battle .effect-magicMissle path {
   fill: #ffffff; }

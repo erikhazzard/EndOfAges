@@ -1,12 +1,22 @@
-.fog {
-}
-.visibleArea {
-}
-
-.node {
-    cursor: pointer;
-}
-
 #region-map {
     z-index: 100;
+}
+
+#map {
+    .fog {
+    }
+    .visibleArea {
+    }
+
+    .map-node {
+        cursor: pointer;
+        stroke: #ffffff;
+        stroke-width: 2px;
+    }
+    .node-hover {
+        fill: #f0f0f0;
+    }
+    .node-visited {
+        fill: #22dd22;
+    }
 }
