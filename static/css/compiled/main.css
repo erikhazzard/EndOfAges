@@ -18,10 +18,12 @@
   stroke-opacity: 0.5;
   stroke-width: 2px; }
 
-.state-ability.selected-ability-damage .target-indicator {
+.state-ability.selected-ability-damage.selected-ability-enemy .enemy .target-indicator,
+.state-ability.selected-ability-damage.selected-ability-player .player .target-indicator {
   fill: #dd2222; }
 
-.state-ability.selected-ability-heal .target-indicator {
+.state-ability.selected-ability-heal.selected-ability-player .player .target-indicator,
+.state-ability.selected-ability-heal.selected-ability-enemy .enemy .target-indicator {
   fill: #22dd22; }
 
 .entity-hover .target-indicator {

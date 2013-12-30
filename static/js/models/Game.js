@@ -22,7 +22,11 @@ define(
             activeNodeInstance: null,
 
             // the player's party
-            playerEntities: null
+            playerEntities: null,
+
+            // money for the current game
+            gold: 0
+
         },
 
         url: function getURL(){

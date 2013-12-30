@@ -11,3 +11,11 @@ Health regens automatically, some other currency is used between battles.
     -money?
     -Something that you would not want to lose over the course of the game, but
     could be replinished at a price
+
+
+Idea 3: 
+***
+    When you die, you lose all your weapons / items / gold that ISN'T attuned to your account
+
+    -You can venture back at any time. When you do, you permanently keep all items that you looted.
+    If you die before venturing back, you lose any unattuned items

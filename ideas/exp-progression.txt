@@ -1,0 +1,9 @@
+# Experience Points / Leveling System
+Need some sort of exp / leveling system
+
+Idea 1:
+    Level by entity. Each entity has own level, can get more or less experience
+    Con: too complicated, to fine grained, doesn't add much
+
+Idea 2:
+    All party members level at same rate

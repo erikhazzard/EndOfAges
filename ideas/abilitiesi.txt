@@ -16,3 +16,8 @@ Abilities should scale in power / effects with level
 Should abilities be able to be interuppted?
 Should you be able to use another ability when you're in the middle of using
 an ability?
+
+
+--------
+
+TODO: Figure out all the 'types' of ability effects - missle, direct, AoE, etc.

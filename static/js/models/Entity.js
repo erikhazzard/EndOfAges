@@ -281,6 +281,7 @@ define(
                 // ----------------------
 
                 // TODO: target based on ability
+                // TODO: Use validTargets instead of checking damage or heal type
                 // (don't target enemy for healing spells)
                
                 if(ability.attributes.damage){

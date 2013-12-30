@@ -55,7 +55,12 @@ define(
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
             damageTarget: 'target',
+
+            // type could be either 'magic' or 'physical'
             type: 'magic',
+            // TODO: allow multiple subtypes
+            // subtypes are:
+            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
             subType: 'fire',
 
             // Heal

@@ -1009,7 +1009,12 @@ define(
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
             damageTarget: 'target',
+
+            // type could be either 'magic' or 'physical'
             type: 'magic',
+            // TODO: allow multiple subtypes
+            // subtypes are:
+            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
             subType: 'fire',
 
             // Heal
@@ -1170,29 +1175,62 @@ define(
     // Here be abilities. This would be loaded in a DB and entities would
     // get abilities from server
     var abilities = {
-        'fireball': new Ability({
-            name: 'Fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            powerCost: 8,
-            validTargets: ['enemy', 'player'],
-            type: 'magic',
-            subType: 'fire',
-            damage: 40
-        }),
+        // ------------------------------
+        // Damage - Arcane
+        // ------------------------------
         'magicmissle': new Ability({
             name: 'Magic Missle',
             effectId: 'magicMissle',
             castTime: 2,
             timeCost: 2,
             powerCost: 6,
-            validTargets: ['enemy', 'player'],
+            validTargets: ['enemy'],
             type: 'magic',
             subType: 'arcane',
             damage: 15,
             heal: 5,
             healTarget: 'source'
+        }),
+
+        // ------------------------------
+        // Damage - Fire
+        // ------------------------------
+        'flamelick': new Ability({
+            name: 'Flamelick',
+            effectId: 'flamelick',
+            castTime: 3,
+            timeCost: 3,
+            powerCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            subType: 'fire',
+            damage: 10
+        }),
+        'fireball': new Ability({
+            name: 'Fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            powerCost: 8,
+            validTargets: ['enemy'],
+            type: 'magic',
+            subType: 'fire',
+            damage: 40
+        }),
+
+        // ------------------------------
+        // Healing - Light
+        // ------------------------------
+        'trivialhealing': new Ability({
+            name: 'Trivial Healing',
+            effectId: 'trivialHealing',
+            castTime: 3,
+            timeCost: 3,
+            powerCost: 1,
+            validTargets: ['player'],
+            type: 'magic',
+            subType: 'light',
+            heal: 5
         }),
         'minorhealing': new Ability({
             name: 'Minor Healing',
@@ -1200,33 +1238,10 @@ define(
             castTime: 3,
             timeCost: 3,
             powerCost: 3,
-            validTargets: ['enemy', 'player'],
+            validTargets: ['player'],
             type: 'magic',
             subType: 'light',
             heal: 15
-        }),
-
-        'flamelick': new Ability({
-            name: 'Flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            powerCost: 4,
-            validTargets: ['enemy', 'player'],
-            type: 'magic',
-            subType: 'fire',
-            damage: 10
-        }),
-        'trivialhealing': new Ability({
-            name: 'Trivial Healing',
-            effectId: 'trivialHealing',
-            castTime: 3,
-            timeCost: 3,
-            powerCost: 1,
-            validTargets: ['enemy', 'player'],
-            type: 'magic',
-            subType: 'light',
-            heal: 5
         })
     };
 
@@ -1517,6 +1532,7 @@ define(
                 // ----------------------
 
                 // TODO: target based on ability
+                // TODO: Use validTargets instead of checking damage or heal type
                 // (don't target enemy for healing spells)
                
                 if(ability.attributes.damage){
@@ -1692,7 +1708,11 @@ define(
             activeNodeInstance: null,
 
             // the player's party
-            playerEntities: null
+            playerEntities: null,
+
+            // money for the current game
+            gold: 0
+
         },
 
         url: function getURL(){
@@ -3202,19 +3222,30 @@ define(
             // When the player's selected ability changes, change the SVG wrapper
             logger.log('views/subviews/Battle', 
                 '1. abilityChange(): ability changed to %O', ability);
-            var type = null;
+            var type = '';
+            var validTargets = ''; 
 
             if(ability){
                 // TODO: more damage types? DOTs?
                 if(ability.get('damage')){ type = 'selected-ability-damage'; }
                 else if(ability.get('heal')){ type = 'selected-ability-heal'; }
+
+                // get valid targets
+                validTargets = ability.get('validTargets');
+                if(validTargets.join){ 
+                    validTargets = validTargets.join(' selected-ability-');
+                }
+                validTargets = 'selected-ability-' + validTargets;
             }
 
             // remove classes
             // TODO: if more types, add them here
-            this.$wrapper.classed('selected-ability-damage selected-ability-heal', false);
+            this.$wrapper.classed(
+                'selected-ability-damage selected-ability-heal selected-ability-enemy selected-ability-player',
+                false);
 
             if(type){ this.$wrapper.classed(type, true); }
+            if(validTargets){ this.$wrapper.classed(validTargets, true); }
 
             return this;
         },
@@ -3349,6 +3380,16 @@ define(
             }
 
             var key = options.key;
+            // If user has an ability selected, only targetting allowed is
+            // using 1 - n, shift + 1 - n, and clicking / selecting an entity
+            if(this.model.get('state') === 'ability' &&
+                key.match(/[0-9]+/) === null){
+                logger.log('views/subviews/Battle', 
+                    '[x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
+                return false;
+            }
+
+            
             var entityGroup = 'player';
 
             // TODO: Handle different functions based on state
@@ -3364,22 +3405,19 @@ define(
                 targetIndex = +(key.replace('shift+', '')) - 1;
             }
             else if(key.match(/[0-9]+/)){
-                // if the user is trying to select an enemy 
-                // (note: must be in ability mode)
+                // When in ability mode, using the 1 - n keys will select an
+                // enemy
                 if(this.model.get('state') === 'ability'){
                     targetIndex = +key - 1;
                     entityGroup = 'enemy';
                 } else { 
                     // when the user is not in ability mode, do nothing when
                     // 1 - n key is pressed
+                    logger.log('views/subviews/Battle', 
+                        '[x] 1-n key pressed not in ability mode, returning');
                     return false;
                 }
             } 
-
-            logger.log('views/subviews/Battle', 
-                '1. got key press : ' + key + 
-                ' : entityGroup: ' + entityGroup +
-                ' : Selecting entity: ' + targetIndex);
 
             var entities, modelsLength;
             if(entityGroup === 'player'){
@@ -3401,6 +3439,14 @@ define(
                     targetIndex = modelsLength-1;
                 }
             }
+
+            // --------------------------
+            // 2. Got target entity, select it
+            // --------------------------
+            logger.log('views/subviews/Battle', 
+                '1. got key press : ' + key + 
+                ' : entityGroup: ' + entityGroup +
+                ' : Selecting entity: ' + targetIndex);
 
             // select the entity
             this.selectEntity({
@@ -3615,11 +3661,13 @@ define(
                                 return self.selectEntity({index: i, entityGroup: entityGroup});
                             })
                             .on('mouseenter',function entityMouseEnter(d,i){ 
+                                // TODO: fix this when ability changes
                                 d3.select(this).classed('entity-hover', true);
                                 return self.entityHoverStart({index: i, entityGroup: entityGroup});
                             })
                             .on('mouseleave',function entityMouseLeave(d,i){ 
                                 d3.select(this).classed('entity-hover', false);
+
                                 return self.entityHoverEnd({index:i, entityGroup: entityGroup});
                             });
 
@@ -4281,6 +4329,8 @@ define(
         useAbility: function battleUseAbility(options){
             // TODO: think of call structure
             // TODO: Move forward entity when ability is used
+            // TODO: Split out the visible stuff and the logic parts. most of 
+            // this function is logic that could live elsewhere
             options = options || {};
             var self = this;
 
@@ -4342,8 +4392,19 @@ define(
             // group, cannot use the ability
             var validTarget = selectedAbility.get('validTargets');
 
+            // if the AI used the ability, the validTargets should be switched
+            //  (to an enemy, the 'enemy' is the player, and 'player' is the AI)
+            var invalidTarget = false;
+
+            // if the PLAYER used the ability, check for valid target.
+            //  The handleAI() logic will handle valid target checks for enemies
+            if(playerUsedAbility){
+                invalidTarget = (validTarget !== targetEntityGroup && 
+                    validTarget.indexOf(targetEntityGroup) === -1);
+            } 
+
             // check that target is valid (either enemy or player)
-            if( (validTarget !== targetEntityGroup && validTarget.indexOf(targetEntityGroup) === -1) ||
+            if( invalidTarget ||
                 // check if target is dead
                 ( !target.get('isAlive') && validTarget.indexOf('dead') === -1 )
             ){
