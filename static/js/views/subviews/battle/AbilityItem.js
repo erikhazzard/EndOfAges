@@ -41,9 +41,12 @@ define(
 
             // TODO: use a hotkey configuration instead of hardcoding
             var key = [ 'q', 'w', 'e', 'r'][this.index];
+            // do the same thing, but also if user holds shift
+            var keyShift = [ 'shift+q', 'shift+w', 'shift+e', 'shift+r'][this.index];
 
             // handle keypress
             this.listenTo(events, 'keyPress:' + key, this.useAbility);
+            this.listenTo(events, 'keyPress:' + keyShift, this.useAbility);
 
             // handle battle related events
             this.listenTo(events, 'ability:cancel', this.cancelAbility);

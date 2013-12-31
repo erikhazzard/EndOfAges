@@ -539,6 +539,7 @@ define('handleKeys',[
             'escape',
             'enter',
             'q','w','e','r',
+            'shift+q','shift+w','shift+e','shift+r',
             'h','j','k','l',
             '1', '2', '3', '4', '5', '6',
             'shift+1', 'shift+2', 'shift+3', 'shift+4', 'shift+5', 'shift+6',
@@ -962,7 +963,7 @@ define(
 define(
     'models/Ability',[ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL'
-    ], function MapModel(
+    ], function AbilityModel(
         Backbone, Marionette, logger,
         events, d3, API_URL
     ){
@@ -1278,7 +1279,7 @@ define(
             abilities: null,
 
             // effects active on the entity (e.g., buffs or DoTs)
-            activeEffects: [],
+            activeEffects: [ function(){ console.log('bla'); } ],
 
             // name of the base sprite
             // TODO: Should this be here?
@@ -1375,6 +1376,23 @@ define(
             // TODO: get a combat score for this entity based on abilities
             // and states
 
+        },
+
+        checkEffects: function checkEffects(time){
+            // Called at each game loop iteration, checks each active effect
+            var effects = this.attributes.activeEffects;
+            if(effects.length === 0){
+                return this;
+            }
+
+            _.each(effects, function checkEffect(effect){
+                if(Math.random() < 0.01){
+                    console.log(">>>>>", time);
+                }
+                // Bla
+            });
+
+            return this;
         },
 
         // ==============================
@@ -2516,9 +2534,12 @@ define(
 
             // TODO: use a hotkey configuration instead of hardcoding
             var key = [ 'q', 'w', 'e', 'r'][this.index];
+            // do the same thing, but also if user holds shift
+            var keyShift = [ 'shift+q', 'shift+w', 'shift+e', 'shift+r'][this.index];
 
             // handle keypress
             this.listenTo(events, 'keyPress:' + key, this.useAbility);
+            this.listenTo(events, 'keyPress:' + keyShift, this.useAbility);
 
             // handle battle related events
             this.listenTo(events, 'ability:cancel', this.cancelAbility);
@@ -3012,7 +3033,7 @@ define(
                 exp: this.model.get('rewardExp')
             };
 
-            alert("so win." + JSON.stringify(reward));
+            console.log("so win." + JSON.stringify(reward));
             return this;
         },
         playerGroupDied: function playerGroupDied(options){
@@ -3022,7 +3043,7 @@ define(
             this.isTimerActive = false;
 
             console.log(">>>>>>>>>>>>>>>> entity group died ", options);
-            alert("so lose.");
+            console.log("so lose.");
             return this;
         },
 
@@ -3055,13 +3076,6 @@ define(
         // Timer
         //
         // ==============================
-        pauseTimer: function pauseTimer(){
-            // pauses the timer by setting isTimerActive to false.
-            // After this is called, runTimer() must be called to run the
-            // timer again
-            this.isTimerActive = false;
-        }, 
-
         runTimer: function battleRunTimer(){
             // TODO: ::: Can we put the timer in a web worker?
             //
@@ -3120,6 +3134,9 @@ define(
                 }
             }
 
+            // TODO: Restart any setTimeouts on ability effects
+
+            // start the game loop
             this.start = new Date();
             requestAnimationFrame(battleFrame);
             return this;
@@ -3199,10 +3216,11 @@ define(
                 });
             });
 
-            // 3. Update info views
-            this.entityInfoView.updateTimer(
-                this.playerEntityTimers[this.selectedEntityIndex]
-            );
+            //// 3. Update info views
+            //// TODO: update each ability's timer
+            //this.entityInfoView.updateTimer(
+                //this.playerEntityTimers[this.selectedEntityIndex]
+            //);
 
             return this;
         },
@@ -3261,7 +3279,11 @@ define(
             d3.selectAll('#battle .timer-bar').transition().duration(0);
 
             // stop the timer
-            this.pauseTimer();
+            // pauses the timer by setting isTimerActive to false.
+            // After this is called, runTimer() must be called to run the
+            // timer again
+            this.isTimerActive = false;
+
             return this;
         },
 
@@ -3306,6 +3328,7 @@ define(
 
             // reset timer
             this.runTimer();
+
             return this;
         },
 

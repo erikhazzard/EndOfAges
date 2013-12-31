@@ -8,7 +8,7 @@
 define(
     [ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL'
-    ], function MapModel(
+    ], function AbilityModel(
         Backbone, Marionette, logger,
         events, d3, API_URL
     ){

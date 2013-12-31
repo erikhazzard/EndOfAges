@@ -27,7 +27,7 @@ define(
             abilities: null,
 
             // effects active on the entity (e.g., buffs or DoTs)
-            activeEffects: [],
+            activeEffects: [ function(){ console.log('bla'); } ],
 
             // name of the base sprite
             // TODO: Should this be here?
@@ -124,6 +124,23 @@ define(
             // TODO: get a combat score for this entity based on abilities
             // and states
 
+        },
+
+        checkEffects: function checkEffects(time){
+            // Called at each game loop iteration, checks each active effect
+            var effects = this.attributes.activeEffects;
+            if(effects.length === 0){
+                return this;
+            }
+
+            _.each(effects, function checkEffect(effect){
+                if(Math.random() < 0.01){
+                    console.log(">>>>>", time);
+                }
+                // Bla
+            });
+
+            return this;
         },
 
         // ==============================

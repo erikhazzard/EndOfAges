@@ -1,3 +1,15 @@
 1. Targetting - you should be able to select an ability to use BEFORE the timer is up. It should automatically recast if set
 
 2. Saving - should only be able to save on map, not in battle. If exited in a battle, should cancel the battle?
+
+
+-----------
+
+How to handle DoTs / abilities that trigger over time?
+    Ideas
+        -each entity has a list of spell effects, check the list each tick
+        -each ability's effect function handles it - using setTimeout
+            -can't use setTimeout as easily if pausing...
+            -could have a global pause event, which would clear all timers
+                -then, when NOT paused, restart timer
+                -resume setTimeouts in unpause / runTimer function

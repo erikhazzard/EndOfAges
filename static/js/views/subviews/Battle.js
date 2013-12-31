@@ -216,7 +216,7 @@ define(
                 exp: this.model.get('rewardExp')
             };
 
-            alert("so win." + JSON.stringify(reward));
+            console.log("so win." + JSON.stringify(reward));
             return this;
         },
         playerGroupDied: function playerGroupDied(options){
@@ -226,7 +226,7 @@ define(
             this.isTimerActive = false;
 
             console.log(">>>>>>>>>>>>>>>> entity group died ", options);
-            alert("so lose.");
+            console.log("so lose.");
             return this;
         },
 
@@ -259,13 +259,6 @@ define(
         // Timer
         //
         // ==============================
-        pauseTimer: function pauseTimer(){
-            // pauses the timer by setting isTimerActive to false.
-            // After this is called, runTimer() must be called to run the
-            // timer again
-            this.isTimerActive = false;
-        }, 
-
         runTimer: function battleRunTimer(){
             // TODO: ::: Can we put the timer in a web worker?
             //
@@ -324,6 +317,9 @@ define(
                 }
             }
 
+            // TODO: Restart any setTimeouts on ability effects
+
+            // start the game loop
             this.start = new Date();
             requestAnimationFrame(battleFrame);
             return this;
@@ -403,10 +399,11 @@ define(
                 });
             });
 
-            // 3. Update info views
-            this.entityInfoView.updateTimer(
-                this.playerEntityTimers[this.selectedEntityIndex]
-            );
+            //// 3. Update info views
+            //// TODO: update each ability's timer
+            //this.entityInfoView.updateTimer(
+                //this.playerEntityTimers[this.selectedEntityIndex]
+            //);
 
             return this;
         },
@@ -465,7 +462,11 @@ define(
             d3.selectAll('#battle .timer-bar').transition().duration(0);
 
             // stop the timer
-            this.pauseTimer();
+            // pauses the timer by setting isTimerActive to false.
+            // After this is called, runTimer() must be called to run the
+            // timer again
+            this.isTimerActive = false;
+
             return this;
         },
 
@@ -510,6 +511,7 @@ define(
 
             // reset timer
             this.runTimer();
+
             return this;
         },
 
