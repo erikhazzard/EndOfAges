@@ -1,0 +1,21 @@
+1. Learn single simple technique in isolation (kihon)
+2. Repeat technique (kihon-kata)
+3. Learn how different techniques can be combined (kata)
+4. Test them in a real fight (kumite)
+
+---First experience - this is important
+----------------------
+For the game, player could start off with a single entity and a single skill.
+First fight is a very easy enemy, which you get some reward, maybe the next
+thing is a shop, then the next is two enemies, then you get a new skill unlocked,
+then you get a new party member, then fight an easier enemy to learn how to
+use both (the second party member has skills that are effective against the new
+enemy, the first entity's skills are not so effective - e.g., fire vs water)
+this cycle continues, until the boss fight, at which point all your skills are 
+tested and you beat the level (or die, and get sent back to the character creation
+process with characters unlocked but items / skills not? Or something. Need to unlock
+things here, but make it obvious that you need to actually travel back next time to keep stuff...)
+
+First time playing, you get a single character with a single skill. As you beat
+levels, you get a choice of other characters. After beating the first "tutorial" map,
+you could continue with the part or get sent back to reselect / rebuild your group

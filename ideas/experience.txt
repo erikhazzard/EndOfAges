@@ -8,3 +8,21 @@ combinations. Like picking a party structure in EQ or choosing the right party
 in FF
 -Progression - getting weapons / armor, leveling up, upgrading skills
     -Customizing characters - upgrade skills?
+
+
+------------
+Death:
+    -Once an entity dies, it is dead. No resuruction spells?
+        -Can hire / find other entities though
+
+------------
+Adventuring / Returning home
+    -Should be able to return home? But not magically in a single leap?
+
+
+---------------
+Learning new skills
+    -When you get a new skill, it starts out very bad until you use it / level it up
+
+-Skills level up as you use them?
+
