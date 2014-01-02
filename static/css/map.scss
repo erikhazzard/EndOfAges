@@ -19,4 +19,12 @@
     .node-visited {
         fill: #22dd22;
     }
+
+    // Paths
+    .destination-path {
+        fill: none;
+        stroke: #ffffff;
+        stroke-dasharray: 10px 4px;
+        stroke-width: 6px;
+    }
 }

@@ -1838,16 +1838,13 @@ define(
                 // nextNodes is an array of neighboring node indicies that the 
                 // player can travel to from the current node (directed edges)
                 // TODO: add types based on biome type (e.g., coastal, mountain)
-                { x: 205, y: 377, nextNodes: [1,2] },
+                { x: 132, y: 337, nextNodes: [1] },
 
-                { x: 269, y: 314, nextNodes: [3,4] },
-                { x: 342, y: 359, nextNodes: [5,6] },
-                
-                { x: 212, y: 247, nextNodes: [] },
-                { x: 296, y: 233, nextNodes: [] },
+                { x: 217, y: 306, nextNodes: [2,3] },
 
-                { x: 359, y: 294, nextNodes: [] },
-                { x: 435, y: 343, nextNodes: [] }
+                { x: 289, y: 276, nextNodes: [] },
+                { x: 311, y: 335, nextNodes: [] }
+
             ]
     
             // Other sets
@@ -2246,6 +2243,7 @@ define(
         initialize: function mapViewInitialize(options){
             // initialize:
             logger.log('views/subviews/Map', 'initialize() called');
+            this.gameModel = options.gameModel;
 
             return this;
         },
@@ -2272,26 +2270,30 @@ define(
             this.height = height;
 
             // setup wrapper and elements
-            this.wrapper = svg.append('g').attr({ 'class': 'svg-wrapper' });
+            this.wrapper = svg.append('g').attr({ 'class': 'svg-wrapper map' });
 
             this.defs = this.wrapper.append('defs');
             this.maskPath = this.defs.append('mask')
                 .attr({ id: 'map-mask' });
 
             // Add background layer
-            this.background = this.wrapper.append('g');
+            // TODO: use difference background image
+            this.background = this.wrapper.append('g').attr({'class': 'background'});
             this.background.append("image")
                 .attr({ 
-                    'xlink:href': '/static/img/map1-dark.png',
+                    // TODO: use difference background image
+                    'xlink:href': '/static/img/maps/map1-dark.jpg',
                     'preserveAspectRatio': 'none',
                     'class': 'fog', x: 0, y: 0,
                     height: '100%', width: '100%'
                     // fill with blacked out map
                 });
+
             // hull / visible area
             this.visibleArea = this.background.append("image")
                 .attr({ 
-                    'xlink:href': '/static/img/map1.png',
+                    // TODO: use difference background image
+                    'xlink:href': '/static/img/maps/map1.jpg',
                     'preserveAspectRatio': 'none',
                     'class': 'visibleArea', x: 0, y: 0,
                     height: '100%', width: '100%'
@@ -2301,8 +2303,13 @@ define(
                     fill: '#336699', mask: 'url(#map-mask)'
                 });
 
+            // draw paths under nodes
+            this.paths = this.wrapper.append('g')
+                .attr({ 'class': 'map-paths' });
+
             // Add nodes
-            this.map = this.wrapper.attr({ 'class': 'map' });
+            this.mapNodes = this.wrapper.append('g')
+                .attr({ 'class': 'map-nodes' });
 
             // Draw nodes
             // Delay execution since the filters is a time consuming process
@@ -2373,82 +2380,181 @@ define(
             d3.select(this).classed('node-hover', false);
         },
 
-        // ------------------------------
+        // ==============================
         //
         // Draw nodes
         //
-        // ------------------------------
+        // ==============================
         drawNodes: function mapDrawNodes(){
             // Draws all the nodes on the map
+            // TODO: Update the function structure, this is really the main
+            // draw func
             var self = this;
             logger.log('views/subviews/Map', 'drawNodes() called');
 
-            // TODO: Use different images?
+            // remove existing current node wrapper
+            this.mapNodes.select('.node-wrapper.current-node').remove();
+
             // Draw nodes
-            var nodes = this.map.selectAll('.node')
-                .data(this.getVisibleNodes(this.model.get('nodes')));
+            var nodes = this.mapNodes.selectAll('.node-wrapper')
+                .data(this.getNodes());
 
             // Draw circles
-            nodes.enter()
+            nodes.enter().append('g')
+                .on('mouseenter', this.nodeHoverStart)
+                .on('mouseleave', this.nodeHoverEnd)
+                .on('touchend', this.nodeClicked)
+                .on('click', this.nodeClicked);
+
+            // add class names to the node wrapper
+            nodes.attr({ 
+                'class': function(d,i){
+                    var cssClass = 'node-wrapper';
+
+                    if(d.node.get('visited')){ cssClass += ' node-visited'; }
+                    if(d.node.get('isCurrentNode')){ cssClass += ' current-node'; }
+                    
+                    return cssClass;
+                }
+            });
+
+            // Add circles representing destinations
+            var circles = nodes
                 .append('circle')
                     .attr({
-                        'class': function(d){
-                            var cssClass = 'map-node';
-                            if(d.node.get('visited')){
-                                cssClass += ' node-visited';
-                            }
-                            if(d.node.get('isCurrentNode')){
-                                cssClass += ' current-node';
-                            }
+                        'class': function(d,i){
+                            var cssClass = 'map-node'; 
+                            if(d.node.get('visited')){ cssClass += ' node-visited'; }
+                            if(d.node.get('isCurrentNode')){ cssClass += ' current-node'; }
                             
                             return cssClass;
                         },
                         cx: function(d){ return d.x; },
                         cy: function(d){ return d.y; },
                         r: 10
-                    })
-                    .on('mouseenter', this.nodeHoverStart)
-                    .on('mouseleave', this.nodeHoverEnd)
-                    .on('touchend', this.nodeClicked)
-                    .on('click', this.nodeClicked);
+                    });
 
+            // Lastly, add the first party member's sprite to the map's current node
+            var entityWidth = 60;
+            var entityHeight = entityWidth;
+
+            var currentNode = null;
+            this.mapNodes.select('.node-wrapper.current-node').append('image')
+                .attr({
+                    'xlink:href': function(d, i){
+                        // store a ref to the current node
+                        currentNode = d;
+
+                        return "/static/img/characters/" + 
+                            self.gameModel.get('playerEntities').models[0].get('sprite') + '.gif';
+                    }, 
+                    x: function(d){ return d.x - entityWidth/2; },
+                    y: function(d){ return d.y - entityHeight/1.2; },
+                    width: entityWidth, height: entityHeight
+                });
+
+            // remove any removed nodes
             nodes.exit().remove();
 
-            // TODO: Draw a path from ALL the visited nodes
-            // TODO: draw a path to all the nextNodes
+            // Draw a paths
+            // --------------------------
+            // We need to:
+            //  1. Draw a path based on the visited nodes path
+            //
+            //  2. Draw a path from the current node to the next nodes
+            var nextNodes = this.getNodes({ 
+                nextNodes: true, visited: false, current: false
+            });
+
+            var destinationPaths = this.paths.selectAll('.destination-path')
+                .data(nextNodes);
+
+            // add paths
+            var lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
+
+            destinationPaths.enter().append('path')
+                .attr({
+                    d: function(d){
+                        return lineDestination([
+                            [currentNode.x, currentNode.y],
+                            [ 
+                                currentNode.x + 4, 
+                                currentNode.y - 30
+                            ],
+                            [d.x, d.y]
+                        ]);
+                    },
+                    'class': 'destination-path'
+                });
+
+            // remove old paths
+            destinationPaths.exit().remove();
+
+
+            return this;
         },
 
-        getVisibleNodes: function mapGetVisibleNodes(nodes){
-            // takes in an array of nodes and returns an array of [x,y] pairs
+        getNodes: function mapGetNodes(options){
+            // This function will get (a subset) of nodes from the map's
+            // node list, process them, and return them. For processing, it
+            // transforms the x/y of the node into the actual x/y map coordinates
+            //
+            // options: {object} optional, describes what subset of nodes to get
+            //
+            //      all these options default to `true`
+            //
+            //      visited: {boolean} get nodes that have been visited 
+            //      current: {boolean} get the current node
+            //      nextNodes: {boolean} get the neighors of the current node
             // 
             // TODO: get only the visible vertices
+            // TODO: get connected nodes to travel to
             var self = this;
+            options = options || {};
+            var nodes = this.model.get('nodes');
+
             var vertices = [];
 
-            // push the current node's neighbors
-            _.each(nodes.getCurrentNode().get('nextNodes'), function(nodeIndex){
-                var node = nodes.models[nodeIndex];
+            var currentNode;
 
+            if(options.current !== false){
+                currentNode = nodes.getCurrentNode();
                 vertices.push({
-                    x: node.attributes.x * (self.width/800), 
-                    y: node.attributes.y * (self.height/400),
-                    node: node
+                    x: currentNode.attributes.x * (self.width/800), 
+                    y: currentNode.attributes.y * (self.height/400),
+                    node: currentNode
                 });
-            });
+            }
+
+            // push the current node's next possible neighbors
+            if(options.getNextNodes !== false){
+
+                _.each(nodes.getCurrentNode().get('nextNodes'), function(nodeIndex){
+                    var node = nodes.models[nodeIndex];
+
+                    vertices.push({
+                        x: node.attributes.x * (self.width/800), 
+                        y: node.attributes.y * (self.height/400),
+                        node: node
+                    });
+                });
+            }
 
             // push all visted nodes
-            _.each(nodes.models, function(d){
-                var x = d.attributes.x;
-                var y = d.attributes.y;
+            if(options.visited !== false){
+                _.each(nodes.models, function(d){
+                    var x = d.attributes.x;
+                    var y = d.attributes.y;
 
-                if(d.attributes.visited){
-                    vertices.push({
-                        x: x * (self.width/800), 
-                        y: y * (self.height/400),
-                        node: d
-                    });
-                }
-            });
+                    if(d.attributes.visited && !d.attributes.isCurrentNode){
+                        vertices.push({
+                            x: x * (self.width/800), 
+                            y: y * (self.height/400),
+                            node: d
+                        });
+                    }
+                });
+            }
 
             return vertices;
         }, 
@@ -2460,7 +2566,7 @@ define(
             // Updates the the visible area, based on nodes
             logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
-            this.vertices = this.getVisibleNodes(this.model.get('nodes'));
+            this.vertices = this.getNodes();
 
             var filter = '';
 
@@ -2469,6 +2575,7 @@ define(
                 filter = 'url(#filter-map)';
             }
 
+            // create a masked path to show visible nodes
             this.maskPath.selectAll('.visibleNode')
                 .data(this.vertices)
                 .enter()
@@ -2478,7 +2585,15 @@ define(
                         cx: function(d){ return d.x; },
                         cy: function(d){ return d.y; },
                         filter: filter,
-                        r: 80
+                        r: function(d){ 
+                            var r = 88;
+                            // note: make unvisited nodes have a smaller visible
+                            // radius
+                            if(!d.node.attributes.visited){
+                                r = 45;
+                            }
+                            return r;
+                        }
                     }).style({
                         fill: '#ffffff'   
                     });
@@ -3727,6 +3842,7 @@ define(
             // setup background
             // --------------------------
             logger.log('views/subviews/Battle', '3. setting up backdrop');
+            // TODO: use different background images
             var backgroundImage = background.append('image')
                 .attr({
                     'xlink:href': '/static/img/backdrops/cave.png',
@@ -4882,7 +4998,8 @@ define(
             // TODO: get model
             this.modelMap = new Map({});
             this.viewMap = new MapView({
-                model: this.modelMap
+                model: this.modelMap,
+                gameModel: this.model
             }); 
 
             return this;
@@ -5265,9 +5382,10 @@ require([
     
     //// log errors:
     logger.options.logLevel = [ 
-        'error',
-        'Controller'
+        'error'
+        ,'Controller'
         //,'views/subviews/Battle'
+        ,'views/subviews/Map'
     ];
 
     //// log EVERYTHING:

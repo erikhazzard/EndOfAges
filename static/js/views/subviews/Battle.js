@@ -910,6 +910,7 @@ define(
             // setup background
             // --------------------------
             logger.log('views/subviews/Battle', '3. setting up backdrop');
+            // TODO: use different background images
             var backgroundImage = background.append('image')
                 .attr({
                     'xlink:href': '/static/img/backdrops/cave.png',

@@ -74,7 +74,8 @@ define(
             // TODO: get model
             this.modelMap = new Map({});
             this.viewMap = new MapView({
-                model: this.modelMap
+                model: this.modelMap,
+                gameModel: this.model
             }); 
 
             return this;

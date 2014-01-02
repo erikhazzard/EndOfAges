@@ -9,6 +9,11 @@
   fill: #f0f0f0; }
 #map .node-visited {
   fill: #22dd22; }
+#map .destination-path {
+  fill: none;
+  stroke: #ffffff;
+  stroke-dasharray: 10px 4px;
+  stroke-width: 6px; }
 
 #battle .effect-magicMissle path {
   fill: #ffffff; }

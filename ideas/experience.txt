@@ -9,6 +9,10 @@ in FF
 -Progression - getting weapons / armor, leveling up, upgrading skills
     -Customizing characters - upgrade skills?
 
+--> With exploration and choosing a party / leveling it up in mind, it seems
+ok to skirt other kinds of storytelling experience? Ideally, both these
+experiences and story telling would exist
+
 
 ------------
 Death:

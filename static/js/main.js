@@ -115,9 +115,10 @@ require([
     
     //// log errors:
     logger.options.logLevel = [ 
-        'error',
-        'Controller'
+        'error'
+        ,'Controller'
         //,'views/subviews/Battle'
+        ,'views/subviews/Map'
     ];
 
     //// log EVERYTHING:
