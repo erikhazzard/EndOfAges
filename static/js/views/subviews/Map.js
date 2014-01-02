@@ -17,6 +17,26 @@ define(
         Map
     ){
 
+    // ----------------------------------
+    // Helper functions
+    // ----------------------------------
+    function animatePath(path) {
+        path.transition()
+            .duration(2500)
+            .ease('linear')
+            .attrTween("stroke-dasharray", tweenDash)
+            .each("end", function() { d3.select(this).call(animatePath); });
+    }
+
+    function tweenDash() {
+        var l = this.getTotalLength(),
+        i = d3.interpolateString("0," + l, l + "," + l);
+        return function(t) { return i(t); };
+    }
+
+    // ----------------------------------
+    // Map view
+    // ----------------------------------
     var MapView = Backbone.Marionette.Layout.extend({
         template: '#template-game-map',
 
@@ -154,6 +174,11 @@ define(
             logger.log('views/subviews/Map', '%s d:%O i:%O', 
                 'nodeHoverStart:', d, i);
 
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            events.trigger('nodeHoverOn', {d: d});
             // hover effect
             d3.select(this).classed('node-hover', true);
         },
@@ -161,6 +186,12 @@ define(
         nodeHoverEnd: function nodeHoverEnd(d,i){
             logger.log('views/subviews/Map', '%s %O %O',
                 'nodeHoverEnd:', d, i);
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            // TODO: REMOVE !!!!!!!!!!!!!!!!
+            events.trigger('nodeHoverOff', {d: d});
             d3.select(this).classed('node-hover', false);
         },
 
@@ -255,21 +286,51 @@ define(
 
             // add paths
             var lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
+            var line = function(d){
+                return lineDestination([
+                    [currentNode.x, currentNode.y],
+                    [d.x, d.y]
+                ]);
+            };
 
-            destinationPaths.enter().append('path')
+            // draw the dotted path
+            var paths = destinationPaths.enter().append('path')
                 .attr({
-                    d: function(d){
-                        return lineDestination([
-                            [currentNode.x, currentNode.y],
-                            [ 
-                                currentNode.x + 4, 
-                                currentNode.y - 30
-                            ],
-                            [d.x, d.y]
-                        ]);
-                    },
-                    'class': 'destination-path'
+                    d: line, 
+                    'class': 'destination-path-dotted',
+                    'filter': 'url(#filter-wavy)',
+                    'stroke-dashoffset': 0
                 });
+
+            //draw the animated path
+            _.each(paths[0], function(path){
+                path = d3.select(path);
+                var totalLength = path.node().getTotalLength();
+                var duration = 21000 * (totalLength / 115);
+                i = 1;
+                function animatePath(){
+                    path.transition().duration(duration).ease("linear")
+                        .attr("stroke-dashoffset", -totalLength * i)
+                            .each('end', animatePath);
+                    i += 1;
+                }
+                animatePath();
+            });
+
+            // TODO: on node mouse over, draw line
+            // TODO: NOOOO remove this, this is JUST for demo
+            events.on('nodeHoverOn', function(options){
+                destinationPaths.enter().append('path')
+                    .attr({
+                        d: line, 
+                        'class': 'to-remove destination-path-animated',
+                        'filter': 'url(#filter-wavy)'
+                    })
+                    .call(animatePath);
+            });
+            events.on('nodeHoverOff', function(options){
+                self.paths.selectAll('.to-remove').remove();
+            });
 
             // remove old paths
             destinationPaths.exit().remove();

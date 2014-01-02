@@ -21,10 +21,16 @@
     }
 
     // Paths
-    .destination-path {
+    .destination-path-dotted {
         fill: none;
         stroke: #ffffff;
+        opacity: 0.6;
         stroke-dasharray: 10px 4px;
         stroke-width: 6px;
+    }
+    .destination-path-animated{
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 3px;
     }
 }

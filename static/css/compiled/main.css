@@ -9,11 +9,16 @@
   fill: #f0f0f0; }
 #map .node-visited {
   fill: #22dd22; }
-#map .destination-path {
+#map .destination-path-dotted {
   fill: none;
   stroke: #ffffff;
+  opacity: 0.6;
   stroke-dasharray: 10px 4px;
   stroke-width: 6px; }
+#map .destination-path-animated {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 3px; }
 
 #battle .effect-magicMissle path {
   fill: #ffffff; }
