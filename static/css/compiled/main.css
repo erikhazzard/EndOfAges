@@ -17,8 +17,8 @@
   stroke-width: 6px; }
 #map .destination-path-animated {
   fill: none;
-  stroke: #ffffff;
-  stroke-width: 3px; }
+  stroke: #343434;
+  stroke-width: 8px; }
 
 #battle .effect-magicMissle path {
   fill: #ffffff; }

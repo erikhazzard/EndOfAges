@@ -1838,12 +1838,12 @@ define(
                 // nextNodes is an array of neighboring node indicies that the 
                 // player can travel to from the current node (directed edges)
                 // TODO: add types based on biome type (e.g., coastal, mountain)
-                { x: 132, y: 337, nextNodes: [1] },
+                { x: 132, y: 337, nextNodes: [1,3] },
 
                 { x: 217, y: 306, nextNodes: [2,3] },
 
                 { x: 289, y: 276, nextNodes: [] },
-                { x: 311, y: 335, nextNodes: [] }
+                { x: 211, y: 355, nextNodes: [] }
 
             ]
     
@@ -2514,24 +2514,26 @@ define(
                 .attr({
                     d: line, 
                     'class': 'destination-path-dotted',
-                    'filter': 'url(#filter-wavy)',
+                    'filter': 'url(#filter5435)',
                     'stroke-dashoffset': 0
                 });
 
-            //draw the animated path
-            _.each(paths[0], function(path){
-                path = d3.select(path);
-                var totalLength = path.node().getTotalLength();
-                var duration = 21000 * (totalLength / 115);
-                i = 1;
-                function animatePath(){
-                    path.transition().duration(duration).ease("linear")
-                        .attr("stroke-dashoffset", -totalLength * i)
-                            .each('end', animatePath);
-                    i += 1;
-                }
-                animatePath();
-            });
+            ////draw the animated path
+            ////TODO: Should this antimate? If it should be, we can do this:
+            //// NOTE: Be sure to cancel the animation
+            //_.each(paths[0], function(path){
+                //path = d3.select(path);
+                //var totalLength = path.node().getTotalLength();
+                //var duration = 34000 * (totalLength / 115);
+                //i = 1;
+                //function animatePath(){
+                    //i += 1;
+                    //path.transition().duration(duration).ease("linear")
+                        //.attr("stroke-dashoffset", -totalLength * i)
+                            //.each('end', animatePath);
+                //}
+                //animatePath();
+            //});
 
             // TODO: on node mouse over, draw line
             // TODO: NOOOO remove this, this is JUST for demo
@@ -2540,7 +2542,7 @@ define(
                     .attr({
                         d: line, 
                         'class': 'to-remove destination-path-animated',
-                        'filter': 'url(#filter-wavy)'
+                        'filter': 'url(#filter5435)'
                     })
                     .call(animatePath);
             });

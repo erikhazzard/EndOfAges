@@ -39,7 +39,24 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
             <feComposite id="feComposite3602" in2="result1" result="result5" operator="arithmetic" k1="1.7" />
             <feBlend id="feBlend3604" in2="result3" in="result5" mode="normal" />
         </filter>
-
+  <filter
+       color-interpolation-filters="sRGB"
+       id="filter5435">
+      <feTurbulence
+         result="result91"
+         baseFrequency="0.04"
+         type="turbulence"
+         seed="0"
+         numOctaves="3"
+         id="feTurbulence5437" />
+      <feDisplacementMap
+         in2="result91"
+         scale="6.6"
+         xChannelSelector="R"
+         yChannelSelector="G"
+         in="SourceGraphic"
+         id="feDisplacementMap5439" />
+    </filter>
 
     </defs>
 </svg>
