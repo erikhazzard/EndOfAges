@@ -298,26 +298,26 @@ define(
                 .attr({
                     d: line, 
                     'class': 'destination-path-dotted',
-                    'filter': 'url(#filter5435)',
+                    'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
 
             ////draw the animated path
             ////TODO: Should this antimate? If it should be, we can do this:
             //// NOTE: Be sure to cancel the animation
-            //_.each(paths[0], function(path){
-                //path = d3.select(path);
-                //var totalLength = path.node().getTotalLength();
-                //var duration = 34000 * (totalLength / 115);
-                //i = 1;
-                //function animatePath(){
-                    //i += 1;
-                    //path.transition().duration(duration).ease("linear")
-                        //.attr("stroke-dashoffset", -totalLength * i)
-                            //.each('end', animatePath);
-                //}
-                //animatePath();
-            //});
+            _.each(paths[0], function(path){
+                path = d3.select(path);
+                var totalLength = path.node().getTotalLength();
+                var duration = 34000 * (totalLength / 115);
+                i = 1;
+                function animatePath(){
+                    i += 1;
+                    path.transition().duration(duration).ease("linear")
+                        .attr("stroke-dashoffset", -totalLength * i)
+                            .each('end', animatePath);
+                }
+                animatePath();
+            });
 
             // TODO: on node mouse over, draw line
             // TODO: NOOOO remove this, this is JUST for demo
@@ -326,7 +326,7 @@ define(
                     .attr({
                         d: line, 
                         'class': 'to-remove destination-path-animated',
-                        'filter': 'url(#filter5435)'
+                        'filter': 'url(#filter-wavy)'
                     })
                     .call(animatePath);
             });
