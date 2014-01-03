@@ -72,9 +72,11 @@ define(
             //
             // MAP
             // TODO: get model
-            this.modelMap = new Map({});
+            this.mapModel = new Map({});
+            this.model.set({ map: this.mapModel });
+
             this.viewMap = new MapView({
-                model: this.modelMap,
+                model: this.mapModel,
                 gameModel: this.model
             }); 
 
@@ -87,7 +89,7 @@ define(
             // setup the map
 
             // TODO: Get map model from game.
-            this.modelMap.generateMap();
+            this.mapModel.generateMap();
 
             this.regionMap.show(this.viewMap);
             return this;
@@ -106,6 +108,9 @@ define(
             //
             // When the instance is finished, the node:instanceFinished 
             // event is fired off, which will re-show the map
+            //
+            // options: {Object}
+            //  node: Map node object
             //
             logger.log('views/PageGame', 
                 '1. mapNodeClicked() called. Options: %O',
@@ -157,8 +162,14 @@ define(
             }
 
             // update game model
-            this.model.set({activeNodeInstance: nodeInstance}, {silent: true});
+            this.model.set({
+                activeNodeInstance: nodeInstance
+            }, {silent: true});
             this.model.trigger('change:activeNodeInstance');
+
+            // TODO: should this be done differently? maybe on map or game?
+            // set the desired next node
+            this.model.get('map').get('nodes').nextNode = options.node;
 
             // show it
             logger.log('views/PageGame', '4. Showing node instance: %O',
@@ -183,7 +194,11 @@ define(
                 '1. nodeInstanceFinished() called. Options: %O',
                 options);
 
-            this.model.set({activeNodeInstance: null}, {silent: true});
+            // change the currently updated node
+            // clear out the active node
+            this.model.set({
+                activeNodeInstance: null
+            }, {silent: true});
             this.model.trigger('change:activeNodeInstance');
             
             // Hide instance
@@ -195,6 +210,10 @@ define(
             logger.log('views/PageGame', '4. Showing map');
             //this.regionMap.$el.show();
             this.regionMap.$el.css({ height: 100 });
+
+            // update the map's current map node
+            var nodes = this.model.get('map').get('nodes');
+            nodes.setCurrentNode(nodes.nextNode);
         }
 
     });

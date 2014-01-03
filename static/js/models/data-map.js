@@ -24,8 +24,8 @@ define(
 
                 { x: 217, y: 306, nextNodes: [2,3] },
 
-                { x: 289, y: 276, nextNodes: [] },
-                { x: 311, y: 335, nextNodes: [] }
+                { x: 272, y: 279, nextNodes: [] },
+                { x: 272, y: 337, nextNodes: [] }
 
             ]
     

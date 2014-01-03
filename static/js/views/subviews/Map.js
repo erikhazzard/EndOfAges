@@ -49,6 +49,12 @@ define(
             logger.log('views/subviews/Map', 'initialize() called');
             this.gameModel = options.gameModel;
 
+            // When the current node changes, update the map
+            this.listenTo(
+                events,
+                'change:currentNode', 
+                this.updateMap
+            );
             return this;
         },
 
@@ -59,7 +65,7 @@ define(
 
         // Map generation
         // ------------------------------
-        drawMap: function mapViewGenerateMap(){
+        drawMap: function mapViewDrawMap(options){
             var self = this;
             logger.log('views/subviews/Map', 'drawMap() called');
 
@@ -134,6 +140,7 @@ define(
             var self = this;
             logger.log('views/subviews/Map', 'updateMap() called');
 
+            // draw / update nodes
             this.drawNodes();
 
             // minor delay to delay SVG filter effect
@@ -157,14 +164,17 @@ define(
 
             // If the node is the current node OR the node has been visited,
             // do nothing
-            if(d.node.get('isCurrentNode') || d.node.get('visited')){
+            if (d.node.get('isCurrentNode')){
+                logger.log('views/subviews/Map', '[x] already visited this node');
+                // TODO: do an effect
+                alert("You're already heree");
+            } else if(d.node.get('visited')){
                 logger.log('views/subviews/Map', '[x] already visited this node');
                 // TODO: do an effect
                 alert('Already visted this location');
-
             } else {
                 // Can travel to the node
-                events.trigger('map:nodeClicked', {node: d, map: self.model});
+                events.trigger('map:nodeClicked', {node: d.node});
             }
         },
 
@@ -281,9 +291,6 @@ define(
                 nextNodes: true, visited: false, current: false
             });
 
-            var destinationPaths = this.paths.selectAll('.destination-path')
-                .data(nextNodes);
-
             // add paths
             var lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
             var line = function(d){
@@ -293,11 +300,16 @@ define(
                 ]);
             };
 
+            var destinationPaths = this.paths.selectAll('.destination-path')
+                .data(nextNodes);
+
             // draw the dotted path
-            var paths = destinationPaths.enter().append('path')
+            destinationPaths.enter().append('path');
+
+            destinationPaths
                 .attr({
                     d: line, 
-                    'class': 'destination-path-dotted',
+                    'class': 'destination-path destination-path-dotted',
                     'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
@@ -305,7 +317,7 @@ define(
             ////draw the animated path
             ////TODO: Should this antimate? If it should be, we can do this:
             //// NOTE: Be sure to cancel the animation
-            _.each(paths[0], function(path){
+            _.each(destinationPaths[0], function(path){
                 path = d3.select(path);
                 var totalLength = path.node().getTotalLength();
                 var duration = 34000 * (totalLength / 115);
@@ -331,6 +343,8 @@ define(
                     .call(animatePath);
             });
             events.on('nodeHoverOff', function(options){
+                self.paths.selectAll('.to-remove').transition()
+                    .duration(0);
                 self.paths.selectAll('.to-remove').remove();
             });
 
@@ -413,7 +427,7 @@ define(
             // Updates the the visible area, based on nodes
             logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
-            this.vertices = this.getNodes();
+            var vertices = this.getNodes();
 
             var filter = '';
 
@@ -423,27 +437,35 @@ define(
             }
 
             // create a masked path to show visible nodes
-            this.maskPath.selectAll('.visibleNode')
-                .data(this.vertices)
-                .enter()
+            var masks = this.maskPath.selectAll('.visibleNode')
+                .data(vertices);
+
+            masks.enter()
                 .append('circle')
-                    .attr({
-                        'class': 'visibleNode',
-                        cx: function(d){ return d.x; },
-                        cy: function(d){ return d.y; },
-                        filter: filter,
-                        r: function(d){ 
-                            var r = 88;
-                            // note: make unvisited nodes have a smaller visible
-                            // radius
-                            if(!d.node.attributes.visited){
-                                r = 45;
-                            }
-                            return r;
-                        }
-                    }).style({
-                        fill: '#ffffff'   
-                    });
+                .style({
+                    fill: '#ffffff'   
+                });
+
+            masks.attr({
+                'class': 'visibleNode',
+                cx: function(d){ return d.x; },
+                cy: function(d){ return d.y; },
+                filter: filter,
+                r: function(d){ 
+                    var r = 73;
+                    // note: make unvisited nodes have a smaller visible
+                    // radius
+                    if(d.node.attributes.isCurrentNode){
+                    } else if(d.node.attributes.visited){
+                        r = 73;
+                    } else {
+                        r = 45;
+                    }
+                    return r;
+                }
+            });
+
+            masks.exit().remove();
 
             return this;
         }

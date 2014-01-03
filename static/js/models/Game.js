@@ -19,6 +19,10 @@ define(
 
     var Game = Backbone.Model.extend({
         defaults: {
+            // current map
+            activeMap: null,
+
+            // Instance of the node type (e.g., battle)
             activeNodeInstance: null,
 
             // the player's party

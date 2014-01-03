@@ -1733,6 +1733,10 @@ define(
 
     var Game = Backbone.Model.extend({
         defaults: {
+            // current map
+            activeMap: null,
+
+            // Instance of the node type (e.g., battle)
             activeNodeInstance: null,
 
             // the player's party
@@ -1842,8 +1846,8 @@ define(
 
                 { x: 217, y: 306, nextNodes: [2,3] },
 
-                { x: 289, y: 276, nextNodes: [] },
-                { x: 311, y: 335, nextNodes: [] }
+                { x: 272, y: 279, nextNodes: [] },
+                { x: 272, y: 337, nextNodes: [] }
 
             ]
     
@@ -1917,6 +1921,10 @@ define(
     var MapNodes = Backbone.Collection.extend({
         model: MapNode,
 
+        // desired node
+        // TODO: should desired / current node info be stored here??
+        nextNode: null,
+
         initialize: function(models, options){
             var self = this;
             logger.log('collections/MapNodes', 'initialize() called');
@@ -1925,6 +1933,19 @@ define(
             options = options || {};
 
             return this;
+        },
+
+        // TODO: should current node be a property of the collection instead of
+        // by model?
+        setCurrentNode: function setCurrentNode(node){
+            // unset current node
+            logger.log('collections/MapNodes', 
+                'setCurrentNode() called with node %O', node);
+
+            this.getCurrentNode().set({ isCurrentNode: false }, {silent:true}); 
+            // set current node
+            node.set({ isCurrentNode: true, visited: true });
+            events.trigger('change:currentNode', {model: node});
         },
 
         getCurrentNode: function getCurrentNode(){
@@ -2265,6 +2286,12 @@ define(
             logger.log('views/subviews/Map', 'initialize() called');
             this.gameModel = options.gameModel;
 
+            // When the current node changes, update the map
+            this.listenTo(
+                events,
+                'change:currentNode', 
+                this.updateMap
+            );
             return this;
         },
 
@@ -2275,7 +2302,7 @@ define(
 
         // Map generation
         // ------------------------------
-        drawMap: function mapViewGenerateMap(){
+        drawMap: function mapViewDrawMap(options){
             var self = this;
             logger.log('views/subviews/Map', 'drawMap() called');
 
@@ -2350,6 +2377,7 @@ define(
             var self = this;
             logger.log('views/subviews/Map', 'updateMap() called');
 
+            // draw / update nodes
             this.drawNodes();
 
             // minor delay to delay SVG filter effect
@@ -2373,14 +2401,17 @@ define(
 
             // If the node is the current node OR the node has been visited,
             // do nothing
-            if(d.node.get('isCurrentNode') || d.node.get('visited')){
+            if (d.node.get('isCurrentNode')){
+                logger.log('views/subviews/Map', '[x] already visited this node');
+                // TODO: do an effect
+                alert("You're already heree");
+            } else if(d.node.get('visited')){
                 logger.log('views/subviews/Map', '[x] already visited this node');
                 // TODO: do an effect
                 alert('Already visted this location');
-
             } else {
                 // Can travel to the node
-                events.trigger('map:nodeClicked', {node: d, map: self.model});
+                events.trigger('map:nodeClicked', {node: d.node});
             }
         },
 
@@ -2497,9 +2528,6 @@ define(
                 nextNodes: true, visited: false, current: false
             });
 
-            var destinationPaths = this.paths.selectAll('.destination-path')
-                .data(nextNodes);
-
             // add paths
             var lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
             var line = function(d){
@@ -2509,11 +2537,16 @@ define(
                 ]);
             };
 
+            var destinationPaths = this.paths.selectAll('.destination-path')
+                .data(nextNodes);
+
             // draw the dotted path
-            var paths = destinationPaths.enter().append('path')
+            destinationPaths.enter().append('path');
+
+            destinationPaths
                 .attr({
                     d: line, 
-                    'class': 'destination-path-dotted',
+                    'class': 'destination-path destination-path-dotted',
                     'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
@@ -2521,7 +2554,7 @@ define(
             ////draw the animated path
             ////TODO: Should this antimate? If it should be, we can do this:
             //// NOTE: Be sure to cancel the animation
-            _.each(paths[0], function(path){
+            _.each(destinationPaths[0], function(path){
                 path = d3.select(path);
                 var totalLength = path.node().getTotalLength();
                 var duration = 34000 * (totalLength / 115);
@@ -2547,6 +2580,8 @@ define(
                     .call(animatePath);
             });
             events.on('nodeHoverOff', function(options){
+                self.paths.selectAll('.to-remove').transition()
+                    .duration(0);
                 self.paths.selectAll('.to-remove').remove();
             });
 
@@ -2629,7 +2664,7 @@ define(
             // Updates the the visible area, based on nodes
             logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
-            this.vertices = this.getNodes();
+            var vertices = this.getNodes();
 
             var filter = '';
 
@@ -2639,27 +2674,35 @@ define(
             }
 
             // create a masked path to show visible nodes
-            this.maskPath.selectAll('.visibleNode')
-                .data(this.vertices)
-                .enter()
+            var masks = this.maskPath.selectAll('.visibleNode')
+                .data(vertices);
+
+            masks.enter()
                 .append('circle')
-                    .attr({
-                        'class': 'visibleNode',
-                        cx: function(d){ return d.x; },
-                        cy: function(d){ return d.y; },
-                        filter: filter,
-                        r: function(d){ 
-                            var r = 88;
-                            // note: make unvisited nodes have a smaller visible
-                            // radius
-                            if(!d.node.attributes.visited){
-                                r = 45;
-                            }
-                            return r;
-                        }
-                    }).style({
-                        fill: '#ffffff'   
-                    });
+                .style({
+                    fill: '#ffffff'   
+                });
+
+            masks.attr({
+                'class': 'visibleNode',
+                cx: function(d){ return d.x; },
+                cy: function(d){ return d.y; },
+                filter: filter,
+                r: function(d){ 
+                    var r = 73;
+                    // note: make unvisited nodes have a smaller visible
+                    // radius
+                    if(d.node.attributes.isCurrentNode){
+                    } else if(d.node.attributes.visited){
+                        r = 73;
+                    } else {
+                        r = 45;
+                    }
+                    return r;
+                }
+            });
+
+            masks.exit().remove();
 
             return this;
         }
@@ -5059,9 +5102,11 @@ define(
             //
             // MAP
             // TODO: get model
-            this.modelMap = new Map({});
+            this.mapModel = new Map({});
+            this.model.set({ map: this.mapModel });
+
             this.viewMap = new MapView({
-                model: this.modelMap,
+                model: this.mapModel,
                 gameModel: this.model
             }); 
 
@@ -5074,7 +5119,7 @@ define(
             // setup the map
 
             // TODO: Get map model from game.
-            this.modelMap.generateMap();
+            this.mapModel.generateMap();
 
             this.regionMap.show(this.viewMap);
             return this;
@@ -5093,6 +5138,9 @@ define(
             //
             // When the instance is finished, the node:instanceFinished 
             // event is fired off, which will re-show the map
+            //
+            // options: {Object}
+            //  node: Map node object
             //
             logger.log('views/PageGame', 
                 '1. mapNodeClicked() called. Options: %O',
@@ -5144,8 +5192,14 @@ define(
             }
 
             // update game model
-            this.model.set({activeNodeInstance: nodeInstance}, {silent: true});
+            this.model.set({
+                activeNodeInstance: nodeInstance
+            }, {silent: true});
             this.model.trigger('change:activeNodeInstance');
+
+            // TODO: should this be done differently? maybe on map or game?
+            // set the desired next node
+            this.model.get('map').get('nodes').nextNode = options.node;
 
             // show it
             logger.log('views/PageGame', '4. Showing node instance: %O',
@@ -5170,7 +5224,11 @@ define(
                 '1. nodeInstanceFinished() called. Options: %O',
                 options);
 
-            this.model.set({activeNodeInstance: null}, {silent: true});
+            // change the currently updated node
+            // clear out the active node
+            this.model.set({
+                activeNodeInstance: null
+            }, {silent: true});
             this.model.trigger('change:activeNodeInstance');
             
             // Hide instance
@@ -5182,6 +5240,10 @@ define(
             logger.log('views/PageGame', '4. Showing map');
             //this.regionMap.$el.show();
             this.regionMap.$el.css({ height: 100 });
+
+            // update the map's current map node
+            var nodes = this.model.get('map').get('nodes');
+            nodes.setCurrentNode(nodes.nextNode);
         }
 
     });

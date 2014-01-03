@@ -16,6 +16,10 @@ define(
     var MapNodes = Backbone.Collection.extend({
         model: MapNode,
 
+        // desired node
+        // TODO: should desired / current node info be stored here??
+        nextNode: null,
+
         initialize: function(models, options){
             var self = this;
             logger.log('collections/MapNodes', 'initialize() called');
@@ -24,6 +28,19 @@ define(
             options = options || {};
 
             return this;
+        },
+
+        // TODO: should current node be a property of the collection instead of
+        // by model?
+        setCurrentNode: function setCurrentNode(node){
+            // unset current node
+            logger.log('collections/MapNodes', 
+                'setCurrentNode() called with node %O', node);
+
+            this.getCurrentNode().set({ isCurrentNode: false }, {silent:true}); 
+            // set current node
+            node.set({ isCurrentNode: true, visited: true });
+            events.trigger('change:currentNode', {model: node});
         },
 
         getCurrentNode: function getCurrentNode(){
