@@ -13,6 +13,12 @@
         stroke: #ffffff;
         stroke-width: 2px;
     }
+    .node-visited {
+        cursor: no-drop;
+    }
+    .node-current {
+        cursor: default !important;
+    }
     .node-hover {
         fill: #f0f0f0;
     }
@@ -28,7 +34,7 @@
     .visited-path-dotted {
         fill: none;
         stroke: #343434;
-        opacity: 0.6;
+        opacity: 0.9;
         stroke-dasharray:  0;
         stroke-width: 6px;
     }

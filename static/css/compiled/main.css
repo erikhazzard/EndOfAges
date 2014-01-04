@@ -5,6 +5,10 @@
   cursor: pointer;
   stroke: #ffffff;
   stroke-width: 2px; }
+#map .node-visited {
+  cursor: no-drop; }
+#map .node-current {
+  cursor: default !important; }
 #map .node-hover {
   fill: #f0f0f0; }
 #map .node-visited {
@@ -14,7 +18,7 @@
 #map .visited-path-dotted {
   fill: none;
   stroke: #343434;
-  opacity: 0.6;
+  opacity: 0.9;
   stroke-dasharray: 0;
   stroke-width: 6px; }
 #map .destination-path-dotted {

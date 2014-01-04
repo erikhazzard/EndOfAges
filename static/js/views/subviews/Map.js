@@ -219,7 +219,7 @@ define(
             logger.log('views/subviews/Map', 'drawNodes() called');
 
             // remove existing current node wrapper
-            this.mapNodes.select('.node-wrapper.current-node').remove();
+            this.mapNodes.select('.node-wrapper.node-current').remove();
 
             // Draw nodes
             var nodes = this.mapNodes.selectAll('.node-wrapper')
@@ -238,7 +238,7 @@ define(
                     var cssClass = 'node-wrapper';
 
                     if(d.node.get('visited')){ cssClass += ' node-visited'; }
-                    if(d.node.get('isCurrentNode')){ cssClass += ' current-node'; }
+                    if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
                     
                     return cssClass;
                 }
@@ -252,7 +252,7 @@ define(
                         'class': function(d,i){
                             var cssClass = 'map-node'; 
                             if(d.node.get('visited')){ cssClass += ' node-visited'; }
-                            if(d.node.get('isCurrentNode')){ cssClass += ' current-node'; }
+                            if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
                             
                             return cssClass;
                         },
@@ -266,7 +266,7 @@ define(
             var entityHeight = entityWidth;
 
             var currentNode = null;
-            this.mapNodes.select('.node-wrapper.current-node').append('image')
+            this.mapNodes.select('.node-wrapper.node-current').append('image')
                 .attr({
                     'xlink:href': function(d, i){
                         // store a ref to the current node
@@ -294,7 +294,7 @@ define(
             logger.log('views/subviews/Map', 
                 'visitedNodes : %O', visitedNodes);
 
-            var lineVisited = d3.svg.line().tension(0).interpolate("cardinal-open");
+            var lineVisited = d3.svg.line();
             var line = function(){
                 return lineVisited(_.map(self.model.get('visitedPath'), function(index){
                     var coords = self.getCoordinatesFromNode(
@@ -330,7 +330,7 @@ define(
             });
 
             // add paths
-            lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
+            lineDestination = d3.svg.line();
             line = function(d){
                 return lineDestination([
                     [currentNode.x, currentNode.y],

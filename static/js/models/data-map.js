@@ -22,10 +22,12 @@ define(
                 // TODO: add types based on biome type (e.g., coastal, mountain)
                 { x: 132, y: 337, nextNodes: [1] },
 
-                { x: 217, y: 306, nextNodes: [2,3] },
+                { x: 217, y: 306, nextNodes: [2,3] }, // 1
 
-                { x: 272, y: 279, nextNodes: [] },
-                { x: 272, y: 337, nextNodes: [] }
+                { x: 272, y: 279, nextNodes: [4] }, // 2
+                { x: 272, y: 337, nextNodes: [] }, // 3
+
+                { x: 252, y: 229, nextNodes: [] } // 4
 
             ]
     
