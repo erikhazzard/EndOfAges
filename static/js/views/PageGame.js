@@ -167,9 +167,8 @@ define(
             }, {silent: true});
             this.model.trigger('change:activeNodeInstance');
 
-            // TODO: should this be done differently? maybe on map or game?
             // set the desired next node
-            this.model.get('map').get('nodes').nextNode = options.node;
+            this.model.get('map').set({nextNode: options.node});
 
             // show it
             logger.log('views/PageGame', '4. Showing node instance: %O',
@@ -212,8 +211,8 @@ define(
             this.regionMap.$el.css({ height: 100 });
 
             // update the map's current map node
-            var nodes = this.model.get('map').get('nodes');
-            nodes.setCurrentNode(nodes.nextNode);
+            var map = this.model.get('map');
+            map.setCurrentNode(map.get('nextNode'));
         }
 
     });

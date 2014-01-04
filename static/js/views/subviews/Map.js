@@ -138,7 +138,8 @@ define(
         updateMap: function mapUpdate(){
             // Draws all nodes then updates the visible areas
             var self = this;
-            logger.log('views/subviews/Map', 'updateMap() called');
+            logger.log('views/subviews/Map', 
+                '=== 1. updateMap() called');
 
             // draw / update nodes
             this.drawNodes();
@@ -244,6 +245,7 @@ define(
             });
 
             // Add circles representing destinations
+            nodes.selectAll('circle').remove();
             var circles = nodes
                 .append('circle')
                     .attr({
@@ -281,19 +283,55 @@ define(
             // remove any removed nodes
             nodes.exit().remove();
 
+            // ==========================
             // Draw a paths
-            // --------------------------
-            // We need to:
+            // ==========================
             //  1. Draw a path based on the visited nodes path
+            var visitedNodes =  this.getNodes({ 
+                nextNodes: false, visited: true, current: true
+            });
+
+            logger.log('views/subviews/Map', 
+                'visitedNodes : %O', visitedNodes);
+
+            var lineVisited = d3.svg.line().tension(0).interpolate("cardinal-open");
+            var line = function(){
+                return lineVisited(_.map(self.model.get('visitedPath'), function(index){
+                    var coords = self.getCoordinatesFromNode(
+                        self.model.get('nodes').models[index]
+                    );
+                    return [coords.x, coords.y];
+                }));
+            };
+            var visitedPaths = this.paths.selectAll('.visited-path')
+                .data([{}]);
+
+            // draw the dotted path
+            visitedPaths.enter().append('path');
+
+            visitedPaths 
+                .attr({
+                    d: line, 
+                    'class': 'visited-path visited-path-dotted',
+                    'filter': 'url(#filter-wavy)',
+                    'stroke-dashoffset': 0
+                });
+
+            visitedPaths.exit().remove();
+
+
+            // --------------------------
             //
             //  2. Draw a path from the current node to the next nodes
+            //
+            // --------------------------
             var nextNodes = this.getNodes({ 
                 nextNodes: true, visited: false, current: false
             });
 
             // add paths
-            var lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
-            var line = function(d){
+            lineDestination = d3.svg.line().tension(0).interpolate("cardinal-open");
+            line = function(d){
                 return lineDestination([
                     [currentNode.x, currentNode.y],
                     [d.x, d.y]
@@ -372,6 +410,9 @@ define(
             // TODO: get connected nodes to travel to
             var self = this;
             options = options || {};
+            logger.log('views/subviews/Map', 
+                '1. getNodes() called: %O', options);
+
             var nodes = this.model.get('nodes');
 
             var vertices = [];
@@ -379,46 +420,49 @@ define(
             var currentNode;
 
             if(options.current !== false){
-                currentNode = nodes.getCurrentNode();
-                vertices.push({
-                    x: currentNode.attributes.x * (self.width/800), 
-                    y: currentNode.attributes.y * (self.height/400),
-                    node: currentNode
-                });
+                currentNode = this.model.getCurrentNode();
+                vertices.push( _.extend(
+                    { node: currentNode },
+                    self.getCoordinatesFromNode(currentNode)
+                ));
             }
 
             // push the current node's next possible neighbors
-            if(options.getNextNodes !== false){
+            if(options.nextNodes !== false){
 
-                _.each(nodes.getCurrentNode().get('nextNodes'), function(nodeIndex){
+                _.each(this.model.getCurrentNode().get('nextNodes'), function(nodeIndex){
                     var node = nodes.models[nodeIndex];
-
-                    vertices.push({
-                        x: node.attributes.x * (self.width/800), 
-                        y: node.attributes.y * (self.height/400),
-                        node: node
-                    });
+                    vertices.push( _.extend(
+                        { node: node },
+                        self.getCoordinatesFromNode(node)
+                    ));
                 });
             }
 
             // push all visted nodes
             if(options.visited !== false){
-                _.each(nodes.models, function(d){
-                    var x = d.attributes.x;
-                    var y = d.attributes.y;
-
-                    if(d.attributes.visited && !d.attributes.isCurrentNode){
-                        vertices.push({
-                            x: x * (self.width/800), 
-                            y: y * (self.height/400),
-                            node: d
-                        });
+                _.each(nodes.models, function(node){
+                    if(node.attributes.visited && !node.attributes.isCurrentNode){
+                        vertices.push( _.extend(
+                            { node: node },
+                            self.getCoordinatesFromNode(node)
+                        ));
                     }
                 });
             }
 
             return vertices;
         }, 
+
+        getCoordinatesFromNode: function getCoordinatesFromNode(node){
+            // Returns the map x/y for a passed in map node object
+            var coordinates = {
+                x: node.attributes.x * (this.width/this.model.get('nodeMaxWidth')), 
+                y: node.attributes.y * (this.height/this.model.get('nodeMaxHeight'))
+            };
+
+            return coordinates;
+        },
 
         // ------------------------------
         // Hide the fog for visible nodes
@@ -455,12 +499,9 @@ define(
                     var r = 73;
                     // note: make unvisited nodes have a smaller visible
                     // radius
-                    if(d.node.attributes.isCurrentNode){
-                    } else if(d.node.attributes.visited){
-                        r = 73;
-                    } else {
-                        r = 45;
-                    }
+                    if(d.node.attributes.isCurrentNode){ } 
+                    else if(d.node.attributes.visited){ r = 73; } 
+                    else { r = 45; }
                     return r;
                 }
             });

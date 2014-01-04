@@ -8,7 +8,15 @@
 #map .node-hover {
   fill: #f0f0f0; }
 #map .node-visited {
-  fill: #22dd22; }
+  fill: #dddddd; }
+#map .node-current {
+  fill: #44aa44; }
+#map .visited-path-dotted {
+  fill: none;
+  stroke: #343434;
+  opacity: 0.6;
+  stroke-dasharray: 0;
+  stroke-width: 6px; }
 #map .destination-path-dotted {
   fill: none;
   stroke: #ffffff;
