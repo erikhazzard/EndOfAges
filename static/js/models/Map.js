@@ -32,7 +32,19 @@ define(
                 nodes: null,
 
                 background: '',
-                mapId: null
+                mapId: null,
+
+                // the width / height the nodes are scaled to
+                //  Used by the view to scale the map. I don't consider
+                //  these view properties because they're data associated with
+                //  the position of the nodes on a map - the view can intrepret
+                //  these units however its wishes (e.g., in pixels, scaled
+                //  to the actual map's width / height)
+                nodeMaxWidth: 800,
+                nodeMaxHeight: 400,
+
+                // next desired node
+                nextNode: null
             },
         
             url: function getURL(){
@@ -63,6 +75,32 @@ define(
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
                 this.trigger('change');
                 return this;
+            },
+
+            // Node related
+            setCurrentNode: function setCurrentNode(node){
+                // unset current node
+                logger.log('collections/MapNodes', 
+                    'setCurrentNode() called with node %O', node);
+
+                this.getCurrentNode().set({ isCurrentNode: false }, {silent:true}); 
+                // set current node
+                node.set({ isCurrentNode: true, visited: true });
+                events.trigger('change:currentNode', {model: node});
+            },
+
+            getCurrentNode: function getCurrentNode(){
+                // returns the currently active node model
+                var i=0;
+                var currentNode = null;
+                var models = this.get('nodes').models;
+
+                for(i=0;i<models.length;i++){
+                    currentNode = models[i];
+                    if(currentNode.get('isCurrentNode')){ break; }
+                }
+
+                return currentNode;
             }
 
         });

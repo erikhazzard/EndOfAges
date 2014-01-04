@@ -17,10 +17,27 @@
         fill: #f0f0f0;
     }
     .node-visited {
-        fill: #22dd22;
+        fill: #dddddd;
+    }
+    .node-current{
+        fill: #44aa44;
     }
 
     // Paths
+    // ----------------------------------
+    .visited-path-dotted {
+        fill: none;
+        stroke: #ffffff;
+        opacity: 0.6;
+        stroke-dasharray: 10px 4px;
+        stroke-width: 6px;
+    }
+    .visited-path-animated{
+        fill: none;
+        stroke: #343434;
+        stroke-width: 8px;
+    }
+
     .destination-path-dotted {
         fill: none;
         stroke: #ffffff;
