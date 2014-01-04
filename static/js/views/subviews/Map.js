@@ -138,7 +138,8 @@ define(
         updateMap: function mapUpdate(){
             // Draws all nodes then updates the visible areas
             var self = this;
-            logger.log('views/subviews/Map', 'updateMap() called');
+            logger.log('views/subviews/Map', 
+                '=== 1. updateMap() called');
 
             // draw / update nodes
             this.drawNodes();
@@ -244,6 +245,7 @@ define(
             });
 
             // Add circles representing destinations
+            nodes.selectAll('circle').remove();
             var circles = nodes
                 .append('circle')
                     .attr({
@@ -286,16 +288,23 @@ define(
             // ==========================
             //  1. Draw a path based on the visited nodes path
             var visitedNodes =  this.getNodes({ 
-                nextNodes: false, visited: true, current: false
+                nextNodes: false, visited: true, current: true
             });
+
+            logger.log('views/subviews/Map', 
+                'visitedNodes : %O', visitedNodes);
+
             var lineVisited = d3.svg.line().tension(0).interpolate("cardinal-open");
-            var line = function(d){
-                return lineVisited(_.map(visitedNodes, function(n){
-                    return [n.x, n.y]; 
+            var line = function(){
+                return lineVisited(_.map(self.model.get('visitedPath'), function(index){
+                    var coords = self.getCoordinatesFromNode(
+                        self.model.get('nodes').models[index]
+                    );
+                    return [coords.x, coords.y];
                 }));
             };
             var visitedPaths = this.paths.selectAll('.visited-path')
-                .data(visitedNodes);
+                .data([{}]);
 
             // draw the dotted path
             visitedPaths.enter().append('path');
@@ -307,6 +316,8 @@ define(
                     'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
+
+            visitedPaths.exit().remove();
 
 
             // --------------------------
@@ -399,6 +410,9 @@ define(
             // TODO: get connected nodes to travel to
             var self = this;
             options = options || {};
+            logger.log('views/subviews/Map', 
+                '1. getNodes() called: %O', options);
+
             var nodes = this.model.get('nodes');
 
             var vertices = [];
@@ -414,7 +428,7 @@ define(
             }
 
             // push the current node's next possible neighbors
-            if(options.getNextNodes !== false){
+            if(options.nextNodes !== false){
 
                 _.each(this.model.getCurrentNode().get('nextNodes'), function(nodeIndex){
                     var node = nodes.models[nodeIndex];

@@ -30,6 +30,8 @@ define(
             defaults: {
                 // collection of node objects
                 nodes: null,
+                // an array of node model index
+                visitedPath: [],
 
                 background: '',
                 mapId: null,
@@ -73,20 +75,31 @@ define(
 
                 // create a collection of map nodes and store it
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
+                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
                 this.trigger('change');
+
                 return this;
             },
 
             // Node related
-            setCurrentNode: function setCurrentNode(node){
+            setCurrentNode: function setCurrentNode(node, options){
+                options = options || {};
                 // unset current node
-                logger.log('collections/MapNodes', 
+                logger.log('models/Map', 
                     'setCurrentNode() called with node %O', node);
 
-                this.getCurrentNode().set({ isCurrentNode: false }, {silent:true}); 
+                // update the visited path first (so changes to currentNode will
+                // know about the visible path)
+                this.updateVisitedPath(node);
+
+                // update current node
+                this.getCurrentNode().set({ isCurrentNode: false }, {silent:!!options.silent}); 
+
                 // set current node
                 node.set({ isCurrentNode: true, visited: true });
-                events.trigger('change:currentNode', {model: node});
+                if(!options.silent){
+                    events.trigger('change:currentNode', {model: node});
+                }
             },
 
             getCurrentNode: function getCurrentNode(){
@@ -100,7 +113,23 @@ define(
                     if(currentNode.get('isCurrentNode')){ break; }
                 }
 
+                logger.log('models/Map', 
+                    'getCurrentNode() got node %O', currentNode);
+
                 return currentNode;
+            },
+
+            updateVisitedPath: function updateVisitedPath(node, options){
+                options = options || {};
+                this.attributes.visitedPath.push(
+                    this.get('nodes').indexOf(node)
+                );
+               
+                if(!!options.silent){
+                    this.trigger('change');
+                    this.trigger('change:visitedPath');
+                }
+                return this;
             }
 
         });

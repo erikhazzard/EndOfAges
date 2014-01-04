@@ -1971,6 +1971,8 @@ define(
             defaults: {
                 // collection of node objects
                 nodes: null,
+                // an array of node model index
+                visitedPath: [],
 
                 background: '',
                 mapId: null,
@@ -2014,20 +2016,31 @@ define(
 
                 // create a collection of map nodes and store it
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
+                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
                 this.trigger('change');
+
                 return this;
             },
 
             // Node related
-            setCurrentNode: function setCurrentNode(node){
+            setCurrentNode: function setCurrentNode(node, options){
+                options = options || {};
                 // unset current node
-                logger.log('collections/MapNodes', 
+                logger.log('models/Map', 
                     'setCurrentNode() called with node %O', node);
 
-                this.getCurrentNode().set({ isCurrentNode: false }, {silent:true}); 
+                // update the visited path first (so changes to currentNode will
+                // know about the visible path)
+                this.updateVisitedPath(node);
+
+                // update current node
+                this.getCurrentNode().set({ isCurrentNode: false }, {silent:!!options.silent}); 
+
                 // set current node
                 node.set({ isCurrentNode: true, visited: true });
-                events.trigger('change:currentNode', {model: node});
+                if(!options.silent){
+                    events.trigger('change:currentNode', {model: node});
+                }
             },
 
             getCurrentNode: function getCurrentNode(){
@@ -2041,7 +2054,23 @@ define(
                     if(currentNode.get('isCurrentNode')){ break; }
                 }
 
+                logger.log('models/Map', 
+                    'getCurrentNode() got node %O', currentNode);
+
                 return currentNode;
+            },
+
+            updateVisitedPath: function updateVisitedPath(node, options){
+                options = options || {};
+                this.attributes.visitedPath.push(
+                    this.get('nodes').indexOf(node)
+                );
+               
+                if(!!options.silent){
+                    this.trigger('change');
+                    this.trigger('change:visitedPath');
+                }
+                return this;
             }
 
         });
@@ -2207,6 +2236,8 @@ define(
             defaults: {
                 // collection of node objects
                 nodes: null,
+                // an array of node model index
+                visitedPath: [],
 
                 background: '',
                 mapId: null,
@@ -2250,20 +2281,31 @@ define(
 
                 // create a collection of map nodes and store it
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
+                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
                 this.trigger('change');
+
                 return this;
             },
 
             // Node related
-            setCurrentNode: function setCurrentNode(node){
+            setCurrentNode: function setCurrentNode(node, options){
+                options = options || {};
                 // unset current node
-                logger.log('collections/MapNodes', 
+                logger.log('models/Map', 
                     'setCurrentNode() called with node %O', node);
 
-                this.getCurrentNode().set({ isCurrentNode: false }, {silent:true}); 
+                // update the visited path first (so changes to currentNode will
+                // know about the visible path)
+                this.updateVisitedPath(node);
+
+                // update current node
+                this.getCurrentNode().set({ isCurrentNode: false }, {silent:!!options.silent}); 
+
                 // set current node
                 node.set({ isCurrentNode: true, visited: true });
-                events.trigger('change:currentNode', {model: node});
+                if(!options.silent){
+                    events.trigger('change:currentNode', {model: node});
+                }
             },
 
             getCurrentNode: function getCurrentNode(){
@@ -2277,7 +2319,23 @@ define(
                     if(currentNode.get('isCurrentNode')){ break; }
                 }
 
+                logger.log('models/Map', 
+                    'getCurrentNode() got node %O', currentNode);
+
                 return currentNode;
+            },
+
+            updateVisitedPath: function updateVisitedPath(node, options){
+                options = options || {};
+                this.attributes.visitedPath.push(
+                    this.get('nodes').indexOf(node)
+                );
+               
+                if(!!options.silent){
+                    this.trigger('change');
+                    this.trigger('change:visitedPath');
+                }
+                return this;
             }
 
         });
@@ -2424,7 +2482,8 @@ define(
         updateMap: function mapUpdate(){
             // Draws all nodes then updates the visible areas
             var self = this;
-            logger.log('views/subviews/Map', 'updateMap() called');
+            logger.log('views/subviews/Map', 
+                '=== 1. updateMap() called');
 
             // draw / update nodes
             this.drawNodes();
@@ -2530,6 +2589,7 @@ define(
             });
 
             // Add circles representing destinations
+            nodes.selectAll('circle').remove();
             var circles = nodes
                 .append('circle')
                     .attr({
@@ -2572,16 +2632,23 @@ define(
             // ==========================
             //  1. Draw a path based on the visited nodes path
             var visitedNodes =  this.getNodes({ 
-                nextNodes: false, visited: true, current: false
+                nextNodes: false, visited: true, current: true
             });
+
+            logger.log('views/subviews/Map', 
+                'visitedNodes : %O', visitedNodes);
+
             var lineVisited = d3.svg.line().tension(0).interpolate("cardinal-open");
-            var line = function(d){
-                return lineVisited(_.map(visitedNodes, function(n){
-                    return [n.x, n.y]; 
+            var line = function(){
+                return lineVisited(_.map(self.model.get('visitedPath'), function(index){
+                    var coords = self.getCoordinatesFromNode(
+                        self.model.get('nodes').models[index]
+                    );
+                    return [coords.x, coords.y];
                 }));
             };
             var visitedPaths = this.paths.selectAll('.visited-path')
-                .data(visitedNodes);
+                .data([{}]);
 
             // draw the dotted path
             visitedPaths.enter().append('path');
@@ -2593,6 +2660,8 @@ define(
                     'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
+
+            visitedPaths.exit().remove();
 
 
             // --------------------------
@@ -2685,6 +2754,9 @@ define(
             // TODO: get connected nodes to travel to
             var self = this;
             options = options || {};
+            logger.log('views/subviews/Map', 
+                '1. getNodes() called: %O', options);
+
             var nodes = this.model.get('nodes');
 
             var vertices = [];
@@ -2700,7 +2772,7 @@ define(
             }
 
             // push the current node's next possible neighbors
-            if(options.getNextNodes !== false){
+            if(options.nextNodes !== false){
 
                 _.each(this.model.getCurrentNode().get('nextNodes'), function(nodeIndex){
                     var node = nodes.models[nodeIndex];
@@ -5586,6 +5658,7 @@ require([
         ,'Controller'
         //,'views/subviews/Battle'
         ,'views/subviews/Map'
+        ,'models/Map'
     ];
 
     //// log EVERYTHING:

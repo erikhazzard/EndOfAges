@@ -27,15 +27,10 @@
     // ----------------------------------
     .visited-path-dotted {
         fill: none;
-        stroke: #ffffff;
-        opacity: 0.6;
-        stroke-dasharray: 10px 4px;
-        stroke-width: 6px;
-    }
-    .visited-path-animated{
-        fill: none;
         stroke: #343434;
-        stroke-width: 8px;
+        opacity: 0.6;
+        stroke-dasharray:  0;
+        stroke-width: 6px;
     }
 
     .destination-path-dotted {

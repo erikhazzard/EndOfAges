@@ -119,6 +119,7 @@ require([
         ,'Controller'
         //,'views/subviews/Battle'
         ,'views/subviews/Map'
+        ,'models/Map'
     ];
 
     //// log EVERYTHING:
