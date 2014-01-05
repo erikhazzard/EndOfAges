@@ -2512,7 +2512,7 @@ define(
 
 
             // Draw nodes
-            // Delay execution since the filters is a time consuming process
+            // Delay execution, settings up filters takes time
             setTimeout(function mapDelayUpdateMap(){
                 self.updateMap.call(self);
             }, 20);
@@ -5512,6 +5512,29 @@ define('Controller',[
             });
             
             return this;
+        },
+
+        setupMobile: function setupMobile(){
+            // Mobile related functionality
+             $(window)    
+                  .bind('orientationchange', function(){
+                       if (window.orientation % 180 === 0){
+                           $(document.body).css("-webkit-transform-origin", "")
+                               .css("-webkit-transform", "");               
+                       } 
+                       else {                   
+                           if ( window.orientation > 0) { //clockwise
+                             $(document.body).css("-webkit-transform-origin", "200px 190px")
+                               .css("-webkit-transform",  "rotate(-90deg)");  
+                           }
+                           else {
+                             $(document.body).css("-webkit-transform-origin", "280px 190px")
+                               .css("-webkit-transform",  "rotate(90deg)"); 
+                           }
+                       }
+                   })
+                  .trigger('orientationchange'); 
+
         },
 
         // ===================================================================

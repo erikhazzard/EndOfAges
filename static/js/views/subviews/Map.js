@@ -166,7 +166,7 @@ define(
 
 
             // Draw nodes
-            // Delay execution since the filters is a time consuming process
+            // Delay execution, settings up filters takes time
             setTimeout(function mapDelayUpdateMap(){
                 self.updateMap.call(self);
             }, 20);
