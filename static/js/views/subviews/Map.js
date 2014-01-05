@@ -49,17 +49,24 @@ define(
             logger.log('views/subviews/Map', 'initialize() called');
             this.gameModel = options.gameModel;
 
+            // set as null by default. will be populated when map is drawn
+            this.nodes = null;
+
+            // When the current node changes, the visited nodes will also
+            // change. Update the stored node references
+            this.listenTo(this.model, 'change:currentNode', this.updateNodeReferences);
+
             // When the current node changes, update the map
-            this.listenTo(
-                events,
-                'change:currentNode', 
-                this.updateMap
-            );
+            this.listenTo(this.model, 'change:currentNode', this.updateMap);
+
+            // update entity sprite position - move to current node
+            this.listenTo(this.model, 'change:currentNode', this.moveEntity);
             return this;
         },
 
         onShow: function mapViewOnShow(){
             this.drawMap();
+
             return this;
         },
 
@@ -121,11 +128,98 @@ define(
             this.mapNodes = this.wrapper.append('g')
                 .attr({ 'class': 'map-nodes' });
 
+            // NOTE: must do this after the map has been created so we
+            // have the map's width / height
+            // if nodes haven't been setup yet, set them up
+            if(!this.nodes){ this.updateNodeReferences(); }
+
+            // stores entity sprite on map
+            // --------------------------
+            var entityWidth = 60;
+            var entityHeight = entityWidth;
+
+            self.entityWidth = entityWidth;
+            self.entityHeight = entityHeight;
+
+            // add group
+            this.entitySprites = this.wrapper.append('g')
+                .attr({ 
+                    'class': 'map-entity-sprites',
+                    transform: function(){ 
+                        return 'translate(' + [
+                            self.nodes.current.x - self.entityWidth/2,
+                            self.nodes.current.y - self.entityHeight/1.2
+                        ] + ')';
+                    }
+                });
+
+            // Add the party member to the map
+            this.entitySprites.append('image')
+                .attr({
+                    'xlink:href': function(d, i){
+                        // store a ref to the current node
+                        return "/static/img/characters/" + 
+                            self.gameModel.get('playerEntities').models[0].get('sprite') + '.gif';
+                    }, 
+                    width: entityWidth, height: entityHeight
+                });
+
+
             // Draw nodes
             // Delay execution since the filters is a time consuming process
             setTimeout(function mapDelayUpdateMap(){
                 self.updateMap.call(self);
             }, 20);
+
+            return this;
+        },
+
+        // ==============================
+        //
+        // Model change callbacks
+        //
+        // ==============================
+        moveEntity: function moveEntity(){
+            // Move the entity sprite to the next node. This is called whenever
+            // the node instance successfully is completed
+            var self = this;
+
+            this.entitySprites.transition().duration(1000)
+                .attr({ 
+                    transform: function(){ 
+                        return 'translate(' + [
+                            self.nodes.current.x - self.entityWidth/2,
+                            self.nodes.current.y - self.entityHeight/1.2
+                        ] + ')';
+                    }
+                });
+            
+            return this;
+        },
+
+        updateNodeReferences: function updateNodeReferences(){
+            // Called whenever the current node changes. Updates all
+            // node references
+            if(!this.nodes){ this.nodes = {}; }
+
+            // visited map nodes also include current node (it's visited)
+            this.nodes.visited = this.getNodes({ 
+                next: false, visited: true, current: true
+            });
+
+            // current will only ever be a single node
+            this.nodes.current = this.getNodes({ 
+                next: false, visited: false, current: true
+            })[0];
+
+            this.nodes.next = this.getNodes({ 
+                next: true, visited: false, current: false
+            });
+
+            // update all the nodes
+            this.nodes.all = [this.nodes.current]
+                .concat(this.nodes.visited)
+                .concat(this.nodes.next);
 
             return this;
         },
@@ -138,6 +232,7 @@ define(
         updateMap: function mapUpdate(){
             // Draws all nodes then updates the visible areas
             var self = this;
+
             logger.log('views/subviews/Map', 
                 '=== 1. updateMap() called');
 
@@ -223,7 +318,7 @@ define(
 
             // Draw nodes
             var nodes = this.mapNodes.selectAll('.node-wrapper')
-                .data(this.getNodes());
+                .data(this.nodes.all);
 
             // Draw circles
             nodes.enter().append('g')
@@ -261,25 +356,6 @@ define(
                         r: 10
                     });
 
-            // Lastly, add the first party member's sprite to the map's current node
-            var entityWidth = 60;
-            var entityHeight = entityWidth;
-
-            var currentNode = null;
-            this.mapNodes.select('.node-wrapper.node-current').append('image')
-                .attr({
-                    'xlink:href': function(d, i){
-                        // store a ref to the current node
-                        currentNode = d;
-
-                        return "/static/img/characters/" + 
-                            self.gameModel.get('playerEntities').models[0].get('sprite') + '.gif';
-                    }, 
-                    x: function(d){ return d.x - entityWidth/2; },
-                    y: function(d){ return d.y - entityHeight/1.2; },
-                    width: entityWidth, height: entityHeight
-                });
-
             // remove any removed nodes
             nodes.exit().remove();
 
@@ -287,12 +363,8 @@ define(
             // Draw a paths
             // ==========================
             //  1. Draw a path based on the visited nodes path
-            var visitedNodes =  this.getNodes({ 
-                nextNodes: false, visited: true, current: true
-            });
-
             logger.log('views/subviews/Map', 
-                'visitedNodes : %O', visitedNodes);
+                'visitedNodes : %O', this.nodes.visited);
 
             var lineVisited = d3.svg.line();
             var line = function(){
@@ -325,21 +397,17 @@ define(
             //  2. Draw a path from the current node to the next nodes
             //
             // --------------------------
-            var nextNodes = this.getNodes({ 
-                nextNodes: true, visited: false, current: false
-            });
-
             // add paths
             lineDestination = d3.svg.line();
             line = function(d){
                 return lineDestination([
-                    [currentNode.x, currentNode.y],
+                    [self.nodes.current.x, self.nodes.current.y],
                     [d.x, d.y]
                 ]);
             };
 
             var destinationPaths = this.paths.selectAll('.destination-path')
-                .data(nextNodes);
+                .data(this.nodes.next);
 
             // draw the dotted path
             destinationPaths.enter().append('path');
@@ -404,7 +472,7 @@ define(
             //
             //      visited: {boolean} get nodes that have been visited 
             //      current: {boolean} get the current node
-            //      nextNodes: {boolean} get the neighors of the current node
+            //      next: {boolean} get the neighors of the current node
             // 
             // TODO: get only the visible vertices
             // TODO: get connected nodes to travel to
@@ -428,8 +496,7 @@ define(
             }
 
             // push the current node's next possible neighbors
-            if(options.nextNodes !== false){
-
+            if(options.next !== false){
                 _.each(this.model.getCurrentNode().get('nextNodes'), function(nodeIndex){
                     var node = nodes.models[nodeIndex];
                     vertices.push( _.extend(
@@ -442,11 +509,14 @@ define(
             // push all visted nodes
             if(options.visited !== false){
                 _.each(nodes.models, function(node){
-                    if(node.attributes.visited && !node.attributes.isCurrentNode){
-                        vertices.push( _.extend(
-                            { node: node },
-                            self.getCoordinatesFromNode(node)
-                        ));
+                    if(node.attributes.visited){ 
+                        if( !node.attributes.isCurrentNode || 
+                        (node.attributes.isCurrentNode && options.current !== false)){
+                            vertices.push( _.extend(
+                                { node: node },
+                                self.getCoordinatesFromNode(node)
+                            ));
+                        }
                     }
                 });
             }
@@ -471,7 +541,7 @@ define(
             // Updates the the visible area, based on nodes
             logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
-            var vertices = this.getNodes();
+            var vertices = this.nodes.all;
 
             var filter = '';
 

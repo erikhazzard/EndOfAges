@@ -176,6 +176,11 @@ define(
             this.regionNodeInstance.show( nodeInstance );
             this.regionNodeInstance.$el.removeClass('hidden');
 
+            // ===============================================================
+            // DEV / ADMIN MODE:::
+            this.nodeInstanceFinished();
+            // ===============================================================
+
             return this;
         },
 

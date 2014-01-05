@@ -98,7 +98,7 @@ define(
                 // set current node
                 node.set({ isCurrentNode: true, visited: true });
                 if(!options.silent){
-                    events.trigger('change:currentNode', {model: node});
+                    this.trigger('change:currentNode', {model: node});
                 }
             },
 
