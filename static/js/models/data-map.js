@@ -16,6 +16,7 @@ define(
         map1: [
             // First set of possible nodes
             [
+                // TODO: Store nextNodes ref differently
                 // id is the node id, x / y are the position on the map,
                 // nextNodes is an array of neighboring node indicies that the 
                 // player can travel to from the current node (directed edges)

@@ -104,6 +104,7 @@ define(
 
             getCurrentNode: function getCurrentNode(){
                 // returns the currently active node model
+                //
                 var i=0;
                 var currentNode = null;
                 var models = this.get('nodes').models;
@@ -120,6 +121,7 @@ define(
             },
 
             updateVisitedPath: function updateVisitedPath(node, options){
+                // Updates the path of nodes the user took
                 options = options || {};
                 this.attributes.visitedPath.push(
                     this.get('nodes').indexOf(node)

@@ -1838,6 +1838,7 @@ define(
         map1: [
             // First set of possible nodes
             [
+                // TODO: Store nextNodes ref differently
                 // id is the node id, x / y are the position on the map,
                 // nextNodes is an array of neighboring node indicies that the 
                 // player can travel to from the current node (directed edges)
@@ -2047,6 +2048,7 @@ define(
 
             getCurrentNode: function getCurrentNode(){
                 // returns the currently active node model
+                //
                 var i=0;
                 var currentNode = null;
                 var models = this.get('nodes').models;
@@ -2063,6 +2065,7 @@ define(
             },
 
             updateVisitedPath: function updateVisitedPath(node, options){
+                // Updates the path of nodes the user took
                 options = options || {};
                 this.attributes.visitedPath.push(
                     this.get('nodes').indexOf(node)
@@ -2312,6 +2315,7 @@ define(
 
             getCurrentNode: function getCurrentNode(){
                 // returns the currently active node model
+                //
                 var i=0;
                 var currentNode = null;
                 var models = this.get('nodes').models;
@@ -2328,6 +2332,7 @@ define(
             },
 
             updateVisitedPath: function updateVisitedPath(node, options){
+                // Updates the path of nodes the user took
                 options = options || {};
                 this.attributes.visitedPath.push(
                     this.get('nodes').indexOf(node)
@@ -5426,10 +5431,10 @@ define(
             this.regionNodeInstance.show( nodeInstance );
             this.regionNodeInstance.$el.removeClass('hidden');
 
-            // ===============================================================
-            // DEV / ADMIN MODE:::
-            this.nodeInstanceFinished();
-            // ===============================================================
+            //// ===============================================================
+            //// DEV / ADMIN MODE:::
+            //this.nodeInstanceFinished();
+            //// ===============================================================
 
             return this;
         },
@@ -5519,13 +5524,6 @@ define('Controller',[
         setupMobile: function setupMobile(){
             // Mobile related functionality
             //
-            function reorient(e) {
-                var portrait = (window.orientation % 180 == 0);
-                $("body > div").css("-webkit-transform", !portrait ? "rotate(-90deg)" : "");
-            }
-            window.onorientationchange = reorient;
-            window.setTimeout(reorient, 200);
-            alert('hi');
         },
 
         // ===================================================================
