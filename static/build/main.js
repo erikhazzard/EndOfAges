@@ -5510,6 +5510,8 @@ define('Controller',[
             _.each(options.regions, function(region, key){
                 self[key] = region;
             });
+
+            this.setupMobile();
             
             return this;
         },
