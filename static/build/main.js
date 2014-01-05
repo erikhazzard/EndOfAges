@@ -5524,7 +5524,8 @@ define('Controller',[
                 $("body > div").css("-webkit-transform", !portrait ? "rotate(-90deg)" : "");
             }
             window.onorientationchange = reorient;
-            window.setTimeout(reorient, 0);
+            window.setTimeout(reorient, 200);
+            alert('hi');
         },
 
         // ===================================================================
