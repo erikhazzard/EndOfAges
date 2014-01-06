@@ -10,24 +10,24 @@
 
     .map-node {
         cursor: pointer;
+        fill: #343434;
         stroke: #ffffff;
         stroke-width: 2px;
-        transition: fill 2s;
+        transition: all .4s;
+        -webkit-transition: all .4s;
     }
     .node-visited {
         cursor: no-drop;
     }
-    .node-current {
-        cursor: default !important;
-    }
-    .node-hover {
+    .node-hover .map-node {
         fill: #f0f0f0;
     }
-    .node-visited {
-        fill: #dddddd;
+    .node-current .map-node {
+        cursor: default !important;
     }
-    .node-current{
-        fill: #44aa44;
+
+    .node-visited .map-node {
+        fill: #44aa44 !important;
     }
 
     // Paths

@@ -2632,7 +2632,6 @@ define(
             // Draw nodes
             var nodes = this.mapNodes.selectAll('.node-wrapper')
                 .data(this.nodes.all);
-            console.log("<><><><>", this.nodes);
 
             // Draw circles
             nodes.enter().append('g')
@@ -2653,8 +2652,11 @@ define(
                 }
             });
 
-            // Add circles representing destinations
+            // remove existing circles
+            // TODO: do this better
             nodes.selectAll('circle').remove();
+
+            // Add circles representing destinations
             var circles = nodes
                 .append('circle')
                     .attr({
