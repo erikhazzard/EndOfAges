@@ -61,8 +61,12 @@ define([
             var self = this;
             logger.log('Controller', 'showHome() called');
 
+            if(!this.pageHome){
+                logger.log('Controller', 'creating new pageHome view');
+            }
             // Otherwise, show the homepage
-            this.currentRegion = new PageHome({});
+            this.pageHome = new PageHome({});
+            this.currentRegion = this.pageHome;
             this.regionMain.show(this.currentRegion);
 
             return this;
@@ -75,9 +79,16 @@ define([
             logger.log('Controller', 'showGame() called');
 
             // get game model from server(?)
-            this.currentRegion = new PageGame({
+            if(!this.pageGame){
+                logger.log('Controller', 'creating new pageGame view');
+            }
+
+            // TODO: Reuse game view, don't show / hide it? Use a different
+            // region?
+            this.pageGame = new PageGame({
                 model: new Game({})
             });
+            this.currentRegion = this.pageGame;
             this.regionMain.show(this.currentRegion);
 
             return this;

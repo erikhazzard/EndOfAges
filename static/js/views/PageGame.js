@@ -73,6 +73,9 @@ define(
             // MAP
             // TODO: get model
             this.mapModel = new Map({});
+            // TODO: Get map model from game.
+            this.mapModel.generateMap();
+
             this.model.set({ map: this.mapModel });
 
             this.viewMap = new MapView({
@@ -87,9 +90,6 @@ define(
             logger.log('views/PageGame', 'onShow() called');
             var self = this;
             // setup the map
-
-            // TODO: Get map model from game.
-            this.mapModel.generateMap();
 
             this.regionMap.show(this.viewMap);
             return this;

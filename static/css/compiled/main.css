@@ -4,7 +4,8 @@
 #map .map-node {
   cursor: pointer;
   stroke: #ffffff;
-  stroke-width: 2px; }
+  stroke-width: 2px;
+  transition: fill 2s; }
 #map .node-visited {
   cursor: no-drop; }
 #map .node-current {

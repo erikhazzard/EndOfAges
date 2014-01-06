@@ -25,6 +25,7 @@ define(
             return this;
         },
         onShow: function homeOnShow(){
+            logger.log('views/PageHome', 'onShow called');
             return this;
         },
 
@@ -34,6 +35,7 @@ define(
         //
         // ------------------------------
         playGame: function homePlayGame(e){
+            logger.log('views/PageHome', 'playGae button clicked');
             e.stopPropagation();
             e.preventDefault();
             

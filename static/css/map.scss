@@ -12,6 +12,7 @@
         cursor: pointer;
         stroke: #ffffff;
         stroke-width: 2px;
+        transition: fill 2s;
     }
     .node-visited {
         cursor: no-drop;

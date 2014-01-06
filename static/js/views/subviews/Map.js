@@ -53,6 +53,7 @@ define(
 
         initialize: function mapViewInitialize(options){
             // initialize:
+            var self = this;
             logger.log('views/subviews/Map', 'initialize() called');
             this.gameModel = options.gameModel;
 
@@ -62,17 +63,36 @@ define(
             // When the current node changes, update the map
             this.listenTo(this.model, 'change:currentNode', this.updateMap);
 
+
+            // TODO: on node mouse over, draw line
+            // TODO: NOOOO remove this, this is JUST for demo
+            this.listenTo(events, 'nodeHoverOn', function(options){
+                var line = function(d){
+                    return d3.svg.line()([
+                        [self.nodes.current.x, self.nodes.current.y],
+                        [options.d.x, options.d.y]
+                    ]);
+                };
+                self.paths.append('path')
+                    .attr({
+                        d: line, 
+                        'class': 'to-remove destination-path-animated',
+                        'filter': 'url(#filter-wavy)'
+                    })
+                    .call(animatePath);
+            });
+            this.listenTo(events, 'nodeHoverOff', function(options){
+                self.paths.selectAll('.to-remove').transition()
+                    .duration(0);
+                self.paths.selectAll('.to-remove').remove();
+            });
+
             return this;
         },
 
         onShow: function mapViewOnShow(){
             // Setup the map svg element and groups
             this.prepareMap();
-
-            // update the node references ( must be called after the map is drawn)
-            this.updateNodeReferences();
-            // setup entity groups
-            this.prepareEntities();
 
             // draw / update the map
             this.updateMap();
@@ -190,7 +210,8 @@ define(
         updateNodeReferences: function updateNodeReferences(){
             // Called whenever the current node changes. Updates all
             // node references
-            if(!this.nodes){ this.nodes = {}; }
+            logger.log('views/subviews/Map', '1. updateNodeReferences() called');
+            this.nodes = {};
 
             // visited map nodes also include current node (it's visited)
             this.nodes.visited = this.getNodes({ 
@@ -207,9 +228,8 @@ define(
             });
 
             // update all the nodes
-            this.nodes.all = [this.nodes.current]
-                .concat(this.nodes.visited)
-                .concat(this.nodes.next);
+            this.nodes.all = this.nodes.visited.concat(this.nodes.next);
+            logger.log('views/subviews/Map', '2. updateNodeReferences() all nodes: %O', this.nodes);
 
             return this;
         },
@@ -226,12 +246,10 @@ define(
             var self = this;
             logger.log('views/subviews/Map', 'updateNodes() called');
 
-            // remove existing current node wrapper
-            this.mapNodes.select('.node-wrapper.node-current').remove();
-
             // Draw nodes
             var nodes = this.mapNodes.selectAll('.node-wrapper')
                 .data(this.nodes.all);
+            console.log("<><><><>", this.nodes);
 
             // Draw circles
             nodes.enter().append('g')
@@ -273,9 +291,9 @@ define(
             nodes.exit().remove();
         },
 
-        // ==============================
+        // ------------------------------
         // Draw a paths
-        // ==============================
+        // ------------------------------
         updatePaths: function(){
             var self = this;
             //  1. Draw a path based on the visited nodes path
@@ -357,7 +375,7 @@ define(
             _.each(destinationPaths[0], function(path){
                 path = d3.select(path);
                 var totalLength = path.node().getTotalLength();
-                var duration = 2000 * (totalLength / 115);
+                var duration = 18000 * (totalLength / 115);
                 var i = 1;
                 function animateNextPath(){
                     // need to check if the path was removed from the DOM.
@@ -370,29 +388,6 @@ define(
                     i += 1;
                 }
                 animateNextPath();
-            });
-
-            // TODO: on node mouse over, draw line
-            // TODO: NOOOO remove this, this is JUST for demo
-            events.on('nodeHoverOn', function(options){
-                var line = function(d){
-                    return d3.svg.line()([
-                        [self.nodes.current.x, self.nodes.current.y],
-                        [options.d.x, options.d.y]
-                    ]);
-                };
-                destinationPaths.enter().append('path')
-                    .attr({
-                        d: line, 
-                        'class': 'to-remove destination-path-animated',
-                        'filter': 'url(#filter-wavy)'
-                    })
-                    .call(animatePath);
-            });
-            events.on('nodeHoverOff', function(options){
-                self.paths.selectAll('.to-remove').transition()
-                    .duration(0);
-                self.paths.selectAll('.to-remove').remove();
             });
 
             // remove old paths
@@ -469,6 +464,13 @@ define(
 
             // update the store node references
             this.updateNodeReferences();
+
+            // setup entity groups if it hasn't been setup
+            if(!this.entitiesSetup){
+                this.prepareEntities();
+                this.entitiesSetup = true;
+            }
+
 
             // draw / update nodes
             this.updateNodes();
@@ -555,8 +557,7 @@ define(
             if(options.visited !== false){
                 _.each(nodes.models, function(node){
                     if(node.attributes.visited){ 
-                        if( !node.attributes.isCurrentNode || 
-                        (node.attributes.isCurrentNode && options.current !== false)){
+                        if( !node.attributes.isCurrentNode ){
                             vertices.push( _.extend(
                                 { node: node },
                                 self.getCoordinatesFromNode(node)
