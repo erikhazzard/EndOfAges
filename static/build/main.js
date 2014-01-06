@@ -1843,14 +1843,14 @@ define(
                 // nextNodes is an array of neighboring node indicies that the 
                 // player can travel to from the current node (directed edges)
                 // TODO: add types based on biome type (e.g., coastal, mountain)
-                { x: 132, y: 337, nextNodes: [1] },
+                { id: '0', x: 132, y: 337, nextNodes: ['1'] },
 
-                { x: 217, y: 306, nextNodes: [2,3] }, // 1
+                { id: '1', x: 217, y: 306, nextNodes: ['2','3'] },
 
-                { x: 272, y: 279, nextNodes: [4] }, // 2
-                { x: 272, y: 337, nextNodes: [] }, // 3
+                { id: '2', x: 272, y: 279, nextNodes: ['4'] }, 
+                { id: '3', x: 272, y: 337, nextNodes: [] }, 
 
-                { x: 252, y: 229, nextNodes: [] } // 4
+                { id: '4', x: 252, y: 229, nextNodes: [] } 
 
             ]
     
@@ -1934,6 +1934,28 @@ define(
 
             // store the entity group ('player' or 'enemy')
             options = options || {};
+
+            this.on('change:nodes', this.updateNextNodesLinks);
+
+            return this;
+        },
+
+        updateNextNodesLinks: function updateNextNodesLinks(){
+            // Sets the nextNodes array to an array of node objects
+            // Original form is an array of node IDs, but we want to link
+            // objects
+            var self = this;
+
+            // go through each map node, then each map node's next nodes
+            _.each(this.models, function(node){
+                var nextNodeObjects = [];
+                _.each(node.get('nextNodes'), function(nextNodeId){
+                    // NOTE: id is not the CID, but just an ID string the
+                    // nodes use to reference each other
+                    nextNodeObjects.push(self.findWhere({id: nextNodeId}));
+                });
+                node.set({ nextNodes: nextNodeObjects }, {silent: true});
+            });
 
             return this;
         }
@@ -2019,8 +2041,12 @@ define(
 
                 // create a collection of map nodes and store it
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
-                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
+                this.get('nodes').trigger('change:nodes');
+
+                // trigger map model changes
                 this.trigger('change');
+                this.trigger('change:nodes');
+                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
 
                 return this;
             },
@@ -2286,8 +2312,12 @@ define(
 
                 // create a collection of map nodes and store it
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
-                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
+                this.get('nodes').trigger('change:nodes');
+
+                // trigger map model changes
                 this.trigger('change');
+                this.trigger('change:nodes');
+                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
 
                 return this;
             },
@@ -2373,7 +2403,7 @@ define(
     // ----------------------------------
     function animatePath(path) {
         path.transition()
-            .duration(2500)
+            .duration(1500)
             .ease('linear')
             .attrTween("stroke-dasharray", tweenDash)
             .each("end", function() { d3.select(this).call(animatePath); });
@@ -2386,9 +2416,16 @@ define(
     }
 
     // ----------------------------------
+    //
     // Map view
+    //
     // ----------------------------------
     var MapView = Backbone.Marionette.Layout.extend({
+        CONFIG: {
+            updateDuration: 1500,
+            updateEase: 'cubic-in-out'
+        },
+
         template: '#template-game-map',
 
         events: { },
@@ -2403,29 +2440,35 @@ define(
             // set as null by default. will be populated when map is drawn
             this.nodes = null;
 
-            // When the current node changes, the visited nodes will also
-            // change. Update the stored node references
-            this.listenTo(this.model, 'change:currentNode', this.updateNodeReferences);
-
             // When the current node changes, update the map
             this.listenTo(this.model, 'change:currentNode', this.updateMap);
 
-            // update entity sprite position - move to current node
-            this.listenTo(this.model, 'change:currentNode', this.moveEntity);
             return this;
         },
 
         onShow: function mapViewOnShow(){
-            this.drawMap();
+            // Setup the map svg element and groups
+            this.prepareMap();
+
+            // update the node references ( must be called after the map is drawn)
+            this.updateNodeReferences();
+            // setup entity groups
+            this.prepareEntities();
+
+            // draw / update the map
+            this.updateMap();
 
             return this;
         },
 
-        // Map generation
-        // ------------------------------
-        drawMap: function mapViewDrawMap(options){
+        // ==============================
+        //
+        // First time setup functions
+        //
+        // ==============================
+        prepareMap: function mapViewDrawMap(options){
             var self = this;
-            logger.log('views/subviews/Map', 'drawMap() called');
+            logger.log('views/subviews/Map', 'prepareMap() called');
 
             // d3 used to draw map
             var svg = d3.select('#map');
@@ -2479,21 +2522,25 @@ define(
             this.mapNodes = this.wrapper.append('g')
                 .attr({ 'class': 'map-nodes' });
 
-            // NOTE: must do this after the map has been created so we
-            // have the map's width / height
-            // if nodes haven't been setup yet, set them up
-            if(!this.nodes){ this.updateNodeReferences(); }
-
             // stores entity sprite on map
             // --------------------------
+            // add group
+            this.entitySpritesWrapper = this.wrapper.append('g')
+                .attr({ 'class': 'entity-sprites-wrapper' });
+
+            return this;
+        },
+
+        prepareEntities: function mapDrawEntities(){
+            // Sets up and Draws the entities and their gorups
+            var self = this;
             var entityWidth = 60;
             var entityHeight = entityWidth;
 
             self.entityWidth = entityWidth;
             self.entityHeight = entityHeight;
 
-            // add group
-            this.entitySprites = this.wrapper.append('g')
+            this.entitySprites = this.entitySpritesWrapper.append('g')
                 .attr({ 
                     'class': 'map-entity-sprites',
                     transform: function(){ 
@@ -2514,15 +2561,6 @@ define(
                     }, 
                     width: entityWidth, height: entityHeight
                 });
-
-
-            // Draw nodes
-            // Delay execution, settings up filters takes time
-            setTimeout(function mapDelayUpdateMap(){
-                self.updateMap.call(self);
-            }, 20);
-
-            return this;
         },
 
         // ==============================
@@ -2530,24 +2568,6 @@ define(
         // Model change callbacks
         //
         // ==============================
-        moveEntity: function moveEntity(){
-            // Move the entity sprite to the next node. This is called whenever
-            // the node instance successfully is completed
-            var self = this;
-
-            this.entitySprites.transition().duration(1000)
-                .attr({ 
-                    transform: function(){ 
-                        return 'translate(' + [
-                            self.nodes.current.x - self.entityWidth/2,
-                            self.nodes.current.y - self.entityHeight/1.2
-                        ] + ')';
-                    }
-                });
-            
-            return this;
-        },
-
         updateNodeReferences: function updateNodeReferences(){
             // Called whenever the current node changes. Updates all
             // node references
@@ -2575,32 +2595,197 @@ define(
             return this;
         },
 
-        // ------------------------------
+        // ==============================
         //
-        // Update Map
+        // Draw nodes
         //
-        // ------------------------------
-        updateMap: function mapUpdate(){
-            // Draws all nodes then updates the visible areas
+        // ==============================
+        updateNodes: function mapDrawNodes(){
+            // Draws all the nodes on the map
+            // TODO: Update the function structure, this is really the main
+            // draw func
             var self = this;
+            logger.log('views/subviews/Map', 'updateNodes() called');
 
+            // remove existing current node wrapper
+            this.mapNodes.select('.node-wrapper.node-current').remove();
+
+            // Draw nodes
+            var nodes = this.mapNodes.selectAll('.node-wrapper')
+                .data(this.nodes.all);
+
+            // Draw circles
+            nodes.enter().append('g')
+                .on('mouseenter', this.nodeHoverStart)
+                .on('mouseleave', this.nodeHoverEnd)
+                .on('touchend', this.nodeClicked)
+                .on('click', this.nodeClicked);
+
+            // add class names to the node wrapper
+            nodes.attr({ 
+                'class': function(d,i){
+                    var cssClass = 'node-wrapper';
+
+                    if(d.node.get('visited')){ cssClass += ' node-visited'; }
+                    if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
+                    
+                    return cssClass;
+                }
+            });
+
+            // Add circles representing destinations
+            nodes.selectAll('circle').remove();
+            var circles = nodes
+                .append('circle')
+                    .attr({
+                        'class': function(d,i){
+                            var cssClass = 'map-node'; 
+                            if(d.node.get('visited')){ cssClass += ' node-visited'; }
+                            if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
+                            
+                            return cssClass;
+                        },
+                        cx: function(d){ return d.x; },
+                        cy: function(d){ return d.y; },
+                        r: 10
+                    });
+
+            // remove any removed nodes
+            nodes.exit().remove();
+        },
+
+        // ==============================
+        // Draw a paths
+        // ==============================
+        updatePaths: function(){
+            var self = this;
+            //  1. Draw a path based on the visited nodes path
             logger.log('views/subviews/Map', 
-                '=== 1. updateMap() called');
+                'visitedNodes : %O', this.nodes.visited);
 
-            // draw / update nodes
-            this.drawNodes();
+            var visited = self.model.get('visitedPath');
 
-            // minor delay to delay SVG filter effect
-            setTimeout(function(){
-                self.updateVisible.call(self);
-            }, 20);
+            // add group for visited paths if it hasn't been added yet
+            if(!this.visitedPaths){
+                this.visitedPaths = this.paths.append('g')
+                    .attr({ 
+                        'filter': 'url(#filter-wavy)'
+                    });
+            }
+
+            // Add a line between the last visited node and the current
+            if(visited.length >= 2){
+                this.visitedPaths.append('path')
+                    .attr({
+                        'class': 'visited-path visited-path-dotted',
+                        d: function(){
+                            var coords = [];
+                            // if no nodes have been visited yet, return empty array
+                            if(visited.length < 2){ return ''; }
+
+                            var previousIndex = visited[visited.length-2];
+                            var currentIndex = visited[visited.length-1];
+                            var previous  = self.getCoordinatesFromNode(
+                                self.model.get('nodes').models[previousIndex]
+                            );
+
+                            return d3.svg.line()([ 
+                                // first pair (previous node)
+                                [previous.x, previous.y], 
+                                [self.nodes.current.x, self.nodes.current.y]
+                            ]);
+                        }
+                    })
+                    // transition the line coming in
+                    .transition().duration(this.CONFIG.updateDuration)
+                        .ease(this.CONFIG.updateEase)
+                        .attrTween("stroke-dasharray", tweenDash);
+            }
+
+            // --------------------------
+            //
+            //  2. Draw a path from the current node to the next nodes
+            //
+            // --------------------------
+            // add paths
+            line = function(d){
+                return d3.svg.line()([
+                    [self.nodes.current.x, self.nodes.current.y],
+                    [d.x, d.y]
+                ]);
+            };
+
+            // remove existing destination paths
+            d3.selectAll('.destination-path').remove();
+
+            var destinationPaths = this.paths.selectAll('.destination-path')
+                .data(this.nodes.next);
+
+            // draw the dotted path
+            destinationPaths.enter().append('path');
+
+            destinationPaths
+                .attr({
+                    d: line, 
+                    'class': 'destination-path destination-path-dotted',
+                    'filter': 'url(#filter-wavy)',
+                    'stroke-dashoffset': 0
+                });
+
+            ////draw the animated path
+            ////TODO: Should this antimate? If it should be, we can do this:
+            //// NOTE: Be sure to cancel the animation
+            _.each(destinationPaths[0], function(path){
+                path = d3.select(path);
+                var totalLength = path.node().getTotalLength();
+                var duration = 2000 * (totalLength / 115);
+                var i = 1;
+                function animateNextPath(){
+                    // need to check if the path was removed from the DOM.
+                    // If so, remove the path and stop the animations
+                    if(!path[0][0].parentNode){ path.remove(); return false; }
+
+                    path.transition().duration(duration).ease("linear")
+                        .attr("stroke-dashoffset", -totalLength * i)
+                            .each('end', function(){ d3.select(this).call(animateNextPath); });
+                    i += 1;
+                }
+                animateNextPath();
+            });
+
+            // TODO: on node mouse over, draw line
+            // TODO: NOOOO remove this, this is JUST for demo
+            events.on('nodeHoverOn', function(options){
+                var line = function(d){
+                    return d3.svg.line()([
+                        [self.nodes.current.x, self.nodes.current.y],
+                        [options.d.x, options.d.y]
+                    ]);
+                };
+                destinationPaths.enter().append('path')
+                    .attr({
+                        d: line, 
+                        'class': 'to-remove destination-path-animated',
+                        'filter': 'url(#filter-wavy)'
+                    })
+                    .call(animatePath);
+            });
+            events.on('nodeHoverOff', function(options){
+                self.paths.selectAll('.to-remove').transition()
+                    .duration(0);
+                self.paths.selectAll('.to-remove').remove();
+            });
+
+            // remove old paths
+            destinationPaths.exit().remove();
 
             return this;
         },
 
-        
         // ------------------------------
+        //
         // Map Node interactions
+        //
         // ------------------------------
         nodeClicked: function nodeClicked(d,i){
             // CLICK event
@@ -2652,166 +2837,62 @@ define(
             d3.select(this).classed('node-hover', false);
         },
 
-        // ==============================
+        // =====================================================================
         //
-        // Draw nodes
+        // Update Map functions
         //
-        // ==============================
-        drawNodes: function mapDrawNodes(){
-            // Draws all the nodes on the map
-            // TODO: Update the function structure, this is really the main
-            // draw func
+        // =====================================================================
+        updateMap: function mapUpdate(){
+            // Draws all nodes then updates the visible areas
             var self = this;
-            logger.log('views/subviews/Map', 'drawNodes() called');
-
-            // remove existing current node wrapper
-            this.mapNodes.select('.node-wrapper.node-current').remove();
-
-            // Draw nodes
-            var nodes = this.mapNodes.selectAll('.node-wrapper')
-                .data(this.nodes.all);
-
-            // Draw circles
-            nodes.enter().append('g')
-                .on('mouseenter', this.nodeHoverStart)
-                .on('mouseleave', this.nodeHoverEnd)
-                .on('touchend', this.nodeClicked)
-                .on('click', this.nodeClicked);
-
-            // add class names to the node wrapper
-            nodes.attr({ 
-                'class': function(d,i){
-                    var cssClass = 'node-wrapper';
-
-                    if(d.node.get('visited')){ cssClass += ' node-visited'; }
-                    if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
-                    
-                    return cssClass;
-                }
-            });
-
-            // Add circles representing destinations
-            nodes.selectAll('circle').remove();
-            var circles = nodes
-                .append('circle')
-                    .attr({
-                        'class': function(d,i){
-                            var cssClass = 'map-node'; 
-                            if(d.node.get('visited')){ cssClass += ' node-visited'; }
-                            if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
-                            
-                            return cssClass;
-                        },
-                        cx: function(d){ return d.x; },
-                        cy: function(d){ return d.y; },
-                        r: 10
-                    });
-
-            // remove any removed nodes
-            nodes.exit().remove();
-
-            // ==========================
-            // Draw a paths
-            // ==========================
-            //  1. Draw a path based on the visited nodes path
             logger.log('views/subviews/Map', 
-                'visitedNodes : %O', this.nodes.visited);
+                '=== 1. updateMap() called');
 
-            var lineVisited = d3.svg.line();
-            var line = function(){
-                return lineVisited(_.map(self.model.get('visitedPath'), function(index){
-                    var coords = self.getCoordinatesFromNode(
-                        self.model.get('nodes').models[index]
-                    );
-                    return [coords.x, coords.y];
-                }));
-            };
-            var visitedPaths = this.paths.selectAll('.visited-path')
-                .data([{}]);
+            // update the store node references
+            this.updateNodeReferences();
 
-            // draw the dotted path
-            visitedPaths.enter().append('path');
+            // draw / update nodes
+            this.updateNodes();
+            this.updatePaths();
 
-            visitedPaths 
-                .attr({
-                    d: line, 
-                    'class': 'visited-path visited-path-dotted',
-                    'filter': 'url(#filter-wavy)',
-                    'stroke-dashoffset': 0
-                });
+            // minor delay to delay SVG filter effect
+            setTimeout(function(){
+                self.updateVisible.call(self);
+            }, 20);
 
-            visitedPaths.exit().remove();
-
-
-            // --------------------------
-            //
-            //  2. Draw a path from the current node to the next nodes
-            //
-            // --------------------------
-            // add paths
-            lineDestination = d3.svg.line();
-            line = function(d){
-                return lineDestination([
-                    [self.nodes.current.x, self.nodes.current.y],
-                    [d.x, d.y]
-                ]);
-            };
-
-            var destinationPaths = this.paths.selectAll('.destination-path')
-                .data(this.nodes.next);
-
-            // draw the dotted path
-            destinationPaths.enter().append('path');
-
-            destinationPaths
-                .attr({
-                    d: line, 
-                    'class': 'destination-path destination-path-dotted',
-                    'filter': 'url(#filter-wavy)',
-                    'stroke-dashoffset': 0
-                });
-
-            ////draw the animated path
-            ////TODO: Should this antimate? If it should be, we can do this:
-            //// NOTE: Be sure to cancel the animation
-            _.each(destinationPaths[0], function(path){
-                path = d3.select(path);
-                var totalLength = path.node().getTotalLength();
-                var duration = 34000 * (totalLength / 115);
-                i = 1;
-                function animatePath(){
-                    i += 1;
-                    path.transition().duration(duration).ease("linear")
-                        .attr("stroke-dashoffset", -totalLength * i)
-                            .each('end', animatePath);
-                }
-                animatePath();
-            });
-
-            // TODO: on node mouse over, draw line
-            // TODO: NOOOO remove this, this is JUST for demo
-            events.on('nodeHoverOn', function(options){
-                destinationPaths.enter().append('path')
-                    .attr({
-                        d: line, 
-                        'class': 'to-remove destination-path-animated',
-                        'filter': 'url(#filter-wavy)'
-                    })
-                    .call(animatePath);
-            });
-            events.on('nodeHoverOff', function(options){
-                self.paths.selectAll('.to-remove').transition()
-                    .duration(0);
-                self.paths.selectAll('.to-remove').remove();
-            });
-
-            // remove old paths
-            destinationPaths.exit().remove();
-
+            // transition the entity to the next node
+            this.moveEntity();
 
             return this;
         },
 
+        moveEntity: function moveEntity(){
+            // Move the entity sprite to the next node. This is called whenever
+            // the node instance successfully is completed
+            var self = this;
+
+            this.entitySprites.transition()
+                .duration(this.CONFIG.updateDuration)
+                .ease(this.CONFIG.updateEase)
+                .attr({ 
+                    transform: function(){ 
+                        return 'translate(' + [
+                            self.nodes.current.x - self.entityWidth/2,
+                            self.nodes.current.y - self.entityHeight/1.2
+                        ] + ')';
+                    }
+                });
+            
+            return this;
+        },
+
+        
+
+        // =====================================================================
+        //
+        // Utility Functions
+        //
+        // =====================================================================
         getNodes: function mapGetNodes(options){
             // This function will get (a subset) of nodes from the map's
             // node list, process them, and return them. For processing, it
@@ -2824,18 +2905,13 @@ define(
             //      visited: {boolean} get nodes that have been visited 
             //      current: {boolean} get the current node
             //      next: {boolean} get the neighors of the current node
-            // 
-            // TODO: get only the visible vertices
-            // TODO: get connected nodes to travel to
             var self = this;
             options = options || {};
             logger.log('views/subviews/Map', 
                 '1. getNodes() called: %O', options);
 
             var nodes = this.model.get('nodes');
-
             var vertices = [];
-
             var currentNode;
 
             if(options.current !== false){
@@ -2848,8 +2924,7 @@ define(
 
             // push the current node's next possible neighbors
             if(options.next !== false){
-                _.each(this.model.getCurrentNode().get('nextNodes'), function(nodeIndex){
-                    var node = nodes.models[nodeIndex];
+                _.each(this.model.getCurrentNode().get('nextNodes'), function(node){
                     vertices.push( _.extend(
                         { node: node },
                         self.getCoordinatesFromNode(node)

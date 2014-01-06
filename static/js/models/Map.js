@@ -75,8 +75,12 @@ define(
 
                 // create a collection of map nodes and store it
                 this.set({ nodes: new MapNodes(nodes) }, {silent: true});
-                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
+                this.get('nodes').trigger('change:nodes');
+
+                // trigger map model changes
                 this.trigger('change');
+                this.trigger('change:nodes');
+                this.setCurrentNode(this.get('nodes').models[0], {silent:true});
 
                 return this;
             },
