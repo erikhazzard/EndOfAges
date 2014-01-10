@@ -30,3 +30,7 @@ Learning new skills
 
 -Skills level up as you use them?
 
+
+-------------
+Explict story vs player stories
+    -provide explict story only as a way to enhance the player story

@@ -20,12 +20,19 @@ define(
             effectId: null,
 
             // castDuration - measured in seconds
-            // how long the spell takes to cast
+            // how long the spell takes to cast - how long between the source
+            // entity using the spell and the target entity receiving the effect
             castDuration: 0.5,
 
             // how much power the ability costs to use
             // TODO: probably won't use power
             powerCost: 10,
+    
+            // Damage Over Time (DOT) properties
+            // ticks: number of times to do the effect
+            ticks: 0,
+            // time between each tick
+            tickDuration: 1,
         
             // How long must the player wait until they can use this ability
             // This SHOULD always be greater than or equal to than the timeCost
@@ -100,6 +107,8 @@ define(
                 this,
                 options);
             var amount = 0;
+                // note: multiply castDuration by 1000 (it's in seconds, we
+                // need to get milliseconds)
             var delay = this.get('castDuration') * 1000;
             // TODO: lower delay if the target has some sort of delay reducting
             // stats
@@ -119,28 +128,56 @@ define(
             // Check property in the takeXX() function?
             if(this.get('heal')){
                 setTimeout(function effectHealDelay(){
-                    amount = options[self.get('healTarget')].takeHeal({
-                        type: self.get('type'),
-                        subType: self.get('subType'),
-                        amount: self.get('heal'),
-                        sourceAbility: self
-                    });
-                    if(options.callback){ options.callback(amount); }
+                    function takeHeal(){
+                        amount = options[self.get('healTarget')].takeHeal({
+                            type: self.get('type'),
+                            subType: self.get('subType'),
+                            amount: self.get('heal'),
+                            sourceAbility: self
+                        });
+                    }
+                    takeHeal();
+
+                    // Setup for DoTs
+                    var curTick = 0;
+                    if(self.get('ticks')){
+                        while(curTick < self.get('ticks')){
+                            setTimeout( takeHeal,
+                                (self.get('tickDuration') * 1000) * (curTick + 1) 
+                            );
+                            curTick += 1;
+                        }
+                    }
+
+                    if(options.callback){ options.callback(); }
                 }, delay);
-                // note: multiply castDuration by 1000 (it's in seconds, we
-                // need to get milliseconds)
             }
 
             // Then, handle damage effect
             if(this.get('damage')){
                 setTimeout(function effectDamageDelay(){
-                    amount = options[self.get('damageTarget')].takeDamage({
-                        type: self.get('type'),
-                        subType: self.get('subType'),
-                        amount: self.get('damage'),
-                        sourceAbility: self
-                    });
-                    if(options.callback){ options.callback(amount); }
+                    function takeDamage(){
+                        amount = options[self.get('damageTarget')].takeDamage({
+                            type: self.get('type'),
+                            subType: self.get('subType'),
+                            amount: self.get('damage'),
+                            sourceAbility: self
+                        });
+                    }
+                    takeDamage();
+
+                    // Setup for DoTs
+                    var curTick = 0;
+                    if(self.get('ticks')){
+                        while(curTick < self.get('ticks')){
+                            setTimeout( takeDamage,
+                                (self.get('tickDuration') * 1000) * (curTick + 1) 
+                            );
+                            curTick += 1;
+                        }
+                    }
+
+                    if(options.callback){ options.callback(); }
                 }, delay);
             }
 

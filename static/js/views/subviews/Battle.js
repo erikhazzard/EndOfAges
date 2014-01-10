@@ -1827,38 +1827,55 @@ define(
                     // get a copy of the svg effect
                     //  all effects should be wrapped in a svg element with id of
                     //  `effect-spellName`, and the wrapper should have no attributes
-                    var $effect = d3.sticker('#effect-' + selectedAbility.attributes.effectId);
-                    // append it the ability effects group
-                    $effect = $effect(this.$abilityEffects);
+                    function renderEffect(){
+                        var $effect = d3.sticker('#effect-' + selectedAbility.attributes.effectId);
+                        // append it the ability effects group
+                        $effect = $effect(self.$abilityEffects);
 
-                    // start in the middle of the source
-                    $effect.attr({
-                        // set start position immediately
-                        transform: 'translate(' + [
-                            // get midpoints
-                            sourcePos.left + ((sourcePos.right - sourcePos.left) / 2), 
-                            sourcePos.top + ((sourcePos.bottom - sourcePos.top) / 2)
-                            ] + ') ' + scaleAmount
-
-                    })
-                        // then travel to the target
-                        .transition()
-                        .ease('cubic-in')
-                        .duration(selectedAbility.attributes.castDuration * 1000) 
-                        .attr({
+                        // start in the middle of the source
+                        $effect.attr({
+                            // set start position immediately
                             transform: 'translate(' + [
-                                // send to edge of either enemy or player
-                                targetEntityGroup === 'enemy' ? targetPos.left - 20 : targetPos.right + 20,
                                 // get midpoints
-                                targetPos.top + ((targetPos.bottom - targetPos.top) / 2)
+                                sourcePos.left + ((sourcePos.right - sourcePos.left) / 2), 
+                                sourcePos.top + ((sourcePos.bottom - sourcePos.top) / 2)
                                 ] + ') ' + scaleAmount
+
                         })
-                        .each('end', function(){
-                            // remove the effect
-                            // NOTE: the entity wiggle will happen in the 
-                            // change:health callback
-                            d3.select(this).remove();
-                        });
+                            // then travel to the target
+                            .transition()
+                            .ease('cubic-in')
+                            .duration(selectedAbility.attributes.castDuration * 1000) 
+                            .attr({
+                                transform: 'translate(' + [
+                                    // send to edge of either enemy or player
+                                    targetEntityGroup === 'enemy' ? targetPos.left - 20 : targetPos.right + 20,
+                                    // get midpoints
+                                    targetPos.top + ((targetPos.bottom - targetPos.top) / 2)
+                                    ] + ') ' + scaleAmount
+                            })
+                            .each('end', function(){
+                                // remove the effect
+                                // NOTE: the entity wiggle will happen in the 
+                                // change:health callback
+                                d3.select(this).remove();
+                            });
+                    }
+
+                    // do the effect
+                    renderEffect();
+
+                    // if the ability has multiple ticks, do it
+                    var curTick = 0;
+                    if(selectedAbility.attributes.ticks){
+                        while(curTick < selectedAbility.attributes.ticks){
+                            setTimeout(
+                                renderEffect,
+                                (selectedAbility.attributes.tickDuration * 1000) * (curTick + 1)
+                            );
+                            curTick += 1;
+                        }
+                    }
                 }
 
 
