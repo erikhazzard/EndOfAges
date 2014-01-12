@@ -3240,9 +3240,12 @@ define(
         checkTimer: function checkTimer(time){
             // called on each loop iteration. Check the abilities 
             // and triggers a change event if necessary
+            // TODO : Might not want to do this? 
+            // TODO: update UI's progress bar based on loop? NO - use d3
+            // timers to do it instead, less DOM updates
             var self = this;
 
-            _.each(this.collection.models, function(ability){
+            _.each(this.collection.models, function checkTimerAbilityListLoop(ability){
                 // see if ability is usable. if so, trigger a change event
                 // if necessary (which abilityItem view listens for)
 
