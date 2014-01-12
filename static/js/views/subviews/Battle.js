@@ -76,8 +76,8 @@ define(
     ){
 
     // Utility functions
-    function getTimestamp() {
-        return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
+    function timestampFunc() {
+        return window.performance && window.performance.now ? window.performance.now : new Date().getTime;
     }
 
     // =======================================================================
@@ -271,7 +271,7 @@ define(
                 
                 timerNow = null,
                 timerDt = 0,
-                timerLast = getTimestamp(),
+                timerLast = (window.performance && window.performance.now ? window.performance.now() : new Date().getTime()),
 
                 fps = 60,
                 timerStep = 1 / fps,
@@ -293,7 +293,7 @@ define(
                 // This function is called each frame. Call render() to keep
                 // render state up to date, call update() on a fixed time
                 //
-                timerNow = getTimestamp();
+                timerNow = (window.performance && window.performance.now ? window.performance.now() : new Date().getTime());
                 // cap time if requestAnimFrame is stalled (e.g., user switches tab)
                 timerDt = timerDt + Math.min(
                     1, (timerNow - timerLast) / 1000);
