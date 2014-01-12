@@ -1792,6 +1792,7 @@ define(
                     this.wrapperBoundingRect = this.$svg.node().getBoundingClientRect();
 
                     // get the position of the entity sprite
+                    // TODO: cache bounding rect
                     var sourceRect = d3.select(this[sourceEntityGroup + 'EntitySprites'][0][sourceEntityIndex])
                         .node()
                         .getBoundingClientRect();
