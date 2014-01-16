@@ -27,42 +27,23 @@
 </head>
 
 <body>
-
-    <!-- Header -->
-    <div class='navbar navbar-default navbar-fixed-top'>
-        <div class='container site-container'>
-            <div class='row-nonresponsive'>
-                <h1 class='navbar-item quint-brand'>
-                    <a class='' href="/">
-                        <!--             <span class='logo'>End of Ages</span> -->
-                    </a>
-                </h1>
-            </div>
-            <!-- Login -->
-            <div id='region-auth' class='hidden-sm'></div>
-
-          </div>
-        </div>
+<div id='site-container'>
+    <div id='region-main'>
+        {{/* NOTE: Everything here is replaced when views are rendered. 
+            We get the page from the server, so do a little pre-rendering
+            if possible
+        */}}
+        <!-- ========================================== 
+        Pages
+        =========================================== -->
+        {{// PRELOAD Pages }}
+        {{ if(page === 'home'){ }}
+            {{ include js-templates/page-home-preload.html }}
+        {{ } else if (page === 'game'){ }}
+            {{ include js-templates/page-game-preload.html }}
+        {{ } }}
     </div>
-    <div class='navbar-spacer'></div>
-
-    <!-- ========================================== 
-    Pages
-    =========================================== -->
-    <div class='container site-container'>
-        <div id='region-main'>
-            {{/* NOTE: Everything here is replaced when views are rendered. 
-                We get the page from the server, so do a little pre-rendering
-                if possible
-            */}}
-            {{// PRELOAD Pages }}
-            {{ if(page === 'home'){ }}
-                {{ include js-templates/page-home-preload.html }}
-            {{ } else if (page === 'game'){ }}
-                {{ include js-templates/page-game-preload.html }}
-            {{ } }}
-        </div>
-    </div>
+</div>
 
 <!-- ============================================ 
     Pages / Underscore templates

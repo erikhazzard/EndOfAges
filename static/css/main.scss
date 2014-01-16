@@ -6,9 +6,6 @@
 $highlight-blue: #3387f5;
 $highlight-green: #1bc812;
 
-// NOTE: this should not be used when the layout is rejiggered
-$nav-height: 75px;
-
 // --------------------------------------
 //
 // Imports
@@ -31,17 +28,14 @@ body {
 body, #region-main {
   -webkit-overflow-scrolling: touch;
 }
-.navbar-spacer {
-  padding-top: 80px;
-}
 
 a {
   cursor: pointer;
   color: $highlight-blue;
   text-decoration: none !important;
-  &:hover {
+}
+a:hover {
     color: darken($highlight-blue, 10%);
-  }
 }
 
 // Make all SVG elements unselectable
@@ -52,16 +46,38 @@ svg {
     user-select:none;
 }
 
+
+@-webkit-keyframes preload {
+    0%  {
+        -webkit-transform: scale(0.95, 0.95);
+        transform: scale(0.95, 0.95);
+        opacity: 0.2;
+    }
+    50%  {
+        opacity: 0.5;
+    }
+    100%  {
+        -webkit-transform: scale(1.0,1.0);
+        transform: scale(1.0, 1.0);
+        opacity: 1;
+    }
+}
 .preload-content {
   text-align: center;
   color: #999;
   font-weight: 500;
-  margin: 3em 0
+  margin: 3em 0;
+
+  -webkit-animation: preload 1.8s ease-out;
+  -webkit-animation-direction: alternate;
+  -webkit-animation-iteration-count: infinite;
+
+  animation: preload 1.8s ease-out;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 .clear { clear: both; }
 
 .blur {
