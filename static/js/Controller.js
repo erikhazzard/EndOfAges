@@ -7,16 +7,20 @@ define([
     'backbone', 'marionette', 'logger', 'events',
     'models/appUser-object',
     'models/Game',
+    'models/Entity',
     'views/PageHome',
-    'views/PageGame'
+    'views/PageGame',
+    'views/PageCreateCharacter'
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
         Game,
+        Entity,
 
         // include views here
         PageHome,
-        PageGame
+        PageGame,
+        PageCreateCharacter
     ){
 
     // console color
@@ -73,7 +77,29 @@ define([
         },
 
         // ------------------------------
+        //
+        // Character Create
+        //
+        // ------------------------------
+        showCreateCharacter: function controllerShowCreateCharacter(){
+            logger.log('Controller', 'showCreateCharacter() called');
+
+            // TODO: Reuse game view, don't show / hide it? Use a different
+            // region?
+            this.pageCreateCharacter = new PageCreateCharacter({
+                // Hmm, model should be an empty entity?
+                model: new Entity({})
+            });
+
+            this.regionMain.show(this.pageCreateCharacter);
+
+            return this;
+        },
+
+        // ------------------------------
+        //
         // Game
+        //
         // ------------------------------
         showGame: function controllerShowGame(){
             logger.log('Controller', 'showGame() called');

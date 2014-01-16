@@ -11,6 +11,7 @@ define(['backbone', 'marionette', 'logger', 'events'],
         appRoutes: {
             //Main route
             "(/)": "showHome",
+            "create": "showCreateCharacter",
             "game": "showGame"
         }
     });
@@ -45,6 +46,11 @@ define(['backbone', 'marionette', 'logger', 'events'],
         events.on('appRouter:showGame', function(){
             logger.log('appRouter', 'appRouter:showGame event called');
             appRouter.navigate('/game', {trigger: true});
+        }, this);
+
+        events.on('appRouter:showCreateCharacter', function(){
+            logger.log('appRouter', 'appRouter:showCreateCharacter event called');
+            appRouter.navigate('/create', {trigger: true});
         }, this);
 
         return appRouter;

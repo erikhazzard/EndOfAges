@@ -5618,6 +5618,47 @@ define(
     return PageGame;
 });
 
+// ===========================================================================
+//
+// Page Create Character
+// 
+// ===========================================================================
+define(
+    'views/PageCreateCharacter',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events'
+    ], function viewPageCreateCharacter(
+        d3, backbone, marionette, 
+        logger, events
+    ){
+
+    var PageCreateCharacter = Backbone.Marionette.Layout.extend({
+        template: '#template-page-create-character',
+        'className': 'page-create-character-wrapper',
+
+        initialize: function initialize(options){
+            // initialize:
+            logger.log('views/PageCreateCharacter', 'initialize() called');
+            return this;
+        },
+        onShow: function homeOnShow(){
+            logger.log('views/PageCreateCharacter', 'onShow called');
+            return this;
+        }
+        // ------------------------------
+        // TODO: how to handle new views?
+        // ------------------------------
+
+        // ------------------------------
+        //
+        // User Interaction
+        //
+        // ------------------------------
+    });
+
+    return PageCreateCharacter;
+});
+
 //=============================================================================
 // Controller.js
 //
@@ -5627,16 +5668,20 @@ define('Controller',[
     'backbone', 'marionette', 'logger', 'events',
     'models/appUser-object',
     'models/Game',
+    'models/Entity',
     'views/PageHome',
-    'views/PageGame'
+    'views/PageGame',
+    'views/PageCreateCharacter'
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
         Game,
+        Entity,
 
         // include views here
         PageHome,
-        PageGame
+        PageGame,
+        PageCreateCharacter
     ){
 
     // console color
@@ -5693,7 +5738,29 @@ define('Controller',[
         },
 
         // ------------------------------
+        //
+        // Character Create
+        //
+        // ------------------------------
+        showCreateCharacter: function controllerShowCreateCharacter(){
+            logger.log('Controller', 'showCreateCharacter() called');
+
+            // TODO: Reuse game view, don't show / hide it? Use a different
+            // region?
+            this.pageCreateCharacter = new PageCreateCharacter({
+                // Hmm, model should be an empty entity?
+                model: new Entity({})
+            });
+
+            this.regionMain.show(this.pageCreateCharacter);
+
+            return this;
+        },
+
+        // ------------------------------
+        //
         // Game
+        //
         // ------------------------------
         showGame: function controllerShowGame(){
             logger.log('Controller', 'showGame() called');
@@ -5732,6 +5799,7 @@ define('appRouter',['backbone', 'marionette', 'logger', 'events'],
         appRoutes: {
             //Main route
             "(/)": "showHome",
+            "create": "showCreateCharacter",
             "game": "showGame"
         }
     });
@@ -5766,6 +5834,11 @@ define('appRouter',['backbone', 'marionette', 'logger', 'events'],
         events.on('appRouter:showGame', function(){
             logger.log('appRouter', 'appRouter:showGame event called');
             appRouter.navigate('/game', {trigger: true});
+        }, this);
+
+        events.on('appRouter:showCreateCharacter', function(){
+            logger.log('appRouter', 'appRouter:showCreateCharacter event called');
+            appRouter.navigate('/create', {trigger: true});
         }, this);
 
         return appRouter;

@@ -13,3 +13,7 @@ How to handle DoTs / abilities that trigger over time?
             -could have a global pause event, which would clear all timers
                 -then, when NOT paused, restart timer
                 -resume setTimeouts in unpause / runTimer function
+
+-----------------
+
+Get rid of bootstrap?

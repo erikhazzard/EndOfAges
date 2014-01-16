@@ -1,0 +1,76 @@
+<script id='template-page-create-character' type='text/template'>
+
+    <!-- ================================
+        Race / Class
+        ================================= -->
+    <div id='race-class-wrapper'>
+
+        <div class='current-race-class'>
+            Race
+        </div>
+
+        <div id='region-create-races'></div>
+        <!-- NOTE: classes could be just a list of classes, with an icon to the side indicating the group? e.g., fighter -->
+        <div id='region-create-classes'></div>
+    </div>
+
+    <!-- ================================
+        Main display area
+        ================================= -->
+    <div id='character-display-wrapper'>
+
+        <!-- NAME -->
+        <div class='name-wrapper'>
+            <input class='input-character-name' type='text' placeholder='Name' />
+            <a class='btn-generate-name btn btn-primary btn-larg'>
+                Generate
+            </a>
+        </div>
+
+
+        <!-- character display -->
+        <div class='character-wrapper'>
+
+            <!-- character svg goes here -->
+            <div class='character'></div>
+
+            <!-- race info -->
+            <div class='race-wrapper'>
+                <div class='race-name'>
+                    Human
+                </div>
+                <div class='race-description'>
+                    Bla
+                </div>
+            </div>
+
+            <!-- class -->
+            <div class='class-wrapper'>
+                <div class='class-name'>
+                    Shadowknight
+                </div>
+                <div class='class-description'>
+                    Bla
+                </div>
+            </div>
+        </div>
+
+        <!-- VIZ -->
+        <div class='character-viz-wrapper'>
+            <!-- Stats -->
+            <div class='stats-viz-wrapper'> </div>
+
+            <!-- Elements -->
+            <div class='elements-viz-wrapper'> </div>
+
+            <!-- Class info -->
+            <div class='class-viz-wrapper'> </div>
+        </div>
+
+        <!-- Abilities -->
+        <div class='abilities-wrapper'>
+            Ability 1 | 2 | 3 | 4
+        </div>
+
+    </div>
+</script>
