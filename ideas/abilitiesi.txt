@@ -29,3 +29,8 @@ TODO: Figure out all the 'types' of ability effects - missle, direct, AoE, etc.
         -choose additioanl effects? specialize how you want the ability to
         scale   
             -damage, focus of element, etc.
+----------------
+
+Ability Ideas:
+    -Abilities that can only be used once per battle
+        -Can be only used once per every n battles
