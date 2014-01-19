@@ -1,9 +1,57 @@
+// variables
+// --------------------------------------
+$create-left-width: 20%;
+$create-name-height: 50px;
+
+// layout
+// --------------------------------------
 .page-create-character-wrapper {
 
+    // Left side
+    // ----------------------------------
     #race-class-wrapper {
+        border: 2px solid #343434;
+        bottom: 0;
+        left: 0;
         position: absolute;
-        left: 0
+        width: $create-left-width;
+        top: 0;
     }
 
+    #region-create-races {
+        .race-list-item {
+            border: 1px solid #a0a0a0;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+    }
+
+    // Right side / Character Display
+    // ----------------------------------
+    #character-display-wrapper {
+        bottom: 0;
+        border: 2px solid #343434;
+        position: absolute;
+        left: $create-left-width;
+        right: 0;
+        top: 0;
+
+        .name-wrapper {
+            position: absolute;
+            left: 0;
+            height: $create-name-height;
+            overflow: hidden;
+            right: 0;
+            top: 0;
+        }
+
+        .character-wrapper {
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: $create-name-height;
+        }
+    }
 
 }

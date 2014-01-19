@@ -9,3 +9,6 @@ Battle Juiciness
         -when you get damaged, screen should shake
 
     -flash idea: gradient on left / right?
+
+
+-Damage effects when enemies die / take damage

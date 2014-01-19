@@ -1,3 +1,5 @@
+{{ include create/races.html }}
+
 <script id='template-page-create-character' type='text/template'>
 
     <!-- ================================
@@ -5,26 +7,42 @@
         ================================= -->
     <div id='race-class-wrapper'>
 
-        <div class='current-race-class'>
-            Race
+        <!-- RACES -->
+        <div id='races'>
+            <div class='current-race-class'>
+                Select Race
+            </div>
+
+            <div id='region-create-races'></div>
         </div>
 
-        <div id='region-create-races'></div>
+        <!-- CLASSES -->
+
+
         <!-- NOTE: classes could be just a list of classes, with an icon to the side indicating the group? e.g., fighter -->
         <div id='region-create-classes'></div>
+
+
+        <!-- next / previous buttons -->
+        <div class='next-prev-buttons blur'>
+            Previous | Next
+        </div>
+
     </div>
 
     <!-- ================================
         Main display area
         ================================= -->
-    <div id='character-display-wrapper'>
+    <div id='character-display-wrapper' class='blur'>
 
         <!-- NAME -->
         <div class='name-wrapper'>
-            <input class='input-character-name' type='text' placeholder='Name' />
-            <a class='btn-generate-name btn btn-primary btn-larg'>
-                Generate
-            </a>
+            <div class='center'>
+                <input class='input-character-name' type='text' placeholder='Name' />
+                <a class='btn-generate-name btn btn-primary btn-larg'>
+                    Generate
+                </a>
+            </div>
         </div>
 
 

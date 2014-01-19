@@ -36,8 +36,36 @@
   fill: #ffffff; }
 
 .page-create-character-wrapper #race-class-wrapper {
+  border: 2px solid #343434;
+  bottom: 0;
+  left: 0;
   position: absolute;
-  left: 0; }
+  width: 20%;
+  top: 0; }
+.page-create-character-wrapper #region-create-races .race-list-item {
+  border: 1px solid #a0a0a0;
+  cursor: pointer;
+  padding: 8px 0; }
+.page-create-character-wrapper #character-display-wrapper {
+  bottom: 0;
+  border: 2px solid #343434;
+  position: absolute;
+  left: 20%;
+  right: 0;
+  top: 0; }
+  .page-create-character-wrapper #character-display-wrapper .name-wrapper {
+    position: absolute;
+    left: 0;
+    height: 50px;
+    overflow: hidden;
+    right: 0;
+    top: 0; }
+  .page-create-character-wrapper #character-display-wrapper .character-wrapper {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 50px; }
 
 .entity-group-wrapper {
   cursor: pointer; }
@@ -194,3 +222,7 @@ svg {
   -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
   opacity: 1\9 !important;
   pointer-events: none; }
+
+.center {
+  display: table;
+  margin: auto; }

@@ -14,6 +14,7 @@ define(
     // Maybe instead of damage and heal, `amount` is used, and a separate
     // attribute like `spellType` specifies if it's a Direct Damage, Heal,
     // DoT, buff, etc. type spell
+    logger.log('models/data-abilities', 'Creating abilities');
 
     // Here be abilities. This would be loaded in a DB and entities would
     // get abilities from server

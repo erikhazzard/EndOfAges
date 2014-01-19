@@ -123,7 +123,7 @@ require([
     ];
 
     //// log EVERYTHING:
-    //logger.options.logLevel = true;
+    logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

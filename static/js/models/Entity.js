@@ -29,6 +29,11 @@ define(
             // effects active on the entity (e.g., buffs or DoTs)
             activeEffects: [ function(){ console.log('bla'); } ],
 
+            // the entity's race
+            // tracks effects / stats, bonuses from / against races, etc.
+            // TODO: favorite / known races, give bonuses based on it
+            race: null,
+
             // name of the base sprite
             // TODO: Should this be here?
             sprite: 'man1', 
@@ -50,6 +55,9 @@ define(
             //---------------------------
             // Attributes include everything from health to attack damage, etc.
             // Anything combat related
+            //
+            // TODO: pass in values?
+            // Starting values based on the entity's race / class
             attributes: {},
 
             //Base attributes (copied over when a game starts to allow
@@ -79,7 +87,7 @@ define(
             return url;
         },
 
-        initialize: function gameInitialize(options){
+        initialize: function entityInitialize(options){
             logger.log('models/Entity', 'initialize() called');
 
             // TODO: get attributes from server
