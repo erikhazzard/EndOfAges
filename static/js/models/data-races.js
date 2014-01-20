@@ -13,15 +13,18 @@ define(
     var RACES = [
         new Race({
             name: 'Elf',
-            description: 'An elf'
+            description: 'An elf',
+            sprite: 'elf'
         }),
         new Race({
             name: 'Human',
-            description: 'Boring'
+            description: 'Boring',
+            sprite: 'human'
         }),
         new Race({
             name: 'Mimirian',
-            description: 'Boring'
+            description: 'Boring',
+            sprite: 'mimirian'
         })
     ];
 

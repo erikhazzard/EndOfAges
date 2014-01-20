@@ -15,6 +15,7 @@ define(
             defaults: {
                 name: 'Race',
                 description: 'Some test',
+                sprite: 'race',
                 baseStats: {
                     // todo: more...
                     agility: 10

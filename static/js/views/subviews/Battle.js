@@ -1007,6 +1007,7 @@ define(
                 // PLAYER SPRITE / image
                 // --------------------------
                 // TODO : figure out better way to handle sprites
+                // TODO: dont use image, use clone / sticker?
                 self[entityGroup + 'EntitySprites'] = groups.append('image')
                     .attr({
                         'class': entityGroup + '-entity entity',

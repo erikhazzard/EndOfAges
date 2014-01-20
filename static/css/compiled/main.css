@@ -74,6 +74,9 @@
   border: 1px solid #a0a0a0;
   cursor: pointer;
   padding: 8px 0; }
+.page-create-character-wrapper #region-create-races .race-list-item .item.active {
+  background: #336699;
+  color: #ffffff; }
 .page-create-character-wrapper #create-classes.list-hidden {
   left: 350px !important; }
 .page-create-character-wrapper #create-character-display-wrapper {

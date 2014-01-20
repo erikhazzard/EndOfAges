@@ -189,6 +189,10 @@ define(
             var cid = $(e.target).attr('data-race-cid');
             var raceModel = this.races.get(cid); 
 
+            // add / remove active class
+            this.getSelector('.item').removeClass('active');
+            $(e.target).addClass('active');
+
             this.model.set({ race: raceModel });
             // can continue
             this.getSelector('.btn-next').removeClass('blur');

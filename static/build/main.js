@@ -4452,6 +4452,7 @@ define(
                 // PLAYER SPRITE / image
                 // --------------------------
                 // TODO : figure out better way to handle sprites
+                // TODO: dont use image, use clone / sticker?
                 self[entityGroup + 'EntitySprites'] = groups.append('image')
                     .attr({
                         'class': entityGroup + '-entity entity',
@@ -5706,7 +5707,32 @@ define(
             logger.log('views/create/RaceListItem', 'initialize : model %O',
                 this.model);
             return this;
+        },
+
+        onShow: function(){
+            var sprite = this.model.get('sprite');
+
+            var sel = d3.select($('.race-sprite', this.$el)[0]);
+            sel = sel.append('image')
+                .attr({
+                    'xlink:href': function(d, i){
+                        return "/static/img/characters/" + 
+                            sprite + '.gif';
+                    },
+                    width: 50,
+                    height: 50
+                });
+
+
+            //// TODO: handle sprite loading 
+            //// NOTE: to use sticker...
+            //var sel = d3.select($('.race-sprite', this.$el)[0]);
+            //var $character = d3.sticker('#race-' + this.model.get('sprite'));
+            //$character = $character(sel);
+
+            return this;
         }
+
     });
 
     return RaceListItem;
@@ -5762,6 +5788,7 @@ define(
             defaults: {
                 name: 'Race',
                 description: 'Some test',
+                sprite: 'race',
                 baseStats: {
                     // todo: more...
                     agility: 10
@@ -5796,15 +5823,18 @@ define(
     var RACES = [
         new Race({
             name: 'Elf',
-            description: 'An elf'
+            description: 'An elf',
+            sprite: 'elf'
         }),
         new Race({
             name: 'Human',
-            description: 'Boring'
+            description: 'Boring',
+            sprite: 'human'
         }),
         new Race({
             name: 'Mimirian',
-            description: 'Boring'
+            description: 'Boring',
+            sprite: 'mimirian'
         })
     ];
 
@@ -6036,6 +6066,10 @@ define(
 
             var cid = $(e.target).attr('data-race-cid');
             var raceModel = this.races.get(cid); 
+
+            // add / remove active class
+            this.getSelector('.item').removeClass('active');
+            $(e.target).addClass('active');
 
             this.model.set({ race: raceModel });
             // can continue

@@ -68,6 +68,10 @@ $create-nav-buttons-height: 50px;
             cursor: pointer;
             padding: 8px 0;
         }
+        .race-list-item .item.active {
+            background: #336699;
+            color: #ffffff;
+        }
     }
 
     // Class list
