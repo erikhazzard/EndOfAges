@@ -27,7 +27,10 @@ define(
                 username: null,
                 
                 // keep track if the user has been fetched from the server
-                isLoggedIn: false
+                isLoggedIn: false,
+
+                // how many games were played?
+                numGames: 0
             },
         
             url: API_URL + 'user/',

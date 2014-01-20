@@ -67,7 +67,7 @@ requirejs.config({
 //========================================
 require([
     //libs
-    'jquery',
+    'jquery', 'lib/jquery.transit.min',
     'backbone', 'marionette', 'bootstrap',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
@@ -84,7 +84,7 @@ require([
     'appRouter'
     ],
     function main(
-        $, 
+        $, $transit,
         Backbone, marionette, bootstrap,
         d3plugins,
 
@@ -99,12 +99,10 @@ require([
     ){
 
     // Allows multiple modals 
-    $.fn.modal.Constructor.prototype.enforceFocus = function () {};
+    if (!$.support.transition) { $.fn.transition = $.fn.animate; }
 
-    if(browserInfo.isIe8){
-        //For IE8, don't cache AJAX queries. 
-        $.ajaxSetup({ cache: false });
-    }
+    //For IE8, don't cache AJAX queries. 
+    if(browserInfo.isIe8){ $.ajaxSetup({ cache: false }); }
 
     //INITIAL CONFIG
     //-----------------------------------

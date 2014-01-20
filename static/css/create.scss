@@ -1,34 +1,67 @@
 // variables
 // --------------------------------------
-$create-left-width: 20%;
+$create-left-width: 300px;
 $create-name-height: 50px;
+$create-nav-buttons-height: 50px;
 
 // layout
 // --------------------------------------
 .page-create-character-wrapper {
+    .list-hidden {
+        left: -$create-left-width !important;
+    }
 
     // Left side
     // ----------------------------------
-    #race-class-wrapper {
+    #create-race-class-wrapper {
         border: 2px solid #343434;
         bottom: 0;
         left: 0;
+        overflow: hidden;
         position: absolute;
         width: $create-left-width;
         top: 0;
     }
 
+    #create-races, #create-classes {
+        bottom: $create-nav-buttons-height;
+        border: 2px solid #343434;
+        left: 0;
+        position: absolute;
+        transition: left 0.4s;
+        top: 0;
+        width: $create-left-width;
+    }
+    #create-classes {
+        left: 0;
+    }
+    // Races
+    #create-races {}
+
     #region-create-races {
-        .race-list-item {
+        .race-list-item .item {
             border: 1px solid #a0a0a0;
             cursor: pointer;
             padding: 8px 0;
         }
     }
 
+    // Class list
+    #create-classes {
+    }
+
+    // buttons
+    .next-prev-buttons {
+        position: absolute;
+        bottom: 0;
+        height: $create-nav-buttons-height;
+        left: 0;
+        right: 0;
+    }
+
     // Right side / Character Display
     // ----------------------------------
-    #character-display-wrapper {
+    #create-character-display-wrapper {
         bottom: 0;
         border: 2px solid #343434;
         position: absolute;
