@@ -89,7 +89,9 @@ svg {
 
 .blur {
   -webkit-filter: blur(10px) !important;
-  filter: blur(10px) !important;
+  -moz-filter: blur(10px) !important;
+  filter: blur(10px); 
+  filter: url(#filter-blur);
   opacity: 1 !important;
   filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10)\9 !important;
   -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10)\9 !important;

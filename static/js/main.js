@@ -149,7 +149,9 @@ require([
             app.router.navigate(route, true);
         });
 
+        // ------------------------------
         // setup handle keys
+        // ------------------------------
         handleKeys();
 
     });

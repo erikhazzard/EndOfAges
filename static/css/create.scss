@@ -1,14 +1,15 @@
 // variables
 // --------------------------------------
-$create-left-width: 300px;
+$create-left-width: 350px;
 $create-name-height: 50px;
 $create-nav-buttons-height: 50px;
 
 // layout
 // --------------------------------------
 .page-create-character-wrapper {
-    .list-hidden {
-        left: -$create-left-width !important;
+
+    .blur {
+        opacity: 0.5 !important;
     }
 
     // Left side
@@ -21,6 +22,30 @@ $create-nav-buttons-height: 50px;
         position: absolute;
         width: $create-left-width;
         top: 0;
+
+        // buttons
+        .next-prev-buttons {
+            position: absolute;
+            bottom: 0;
+            height: $create-nav-buttons-height;
+            left: 0;
+            right: 0;
+
+            .btn { 
+                border: 2px solid #343434;
+                position: absolute;
+                transition: opacity 0.3s; 
+                width: 45%;
+            }
+
+            .btn-previous {
+                left: 0;
+            }
+            .btn-next {
+                right: 0;
+            }
+        }
+
     }
 
     #create-races, #create-classes {
@@ -32,11 +57,10 @@ $create-nav-buttons-height: 50px;
         top: 0;
         width: $create-left-width;
     }
-    #create-classes {
-        left: 0;
-    }
     // Races
-    #create-races {}
+    #create-races.list-hidden {
+        left: -$create-left-width !important;
+    }
 
     #region-create-races {
         .race-list-item .item {
@@ -47,18 +71,10 @@ $create-nav-buttons-height: 50px;
     }
 
     // Class list
-    #create-classes {
+    #create-classes.list-hidden {
+        left: $create-left-width !important;
     }
-
-    // buttons
-    .next-prev-buttons {
-        position: absolute;
-        bottom: 0;
-        height: $create-nav-buttons-height;
-        left: 0;
-        right: 0;
-    }
-
+    
     // Right side / Character Display
     // ----------------------------------
     #create-character-display-wrapper {
@@ -85,6 +101,6 @@ $create-nav-buttons-height: 50px;
             right: 0;
             top: $create-name-height;
         }
-    }
 
+    }
 }

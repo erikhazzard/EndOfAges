@@ -35,16 +35,31 @@
 #battle .effect-magicMissle path {
   fill: #ffffff; }
 
-.page-create-character-wrapper .list-hidden {
-  left: -300px !important; }
+.page-create-character-wrapper .blur {
+  opacity: 0.5 !important; }
 .page-create-character-wrapper #create-race-class-wrapper {
   border: 2px solid #343434;
   bottom: 0;
   left: 0;
   overflow: hidden;
   position: absolute;
-  width: 300px;
+  width: 350px;
   top: 0; }
+  .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons {
+    position: absolute;
+    bottom: 0;
+    height: 50px;
+    left: 0;
+    right: 0; }
+    .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons .btn {
+      border: 2px solid #343434;
+      position: absolute;
+      transition: opacity 0.3s;
+      width: 45%; }
+    .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons .btn-previous {
+      left: 0; }
+    .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons .btn-next {
+      right: 0; }
 .page-create-character-wrapper #create-races, .page-create-character-wrapper #create-classes {
   bottom: 50px;
   border: 2px solid #343434;
@@ -52,24 +67,20 @@
   position: absolute;
   transition: left 0.4s;
   top: 0;
-  width: 300px; }
-.page-create-character-wrapper #create-classes {
-  left: 0; }
+  width: 350px; }
+.page-create-character-wrapper #create-races.list-hidden {
+  left: -350px !important; }
 .page-create-character-wrapper #region-create-races .race-list-item .item {
   border: 1px solid #a0a0a0;
   cursor: pointer;
   padding: 8px 0; }
-.page-create-character-wrapper .next-prev-buttons {
-  position: absolute;
-  bottom: 0;
-  height: 50px;
-  left: 0;
-  right: 0; }
+.page-create-character-wrapper #create-classes.list-hidden {
+  left: 350px !important; }
 .page-create-character-wrapper #create-character-display-wrapper {
   bottom: 0;
   border: 2px solid #343434;
   position: absolute;
-  left: 300px;
+  left: 350px;
   right: 0;
   top: 0; }
   .page-create-character-wrapper #create-character-display-wrapper .name-wrapper {
@@ -235,7 +246,9 @@ svg {
 
 .blur {
   -webkit-filter: blur(10px) !important;
-  filter: blur(10px) !important;
+  -moz-filter: blur(10px) !important;
+  filter: blur(10px);
+  filter: url(#filter-blur);
   opacity: 1 !important;
   filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
   -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
