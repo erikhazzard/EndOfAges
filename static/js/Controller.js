@@ -2,9 +2,11 @@
 // Controller.js
 //
 // Handles Controller functions the router uses
+//
+// TODO: Don't have user be logged in permanently (done for dev)
 //============================================================================= 
 define([
-    'backbone', 'marionette', 'logger', 'events',
+    'backbone', 'marionette', 'logger', 'events', 'util/STORAGE_PREFIX',
     'models/appUser-object',
     'models/Game',
     'models/Entity',
@@ -12,7 +14,7 @@ define([
     'views/PageGame',
     'views/PageCreateCharacter'
     ], function(
-        Backbone, Marionette, logger, events,
+        Backbone, Marionette, logger, events, STORAGE_PREFIX,
         appUser,
         Game,
         Entity,
@@ -49,31 +51,43 @@ define([
             if(appUser.get('isLoggedIn') === false){
                 // Note: it's possible the appUser may have been fetched before
                 // this is called - in that case, do nothing
-                //
+                logger.log('Controller', 'not logged in');
+
                 appUser.on('initialFetchFromServer', function controllerUserFetched(){
                     var loggedIn = appUser.get('isLoggedIn');
 
                     logger.log('Controller', 
-                        'fetched app user, calling original route logged in: %O', 
+                        'fetched app user : loggedIn: %O',
                         loggedIn);
 
                     // If user is logged in, show the called route
                     if(loggedIn){
-                        events.trigger('appRouter:navigate', {
-                            route: self.initialUrl,
-                            reset: true,
-                            trigger: true
-                        });
-                    } else {
-                        // User not logged in, show home
-                        events.trigger('appRouter:navigate', {
-                            route: '/',
-                            trigger: true
-                        });
+                        //// TODO: get game from user
+                        //self.showGame({});
 
+                    } else {
+                        //// User not logged in. Check localstorage
+                        ////  TODO:
+                        ////  If game model is setup, show the game
+                        //self.showGame({});
                     }
                 });
-            }             
+            } else {
+                // if user is already logged in, 
+                logger.log('Controller', 'logged in');
+                //// TODO: use localstorage
+                ////
+                // self.showGame({});
+            }
+
+            // Listen for controller events to show different pages
+            // --------------------------
+            // NOTE: We're NOT using the appRouter for this, because we don't
+            // want routes - we want the game state to be stored outside of URLs
+            this.listenTo(events, 'controller:showCreateCharacter', this.showCreateCharacter);
+            this.listenTo(events, 'controller:showGame', this.showGame);
+            this.listenTo(events, 'controller:showHome', this.showHome);
+
             return this;
         },
 
@@ -140,7 +154,9 @@ define([
         // Game
         //
         // ------------------------------
-        showGame: function controllerShowGame(){
+        showGame: function controllerShowGame(options){
+            options = options || {};
+
             logger.log('Controller', 'showGame() called');
 
             if(!appUser.get('isLoggedIn')){ 
@@ -153,11 +169,27 @@ define([
                 logger.log('Controller', 'creating new pageGame view');
             }
 
+            var gameModel = null;
+            gameModel = new Game({}, {
+                models: [this.pageCreateCharacter.model]
+            });
+
+            //// TODO: use localstorage if exist
+            //if(options.useLocalStorage && 
+                //window.localStorage.getItem(STORAGE_PREFIX + 'game')){
+
+                //gameModel = JSON.parse(
+                    //window.localStorage.getItem(STORAGE_PREFIX + 'game')
+                //);
+            //}
+
+
             // TODO: Reuse game view, don't show / hide it? Use a different
             // region?
             this.pageGame = new PageGame({
-                model: new Game({})
+                model: gameModel
             });
+
             this.currentRegion = this.pageGame;
             this.regionMain.show(this.currentRegion);
 

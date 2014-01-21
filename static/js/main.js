@@ -19,7 +19,8 @@ requirejs.config({
 
         backbone: 'lib/backbone',
         marionette: 'lib/marionette',
-        bootstrap: 'lib/bootstrap'
+        bootstrap: 'lib/bootstrap',
+        localstorage: "lib/backbone.localStorage"
     },
     shim: {
         'jquery-ui': {

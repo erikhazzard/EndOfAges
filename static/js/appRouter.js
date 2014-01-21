@@ -1,7 +1,9 @@
 //=============================================================================
 // Router.js
 //
-// Handles routing for the app
+// Handles routing for the game. Note that there is only a single route for
+// the game itself, but there may be other routes for things like account info,
+// about, etc. that are _outside_ the game
 //=============================================================================
 define(['backbone', 'marionette', 'logger', 'events'], 
     function(Backbone, Marionette, logger, events){
@@ -10,9 +12,7 @@ define(['backbone', 'marionette', 'logger', 'events'],
     var Router = Backbone.Marionette.AppRouter.extend({
         appRoutes: {
             //Main route
-            "(/)": "showHome",
-            "create": "showCreateCharacter",
-            "game": "showGame"
+            "(/)": "showHome"
         }
     });
 
@@ -35,27 +35,6 @@ define(['backbone', 'marionette', 'logger', 'events'],
         appRouter = new Router({
             controller: controller
         });
-
-        // setup global event handlers (allows code to trigger a page 
-        // redirect without directly accessing router)
-        events.on('appRouter:showGame', function(){
-            logger.log('appRouter', 'appRouter:showGame event called');
-            appRouter.navigate('/game', {trigger: true});
-        }, this);
-
-        // Manual app router navigation
-        //  This is called to manually update the URL
-        events.on('appRouter:navigate', function(options){
-            logger.log('appRouter', 'navigate called: %O', options);
-            options = options || {};
-            if(options.trigger === undefined){ options.trigger = true; }
-            if(!options.route){ throw new Error('No route passed into router'); }
-
-            if(options.reset){
-                appRouter.navigate('/', {trigger: options.trigger});
-            }
-            appRouter.navigate(options.route, {trigger: options.trigger});
-        }, this);
 
         return appRouter;
     }

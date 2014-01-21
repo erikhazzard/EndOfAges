@@ -56,7 +56,7 @@ define(
             this.createStates = ['race', 'class'];
 
             // keep track of the first race click
-            this.raceClicked = false;
+            this._firstRaceClick = true;
 
             this.listenTo(this.model, 'change:race', this.updateCharacterDisplay);
             this.listenTo(this.model, 'change:class', this.updateCharacterDisplay);
@@ -132,14 +132,20 @@ define(
 
             // RACE related
             // --------------------------
-            $('.race-name', this.$el).html(race.get('name'));
-            $('.race-description', this.$el).html(race.get('description'));
+            this.getSelector('.race-name').html(race.get('name'));
+            this.getSelector('.race-description').html(race.get('description'));
+
+            // race charts
+            // TODO: show bar charts
+            this.getSelector('.race-viz-wrapper').html(
+                JSON.stringify(race.get('baseStats'))
+            );
 
             // CLASS related
             // --------------------------
             if(entityClass){
-                $('.class-name', this.$el).html(entityClass.get('name'));
-                $('.class-description', this.$el).html(entityClass.get('description'));
+                this.getSelector('.class-name').html(entityClass.get('name'));
+                this.getSelector('.class-description').html(entityClass.get('description'));
             }
 
             return this;
@@ -169,9 +175,16 @@ define(
 
             // make sure state doesn't fall outside of state bounds
             if(targetState < 0){ targetState = 0; }
-            else if(targetState > this.createStates.length - 1){ 
+
+            // Check for FINISH state
+            if(targetState > this.createStates.length - 1){ 
+                // TODO: show an in app prompt
+                // If done, show the game and pass in the entities
+                events.trigger('controller:showGame');
+
                 targetState = this.createStates.length - 1; 
             }
+
             // set the state index
             this.createState = targetState;
 
@@ -245,6 +258,11 @@ define(
             var cid = $(e.target).attr('data-race-cid');
             var raceModel = this.races.get(cid); 
 
+            // update the entity sprite
+            // TODO: use a more robust sprite system, allow for differences
+            //   in classes 
+            this.model.set({ sprite: raceModel.get('sprite') });
+
             // add / remove active class on list item
             this.getSelector('.races-list .item').removeClass('active');
             $(e.target).addClass('active');
@@ -260,9 +278,9 @@ define(
 
             // Go to the next state (select class) automatically the FIRST
             // time the race is selected
-            if(!this.raceClicked){ 
-                this.changeState('next'); 
-                this.raceClicked = true;
+            if(this._firstRaceClick){ 
+                //this.changeState('next'); 
+                this._firstRaceClick = false;
             }
 
             return this;

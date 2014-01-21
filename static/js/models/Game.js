@@ -7,14 +7,19 @@
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
-        'events', 'd3', 'util/API_URL',
+        'events', 'd3', 'util/API_URL', 'util/STORAGE_PREFIX',
 
-        'collections/Entities', 'models/Entity'
+        'collections/Entities', 'models/Entity',
+        'models/Map',
+        'models/appUser-object'
+
     ], function MapModel(
         Backbone, Marionette, logger,
-        events, d3, API_URL,
+        events, d3, API_URL, STORAGE_PREFIX,
 
-        Entities, Entity
+        Entities, Entity,
+        Map,
+        appUser
     ){
 
     var Game = Backbone.Model.extend({
@@ -30,7 +35,6 @@ define(
 
             // money for the current game
             gold: 0
-
         },
 
         url: function getURL(){
@@ -38,21 +42,26 @@ define(
             return url;
         },
 
-        initialize: function gameInitialize(){
+        initialize: function gameInitialize(attrs, options){
             logger.log('models/Game', 'initialize() called');
+            options = options || {};
 
-            // TODO: setup entities
-            this.set({
-                playerEntities: new Entities([
-                    new Entity({}),
-                    new Entity({}),
-                    new Entity({}),
-                    new Entity({})
-                ])
-            }, {silent: true});
-            this.trigger('change:playerEntities');
+            if(options.models){
+                this.set({ playerEntities: new Entities(options.models) });
+            }
 
+            window.G = this;
             return this;
+        },
+
+        saveLocal: function saveLocal(){
+            // saves game to local storage
+            if(window.localStorage){
+                window.localStorage.setItem(
+                    STORAGE_PREFIX + 'game',
+                    JSON.stringify(this.toJSON())
+                );
+            }
         }
     });
 

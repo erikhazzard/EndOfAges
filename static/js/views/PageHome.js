@@ -35,12 +35,12 @@ define(
         //
         // ------------------------------
         playGame: function homePlayGame(e){
-            logger.log('views/PageHome', 'playGae button clicked');
+            logger.log('views/PageHome', 'playGame button clicked');
             e.stopPropagation();
             e.preventDefault();
             
             // Let controller know play game was clicked
-            events.trigger('appRouter:showGame');
+            events.trigger('controller:showCreateCharacter');
         }
     });
 

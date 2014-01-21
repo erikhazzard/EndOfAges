@@ -70,22 +70,23 @@
   width: 350px; }
   .page-create-character-wrapper #create-races .race-title, .page-create-character-wrapper #create-classes .race-title {
     height: 50px; }
-  .page-create-character-wrapper #create-races #region-create-races, .page-create-character-wrapper #create-classes #region-create-races {
+  .page-create-character-wrapper #create-races #region-create-races, .page-create-character-wrapper #create-races #region-create-classes, .page-create-character-wrapper #create-classes #region-create-races, .page-create-character-wrapper #create-classes #region-create-classes {
+    -webkit-overflow-scrolling: touch;
     bottom: 0;
     left: 0;
     overflow: auto;
     position: absolute;
     right: 0;
     top: 50px; }
+    .page-create-character-wrapper #create-races #region-create-races .item, .page-create-character-wrapper #create-races #region-create-classes .item, .page-create-character-wrapper #create-classes #region-create-races .item, .page-create-character-wrapper #create-classes #region-create-classes .item {
+      border: 1px solid #a0a0a0;
+      cursor: pointer;
+      padding: 8px 0; }
+    .page-create-character-wrapper #create-races #region-create-races .item.active, .page-create-character-wrapper #create-races #region-create-classes .item.active, .page-create-character-wrapper #create-classes #region-create-races .item.active, .page-create-character-wrapper #create-classes #region-create-classes .item.active {
+      background: #336699;
+      color: #ffffff; }
 .page-create-character-wrapper #create-races.list-hidden {
   left: -350px !important; }
-.page-create-character-wrapper #region-create-races .item {
-  border: 1px solid #a0a0a0;
-  cursor: pointer;
-  padding: 8px 0; }
-.page-create-character-wrapper #region-create-races .item.active {
-  background: #336699;
-  color: #ffffff; }
 .page-create-character-wrapper #create-classes.list-hidden {
   left: 350px !important; }
 .page-create-character-wrapper #create-character-display-wrapper {
@@ -109,6 +110,10 @@
     position: absolute;
     right: 0;
     top: 50px; }
+  .page-create-character-wrapper #create-character-display-wrapper .race-viz-wrapper {
+    top: 0;
+    position: absolute;
+    right: 0px; }
 
 .entity-group-wrapper {
   cursor: pointer; }

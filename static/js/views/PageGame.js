@@ -7,6 +7,8 @@
 //      This acts also as a controller for the game. It listens for and 
 //      handles game related events 
 //
+//      TODO: allow resuming games
+//
 // ===========================================================================
 define(
     [ 
