@@ -68,13 +68,22 @@
   transition: left 0.4s;
   top: 0;
   width: 350px; }
+  .page-create-character-wrapper #create-races .race-title, .page-create-character-wrapper #create-classes .race-title {
+    height: 50px; }
+  .page-create-character-wrapper #create-races #region-create-races, .page-create-character-wrapper #create-classes #region-create-races {
+    bottom: 0;
+    left: 0;
+    overflow: auto;
+    position: absolute;
+    right: 0;
+    top: 50px; }
 .page-create-character-wrapper #create-races.list-hidden {
   left: -350px !important; }
-.page-create-character-wrapper #region-create-races .race-list-item .item {
+.page-create-character-wrapper #region-create-races .item {
   border: 1px solid #a0a0a0;
   cursor: pointer;
   padding: 8px 0; }
-.page-create-character-wrapper #region-create-races .race-list-item .item.active {
+.page-create-character-wrapper #region-create-races .item.active {
   background: #336699;
   color: #ffffff; }
 .page-create-character-wrapper #create-classes.list-hidden {
@@ -85,7 +94,8 @@
   position: absolute;
   left: 350px;
   right: 0;
-  top: 0; }
+  top: 0;
+  transition: opacity 0.3s; }
   .page-create-character-wrapper #create-character-display-wrapper .name-wrapper {
     position: absolute;
     left: 0;

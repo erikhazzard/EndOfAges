@@ -3,6 +3,7 @@
 $create-left-width: 350px;
 $create-name-height: 50px;
 $create-nav-buttons-height: 50px;
+$create-race-title-height: 50px;
 
 // layout
 // --------------------------------------
@@ -34,7 +35,7 @@ $create-nav-buttons-height: 50px;
             .btn { 
                 border: 2px solid #343434;
                 position: absolute;
-                transition: opacity 0.3s; 
+                transition: opacity $opacity-transition-time;
                 width: 45%;
             }
 
@@ -45,7 +46,6 @@ $create-nav-buttons-height: 50px;
                 right: 0;
             }
         }
-
     }
 
     #create-races, #create-classes {
@@ -56,6 +56,19 @@ $create-nav-buttons-height: 50px;
         transition: left 0.4s;
         top: 0;
         width: $create-left-width;
+
+        .race-title {
+            height: $create-race-title-height;
+        }
+
+        #region-create-races {
+            bottom: 0;
+            left: 0;
+            overflow: auto;
+            position: absolute;
+            right: 0;
+            top: $create-race-title-height;
+        }
     }
     // Races
     #create-races.list-hidden {
@@ -63,12 +76,12 @@ $create-nav-buttons-height: 50px;
     }
 
     #region-create-races {
-        .race-list-item .item {
+        .item {
             border: 1px solid #a0a0a0;
             cursor: pointer;
             padding: 8px 0;
         }
-        .race-list-item .item.active {
+        .item.active {
             background: #336699;
             color: #ffffff;
         }
@@ -88,6 +101,7 @@ $create-nav-buttons-height: 50px;
         left: $create-left-width;
         right: 0;
         top: 0;
+        transition: opacity $opacity-transition-time;
 
         .name-wrapper {
             position: absolute;

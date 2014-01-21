@@ -5878,6 +5878,195 @@ define(
 
 // ===========================================================================
 //
+// Class List Item
+//
+// ItemView for class item
+//
+// ===========================================================================
+define(
+    'views/create/ClassListItem',[ 
+        'd3', 'logger', 'events'
+    ], function viewClassListItem(
+        d3, logger, events
+    ){
+
+    var ClassListItem = Backbone.Marionette.ItemView.extend({
+        'className': 'class-list-item',
+        template: '#template-create-class-list-item',
+
+        serializeData: function(){
+            return _.extend({ cid: this.model.cid }, this.model.toJSON());
+        },
+
+        initialize: function(){
+            logger.log('views/create/ClassListItem', 'initialize : model %O',
+                this.model);
+            return this;
+        },
+
+        onShow: function(){
+            var sprite = this.model.get('sprite');
+            var sel = $('.class-sprite', this.$el);
+            sel.attr({ 'src' : "/static/img/classes/" + sprite + '.svg' });
+
+            return this;
+        }
+
+    });
+
+    return ClassListItem;
+});
+
+// ===========================================================================
+//
+// Class List
+//
+// Collection for classes in the create screen
+//
+// ===========================================================================
+define(
+    'views/create/ClassList',[ 
+        'd3', 'logger', 'events', 
+        'views/create/ClassListItem'
+    ], function viewClassListCollection(
+        d3, logger, events,
+        ClassListItem
+    ){
+
+    var ClassListCollection = Backbone.Marionette.CollectionView.extend({
+        'className': 'class-list',
+
+        itemView: ClassListItem,
+
+        initialize: function(options){
+            logger.log(
+                'views/create/ClassList.js', 
+                'collectionView initialized : %O', options);
+            this.itemView = ClassListItem;
+            return this;
+        }
+    });
+
+    return ClassListCollection;
+});
+
+// ===========================================================================
+//
+// EntityClass
+//
+//  Model for a race (used in create process)
+//
+// ===========================================================================
+define(
+    'models/EntityClass',[ 'events', 'logger', 'util/API_URL' ], function ModelEntityClass(
+        events, logger, API_URL
+    ){
+
+        // Define the app user model. Similar to user model, but a bit different
+        var EntityClass = Backbone.Model.extend({
+            defaults: {
+                name: '',
+                description: '',
+                sprite: '',
+                baseStats: {
+                    // todo: more...
+                    agility: 10
+                }
+            },
+
+            initialize: function appUserInitialize(){
+                var self = this;
+                logger.log('models/EntityClass', 
+                    'initialize: New entity class object created');
+
+                return this;
+            }
+
+        });
+
+    return EntityClass;
+});
+
+// ===========================================================================
+//
+// data-races
+//
+//      TODO: should be loaded from server and abilities should load 
+//
+// ===========================================================================
+define(
+    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass' ], function(
+        events, logger, EntityClass
+    ){
+
+    var ENTITY_CLASSES = [
+        new EntityClass({
+            name: 'Shadowknight',
+            description: 'An experienced warrior dabbling dark with unutterable sorrows',
+            sprite: 'shadowknight'
+        }),
+
+        new EntityClass({
+            name: 'Wizard',
+            description: 'Magic missle into the darkness',
+            sprite: 'wizard'
+        }),
+
+        new EntityClass({
+            name: 'Assassin',
+            description: 'Stab yo eye',
+            sprite: 'assassin'
+        }),
+
+        new EntityClass({
+            name: 'Ranger',
+            description: 'Pew pew with my bow',
+            sprite: 'ranger'
+        })
+
+    ];
+
+
+    return ENTITY_CLASSES;
+});
+
+// ===========================================================================
+//
+//  Classes Collection
+//
+//      This collection contains a collection of races for the create screen,
+//      the list of available races for the player
+// ===========================================================================
+define(
+    'collections/Classes',[ 'backbone', 'marionette', 'logger', 'events', 
+        'models/EntityClass',
+        'models/data-entity-classes'
+    ], function EntityClassCollection(
+        Backbone, Marionette, logger, events,
+        EntityClass,
+        ENTITY_CLASSES
+    ){
+
+    var Classes = Backbone.Collection.extend({
+        model: EntityClass,
+
+        initialize: function(models, options){
+            var self = this;
+            logger.log('collections/Classes', 'initialize() called');
+
+            // TODO: don't do this, get from server
+            this.add(ENTITY_CLASSES);
+
+            return this;
+        }
+
+    });
+
+    return Classes;
+});
+
+// ===========================================================================
+//
 // Page Create Character
 // 
 // ===========================================================================
@@ -5887,25 +6076,35 @@ define(
         'logger', 'events',
 
         'views/create/RaceList',
-        'collections/Races'
+        'collections/Races',
+
+        'views/create/ClassList',
+        'collections/Classes'
+
     ], function viewPageCreateCharacter(
         d3, backbone, marionette, 
         logger, events,
 
         RaceList,
-        Races
+        Races,
+
+        ClassList,
+        Classes
     ){
 
     var PageCreateCharacter = Backbone.Marionette.Layout.extend({
         template: '#template-page-create-character',
         'className': 'page-create-character-wrapper',
         regions: {
-            'regionRaceList': '#region-create-races'
+            'regionRaceList': '#region-create-races',
+            'regionClassList': '#region-create-classes'
         },
 
         // UI events
         events: {
             'click .race-list-item .item': 'raceClicked',
+            'click .class-list-item .item': 'classClicked',
+
             'click .btn-previous': 'previousClicked',
             'click .btn-next': 'nextClicked'
         },
@@ -5914,6 +6113,7 @@ define(
             // initialize:
             logger.log('views/PageCreateCharacter', 'initialize() called');
             this.races = new Races();
+            this.classes = new Classes();
 
             // state for the create process - race or class
             // NOTE: could use a FSM here, but this is simple enough - just two
@@ -5922,12 +6122,18 @@ define(
             // possible states
             this.createStates = ['race', 'class'];
 
+            // keep track of the first race click
+            this.raceClicked = false;
+
             this.listenTo(this.model, 'change:race', this.updateCharacterDisplay);
+            this.listenTo(this.model, 'change:class', this.updateCharacterDisplay);
             return this;
         },
 
         // ------------------------------
+        //
         // UTIL
+        //
         // ------------------------------
         getSelector: function getSelector(selector){
             // takes in a selector and returns the element(s) that belong
@@ -5950,7 +6156,9 @@ define(
 
 
         // ------------------------------
+        //
         // Close / Show
+        //
         // ------------------------------
         onBeforeClose: function onBeforeClose(){
             // get rid of the element cache
@@ -5966,28 +6174,48 @@ define(
             this.raceListView = new RaceList({
                 collection: this.races
             });
+            this.classListView = new ClassList({
+                collection: this.classes
+            });
 
             this.regionRaceList.show(this.raceListView);
+            this.regionClassList.show(this.classListView);
             return this;
         },
 
+        // ------------------------------
+        //
+        // Update / Rerender elements
+        //
+        // ------------------------------
         updateCharacterDisplay: function updateCharacterDisplay(){
             // Updates the main display area whenever the race or class
             // changes. 
+            //
             // TODO: Could have a better way to handle this, e.g., view for
             // each race / class. Update after figuring out what to display
             var race = this.model.get('race');
+            var entityClass = this.model.get('class');
 
             // RACE related
             // --------------------------
             $('.race-name', this.$el).html(race.get('name'));
             $('.race-description', this.$el).html(race.get('description'));
 
+            // CLASS related
+            // --------------------------
+            if(entityClass){
+                $('.class-name', this.$el).html(entityClass.get('name'));
+                $('.class-description', this.$el).html(entityClass.get('description'));
+            }
+
             return this;
         },
 
         // ------------------------------
-        // List related functions
+        //
+        // State Functions
+        //
         // ------------------------------
         changeState: function changeState(state){
             // Shows the corresponding race or class list
@@ -6053,32 +6281,8 @@ define(
         },
 
         // ------------------------------
-        //
-        // User Interaction
-        //
-        // ------------------------------
-        raceClicked: function raceClicked(e){
-            // When a race item is clicked from the race list, update the model,
-            // which updates the display, then update the list to show the classes
-            // Get the race model
-            logger.log('views/PageCreateCharacter', 'raceClicked() called');
-            e.preventDefault(); e.stopPropagation();
-
-            var cid = $(e.target).attr('data-race-cid');
-            var raceModel = this.races.get(cid); 
-
-            // add / remove active class
-            this.getSelector('.item').removeClass('active');
-            $(e.target).addClass('active');
-
-            this.model.set({ race: raceModel });
-            // can continue
-            this.getSelector('.btn-next').removeClass('blur');
-
-            return this;
-        },
-
         // Nav / State Buttons
+        // ------------------------------
         previousClicked: function(e){
             e.preventDefault(); e.stopPropagation();
 
@@ -6090,8 +6294,68 @@ define(
 
             logger.log('views/PageCreateCharacter', 'nextClicked() called');
             this.changeState('next');
-        }
+        },
 
+        // ------------------------------
+        //
+        // User Interaction
+        //
+        // ------------------------------
+        raceClicked: function raceClicked(e){
+            // When a race item is clicked from the race list, update the model,
+            // which updates the display, then update the list to show the classes
+            // Get the race model
+            logger.log('views/PageCreateCharacter', 'raceClicked() called');
+            e.preventDefault(); e.stopPropagation();
+
+            // get race from clicked element
+            var cid = $(e.target).attr('data-race-cid');
+            var raceModel = this.races.get(cid); 
+
+            // add / remove active class on list item
+            this.getSelector('.races-list .item').removeClass('active');
+            $(e.target).addClass('active');
+
+            // update model
+            this.model.set({ race: raceModel });
+
+            // remove blur / disable on the next button
+            this.getSelector('.btn-next').removeClass('blur');
+
+            // remove the initial blur on the main character area
+            this.getSelector('#create-character-display-wrapper').removeClass('blur');
+
+            // Go to the next state (select class) automatically the FIRST
+            // time the race is selected
+            if(!this.raceClicked){ 
+                this.changeState('next'); 
+                this.raceClicked = true;
+            }
+
+            return this;
+        },
+
+        classClicked: function classClicked(e){
+            // Similar to race clicked, but fires when a class item is clicked
+            logger.log('views/PageCreateCharacter', 'classClicked() called');
+            e.preventDefault(); e.stopPropagation();
+
+            // get race from clicked element
+            var cid = $(e.target).attr('data-class-cid');
+            var classModel = this.classes.get(cid); 
+
+            // add / remove active class on list item
+            this.getSelector('.class-list .item').removeClass('active');
+            $(e.target).addClass('active');
+
+            // update model
+            this.model.set({ 'class' : classModel });
+
+            // remove blur / disable on the next button
+            this.getSelector('.btn-next').removeClass('blur');
+
+            return this;
+        }
     });
 
     return PageCreateCharacter;
