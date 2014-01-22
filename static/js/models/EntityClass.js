@@ -16,6 +16,8 @@ define(
                 name: '',
                 description: '',
                 sprite: '',
+                // abilities will be a collection of abilities
+                abilities: [],
                 baseStats: {
                     // todo: more...
                     agility: 10

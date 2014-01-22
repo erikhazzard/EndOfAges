@@ -8,6 +8,8 @@ define(
         'd3', 'backbone', 'marionette',
         'logger', 'events',
 
+        'util/generateName',
+
         'views/create/RaceList',
         'collections/Races',
 
@@ -17,6 +19,8 @@ define(
     ], function viewPageCreateCharacter(
         d3, backbone, marionette, 
         logger, events,
+
+        generateName,
 
         RaceList,
         Races,
@@ -39,7 +43,10 @@ define(
             'click .class-list-item .item': 'classClicked',
 
             'click .btn-previous': 'previousClicked',
-            'click .btn-next': 'nextClicked'
+            'click .btn-next': 'nextClicked',
+
+            // generate name
+            'click .btn-generate-name': 'generateNewName'
         },
 
         initialize: function initialize(options){
@@ -102,6 +109,14 @@ define(
         onShow: function homeOnShow(){
             logger.log('views/PageCreateCharacter', 'onShow called');
 
+            // remove existing el cache
+            delete this._elCache;
+
+            // Generate a random name
+            this.getSelector('.input-character-name', this.$el).attr({
+                placeholder: generateName()
+            });
+
             // show regions
             // TODO: how to handle race collection?
             this.raceListView = new RaceList({
@@ -113,6 +128,7 @@ define(
 
             this.regionRaceList.show(this.raceListView);
             this.regionClassList.show(this.classListView);
+
             return this;
         },
 
@@ -193,6 +209,7 @@ define(
 
             // show corresponding lists, hide button states
             if(this.createStates[this.createState] === 'race'){
+                // ----------------------
                 // RACE
                 // ----------------------
                 // button
@@ -205,6 +222,7 @@ define(
                 this.getSelector('#create-classes').addClass('list-hidden');
 
             } else if(this.createStates[this.createState] === 'class'){
+                // ----------------------
                 // CLASS
                 // ----------------------
                 // button
@@ -229,17 +247,26 @@ define(
         // ------------------------------
         // Nav / State Buttons
         // ------------------------------
-        previousClicked: function(e){
+        previousClicked: function previousClicked(e){
             e.preventDefault(); e.stopPropagation();
 
             logger.log('views/PageCreateCharacter', 'previousClicked() called');
             this.changeState('previous');
         },
-        nextClicked: function(e){
+        nextClicked: function nextClicked(e){
             e.preventDefault(); e.stopPropagation();
 
             logger.log('views/PageCreateCharacter', 'nextClicked() called');
             this.changeState('next');
+        },
+
+        generateNewName: function generateNewName(){
+            // Generate a random name
+            this.getSelector('.input-character-name', this.$el).val(
+                generateName()
+            );
+
+            return this;
         },
 
         // ------------------------------
@@ -262,6 +289,11 @@ define(
             // TODO: use a more robust sprite system, allow for differences
             //   in classes 
             this.model.set({ sprite: raceModel.get('sprite') });
+
+            // Generate a random name
+            this.getSelector('.input-character-name', this.$el).attr({
+                placeholder: generateName()
+            });
 
             // add / remove active class on list item
             this.getSelector('.races-list .item').removeClass('active');
@@ -304,6 +336,17 @@ define(
 
             // remove blur / disable on the next button
             this.getSelector('.btn-next').removeClass('blur');
+
+            // Update abilities based on class
+            // TODO: hide abilities that haven't been unlocked? 
+            // ... game design task
+            var abilities = classModel.get('abilities');
+            this.model.set({ abilities: abilities });
+
+            // TODO: view for abilities. use a region
+            this.getSelector('.abilities-wrapper').html(
+                JSON.stringify(abilities)
+            );
 
             return this;
         }

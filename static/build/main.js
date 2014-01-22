@@ -5707,6 +5707,93 @@ define(
 
 // ===========================================================================
 //
+// generateName
+//
+//      -Generates a random name
+//
+// ===========================================================================
+define( 'util/generateName',[], function funcGenerateName(){
+    function generateName(){
+        var vowels = "aeiouyaeiouaeioea";
+        var cons = "bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkdtr";
+        var rndname = []; // final name
+        var paircons = "ngrkndstshthphsktrdrbrgrfrclcrst";
+        var randomNum = Math.random() * 75 | 0;
+        var orig = randomNum;
+        var n=1;
+
+        var dlc=false;
+        var vwl=false;
+        var dbl=false;
+
+        if (randomNum>63) {
+            // randomNum is 0 - 75 where 64-75 is cons pair, 
+            // 17-63 is cons, 0-16 is vowel
+            randomNum=(randomNum-61)*2;	// name can't start with "ng" "nd" or "rk"
+            rndname[0]=paircons[randomNum];
+            rndname[1]=paircons[randomNum+1];
+            n=2;
+        } else if (randomNum>16) {
+            randomNum -= 17;
+            rndname[0] = cons[randomNum];
+        } else {
+            rndname[0]=vowels[randomNum];
+            vwl=true;
+        }
+
+        var namlen = 5 + (Math.random() * 5 | 0);
+
+        for(var i=n;i<namlen;i++){
+            dlc=false;
+            if (vwl){
+                //last char was a vowel		
+                // so pick a cons or cons pair
+                randomNum=Math.random() * 62 | 0;
+                if (randomNum>46) {	
+                    // pick a cons pair
+                    if(i>namlen-3){
+                        // last 2 chars in name?
+                        // name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
+                        randomNum=(Math.random() * 7 | 0)*2;
+                    } else {	
+                        // pick any from the set
+                        randomNum=(randomNum-47)*2;
+                    }
+                    rndname[i]=paircons[randomNum];
+                    rndname[i+1]=paircons[randomNum+1];
+                    dlc=true;	// flag keeps second letter from being doubled below
+                    i+=1;
+                } else {	
+                    // select a single cons
+                    rndname[i]=cons[randomNum];
+                }
+            } else {		
+                // select a vowel
+                rndname[i]=vowels[Math.random() * 16 | 0];
+            }
+            vwl=!vwl;
+            if (!dbl && !dlc) {	
+                // one chance at double letters in name
+                if(!(Math.random() * (i+9) | 0)){
+                    // chances decrease towards end of name
+                    rndname[i+1]=rndname[i];
+                    dbl=true;
+                    i+=1;
+                }
+            }
+        }
+
+        // capitalize name
+        rndname[0] = rndname[0].toUpperCase();
+        rndname = rndname.join('');
+        // return it
+        return rndname;
+    }
+    return generateName;
+});
+
+// ===========================================================================
+//
 // Race List Item
 //
 // ItemView for race item
@@ -6010,6 +6097,8 @@ define(
                 name: '',
                 description: '',
                 sprite: '',
+                // abilities will be a collection of abilities
+                abilities: [],
                 baseStats: {
                     // todo: more...
                     agility: 10
@@ -6037,33 +6126,47 @@ define(
 //
 // ===========================================================================
 define(
-    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass' ], function(
-        events, logger, EntityClass
+    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass',
+        'collections/Abilities', 'models/data-abilities'], function(
+        events, logger, EntityClass,
+        Abilities, ABILITIES
     ){
 
     var ENTITY_CLASSES = [
         new EntityClass({
             name: 'Shadowknight',
             description: 'An experienced warrior dabbling dark with unutterable sorrows',
-            sprite: 'shadowknight'
+            sprite: 'shadowknight',
+            abilities: new Abilities([
+                ABILITIES.fireball
+            ])
         }),
 
         new EntityClass({
             name: 'Wizard',
             description: 'Magic missle into the darkness',
-            sprite: 'wizard'
+            sprite: 'wizard',
+            abilities: new Abilities([
+                ABILITIES.minorhealing
+            ])
         }),
 
         new EntityClass({
             name: 'Assassin',
             description: 'Stab yo eye',
-            sprite: 'assassin'
+            sprite: 'assassin',
+            abilities: new Abilities([
+                ABILITIES.magicmissle
+            ])
         }),
 
         new EntityClass({
             name: 'Ranger',
             description: 'Pew pew with my bow',
-            sprite: 'ranger'
+            sprite: 'ranger',
+            abilities: new Abilities([
+                ABILITIES.flamelick
+            ])
         })
 
     ];
@@ -6117,6 +6220,8 @@ define(
         'd3', 'backbone', 'marionette',
         'logger', 'events',
 
+        'util/generateName',
+
         'views/create/RaceList',
         'collections/Races',
 
@@ -6126,6 +6231,8 @@ define(
     ], function viewPageCreateCharacter(
         d3, backbone, marionette, 
         logger, events,
+
+        generateName,
 
         RaceList,
         Races,
@@ -6148,7 +6255,10 @@ define(
             'click .class-list-item .item': 'classClicked',
 
             'click .btn-previous': 'previousClicked',
-            'click .btn-next': 'nextClicked'
+            'click .btn-next': 'nextClicked',
+
+            // generate name
+            'click .btn-generate-name': 'generateNewName'
         },
 
         initialize: function initialize(options){
@@ -6211,6 +6321,14 @@ define(
         onShow: function homeOnShow(){
             logger.log('views/PageCreateCharacter', 'onShow called');
 
+            // remove existing el cache
+            delete this._elCache;
+
+            // Generate a random name
+            this.getSelector('.input-character-name', this.$el).attr({
+                placeholder: generateName()
+            });
+
             // show regions
             // TODO: how to handle race collection?
             this.raceListView = new RaceList({
@@ -6222,6 +6340,7 @@ define(
 
             this.regionRaceList.show(this.raceListView);
             this.regionClassList.show(this.classListView);
+
             return this;
         },
 
@@ -6302,6 +6421,7 @@ define(
 
             // show corresponding lists, hide button states
             if(this.createStates[this.createState] === 'race'){
+                // ----------------------
                 // RACE
                 // ----------------------
                 // button
@@ -6314,6 +6434,7 @@ define(
                 this.getSelector('#create-classes').addClass('list-hidden');
 
             } else if(this.createStates[this.createState] === 'class'){
+                // ----------------------
                 // CLASS
                 // ----------------------
                 // button
@@ -6338,17 +6459,26 @@ define(
         // ------------------------------
         // Nav / State Buttons
         // ------------------------------
-        previousClicked: function(e){
+        previousClicked: function previousClicked(e){
             e.preventDefault(); e.stopPropagation();
 
             logger.log('views/PageCreateCharacter', 'previousClicked() called');
             this.changeState('previous');
         },
-        nextClicked: function(e){
+        nextClicked: function nextClicked(e){
             e.preventDefault(); e.stopPropagation();
 
             logger.log('views/PageCreateCharacter', 'nextClicked() called');
             this.changeState('next');
+        },
+
+        generateNewName: function generateNewName(){
+            // Generate a random name
+            this.getSelector('.input-character-name', this.$el).val(
+                generateName()
+            );
+
+            return this;
         },
 
         // ------------------------------
@@ -6371,6 +6501,11 @@ define(
             // TODO: use a more robust sprite system, allow for differences
             //   in classes 
             this.model.set({ sprite: raceModel.get('sprite') });
+
+            // Generate a random name
+            this.getSelector('.input-character-name', this.$el).attr({
+                placeholder: generateName()
+            });
 
             // add / remove active class on list item
             this.getSelector('.races-list .item').removeClass('active');
@@ -6413,6 +6548,17 @@ define(
 
             // remove blur / disable on the next button
             this.getSelector('.btn-next').removeClass('blur');
+
+            // Update abilities based on class
+            // TODO: hide abilities that haven't been unlocked? 
+            // ... game design task
+            var abilities = classModel.get('abilities');
+            this.model.set({ abilities: abilities });
+
+            // TODO: view for abilities. use a region
+            this.getSelector('.abilities-wrapper').html(
+                JSON.stringify(abilities)
+            );
 
             return this;
         }

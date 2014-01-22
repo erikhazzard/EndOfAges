@@ -25,3 +25,7 @@ A parent view for the sub views for creating characters
 ----------------
 
 save position / game / etc.
+
+-----------------------
+
+generateName func
