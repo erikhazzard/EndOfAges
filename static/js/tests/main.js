@@ -91,6 +91,7 @@ require(['events',
     require([
         'tests/collections/Entities'
         , 'tests/views/subviews/Battle'
+        , 'tests/util/generateName'
         ], function( ){
 
         //Start runner

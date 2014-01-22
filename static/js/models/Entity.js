@@ -87,8 +87,9 @@ define(
             return url;
         },
 
-        initialize: function entityInitialize(options){
+        initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
+            options = options || {};
 
             // TODO: get attributes from server
             // set attributes and base attributes from server

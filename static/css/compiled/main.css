@@ -205,7 +205,10 @@
   z-index: 1000; }
 
 body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-size: 17px;
+  font-family: "Lustria", serif;
   color: #000; }
 
 html, body, #site-container, #region-main {
@@ -224,11 +227,35 @@ a {
 a:hover {
   color: #0b6cea; }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: "IM Fell English", san-serif; }
+
 svg {
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none; }
+
+.hidden {
+  display: none; }
+
+.clear {
+  clear: both; }
+
+.blur {
+  -webkit-filter: blur(10px) !important;
+  -moz-filter: blur(10px) !important;
+  filter: blur(10px);
+  filter: url(#filter-blur);
+  opacity: 1 !important;
+  filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
+  -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
+  opacity: 1\9 !important;
+  pointer-events: none; }
+
+.center {
+  display: table;
+  margin: auto; }
 
 @-webkit-keyframes preload {
   0% {
@@ -255,24 +282,3 @@ svg {
   animation: preload 1.8s ease-out;
   animation-direction: alternate;
   animation-iteration-count: infinite; }
-
-.hidden {
-  display: none; }
-
-.clear {
-  clear: both; }
-
-.blur {
-  -webkit-filter: blur(10px) !important;
-  -moz-filter: blur(10px) !important;
-  filter: blur(10px);
-  filter: url(#filter-blur);
-  opacity: 1 !important;
-  filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
-  -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10) \9  !important;
-  opacity: 1\9 !important;
-  pointer-events: none; }
-
-.center {
-  display: table;
-  margin: auto; }

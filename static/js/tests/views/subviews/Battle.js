@@ -5,10 +5,16 @@ define([
     'events',
     'models/Game',
     'models/Battle',
-    'views/subviews/Battle'
-    ], function(events, Game, Battle, BattleView){
+    'views/subviews/Battle',
+    'collections/Entities',
+    'models/Entity'
+    ], function(events, Game, Battle, BattleView, Entities, Entity){
     
-    var game = new Game({});
+    var game = new Game({
+        playerEntities: new Entities([
+            new Entity()
+        ])
+    });
     var battle = new BattleView({ 
         gameModel: game,
         model: new Battle({
@@ -29,10 +35,10 @@ define([
             //battle.on('showDone', function(){
                 //done();
             //});
-
             //regionBattle.show(battle);
 
-            //remove this
+            // close battle
+            battle.close();
             done();
         });
     });

@@ -8,6 +8,9 @@ $highlight-green: #1bc812;
 
 $opacity-transition-time: 0.3s;
 
+$main-font: 'Lustria', serif;
+$header-font: 'IM Fell English', san-serif;
+
 // --------------------------------------
 //
 // Imports
@@ -25,28 +28,39 @@ $opacity-transition-time: 0.3s;
 //
 // --------------------------------------
 body {
-  font-size: 17px;
-  color: #000;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+
+    font-size: 17px;
+    font-family: $main-font;
+    color: #000;
 }
+
 html, body, #site-container, #region-main {
-  -webkit-overflow-scrolling: touch;
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
+    -webkit-overflow-scrolling: touch;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 a {
-  cursor: pointer;
-  color: $highlight-blue;
-  text-decoration: none !important;
+    cursor: pointer;
+    color: $highlight-blue;
+    text-decoration: none !important;
 }
 a:hover {
-    color: darken($highlight-blue, 10%);
+        color: darken($highlight-blue, 10%);
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-family: $header-font;
+}
+
+// --------------------------------------
 // Make all SVG elements unselectable
+// --------------------------------------
 svg {
     -moz-user-select: none; 
     -webkit-user-select: none; 
@@ -54,17 +68,43 @@ svg {
     user-select:none;
 }
 
+// --------------------------------------
+//
+// General Reusable classes
+//
+// --------------------------------------
+.hidden { display: none; }
+.clear { clear: both; }
 
+.blur {
+    -webkit-filter: blur(10px) !important;
+    -moz-filter: blur(10px) !important;
+    filter: blur(10px); 
+    filter: url(#filter-blur);
+    opacity: 1 !important;
+    filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10)\9 !important;
+    -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10)\9 !important;
+    opacity: 1\9 !important;
+    pointer-events: none;
+}
+
+.center { display: table; margin: auto; }
+
+// --------------------------------------
+//
+// Animation related
+//
+// --------------------------------------
 @-webkit-keyframes preload {
-    0%  {
+    0% {
         -webkit-transform: scale(0.95, 0.95);
         transform: scale(0.95, 0.95);
         opacity: 0.2;
     }
-    50%  {
+    50% {
         opacity: 0.5;
     }
-    100%  {
+    100% {
         -webkit-transform: scale(1.0,1.0);
         transform: scale(1.0, 1.0);
         opacity: 1;
@@ -72,36 +112,16 @@ svg {
 }
 
 .preload-content {
-  text-align: center;
-  color: #999;
-  font-weight: 500;
-  margin: 3em 0;
+    text-align: center;
+    color: #999;
+    font-weight: 500;
+    margin: 3em 0;
 
-  -webkit-animation: preload 1.8s ease-out;
-  -webkit-animation-direction: alternate;
-  -webkit-animation-iteration-count: infinite;
+    -webkit-animation: preload 1.8s ease-out;
+    -webkit-animation-direction: alternate;
+    -webkit-animation-iteration-count: infinite;
 
-  animation: preload 1.8s ease-out;
-  animation-direction: alternate;
-  animation-iteration-count: infinite;
-}
-
-.hidden { display: none; }
-.clear { clear: both; }
-
-.blur {
-  -webkit-filter: blur(10px) !important;
-  -moz-filter: blur(10px) !important;
-  filter: blur(10px); 
-  filter: url(#filter-blur);
-  opacity: 1 !important;
-  filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10)\9 !important;
-  -ms-filter: progid:DXImageTransform.Microsoft.Blur(pixelradius=10)\9 !important;
-  opacity: 1\9 !important;
-  pointer-events: none;
-}
-
-.center {
-    display: table;
-    margin: auto;
+    animation: preload 1.8s ease-out;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
 }
