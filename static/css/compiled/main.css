@@ -35,6 +35,21 @@
 #battle .effect-magicMissle path {
   fill: #ffffff; }
 
+.page-create-character-wrapper .create-ability-wrapper {
+  display: block;
+  float: left;
+  margin-right: 1%;
+  width: 24%; }
+.page-create-character-wrapper .create-ability-wrapper.damage {
+  background: rgba(255, 20, 20, 0.8); }
+.page-create-character-wrapper .create-ability-wrapper.heal {
+  background: rgba(20, 255, 20, 0.8); }
+.page-create-character-wrapper .create-ability-wrapper.heal.damage {
+  background: -webkit-radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);
+  background: -moz-radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);
+  background: radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 ); }
+
 .page-create-character-wrapper .blur {
   opacity: 0.5 !important; }
 .page-create-character-wrapper #create-race-class-wrapper {

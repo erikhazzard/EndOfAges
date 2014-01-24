@@ -34,3 +34,10 @@ Learning new skills
 -------------
 Explict story vs player stories
     -provide explict story only as a way to enhance the player story
+
+------------------
+Exploration : capture essential experience of Battlestar Galatica - lost, cannot
+    return home, have to keep going, no end, looking for home
+    -Maybe you can find a suitable settlement, and you can choose to retire (keeping
+    everything) or continue onwards 
+

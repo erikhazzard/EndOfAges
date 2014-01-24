@@ -14,7 +14,9 @@ define(
         'collections/Races',
 
         'views/create/ClassList',
-        'collections/Classes'
+        'collections/Classes',
+
+        'views/create/AbilityList'
 
     ], function viewPageCreateCharacter(
         d3, backbone, marionette, 
@@ -26,7 +28,9 @@ define(
         Races,
 
         ClassList,
-        Classes
+        Classes,
+
+        AbilityList
     ){
 
     var PageCreateCharacter = Backbone.Marionette.Layout.extend({
@@ -34,7 +38,8 @@ define(
         'className': 'page-create-character-wrapper',
         regions: {
             'regionRaceList': '#region-create-races',
-            'regionClassList': '#region-create-classes'
+            'regionClassList': '#region-create-classes',
+            'regionAbilityList': '#region-create-abilities'
         },
 
         // UI events
@@ -65,6 +70,9 @@ define(
             // keep track of the first race click
             this._firstRaceClick = true;
 
+            // anytime race or class is change, update the main character display
+            // area
+            // TODO: could be a subview?
             this.listenTo(this.model, 'change:race', this.updateCharacterDisplay);
             this.listenTo(this.model, 'change:class', this.updateCharacterDisplay);
             return this;
@@ -194,11 +202,9 @@ define(
 
             // Check for FINISH state
             if(targetState > this.createStates.length - 1){ 
-                // TODO: show an in app prompt
-                // If done, show the game and pass in the entities
-                events.trigger('controller:showGame');
-
-                targetState = this.createStates.length - 1; 
+                // FINISHED
+                // ----------------------
+                return this.finishProcess();
             }
 
             // set the state index
@@ -343,11 +349,31 @@ define(
             var abilities = classModel.get('abilities');
             this.model.set({ abilities: abilities });
 
-            // TODO: view for abilities. use a region
-            this.getSelector('.abilities-wrapper').html(
-                JSON.stringify(abilities)
-            );
+            // update the ability list
+            this.abilityListView = new AbilityList({
+                collection: abilities
+            });
+            this.regionAbilityList.show( this.abilityListView );
 
+            return this;
+        },
+
+        // --------------------------------------------------------------------
+        //
+        // Finish creation
+        //
+        // -------------------------------------------------------------------
+        finishProcess: function finishProcess(){
+            // Called when the creation process is completely finished.
+            //
+            // TODO: show an in app prompt
+            this.model.set({ 
+                name: this.getSelector('.input-character-name')
+            });
+
+            // TODO: only trigger if prompt is true
+            // If done, show the game and pass in the entities
+            events.trigger('controller:showGame');
             return this;
         }
     });

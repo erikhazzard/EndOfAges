@@ -1045,9 +1045,9 @@ define(
             castDuration: 0.5,
 
             // how much power the ability costs to use
-            // TODO: probably won't use power
-            powerCost: 10,
-    
+            // TODO: probably won't use power?  Think on this
+            powerCost: 10, 
+
             // Damage Over Time (DOT) properties
             // ticks: number of times to do the effect
             ticks: 0,
@@ -1074,21 +1074,23 @@ define(
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
-            validTargets: ['enemy', 'player'],
+            validTargets: ['enemy'],
         
+            // type / subtype
+            // --------------------------
+            // type could be either 'magic' or 'physical'
+            type: 'magic',
+            // TODO: allow multiple subtypes and percentages for sub types
+            // subtypes are:
+            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
+            subType: 'fire',
+
             // Damage
             // --------------------------
             damage: undefined,
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
             damageTarget: 'target',
-
-            // type could be either 'magic' or 'physical'
-            type: 'magic',
-            // TODO: allow multiple subtypes
-            // subtypes are:
-            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
-            subType: 'fire',
 
             // Heal
             // --------------------------
@@ -6212,6 +6214,76 @@ define(
 
 // ===========================================================================
 //
+// Ability List Item
+//
+// ItemView for ability item
+//
+// ===========================================================================
+define(
+    'views/create/AbilityListItem',[ 
+        'd3', 'logger', 'events'
+    ], function viewAbilityListItem(
+        d3, logger, events
+    ){
+
+    var AbilityListItem = Backbone.Marionette.ItemView.extend({
+        'className': 'ability-list-item',
+        template: '#template-create-ability-list-item',
+
+        serializeData: function(){
+            return _.extend({ cid: this.model.cid }, this.model.toJSON());
+        },
+
+        initialize: function(){
+            logger.log('views/create/AbilityListItem', 'initialize : model %O',
+                this.model);
+            return this;
+        },
+
+        onShow: function(){
+            return this;
+        }
+
+    });
+
+    return AbilityListItem;
+});
+
+// ===========================================================================
+//
+// Ability List
+//
+// Collection for classes in the create screen
+//
+// ===========================================================================
+define(
+    'views/create/AbilityList',[ 
+        'd3', 'logger', 'events', 
+        'views/create/AbilityListItem'
+    ], function viewAbilityListCollection(
+        d3, logger, events,
+        AbilityListItem
+    ){
+
+    var AbilityListCollection = Backbone.Marionette.CollectionView.extend({
+        'className': 'ability-list',
+
+        itemView: AbilityListItem,
+
+        initialize: function(options){
+            logger.log(
+                'views/create/AbilityList.js', 
+                'collectionView initialized : %O', options);
+            this.itemView = AbilityListItem;
+            return this;
+        }
+    });
+
+    return AbilityListCollection;
+});
+
+// ===========================================================================
+//
 // Page Create Character
 // 
 // ===========================================================================
@@ -6226,7 +6298,9 @@ define(
         'collections/Races',
 
         'views/create/ClassList',
-        'collections/Classes'
+        'collections/Classes',
+
+        'views/create/AbilityList'
 
     ], function viewPageCreateCharacter(
         d3, backbone, marionette, 
@@ -6238,7 +6312,9 @@ define(
         Races,
 
         ClassList,
-        Classes
+        Classes,
+
+        AbilityList
     ){
 
     var PageCreateCharacter = Backbone.Marionette.Layout.extend({
@@ -6246,7 +6322,8 @@ define(
         'className': 'page-create-character-wrapper',
         regions: {
             'regionRaceList': '#region-create-races',
-            'regionClassList': '#region-create-classes'
+            'regionClassList': '#region-create-classes',
+            'regionAbilityList': '#region-create-abilities'
         },
 
         // UI events
@@ -6277,6 +6354,9 @@ define(
             // keep track of the first race click
             this._firstRaceClick = true;
 
+            // anytime race or class is change, update the main character display
+            // area
+            // TODO: could be a subview?
             this.listenTo(this.model, 'change:race', this.updateCharacterDisplay);
             this.listenTo(this.model, 'change:class', this.updateCharacterDisplay);
             return this;
@@ -6406,11 +6486,9 @@ define(
 
             // Check for FINISH state
             if(targetState > this.createStates.length - 1){ 
-                // TODO: show an in app prompt
-                // If done, show the game and pass in the entities
-                events.trigger('controller:showGame');
-
-                targetState = this.createStates.length - 1; 
+                // FINISHED
+                // ----------------------
+                return this.finishProcess();
             }
 
             // set the state index
@@ -6555,11 +6633,31 @@ define(
             var abilities = classModel.get('abilities');
             this.model.set({ abilities: abilities });
 
-            // TODO: view for abilities. use a region
-            this.getSelector('.abilities-wrapper').html(
-                JSON.stringify(abilities)
-            );
+            // update the ability list
+            this.abilityListView = new AbilityList({
+                collection: abilities
+            });
+            this.regionAbilityList.show( this.abilityListView );
 
+            return this;
+        },
+
+        // --------------------------------------------------------------------
+        //
+        // Finish creation
+        //
+        // -------------------------------------------------------------------
+        finishProcess: function finishProcess(){
+            // Called when the creation process is completely finished.
+            //
+            // TODO: show an in app prompt
+            this.model.set({ 
+                name: this.getSelector('.input-character-name')
+            });
+
+            // TODO: only trigger if prompt is true
+            // If done, show the game and pass in the entities
+            events.trigger('controller:showGame');
             return this;
         }
     });

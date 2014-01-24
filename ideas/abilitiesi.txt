@@ -34,3 +34,8 @@ TODO: Figure out all the 'types' of ability effects - missle, direct, AoE, etc.
 Ability Ideas:
     -Abilities that can only be used once per battle
         -Can be only used once per every n battles
+
+====================
+
+All abilities should share a base scale, so we can calculate power / etc. for a
+class based on a collection of abilities

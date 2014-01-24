@@ -1,0 +1,6 @@
+@mixin radial-gradient-background($position, $shape, $start, $startval, $end, $endval){
+    background: -webkit-radial-gradient($position, $shape cover, $start $startval, $end $endval);
+    background: -moz-radial-gradient($position, $shape cover, $start $startval, $end $endval);
+    background: radial-gradient($position, $shape cover, $start $startval, $end $endval);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
+}

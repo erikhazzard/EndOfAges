@@ -1,0 +1,27 @@
+{{ // Item view for a single ability }}
+<script id='template-create-ability-list-item' type='text/template'>
+    <!-- Ability -->
+    <div class='create-ability-wrapper <%= (damage ? "damage" : "") %> <%= (heal? "heal" : "") %>'>
+        <div class='create-ability-inner'>
+            <h3><%= name %></h3>
+            {{// Damage or heal or dot }}
+            <div class='damage-heal-info'>
+                <% if(damage){  %>
+                    Damage: <%= damage %>
+                <% } else if (heal){ %>
+                    Heal: <%= heal %>
+                <% } %>
+            </div>
+
+            <div class='type-info'>
+                Type: <%= type %> : <%= subType %>
+            </div>
+
+            <div class='cast-info'>
+                Cast duration: <%= castDuration %>
+            </div>
+        </div>
+    </div>
+
+    <div class='clear'>
+</script>

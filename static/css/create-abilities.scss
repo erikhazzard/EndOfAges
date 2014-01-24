@@ -1,0 +1,23 @@
+// Abilities
+// --------------------------------------
+.page-create-character-wrapper {
+    .create-ability-wrapper {
+        display: block;
+        float: left;
+        margin-right: 1%;
+        width: 24%;
+    }
+
+    // Damage / heal 
+    .create-ability-wrapper.damage {
+        background: rgba(255,20,20, 0.8);
+    }
+    .create-ability-wrapper.heal {
+        background: rgba(20,255,20, 0.8);
+    }
+
+    // Both 
+    .create-ability-wrapper.heal.damage {
+        @include radial-gradient-background(left top, ellipse, #dd2222, 12%, #22dd22, 110%);
+    }
+}

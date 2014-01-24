@@ -1,9 +1,12 @@
-// variables
+// variables 
 // --------------------------------------
 $create-left-width: 350px;
 $create-name-height: 50px;
 $create-nav-buttons-height: 50px;
 $create-race-title-height: 50px;
+
+// sub files (so this file doesn't get too big)
+@import "create-abilities";
 
 // layout
 // --------------------------------------
@@ -129,3 +132,4 @@ $create-race-title-height: 50px;
         }
     }
 }
+

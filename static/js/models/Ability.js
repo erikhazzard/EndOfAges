@@ -25,9 +25,9 @@ define(
             castDuration: 0.5,
 
             // how much power the ability costs to use
-            // TODO: probably won't use power
-            powerCost: 10,
-    
+            // TODO: probably won't use power?  Think on this
+            powerCost: 10, 
+
             // Damage Over Time (DOT) properties
             // ticks: number of times to do the effect
             ticks: 0,
@@ -54,21 +54,23 @@ define(
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
-            validTargets: ['enemy', 'player'],
+            validTargets: ['enemy'],
         
+            // type / subtype
+            // --------------------------
+            // type could be either 'magic' or 'physical'
+            type: 'magic',
+            // TODO: allow multiple subtypes and percentages for sub types
+            // subtypes are:
+            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
+            subType: 'fire',
+
             // Damage
             // --------------------------
             damage: undefined,
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
             damageTarget: 'target',
-
-            // type could be either 'magic' or 'physical'
-            type: 'magic',
-            // TODO: allow multiple subtypes
-            // subtypes are:
-            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
-            subType: 'fire',
 
             // Heal
             // --------------------------
