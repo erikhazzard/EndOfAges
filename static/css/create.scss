@@ -11,6 +11,12 @@ $create-race-title-height: 50px;
 // layout
 // --------------------------------------
 .page-create-character-wrapper {
+    // override hidden elements to HAVE a block display, but set visibilty to 0
+    .hidden { display: block !important; visibility: visible !important; opacity: 0; }
+    // allow the class and ability wrappers to fade in (when .hidden is removed)
+    .class-info-wrapper, .abilities-wrapper {
+        @include transition("opacity 0.4s");
+    }
 
     .blur {
         opacity: 0.5 !important;
@@ -30,11 +36,11 @@ $create-race-title-height: 50px;
 
     #create-races, #create-classes {
         @include no-touch();
+        @include transition("left 0.4s");
         bottom: 0;
         border: 2px solid #343434;
         left: 0;
         position: absolute;
-        transition: left 0.4s;
         top: 0;
         width: $create-left-width;
 
@@ -75,6 +81,7 @@ $create-race-title-height: 50px;
         left: $create-left-width !important;
     }
     
+    // ----------------------------------
     // Right side / Character Display
     // ----------------------------------
     #create-character-display-wrapper {
@@ -84,32 +91,52 @@ $create-race-title-height: 50px;
         left: $create-left-width;
         right: 0;
         top: 0;
-        transition: opacity $opacity-transition-time;
+        @include transition("opacity " + $opacity-transition-time);
 
-        .name-wrapper {
-            position: absolute;
-            left: 0;
-            height: $create-name-height;
-            overflow: hidden;
-            right: 0;
-            top: 0;
-        }
-
+        // ==================================
+        // Race
+        // ==================================
         .character-wrapper {
             bottom: 0;
             left: 0;
             position: absolute;
             right: 0;
             top: $create-name-height;
-        }
 
+            .character-display {
+                float: left;
+                width: 50px;
+            }
+            p {
+                float: left;
+            }
+        }
         .race-viz-wrapper {
             top: 0;
             position: absolute;
             right: 0px;
         }
+
+        // ==================================
+        // Class
+        // ==================================
     }
 
+    // ==================================
+    // Name 
+    // ==================================
+    .name-wrapper {
+        position: absolute;
+        left: 0;
+        height: $create-name-height;
+        overflow: hidden;
+        right: 0;
+        top: 0;
+    }
+
+    // ==================================
+    // State / nav buttons
+    // ==================================
     #create-state-buttons-wrapper {
         background: rgba(0,0,0,0.5);
         position: absolute;
@@ -119,10 +146,10 @@ $create-race-title-height: 50px;
         right: 0;
 
         .btn { 
-            border: 2px solid #343434;
             @include radial-gradient-background(left top, ellipse, #cdcdcd, 12%, #707070, 110%);
+            border: 2px solid #343434;
             position: absolute;
-            transition: opacity $opacity-transition-time;
+            @include transition("opacity " + $opacity-transition-time);
             width: 45%;
         }
 

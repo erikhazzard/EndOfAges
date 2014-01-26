@@ -50,6 +50,15 @@
   background: radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 ); }
 
+.page-create-character-wrapper .hidden {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 0; }
+.page-create-character-wrapper .class-info-wrapper, .page-create-character-wrapper .abilities-wrapper {
+  -webkit-transition: opacity 0.4s;
+  -moz-transition: opacity 0.4s;
+  -o-transition: opacity 0.4s;
+  transition: opacity 0.4s; }
 .page-create-character-wrapper .blur {
   opacity: 0.5 !important; }
 .page-create-character-wrapper #create-race-class-wrapper {
@@ -67,11 +76,14 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  -webkit-transition: left 0.4s;
+  -moz-transition: left 0.4s;
+  -o-transition: left 0.4s;
+  transition: left 0.4s;
   bottom: 0;
   border: 2px solid #343434;
   left: 0;
   position: absolute;
-  transition: left 0.4s;
   top: 0;
   width: 350px; }
   .page-create-character-wrapper #create-races .race-title, .page-create-character-wrapper #create-classes .race-title {
@@ -102,24 +114,32 @@
   left: 350px;
   right: 0;
   top: 0;
+  -webkit-transition: opacity 0.3s;
+  -moz-transition: opacity 0.3s;
+  -o-transition: opacity 0.3s;
   transition: opacity 0.3s; }
-  .page-create-character-wrapper #create-character-display-wrapper .name-wrapper {
-    position: absolute;
-    left: 0;
-    height: 50px;
-    overflow: hidden;
-    right: 0;
-    top: 0; }
   .page-create-character-wrapper #create-character-display-wrapper .character-wrapper {
     bottom: 0;
     left: 0;
     position: absolute;
     right: 0;
     top: 50px; }
+    .page-create-character-wrapper #create-character-display-wrapper .character-wrapper .character-display {
+      float: left;
+      width: 50px; }
+    .page-create-character-wrapper #create-character-display-wrapper .character-wrapper p {
+      float: left; }
   .page-create-character-wrapper #create-character-display-wrapper .race-viz-wrapper {
     top: 0;
     position: absolute;
     right: 0px; }
+.page-create-character-wrapper .name-wrapper {
+  position: absolute;
+  left: 0;
+  height: 50px;
+  overflow: hidden;
+  right: 0;
+  top: 0; }
 .page-create-character-wrapper #create-state-buttons-wrapper {
   background: rgba(0, 0, 0, 0.5);
   position: absolute;
@@ -128,12 +148,15 @@
   left: 0;
   right: 0; }
   .page-create-character-wrapper #create-state-buttons-wrapper .btn {
-    border: 2px solid #343434;
     background: -webkit-radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
     background: -moz-radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
     background: radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
+    border: 2px solid #343434;
     position: absolute;
+    -webkit-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
     transition: opacity 0.3s;
     width: 45%; }
   .page-create-character-wrapper #create-state-buttons-wrapper .btn-previous {

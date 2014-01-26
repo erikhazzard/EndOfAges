@@ -8,8 +8,29 @@
     </div>
 </script>
 
+{{ // race info templates }}
+<script id='template-create-race-info' type='text/template'>
+    <h1 class='race-name'><%= race.get('name') %></h1>
+    <div class='race-description'>
+        {{// TODO: handle sprite differently - change the src - generate sprite, use base64 string(?) }}
+        <!-- sprite goes here -->
+        <div class='character-display'>
+            <image src='/static/img/characters/<%= race.get('sprite') %>.gif' />
+        </div>
 
-{{ // Race info area templates }}
+        <!-- description here -->
+        <p>
+            <%= race.get('description') %>
+        </p>
+        <div class='clear'></div>
+    </div>
+</script>
+
+{{ // viz templates }}
 <script id='template-create-race-viz' type='text/template'>
-    Sup dawg
+    <% _.each(stats, function(value, key){ %>
+        <div>
+            <%= key %>: <%= value %>
+        </div>
+    <% }); %>
 </script>

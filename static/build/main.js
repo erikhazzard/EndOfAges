@@ -6277,6 +6277,8 @@ define(
 // ===========================================================================
 //
 // Page Create Character
+//  
+//  TODO: Whenever sprite changes, update the element
 // 
 // ===========================================================================
 define(
@@ -6391,7 +6393,7 @@ define(
             delete this._elCache;
 
             // Generate a random name
-            this.getSelector('.input-character-name', this.$el).attr({
+            this.getSelector('.input-character-name').attr({
                 placeholder: generateName()
             });
 
@@ -6503,7 +6505,7 @@ define(
 
         generateNewName: function generateNewName(){
             // Generate a random name
-            this.getSelector('.input-character-name', this.$el).val(
+            this.getSelector('.input-character-name').val(
                 generateName()
             );
 
@@ -6537,20 +6539,21 @@ define(
             // and updates the model
             //
             // get race model
+            var self = this;
             var raceModel = this.races.get(cid); 
 
             // --------------------------
             // Update DOM elements
             // --------------------------
             // Generate a random name
-            this.getSelector('.input-character-name', this.$el).attr({
+            this.getSelector('.input-character-name').attr({
                 placeholder: generateName()
             });
             
             // add / remove active class for all other races
             this.getSelector('.races-list .item').removeClass('active');
             // (get item by race cid, so we don't need an event passed in)
-            $(".item[data-race-cid='" + cid + "']", this.$el).addClass('active');
+            $(".item[data-race-cid='" + cid + "']").addClass('active');
 
             // remove the initial blur on the main character area
             this.getSelector('#create-character-display-wrapper').removeClass('blur');
@@ -6560,9 +6563,19 @@ define(
 
             // Update race info
             // --------------------------
-            this.getSelector('.race-name').html(raceModel.get('name'));
-            this.getSelector('.race-description').html(raceModel.get('description'));
+            self.getSelector('.race-info-wrapper').empty().append(
+                Backbone.Marionette.TemplateCache.get('#template-create-race-info')({
+                    race: raceModel
+                })
+            );
 
+            // update race viz
+            // TODO: Don't empty / append, have a view and call update on it
+            this.getSelector('.race-viz-wrapper').empty().append(
+                Backbone.Marionette.TemplateCache.get('#template-create-race-viz')({
+                    stats: raceModel.get('baseStats')
+                })
+            );
 
             // --------------------------
             // Update model
@@ -6576,6 +6589,8 @@ define(
                 sprite: raceModel.get('sprite') 
             });
 
+            logger.log('views/PageCreateCharacter', 'finished setting race to %O',
+                raceModel);
             return this;
         },
 
@@ -6590,6 +6605,8 @@ define(
             e.preventDefault(); e.stopPropagation();
             // get race from clicked element
             var cid = $(e.target).attr('data-class-cid');
+
+            // TODO just set model's race and have event listener for change
 
             return this.setClass(cid);
         },
@@ -6610,7 +6627,7 @@ define(
             // add / remove active class on all other classes in the list
             this.getSelector('.class-list .item').removeClass('active');
             // add active class to the class
-            $(".item[data-class-cid='" + cid + "']", this.$el).addClass('active');
+            $(".item[data-class-cid='" + cid + "']").addClass('active');
 
             // Update abilities based on class
             // TODO: hide abilities that haven't been unlocked? 
@@ -6619,11 +6636,18 @@ define(
             this.model.set({ abilities: abilities });
 
             // update class html elements (TODO: View?)
-            this.getSelector('.class-name').html(classModel.get('name'));
-            this.getSelector('.class-description').html(classModel.get('description'));
+            this.getSelector('.class-info-wrapper').removeClass('hidden');
+            this.getSelector('.class-info-wrapper').empty().append(
+                Backbone.Marionette.TemplateCache.get('#template-create-class-info')({
+                    classModel: classModel
+                })
+            );
 
             // update the ability list
             // --------------------------
+            // ability wrapper starts out hidden until a class is selected
+            this.getSelector('.abilities-wrapper').removeClass('hidden');
+
             this.abilityListView = new AbilityList({
                 collection: abilities
             });
