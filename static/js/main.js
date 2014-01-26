@@ -13,7 +13,7 @@ requirejs.config({
         async: 'lib/async.min',
     
         // We're using lodash in place of underscore
-        lodash: 'lib/lodash.compat',
+        lodash: 'lib/lodash.min',
         
         jwerty: 'lib/jwerty.min',
 

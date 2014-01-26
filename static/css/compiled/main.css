@@ -60,23 +60,14 @@
   position: absolute;
   width: 350px;
   top: 0; }
-  .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons {
-    position: absolute;
-    bottom: 0;
-    height: 50px;
-    left: 0;
-    right: 0; }
-    .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons .btn {
-      border: 2px solid #343434;
-      position: absolute;
-      transition: opacity 0.3s;
-      width: 45%; }
-    .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons .btn-previous {
-      left: 0; }
-    .page-create-character-wrapper #create-race-class-wrapper .next-prev-buttons .btn-next {
-      right: 0; }
 .page-create-character-wrapper #create-races, .page-create-character-wrapper #create-classes {
-  bottom: 50px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  bottom: 0;
   border: 2px solid #343434;
   left: 0;
   position: absolute;
@@ -129,6 +120,26 @@
     top: 0;
     position: absolute;
     right: 0px; }
+.page-create-character-wrapper #create-state-buttons-wrapper {
+  background: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  bottom: 0;
+  height: 50px;
+  left: 0;
+  right: 0; }
+  .page-create-character-wrapper #create-state-buttons-wrapper .btn {
+    border: 2px solid #343434;
+    background: -webkit-radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
+    background: -moz-radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
+    background: radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
+    position: absolute;
+    transition: opacity 0.3s;
+    width: 45%; }
+  .page-create-character-wrapper #create-state-buttons-wrapper .btn-previous {
+    left: 0; }
+  .page-create-character-wrapper #create-state-buttons-wrapper .btn-next {
+    right: 0; }
 
 .entity-group-wrapper {
   cursor: pointer; }

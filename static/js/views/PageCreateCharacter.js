@@ -67,14 +67,8 @@ define(
             // possible states
             this.createStates = ['race', 'class'];
 
-            // keep track of the first race click
-            this._firstRaceClick = true;
-
-            // anytime race or class is change, update the main character display
-            // area
-            // TODO: could be a subview?
-            this.listenTo(this.model, 'change:race', this.updateCharacterDisplay);
-            this.listenTo(this.model, 'change:class', this.updateCharacterDisplay);
+            // TODO: if entity already has a race or class, trigger the
+            // event to show it
             return this;
         },
 
@@ -136,41 +130,6 @@ define(
 
             this.regionRaceList.show(this.raceListView);
             this.regionClassList.show(this.classListView);
-
-            return this;
-        },
-
-        // ------------------------------
-        //
-        // Update / Rerender elements
-        //
-        // ------------------------------
-        updateCharacterDisplay: function updateCharacterDisplay(){
-            // Updates the main display area whenever the race or class
-            // changes. 
-            //
-            // TODO: Could have a better way to handle this, e.g., view for
-            // each race / class. Update after figuring out what to display
-            var race = this.model.get('race');
-            var entityClass = this.model.get('class');
-
-            // RACE related
-            // --------------------------
-            this.getSelector('.race-name').html(race.get('name'));
-            this.getSelector('.race-description').html(race.get('description'));
-
-            // race charts
-            // TODO: show bar charts
-            this.getSelector('.race-viz-wrapper').html(
-                JSON.stringify(race.get('baseStats'))
-            );
-
-            // CLASS related
-            // --------------------------
-            if(entityClass){
-                this.getSelector('.class-name').html(entityClass.get('name'));
-                this.getSelector('.class-description').html(entityClass.get('description'));
-            }
 
             return this;
         },
@@ -280,6 +239,11 @@ define(
         // User Interaction
         //
         // ------------------------------
+        // ==============================
+        //
+        // Race
+        //
+        // ==============================
         raceClicked: function raceClicked(e){
             // When a race item is clicked from the race list, update the model,
             // which updates the display, then update the list to show the classes
@@ -289,59 +253,88 @@ define(
 
             // get race from clicked element
             var cid = $(e.target).attr('data-race-cid');
+            return this.setRace(cid);
+        },
+
+        setRace: function(cid){
+            // Called to set the race for the entity model. Updates the HTML 
+            // and updates the model
+            //
+            // get race model
             var raceModel = this.races.get(cid); 
 
-            // update the entity sprite
-            // TODO: use a more robust sprite system, allow for differences
-            //   in classes 
-            this.model.set({ sprite: raceModel.get('sprite') });
-
+            // --------------------------
+            // Update DOM elements
+            // --------------------------
             // Generate a random name
             this.getSelector('.input-character-name', this.$el).attr({
                 placeholder: generateName()
             });
-
-            // add / remove active class on list item
+            
+            // add / remove active class for all other races
             this.getSelector('.races-list .item').removeClass('active');
-            $(e.target).addClass('active');
-
-            // update model
-            this.model.set({ race: raceModel });
-
-            // remove blur / disable on the next button
-            this.getSelector('.btn-next').removeClass('blur');
+            // (get item by race cid, so we don't need an event passed in)
+            $(".item[data-race-cid='" + cid + "']", this.$el).addClass('active');
 
             // remove the initial blur on the main character area
             this.getSelector('#create-character-display-wrapper').removeClass('blur');
 
-            // Go to the next state (select class) automatically the FIRST
-            // time the race is selected
-            if(this._firstRaceClick){ 
-                //this.changeState('next'); 
-                this._firstRaceClick = false;
-            }
+            // remove blur / disable on the next button
+            this.getSelector('.btn-next').removeClass('blur');
+
+            // Update race info
+            // --------------------------
+            this.getSelector('.race-name').html(raceModel.get('name'));
+            this.getSelector('.race-description').html(raceModel.get('description'));
+
+
+            // --------------------------
+            // Update model
+            // --------------------------
+            // update the entity (this.model) with the race
+            // update the entity sprite
+            // TODO: use a more robust sprite system, allow for differences
+            //   in classes 
+            this.model.set({ 
+                race: raceModel, 
+                sprite: raceModel.get('sprite') 
+            });
 
             return this;
         },
 
+        // ==============================
+        //
+        // Update Class 
+        //
+        // ==============================
         classClicked: function classClicked(e){
             // Similar to race clicked, but fires when a class item is clicked
             logger.log('views/PageCreateCharacter', 'classClicked() called');
             e.preventDefault(); e.stopPropagation();
-
             // get race from clicked element
             var cid = $(e.target).attr('data-class-cid');
+
+            return this.setClass(cid);
+        },
+
+        setClass: function(cid){
+            // if raceCid was passed in, allow it to override the one from the
+            // click event
             var classModel = this.classes.get(cid); 
 
-            // add / remove active class on list item
-            this.getSelector('.class-list .item').removeClass('active');
-            $(e.target).addClass('active');
+            logger.log('views/PageCreateCharacter', 'classModel: %O, cid: %O',
+                classModel, cid);
 
-            // update model
-            this.model.set({ 'class' : classModel });
-
+            // --------------------------
+            // Update DOM elements
+            // --------------------------
             // remove blur / disable on the next button
             this.getSelector('.btn-next').removeClass('blur');
+            // add / remove active class on all other classes in the list
+            this.getSelector('.class-list .item').removeClass('active');
+            // add active class to the class
+            $(".item[data-class-cid='" + cid + "']", this.$el).addClass('active');
 
             // Update abilities based on class
             // TODO: hide abilities that haven't been unlocked? 
@@ -349,11 +342,21 @@ define(
             var abilities = classModel.get('abilities');
             this.model.set({ abilities: abilities });
 
+            // update class html elements (TODO: View?)
+            this.getSelector('.class-name').html(classModel.get('name'));
+            this.getSelector('.class-description').html(classModel.get('description'));
+
             // update the ability list
+            // --------------------------
             this.abilityListView = new AbilityList({
                 collection: abilities
             });
             this.regionAbilityList.show( this.abilityListView );
+
+            // --------------------------
+            // update model
+            // --------------------------
+            this.model.set({ 'class' : classModel });
 
             return this;
         },
@@ -368,7 +371,8 @@ define(
             //
             // TODO: show an in app prompt
             this.model.set({ 
-                name: this.getSelector('.input-character-name')
+                name: this.getSelector('.input-character-name').val() || this.getSelector('.input-character-name').attr('placeholder')
+
             });
 
             // TODO: only trigger if prompt is true

@@ -1,0 +1,5 @@
+Guideline For Design
+-----------------------------------------
+Strict Color Language
+    -e.g., Blue / White means interactive
+    -colors for elements? UI elements?
