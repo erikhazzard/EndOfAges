@@ -262,6 +262,8 @@ define(
                 'class': function(d,i){
                     var cssClass = 'node-wrapper';
 
+                    // add the visited class after a delay - after the
+                    // transition of the entity sprite to the node
                     if(d.node.get('visited')){ cssClass += ' node-visited'; }
                     if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
                     
@@ -270,10 +272,13 @@ define(
             });
 
             // remove existing circles
-            // TODO: do this better
+            // TODO: :::::::::::::::::::::::::::
+            // TODO: do this better - don't remove nodes every call
+            // TODO: :::::::::::::::::::::::::::
             nodes.selectAll('circle').remove();
 
             // Add circles representing destinations
+            var currentNode = null;
             var circles = nodes
                 .append('circle')
                     .attr({
@@ -281,6 +286,17 @@ define(
                             var cssClass = 'map-node'; 
                             if(d.node.get('visited')){ cssClass += ' node-visited'; }
                             if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
+
+                            // TODO: :::::::::::::::::::::::::::
+                            // TODO: Don't use id check of 0
+                            // TODO: How to 
+                            // TODO: :::::::::::::::::::::::::::
+                            var index = self.model.get('nodes').models.indexOf(d.node); 
+                            if(index > 0 && d.node.get('isCurrentNode') && d.node.get('visited')){
+                                // There is only one current node
+                                currentNode = this;
+                                cssClass = cssClass.replace(/node-visited/, '');
+                            }
                             
                             return cssClass;
                         },
@@ -288,6 +304,15 @@ define(
                         cy: function(d){ return d.y; },
                         r: 10
                     });
+
+            // Turn the node green after the entity has moved to it
+            if(currentNode){
+                setTimeout(function(){
+                    d3.select(currentNode).attr({
+                        'class': d3.select(currentNode).attr('class') + ' node-visited'
+                    });
+                }, this.CONFIG.updateDuration * 0.8);
+            }
 
             // remove any removed nodes
             nodes.exit().remove();
@@ -472,7 +497,6 @@ define(
                 this.prepareEntities();
                 this.entitiesSetup = true;
             }
-
 
             // draw / update nodes
             this.updateNodes();

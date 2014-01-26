@@ -18,7 +18,7 @@ define(
             description: 'An experienced warrior dabbling dark with unutterable sorrows',
             sprite: 'shadowknight',
             abilities: new Abilities([
-                ABILITIES.fireball
+                ABILITIES.lifetap
             ])
         }),
 

@@ -50,7 +50,7 @@ define(
             // as powerful a spell)
             //
             // Measured in seconds
-            timeCost: 1,
+            timeCost: null, // By default, will be set to castTime
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
@@ -77,6 +77,7 @@ define(
             heal: undefined,
             // could be either 'source' or 'target', will heal the entities
             // that are either the source or target of the used ability
+            //      (source would be a self heal, target heals other)
             healTarget: 'target',
 
             visualEffect: function(options){
@@ -199,6 +200,13 @@ define(
 
             // if an effect attributes was passed in, updat the method
             if(options.effect){ this.effect = options.effect; }
+
+            // set timeCost if it is not passed in
+            if(this.attributes.timeCost === null){
+                this.set({
+                    timeCost: this.get('castTime')
+                }, { silent: false });
+            }
 
             // if the model is updated and a new effect attribute is set,
             // update the effect method

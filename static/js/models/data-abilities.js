@@ -31,7 +31,23 @@ define(
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'arcane',
-            damage: 15,
+            damage: 15
+        }),
+        
+        // ------------------------------
+        // Damage - Dark - Shadowknight
+        // TODO: spell effects
+        // ------------------------------
+        'lifetap': new Ability({
+            name: 'Life Tap',
+            effectId: 'magicMissle',
+            castTime: 0.8,
+            timeCost: 0.8, 
+            castDuration: 0.2,
+            validTargets: ['enemy'],
+            type: 'magic',
+            subType: 'dark',
+            damage: 8,
             heal: 5,
             healTarget: 'source'
         }),

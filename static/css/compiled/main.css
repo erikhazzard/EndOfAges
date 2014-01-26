@@ -2,11 +2,14 @@
   z-index: 100; }
 
 #map .map-node {
+  -webkit-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  transition: all 0.4s;
   cursor: pointer;
   fill: #343434;
   stroke: #ffffff;
   stroke-width: 2px;
-  transition: all .4s;
   -webkit-transition: all .4s; }
 #map .node-visited {
   cursor: no-drop; }
@@ -14,7 +17,7 @@
   fill: #f0f0f0; }
 #map .node-current .map-node {
   cursor: default !important; }
-#map .node-visited .map-node {
+#map .node-visited .map-node.node-visited {
   fill: #44aa44 !important; }
 #map .visited-path-dotted {
   fill: none;
