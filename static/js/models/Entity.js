@@ -27,7 +27,11 @@ define(
             abilities: null,
 
             // effects active on the entity (e.g., buffs or DoTs)
-            activeEffects: [ function(){ console.log('bla'); } ],
+            activeEffects: [ 
+                // Will look like:
+                // { type: magic, subtype: fire, effect: function(){ ... }, duration: n }
+                // TODO: some sort ofDetrimental property to determine if it's
+            ],
 
             // the entity's race
             // tracks effects / stats, bonuses from / against races, etc.
@@ -124,7 +128,7 @@ define(
             this.listenTo(
                 this.get('attributes'), 
                 'change:health', 
-                this.healthCallback);
+                this.healthChanged);
 
             return this;
         },
@@ -135,30 +139,92 @@ define(
 
         },
 
-        checkEffects: function checkEffects(time){
-            // Called at each game loop iteration, checks each active effect
-            var effects = this.attributes.activeEffects;
-            if(effects.length === 0){
-                return this;
+        // ===================================================================
+        // Add buff / triggered effects
+        // ===================================================================
+        addEffect: function addEffect(options){
+            // Called to add an effect to the entity's staticEffects or 
+            // triggeredEffects array. 
+            // params: options {object}
+            //      source: {Entity}
+            //      duration: {Number} in seconds, how long the effect will last
+            //      type: {string}
+            //      subType: {string}
+            //      isDetrimental: {string}
+            //
+            //      effect: {Function} (OPTIONAL)
+            //          effect that will trigger on health change. If duration is
+            //          also passed in, will STOP listening after the duration.
+            //
+            //          TODO: WARDS - effects that are based on some condition
+            //          and NOT time - should trigger BEFORE damage is applied
+            //              -If it's just set as a change:health callback, then
+            //              damage will be done BEFORE the ward can asorb it
+            //
+            var self = this;
+            options = options || {};
+
+            // --------------------------
+            // STATIC effects
+            // --------------------------
+            if(!options.effect){
+                // Do something 
+
+            }
+            // --------------------------
+            // TRIGGERED EFFECTS
+            // --------------------------
+            else if(options.effect){
+                var effectCallback = function effectCallback(model, health, changeOptions){
+                    options.effect.call(self, {
+                        health: health, 
+                        effectOptions: options,
+                        changeOptions: changeOptions
+                    });
+                };
+
+                // update active effects
+                var updatedEffects = this.get('activeEffects');
+                updatedEffects[this.get('activeEffects').length] = options.effect;
+                this.set({
+                    activeEffects: updatedEffects
+                });
+
+                // add this effect on health change
+                this.listenTo(
+                    this.get('attributes'), 
+                    'change:health', 
+                    effectCallback
+                );
+                
+                // after a time, stop listening
+                if(options.duration){
+                    setTimeout(function removeEffect(){
+                        self.stopListening(
+                            self.get('attributes'),
+                            'change:health',
+                            effectCallback
+                        );
+                    }, options.duration * 1000);
+                }
             }
 
-            _.each(effects, function checkEffect(effect){
-                if(Math.random() < 0.01){
-                    console.log(">>>>>", time);
-                }
-                // Bla
-            });
-
-            return this;
         },
 
-        // ==============================
+
+        // ===================================================================
         //
         // Take damage / heal functions
         //
-        // ==============================
-        healthCallback: function healthCallback(model, health){
-            logger.log('models/Entity', '1. healthCallback() : health ' + health);
+        // ===================================================================
+        healthChanged: function healthChanged(model, health, options){
+            // Called whenever the entity's health changes. Takes in the
+            // changed model (the attributes), the health amount, and an options
+            // object that contains the `sourceAbility` that triggered the health
+            // change
+            logger.log('models/Entity', 
+                '1. healthChanged() : health ' + health + ' options: %O',
+                options);
 
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
@@ -170,7 +236,11 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // TODO: Combine takeDamage and takeHeal
+        //
         // Take / Deal damage
+        // ------------------------------
         takeDamage: function(options){
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeDamage() : options: %O',
@@ -204,17 +274,20 @@ define(
 
             // update the health
             //  pass in the ability that caused the damage
-            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
+            attrs.set({ health: newHealth }, { 
+                sourceAbility: sourceAbility,
+                source: options.source
+            });
 
             // NOTE:
-            // death event is called in the `healthCallback`, which is called
+            // death event is called in the `healthChanged`, which is called
             // whenever health changes
 
             return damage;
         },
         
-        // an ability that does healing
         takeHeal: function(options){
+            // This is called by an abilty that does healing
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeHeal() : options: %O',
                 options);
@@ -247,7 +320,10 @@ define(
 
             // update the health
             //  pass in the ability that healed the entity
-            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
+            attrs.set({ health: newHealth }, {
+                sourceAbility: sourceAbility,
+                source: options.source
+            });
 
             return amount;
         },

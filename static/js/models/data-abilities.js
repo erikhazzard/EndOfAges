@@ -38,12 +38,13 @@ define(
         // Damage - Dark - Shadowknight
         // TODO: spell effects
         // ------------------------------
-        'lifetap': new Ability({
-            name: 'Life Tap',
+        'darkblade': new Ability({
+            name: 'Dark Blade',
+            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'magicMissle',
-            castTime: 0.8,
-            timeCost: 0.8, 
-            castDuration: 0.2,
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 0.3,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'dark',
@@ -51,6 +52,7 @@ define(
             heal: 5,
             healTarget: 'source'
         }),
+
 
         // ------------------------------
         // Damage - Fire

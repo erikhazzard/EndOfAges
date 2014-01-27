@@ -8,6 +8,7 @@
 //      handles game related events 
 //
 //      TODO: allow resuming games
+//      TODO: Use EoALayoutView
 //
 // ===========================================================================
 define(

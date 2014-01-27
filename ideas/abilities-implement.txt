@@ -1,0 +1,44 @@
+Buffs / Duration based effects
+----------------
+Two types : 
+    1. static effects that only affect stats
+    2. triggered effects that trigger on taking damage or receiving health
+
+Static
+-------
+Add an effect to the entity
+    -call entity.addEffect( ---- ), which can change any property.
+        Can pass in either a positive or negative number or positive or negative percent 
+
+    -can remove by calling entity.removeEffect( ---- )
+
+-need to determine if effect is positive or negative
+    -e.g., ability like cancel magic to remove negative effect
+
+
+-effect type (magic, physical, element)
+
+
+Triggered
+-------
+same as above
+    -when taking damage or heal, loop through triggered effects
+
+
+------------------- 
+Example ability effects
+    -Wards : Asborb X damage
+    -Damage Shield : return X damage to attacker
+    -Debuffs : lower some stat
+    -Turn target into an animal / change sprite, add some stat effect
+    -% Chance to do extra damage on hit 
+    -Ressurect(?)
+    -When healed or damage, do some effect
+
+    -When entity dies, heal
+    -When entity takes damage, heal other entity
+
+Timerbased:
+    -Stun
+    -Slow : slow down the counter for an entity
+    -Haste : speed up counter for entity

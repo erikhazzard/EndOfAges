@@ -1016,6 +1016,9 @@ define(
 //
 //      This model manages a single ability
 //
+//      TODO: Add an ability rating - a sort of 'score' for how powerful the
+//      ability is(?)
+//
 // ===========================================================================
 define(
     'models/Ability',[ 'backbone', 'marionette', 'logger',
@@ -1030,6 +1033,7 @@ define(
             name: 'Magic Missle',
             // ID of the effect element
             effectId: null,
+            description: 'Textual description of effect',
 
             // castDuration - measured in seconds
             // how long the spell takes to cast - how long between the source
@@ -1148,7 +1152,9 @@ define(
                             type: self.get('type'),
                             subType: self.get('subType'),
                             amount: self.get('heal'),
-                            sourceAbility: self
+                            sourceAbility: self,
+                            target: options.target,
+                            source: options.source
                         });
                     }
                     takeHeal();
@@ -1176,7 +1182,9 @@ define(
                             type: self.get('type'),
                             subType: self.get('subType'),
                             amount: self.get('damage'),
-                            sourceAbility: self
+                            sourceAbility: self,
+                            target: options.target,
+                            source: options.source
                         });
                     }
                     takeDamage();
@@ -1300,12 +1308,13 @@ define(
         // Damage - Dark - Shadowknight
         // TODO: spell effects
         // ------------------------------
-        'lifetap': new Ability({
-            name: 'Life Tap',
+        'darkblade': new Ability({
+            name: 'Dark Blade',
+            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'magicMissle',
-            castTime: 0.8,
-            timeCost: 0.8, 
-            castDuration: 0.2,
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 0.3,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'dark',
@@ -1313,6 +1322,7 @@ define(
             heal: 5,
             healTarget: 'source'
         }),
+
 
         // ------------------------------
         // Damage - Fire
@@ -1400,7 +1410,11 @@ define(
             abilities: null,
 
             // effects active on the entity (e.g., buffs or DoTs)
-            activeEffects: [ function(){ console.log('bla'); } ],
+            activeEffects: [ 
+                // Will look like:
+                // { type: magic, subtype: fire, effect: function(){ ... }, duration: n }
+                // TODO: some sort ofDetrimental property to determine if it's
+            ],
 
             // the entity's race
             // tracks effects / stats, bonuses from / against races, etc.
@@ -1497,7 +1511,7 @@ define(
             this.listenTo(
                 this.get('attributes'), 
                 'change:health', 
-                this.healthCallback);
+                this.healthChanged);
 
             return this;
         },
@@ -1508,30 +1522,92 @@ define(
 
         },
 
-        checkEffects: function checkEffects(time){
-            // Called at each game loop iteration, checks each active effect
-            var effects = this.attributes.activeEffects;
-            if(effects.length === 0){
-                return this;
+        // ===================================================================
+        // Add buff / triggered effects
+        // ===================================================================
+        addEffect: function addEffect(options){
+            // Called to add an effect to the entity's staticEffects or 
+            // triggeredEffects array. 
+            // params: options {object}
+            //      source: {Entity}
+            //      duration: {Number} in seconds, how long the effect will last
+            //      type: {string}
+            //      subType: {string}
+            //      isDetrimental: {string}
+            //
+            //      effect: {Function} (OPTIONAL)
+            //          effect that will trigger on health change. If duration is
+            //          also passed in, will STOP listening after the duration.
+            //
+            //          TODO: WARDS - effects that are based on some condition
+            //          and NOT time - should trigger BEFORE damage is applied
+            //              -If it's just set as a change:health callback, then
+            //              damage will be done BEFORE the ward can asorb it
+            //
+            var self = this;
+            options = options || {};
+
+            // --------------------------
+            // STATIC effects
+            // --------------------------
+            if(!options.effect){
+                // Do something 
+
+            }
+            // --------------------------
+            // TRIGGERED EFFECTS
+            // --------------------------
+            else if(options.effect){
+                var effectCallback = function effectCallback(model, health, changeOptions){
+                    options.effect.call(self, {
+                        health: health, 
+                        effectOptions: options,
+                        changeOptions: changeOptions
+                    });
+                };
+
+                // update active effects
+                var updatedEffects = this.get('activeEffects');
+                updatedEffects[this.get('activeEffects').length] = options.effect;
+                this.set({
+                    activeEffects: updatedEffects
+                });
+
+                // add this effect on health change
+                this.listenTo(
+                    this.get('attributes'), 
+                    'change:health', 
+                    effectCallback
+                );
+                
+                // after a time, stop listening
+                if(options.duration){
+                    setTimeout(function removeEffect(){
+                        self.stopListening(
+                            self.get('attributes'),
+                            'change:health',
+                            effectCallback
+                        );
+                    }, options.duration * 1000);
+                }
             }
 
-            _.each(effects, function checkEffect(effect){
-                if(Math.random() < 0.01){
-                    console.log(">>>>>", time);
-                }
-                // Bla
-            });
-
-            return this;
         },
 
-        // ==============================
+
+        // ===================================================================
         //
         // Take damage / heal functions
         //
-        // ==============================
-        healthCallback: function healthCallback(model, health){
-            logger.log('models/Entity', '1. healthCallback() : health ' + health);
+        // ===================================================================
+        healthChanged: function healthChanged(model, health, options){
+            // Called whenever the entity's health changes. Takes in the
+            // changed model (the attributes), the health amount, and an options
+            // object that contains the `sourceAbility` that triggered the health
+            // change
+            logger.log('models/Entity', 
+                '1. healthChanged() : health ' + health + ' options: %O',
+                options);
 
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
@@ -1543,7 +1619,11 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // TODO: Combine takeDamage and takeHeal
+        //
         // Take / Deal damage
+        // ------------------------------
         takeDamage: function(options){
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeDamage() : options: %O',
@@ -1577,17 +1657,20 @@ define(
 
             // update the health
             //  pass in the ability that caused the damage
-            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
+            attrs.set({ health: newHealth }, { 
+                sourceAbility: sourceAbility,
+                source: options.source
+            });
 
             // NOTE:
-            // death event is called in the `healthCallback`, which is called
+            // death event is called in the `healthChanged`, which is called
             // whenever health changes
 
             return damage;
         },
         
-        // an ability that does healing
         takeHeal: function(options){
+            // This is called by an abilty that does healing
             // TODO: document, think of structure
             logger.log('models/Entity', '1. takeHeal() : options: %O',
                 options);
@@ -1620,7 +1703,10 @@ define(
 
             // update the health
             //  pass in the ability that healed the entity
-            attrs.set({ health: newHealth }, { sourceAbility: sourceAbility});
+            attrs.set({ health: newHealth }, {
+                sourceAbility: sourceAbility,
+                source: options.source
+            });
 
             return amount;
         },
@@ -5528,6 +5614,7 @@ define(
 //      handles game related events 
 //
 //      TODO: allow resuming games
+//      TODO: Use EoALayoutView
 //
 // ===========================================================================
 define(
@@ -5745,6 +5832,55 @@ define(
     });
 
     return PageGame;
+});
+
+// ===========================================================================
+//
+// getSelector
+//
+//  Returns a function views can use to get and cache DOM selectors.
+//  TODO: extend Marionette's view classes to have this, along with delete
+//  the cache when the view is closed
+//
+// ===========================================================================
+define('views/EoALayoutView',[ 'backbone', 'marionette'], function(
+        Backbone, Marionette
+    ){
+    
+        // ------------------------------
+        // EoALayoutView
+        // ------------------------------
+        EoALayoutView = Backbone.Marionette.Layout.extend({});
+
+        EoALayoutView.prototype.getSelector = function EoALayoutViewGetSelector(selector){
+            // takes in a selector and returns the element(s) that belong
+            // to `this` $el. Uses a cache to avoid dom hits
+            var sel;
+            if(this._elCache === undefined){ this._elCache = {}; }
+
+            if(this._elCache[selector]){ 
+                // in cache, return it
+                sel = this._elCache[selector];
+            }
+            else {
+                // not in cache
+                sel = $(selector, this.$el);
+                this._elCache[selector] = sel;
+            }
+
+            return sel;
+        };
+
+        EoALayoutView.prototype.close = function EoALayoutViewOnClose(){
+            // get rid of the element cache
+            delete this._elCache;
+
+            Backbone.Marionette.Layout.prototype.close.call(this);
+
+            return this;
+        };
+
+        return EoALayoutView;
 });
 
 // ===========================================================================
@@ -6180,7 +6316,7 @@ define(
             description: 'An experienced warrior dabbling dark with unutterable sorrows',
             sprite: 'shadowknight',
             abilities: new Abilities([
-                ABILITIES.lifetap
+                ABILITIES.darkblade
             ])
         }),
 
@@ -6332,6 +6468,7 @@ define(
 define(
     'views/PageCreateCharacter',[ 
         'd3', 'backbone', 'marionette',
+        'views/EoALayoutView',
         'logger', 'events',
 
         'util/generateName',
@@ -6345,7 +6482,8 @@ define(
         'views/create/AbilityList'
 
     ], function viewPageCreateCharacter(
-        d3, backbone, marionette, 
+        d3, Backbone, Marionette, 
+        EoALayoutView,
         logger, events,
 
         generateName,
@@ -6359,7 +6497,7 @@ define(
         AbilityList
     ){
 
-    var PageCreateCharacter = Backbone.Marionette.Layout.extend({
+    var PageCreateCharacter = EoALayoutView.extend({
         template: '#template-page-create-character',
         'className': 'page-create-character-wrapper',
         regions: {
@@ -6371,15 +6509,24 @@ define(
         // UI events
         events: {
             'click .race-list-item .item': 'raceClicked',
+            'touchend .race-list-item .item': 'raceClicked',
+
             'click .class-list-item .item': 'classClicked',
+            'touchend .class-list-item .item': 'classClicked',
 
             'click .btn-previous': 'previousClicked',
+            'touchend .btn-previous': 'previousClicked',
             'click .btn-next': 'nextClicked',
+            'touchend.btn-next': 'nextClicked',
 
             // generate name
-            'click .btn-generate-name': 'generateNewName'
+            'click .btn-generate-name': 'generateNewName',
+            'touchend .btn-generate-name': 'generateNewName'
         },
 
+        // ------------------------------
+        // init
+        // ------------------------------
         initialize: function initialize(options){
             // initialize:
             logger.log('views/PageCreateCharacter', 'initialize() called');
@@ -6393,47 +6540,39 @@ define(
             // possible states
             this.createStates = ['race', 'class'];
 
+            // Listen for key presses to navigate through class / race list
+            this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
+            this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpDown);
+            this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
+
             // TODO: if entity already has a race or class, trigger the
             // event to show it
             return this;
         },
 
         // ------------------------------
-        //
-        // UTIL
-        //
+        // Key handlers
         // ------------------------------
-        getSelector: function getSelector(selector){
-            // takes in a selector and returns the element(s) that belong
-            // to `this` $el. Uses a cache to avoid dom hits
-            var sel;
-            if(this._elCache === undefined){ this._elCache = {}; }
-
-            if(this._elCache[selector]){ 
-                // in cache, return it
-                sel = this._elCache[selector];
-            }
-            else {
-                // not in cache
-                sel = $(selector, this.$el);
-                this._elCache[selector] = sel;
-            }
-
-            return sel;
+        handleKeyEnter: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyEnter() called');
+            this.changeState('next');
+        },
+        handleKeyBackspace: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyBackspace() called');
+            this.changeState('previous');
         },
 
-
-        // ------------------------------
-        //
-        // Close / Show
-        //
-        // ------------------------------
-        onBeforeClose: function onBeforeClose(){
-            // get rid of the element cache
-            delete this._elCache;
-            return this;
+        handleKeyUpDown: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyUpDown() called');
+            // TODO : cycle through current list
         },
 
+        // ------------------------------
+        //
+        // Show
+        //
+        // ------------------------------
         onShow: function homeOnShow(){
             logger.log('views/PageCreateCharacter', 'onShow called');
 
@@ -6479,6 +6618,23 @@ define(
             // Allow 'next' or 'previous' to change the currently selected 
             // state, either go forward or backward between states
             var targetState = this.createState;
+
+            // Ensure the next state can be gone to
+            if(state === 'next'){
+                // ensure a race was picked
+                if(this.createState === 0 && !this.model.get('race')){
+                    alert('pick a race');
+                    return false;
+                }
+
+                // ensure a class was picked
+                if(this.createState === 1 && !this.model.get('class')){
+                    alert('pick a class');
+                    return false;
+                }
+            }
+
+
             if(state === 'next'){ targetState += 1; }
             else if(state === 'previous'){ targetState -= 1; }
 
@@ -7099,13 +7255,14 @@ require([
     logger.options.logLevel = [ 
         'error'
         ,'Controller'
+        ,'views/PageCreateCharacter'
         //,'views/subviews/Battle'
-        ,'views/subviews/Map'
-        ,'models/Map'
+        //,'views/subviews/Map'
+        //,'models/Map'
     ];
 
     //// log EVERYTHING:
-    logger.options.logLevel = true;
+    //logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

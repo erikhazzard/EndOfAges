@@ -116,13 +116,14 @@ require([
     logger.options.logLevel = [ 
         'error'
         ,'Controller'
+        ,'views/PageCreateCharacter'
         //,'views/subviews/Battle'
-        ,'views/subviews/Map'
-        ,'models/Map'
+        //,'views/subviews/Map'
+        //,'models/Map'
     ];
 
     //// log EVERYTHING:
-    logger.options.logLevel = true;
+    //logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

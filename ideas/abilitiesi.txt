@@ -39,3 +39,7 @@ Ability Ideas:
 
 All abilities should share a base scale, so we can calculate power / etc. for a
 class based on a collection of abilities
+
+-----------------
+
+-Abilities that do an effect based on the entitiy's attribute

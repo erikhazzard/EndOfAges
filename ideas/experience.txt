@@ -41,3 +41,8 @@ Exploration : capture essential experience of Battlestar Galatica - lost, cannot
     -Maybe you can find a suitable settlement, and you can choose to retire (keeping
     everything) or continue onwards 
 
+
+----------------
+First experience:
+    Each class has an ability or skill that does extra damage to a creaate type.
+    First battle should include a creature of that type

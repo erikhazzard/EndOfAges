@@ -4,6 +4,9 @@
 //
 //      This model manages a single ability
 //
+//      TODO: Add an ability rating - a sort of 'score' for how powerful the
+//      ability is(?)
+//
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
@@ -18,6 +21,7 @@ define(
             name: 'Magic Missle',
             // ID of the effect element
             effectId: null,
+            description: 'Textual description of effect',
 
             // castDuration - measured in seconds
             // how long the spell takes to cast - how long between the source
@@ -136,7 +140,9 @@ define(
                             type: self.get('type'),
                             subType: self.get('subType'),
                             amount: self.get('heal'),
-                            sourceAbility: self
+                            sourceAbility: self,
+                            target: options.target,
+                            source: options.source
                         });
                     }
                     takeHeal();
@@ -164,7 +170,9 @@ define(
                             type: self.get('type'),
                             subType: self.get('subType'),
                             amount: self.get('damage'),
-                            sourceAbility: self
+                            sourceAbility: self,
+                            target: options.target,
+                            source: options.source
                         });
                     }
                     takeDamage();

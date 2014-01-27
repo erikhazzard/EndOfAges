@@ -8,6 +8,7 @@
 define(
     [ 
         'd3', 'backbone', 'marionette',
+        'views/EoALayoutView',
         'logger', 'events',
 
         'util/generateName',
@@ -21,7 +22,8 @@ define(
         'views/create/AbilityList'
 
     ], function viewPageCreateCharacter(
-        d3, backbone, marionette, 
+        d3, Backbone, Marionette, 
+        EoALayoutView,
         logger, events,
 
         generateName,
@@ -35,7 +37,7 @@ define(
         AbilityList
     ){
 
-    var PageCreateCharacter = Backbone.Marionette.Layout.extend({
+    var PageCreateCharacter = EoALayoutView.extend({
         template: '#template-page-create-character',
         'className': 'page-create-character-wrapper',
         regions: {
@@ -47,15 +49,24 @@ define(
         // UI events
         events: {
             'click .race-list-item .item': 'raceClicked',
+            'touchend .race-list-item .item': 'raceClicked',
+
             'click .class-list-item .item': 'classClicked',
+            'touchend .class-list-item .item': 'classClicked',
 
             'click .btn-previous': 'previousClicked',
+            'touchend .btn-previous': 'previousClicked',
             'click .btn-next': 'nextClicked',
+            'touchend.btn-next': 'nextClicked',
 
             // generate name
-            'click .btn-generate-name': 'generateNewName'
+            'click .btn-generate-name': 'generateNewName',
+            'touchend .btn-generate-name': 'generateNewName'
         },
 
+        // ------------------------------
+        // init
+        // ------------------------------
         initialize: function initialize(options){
             // initialize:
             logger.log('views/PageCreateCharacter', 'initialize() called');
@@ -69,47 +80,39 @@ define(
             // possible states
             this.createStates = ['race', 'class'];
 
+            // Listen for key presses to navigate through class / race list
+            this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
+            this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpDown);
+            this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
+
             // TODO: if entity already has a race or class, trigger the
             // event to show it
             return this;
         },
 
         // ------------------------------
-        //
-        // UTIL
-        //
+        // Key handlers
         // ------------------------------
-        getSelector: function getSelector(selector){
-            // takes in a selector and returns the element(s) that belong
-            // to `this` $el. Uses a cache to avoid dom hits
-            var sel;
-            if(this._elCache === undefined){ this._elCache = {}; }
-
-            if(this._elCache[selector]){ 
-                // in cache, return it
-                sel = this._elCache[selector];
-            }
-            else {
-                // not in cache
-                sel = $(selector, this.$el);
-                this._elCache[selector] = sel;
-            }
-
-            return sel;
+        handleKeyEnter: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyEnter() called');
+            this.changeState('next');
+        },
+        handleKeyBackspace: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyBackspace() called');
+            this.changeState('previous');
         },
 
-
-        // ------------------------------
-        //
-        // Close / Show
-        //
-        // ------------------------------
-        onBeforeClose: function onBeforeClose(){
-            // get rid of the element cache
-            delete this._elCache;
-            return this;
+        handleKeyUpDown: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyUpDown() called');
+            // TODO : cycle through current list
         },
 
+        // ------------------------------
+        //
+        // Show
+        //
+        // ------------------------------
         onShow: function homeOnShow(){
             logger.log('views/PageCreateCharacter', 'onShow called');
 
@@ -155,6 +158,23 @@ define(
             // Allow 'next' or 'previous' to change the currently selected 
             // state, either go forward or backward between states
             var targetState = this.createState;
+
+            // Ensure the next state can be gone to
+            if(state === 'next'){
+                // ensure a race was picked
+                if(this.createState === 0 && !this.model.get('race')){
+                    alert('pick a race');
+                    return false;
+                }
+
+                // ensure a class was picked
+                if(this.createState === 1 && !this.model.get('class')){
+                    alert('pick a class');
+                    return false;
+                }
+            }
+
+
             if(state === 'next'){ targetState += 1; }
             else if(state === 'previous'){ targetState -= 1; }
 
