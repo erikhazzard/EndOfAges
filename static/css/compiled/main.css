@@ -147,7 +147,7 @@
   background: rgba(0, 0, 0, 0.5);
   position: absolute;
   bottom: 0;
-  height: 50px;
+  height: 70px;
   left: 0;
   right: 0; }
   .page-create-character-wrapper #create-state-buttons-wrapper .btn {
@@ -155,12 +155,18 @@
     background: -moz-radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
     background: radial-gradient(left top, ellipse cover, #cdcdcd 12%, #707070 110%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
-    border: 2px solid #343434;
-    position: absolute;
     -webkit-transition: opacity 0.3s;
     -moz-transition: opacity 0.3s;
     -o-transition: opacity 0.3s;
     transition: opacity 0.3s;
+    border: 2px solid #343434;
+    color: #ffffff;
+    font-size: 2em;
+    font-weight: bold;
+    height: 100%;
+    padding: 10px 0 0 0;
+    position: absolute;
+    text-shadow: 1px 1px 1px #000000, 2px 2px 0 #343434;
     width: 45%; }
   .page-create-character-wrapper #create-state-buttons-wrapper .btn-previous {
     left: 0; }
@@ -264,12 +270,22 @@
   position: fixed;
   right: 0;
   top: 0; }
+  #home .home-bg-gradient {
+    background: -webkit-radial-gradient(top center, ellipse cover, white 25%, rgba(0, 0, 0, 0) 70%);
+    background: -moz-radial-gradient(top center, ellipse cover, white 25%, rgba(0, 0, 0, 0) 70%);
+    background: radial-gradient(top center, ellipse cover, white 25%, rgba(0, 0, 0, 0) 70%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
+    opacity: 0.4;
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0; }
   #home .home-callout-wrapper {
-    background: rgba(255, 255, 255, 0.3);
     border-radius: 6px;
     display: table;
-    margin: 7% auto 0 auto;
-    padding: 2em 2em 4em 2em;
+    margin: 0% auto 0 auto;
+    padding: 2em 0 4em;
     position: relative;
     text-align: center; }
     #home .home-callout-wrapper .logo-text {
@@ -287,15 +303,15 @@
       word-spacing: 0.2em;
       z-index: 1; }
     #home .home-callout-wrapper .copy {
-      color: rgba(0, 0, 0, 0.8);
+      color: rgba(255, 255, 255, 0.7);
       left: 0;
-      opacity: 0.45;
+      opacity: 0.25;
       position: absolute;
       top: 0;
-      text-shadow: 0 0 2px #000000;
-      -webkit-filter: blur(4px);
-      -moz-filter: blur(4px);
-      filter: blur(4px);
+      text-shadow: none;
+      -webkit-filter: url("#filter-map");
+      -moz-filter: url("#filter-map");
+      filter: url("#filter-map");
       z-index: 2; }
     #home .home-callout-wrapper .btn-play-game {
       -webkit-transition: color 0.3s, text-shadow 0.3s, box-shadow 0.3s;

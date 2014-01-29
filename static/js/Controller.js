@@ -4,6 +4,9 @@
 // Handles Controller functions the router uses
 //
 // TODO: Don't have user be logged in permanently (done for dev)
+//
+// TODO: Show loading message if auth cookie exists (in HTML).
+//  -load game state from localstorage
 //============================================================================= 
 define([
     'backbone', 'marionette', 'logger', 'events', 'util/STORAGE_PREFIX',
@@ -63,6 +66,17 @@ define([
                     // If user is logged in, show the called route
                     if(loggedIn){
                         //// TODO: get game from user
+
+                        //// TODO: use localstorage if exist
+                        //if(options.useLocalStorage && 
+                            //window.localStorage.getItem(STORAGE_PREFIX + 'game')){
+
+                            //gameModel = JSON.parse(
+                                //window.localStorage.getItem(STORAGE_PREFIX + 'game')
+                            //);
+                        //}
+
+
                         //self.showGame({});
 
                     } else {
@@ -169,9 +183,19 @@ define([
                 logger.log('Controller', 'creating new pageGame view');
             }
 
+            // TODO: handle creating game differently, load in models
+            // NOT from pageCreateCharacter. Get from GAME model
+            var playerEntityModels = [this.pageCreateCharacter.model];
+
+            //// TODO: To load from localstorage
+            //if(window.localStorage.getItem(STORAGE_PREFIX + 'game')){
+                //playerEntityModels = JSON.parse(window.localStorage.getItem(STORAGE_PREFIX + 'game'))
+                    //.playerEntities;
+            //console.log(">>>>>>>>", playerEntityModels);
+
             var gameModel = null;
             gameModel = new Game({}, {
-                models: [this.pageCreateCharacter.model]
+                models: playerEntityModels
             });
 
             //// TODO: use localstorage if exist

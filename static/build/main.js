@@ -1528,6 +1528,8 @@ define(
         addEffect: function addEffect(options){
             // Called to add an effect to the entity's staticEffects or 
             // triggeredEffects array. 
+            // Note: This would be called by the ability
+            //
             // params: options {object}
             //      source: {Entity}
             //      duration: {Number} in seconds, how long the effect will last
@@ -6876,7 +6878,6 @@ define(
             // TODO: show an in app prompt
             this.model.set({ 
                 name: this.getSelector('.input-character-name').val() || this.getSelector('.input-character-name').attr('placeholder')
-
             });
 
             // TODO: only trigger if prompt is true
@@ -6895,6 +6896,9 @@ define(
 // Handles Controller functions the router uses
 //
 // TODO: Don't have user be logged in permanently (done for dev)
+//
+// TODO: Show loading message if auth cookie exists (in HTML).
+//  -load game state from localstorage
 //============================================================================= 
 define('Controller',[
     'backbone', 'marionette', 'logger', 'events', 'util/STORAGE_PREFIX',
@@ -6954,6 +6958,17 @@ define('Controller',[
                     // If user is logged in, show the called route
                     if(loggedIn){
                         //// TODO: get game from user
+
+                        //// TODO: use localstorage if exist
+                        //if(options.useLocalStorage && 
+                            //window.localStorage.getItem(STORAGE_PREFIX + 'game')){
+
+                            //gameModel = JSON.parse(
+                                //window.localStorage.getItem(STORAGE_PREFIX + 'game')
+                            //);
+                        //}
+
+
                         //self.showGame({});
 
                     } else {
@@ -7060,9 +7075,19 @@ define('Controller',[
                 logger.log('Controller', 'creating new pageGame view');
             }
 
+            // TODO: handle creating game differently, load in models
+            // NOT from pageCreateCharacter. Get from GAME model
+            var playerEntityModels = [this.pageCreateCharacter.model];
+
+            //// TODO: To load from localstorage
+            //if(window.localStorage.getItem(STORAGE_PREFIX + 'game')){
+                //playerEntityModels = JSON.parse(window.localStorage.getItem(STORAGE_PREFIX + 'game'))
+                    //.playerEntities;
+            //console.log(">>>>>>>>", playerEntityModels);
+
             var gameModel = null;
             gameModel = new Game({}, {
-                models: [this.pageCreateCharacter.model]
+                models: playerEntityModels
             });
 
             //// TODO: use localstorage if exist

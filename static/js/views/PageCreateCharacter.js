@@ -416,7 +416,6 @@ define(
             // TODO: show an in app prompt
             this.model.set({ 
                 name: this.getSelector('.input-character-name').val() || this.getSelector('.input-character-name').attr('placeholder')
-
             });
 
             // TODO: only trigger if prompt is true

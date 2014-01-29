@@ -2,7 +2,7 @@
 // --------------------------------------
 $create-left-width: 350px;
 $create-name-height: 50px;
-$create-nav-buttons-height: 50px;
+$create-nav-buttons-height: 70px;
 $create-race-title-height: 50px;
 
 // sub files (so this file doesn't get too big)
@@ -147,9 +147,20 @@ $create-race-title-height: 50px;
 
         .btn { 
             @include radial-gradient-background(left top, ellipse, #cdcdcd, 12%, #707070, 110%);
-            border: 2px solid #343434;
-            position: absolute;
             @include transition("opacity " + $opacity-transition-time);
+
+            border: 2px solid #343434;
+            color: #ffffff;
+            font-size: 2em;
+            font-weight: bold;
+            height: 100%;
+            padding: 10px 0 0 0;
+
+            position: absolute;
+            text-shadow:
+                1px 1px 1px #000000,
+                2px 2px 0 #343434;
+
             width: 45%;
         }
 

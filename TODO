@@ -33,6 +33,8 @@ Good solid name generation
 
 ------------------
 fonts
+    -Use google web fonts
+        POTENTIAL: Alegreya (provides a bunch)
 
 ---------------
 
@@ -44,3 +46,4 @@ Ideas about gameplay - resources - if running low, start to move slower, more vu
 BIG: Character sprite generation concepts / customization
 
 ---------------------------------------------------------
+

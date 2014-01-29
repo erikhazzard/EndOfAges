@@ -26,3 +26,9 @@
     -moz-filter: blur($r);
     filter: blur($r);
 }
+
+@mixin filter($f){
+    -webkit-filter: $f;
+    -moz-filter: $f;
+    filter: $f;
+}

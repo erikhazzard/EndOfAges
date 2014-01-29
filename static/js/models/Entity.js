@@ -145,6 +145,8 @@ define(
         addEffect: function addEffect(options){
             // Called to add an effect to the entity's staticEffects or 
             // triggeredEffects array. 
+            // Note: This would be called by the ability
+            //
             // params: options {object}
             //      source: {Entity}
             //      duration: {Number} in seconds, how long the effect will last
