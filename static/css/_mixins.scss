@@ -20,3 +20,9 @@
     -o-transition: unquote($t);
     transition: unquote($t);
 }
+
+@mixin blur($r:10px){
+    -webkit-filter: blur($r);
+    -moz-filter: blur($r);
+    filter: blur($r);
+}

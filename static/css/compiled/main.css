@@ -256,6 +256,75 @@
   top: 0;
   z-index: 1000; }
 
+#home {
+  background: #686c49 url(../../img/home.jpg);
+  background-size: cover;
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0; }
+  #home .home-callout-wrapper {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    display: table;
+    margin: 7% auto 0 auto;
+    padding: 2em 2em 4em 2em;
+    position: relative;
+    text-align: center; }
+    #home .home-callout-wrapper .logo-text {
+      position: relative; }
+    #home .home-callout-wrapper h1 {
+      color: #850809;
+      font-size: 8em;
+      margin: 0 0 1em 0;
+      padding: 0 1em;
+      position: relative;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.9), 2px 2px 0 rgba(0, 0, 0, 0.9), 3px 3px 0 rgba(0, 0, 0, 0.2), 4px 4px 0 rgba(0, 0, 0, 0.2), 5px 5px 0 rgba(0, 0, 0, 0.2), 6px 6px 0 rgba(0, 0, 0, 0.2);
+      /* end of 4 level deep dark shadow */
+      text-shadow: -1px -1px 0 rgba(255, 255, 255, 0.7), -2px -2px 0 rgba(227, 185, 65, 0.6), -1px -1px 0 rgba(255, 255, 255, 0.8), 1px 1px 0 rgba(0, 0, 0, 0.8), 1px 1px 0 rgba(255, 255, 255, 0.7), 2px 2px 0 rgba(255, 255, 255, 0.7), 1px 1px 0 rgba(255, 255, 255, 0.7), 3px 3px 0 rgba(0, 0, 0, 0.3), 4px 4px 0 rgba(0, 0, 0, 0.3), 5px 5px 0 rgba(0, 0, 0, 0.3), 6px 6px 0 rgba(0, 0, 0, 0.3);
+      /* end of 4 level deep dark shadow */
+      word-spacing: 0.2em;
+      z-index: 1; }
+    #home .home-callout-wrapper .copy {
+      color: rgba(0, 0, 0, 0.8);
+      left: 0;
+      opacity: 0.45;
+      position: absolute;
+      top: 0;
+      text-shadow: 0 0 2px #000000;
+      -webkit-filter: blur(4px);
+      -moz-filter: blur(4px);
+      filter: blur(4px);
+      z-index: 2; }
+    #home .home-callout-wrapper .btn-play-game {
+      -webkit-transition: color 0.3s, text-shadow 0.3s, box-shadow 0.3s;
+      -moz-transition: color 0.3s, text-shadow 0.3s, box-shadow 0.3s;
+      -o-transition: color 0.3s, text-shadow 0.3s, box-shadow 0.3s;
+      transition: color 0.3s, text-shadow 0.3s, box-shadow 0.3s;
+      box-shadow: 0 0 80px #000000;
+      border: 1px solid #343434;
+      color: rgba(255, 255, 255, 0.9);
+      display: table;
+      font-size: 3.8em;
+      letter-spacing: 2px;
+      margin: 5% auto 0 auto;
+      padding: 26px 0 0 0;
+      background: url(../../img/ui/play-button-big.png) 0 140px;
+      width: 550px;
+      height: 140px;
+      font-variant: small-caps;
+      text-shadow: 0 0 1px #000000, 1px 1px 0 #000000; }
+    #home .home-callout-wrapper .btn-play-game:hover {
+      background: url(../../img/ui/play-button-big.png) 0 280px;
+      box-shadow: 0 0 60px #000000, 0 0 80px #000000;
+      text-shadow: 0 0 1px #000000, 1px 1px 0 #000000, 1px 1px 7px #ffffff; }
+    #home .home-callout-wrapper .btn-play-game:active {
+      background: url(../../img/ui/play-button-big.png) 0 0px;
+      box-shadow: 0 0 40px #000000, 0 0 80px #000000;
+      color: rgba(255, 255, 255, 0.5);
+      text-shadow: none; }
+
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

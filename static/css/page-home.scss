@@ -1,0 +1,113 @@
+// Page home
+// --------------------------------------
+#home {
+    background: #686c49 url(../../img/home.jpg);
+    background-size: cover;
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+
+    .home-callout-wrapper {
+        background: rgba(255,255,255,0.3);
+        border-radius: 6px;
+        display: table;
+        margin: 7% auto 0 auto;
+        padding: 2em 2em 4em 2em;
+        position: relative;
+        text-align: center;
+
+        .logo-text {
+            position: relative;
+        }
+
+        h1 {
+            // color: #FFE949;  // yellow
+            color: #850809;  // red
+            font-size: 8em;
+            margin: 0 0 1em 0;
+            padding: 0 1em;
+            position: relative;
+
+            // Nice shadow for yellow 
+            $s1: rgba(0,0,0,0.9);
+            $s2: rgba(0,0,0,0.2);
+            text-shadow:
+                1px 1px 0 $s1,
+                2px 2px 0 $s1, /* end of 2 level deep grey shadow */
+                3px 3px 0 $s2,
+                4px 4px 0 $s2,
+                5px 5px 0 $s2,
+                6px 6px 0 $s2; /* end of 4 level deep dark shadow */
+
+            $s1: rgba(255,255,255,0.7);
+            $s2: rgba(0,0,0,0.3); 
+            text-shadow:
+                -1px -1px 0 rgba(255,255,255,0.7),
+                -2px -2px 0 rgba(227,185,65,0.6),
+                -1px -1px 0 rgba(255,255,255,0.8),
+                1px 1px 0 rgba(0,0,0,0.8),
+                1px 1px 0 $s1,
+                2px 2px 0 $s1, /* end of 2 level deep grey shadow */
+                1px 1px 0 rgba(255,255,255,0.7),
+                3px 3px 0 $s2,
+                4px 4px 0 $s2,
+                5px 5px 0 $s2,
+                6px 6px 0 $s2; /* end of 4 level deep dark shadow */
+
+            word-spacing: 0.2em;
+            z-index: 1;
+        }
+        .copy {
+            color: rgba(0,0,0,0.8);
+            left: 0;
+            opacity: 0.45;
+            position: absolute;
+            top: 0;
+            text-shadow: 0 0 2px #000000;
+            @include blur(4px);
+            z-index: 2;
+        }
+
+        .btn-play-game {
+            @include transition("color 0.3s, text-shadow 0.3s, box-shadow 0.3s");
+
+            box-shadow: 0 0 80px #000000;
+            border: 1px solid #343434;
+
+            // color: #FFE949;  // yellow
+            color: rgba(255,255,255,0.9);
+            display: table;
+
+            font-size: 3.8em;
+            letter-spacing: 2px;
+
+            margin: 5% auto 0 auto;
+            padding: 26px 0 0 0;
+            
+            background: url(../../img/ui/play-button-big.png) 0 140px;
+            width: 550px;
+            height: 140px;
+
+            font-variant: small-caps;
+            text-shadow: 0 0 1px #000000,
+                         1px 1px 0 #000000;
+        }
+        .btn-play-game:hover {
+            background: url(../../img/ui/play-button-big.png) 0 280px;
+            box-shadow: 0 0 60px #000000,
+                        0 0 80px #000000;
+            text-shadow: 0 0 1px #000000,
+                         1px 1px 0 #000000,
+                         1px 1px 7px #ffffff;
+        }
+        .btn-play-game:active {
+            background: url(../../img/ui/play-button-big.png) 0 0px;
+            box-shadow: 0 0 40px #000000,
+                0 0 80px #000000;
+            color: rgba(255,255,255,0.5);
+            text-shadow: none;
+        }
+    }
+}
