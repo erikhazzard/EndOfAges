@@ -1,3 +1,21 @@
+#region-dev-tools .dev-tools-wrapper {
+  -webkit-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  transition: all 0.4s;
+  background: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  border-left: 1px solid #a0a0a0;
+  position: fixed;
+  overflow: hidden;
+  width: 100px;
+  right: 0;
+  top: 0;
+  text-align: right; }
+#region-dev-tools .dev-tools-wrapper.hidden {
+  display: block !important;
+  right: -100px; }
+
 #region-map {
   z-index: 100; }
 

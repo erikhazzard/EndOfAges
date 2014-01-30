@@ -40,8 +40,8 @@ define([
         var regionMain = new Backbone.Marionette.Region({
             el: '#region-main'
         });
-        var regionFriends = new Backbone.Marionette.Region({
-            el: '#region-friends'
+        var regionDevTools = new Backbone.Marionette.Region({
+            el: '#region-dev-tools'
         });
 
         // user login / profile
@@ -50,7 +50,7 @@ define([
         });
         app.addRegions({
             'regionMain': regionMain,
-            'regionFriends': regionFriends,
+            'regionDevTools': regionDevTools,
             'regionAuth': regionAuth
         });
 

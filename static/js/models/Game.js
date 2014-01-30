@@ -50,6 +50,7 @@ define(
 
         initialize: function gameInitialize(attrs, options){
             logger.log('models/Game', 'initialize() called');
+            var self = this;
             options = options || {};
 
             if(options.models){
@@ -63,7 +64,13 @@ define(
             window._GAME = this;
 
             this.on('sync', function(r){
-                console.log('SYNCED', r);
+                logger.log('models/Game', 'sync() triggered');
+            });
+
+            // TODO: DEV ::: REMOVE THIS, CHANGE SAVE LOGIC
+            this.listenTo(events, 'dev:saveGame', function(){
+                logger.log('models/Game', 'dev:saveGame event received, saving');
+                self.save();
             });
 
             return this;

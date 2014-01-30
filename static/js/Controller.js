@@ -15,7 +15,11 @@ define([
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
-    'views/PageCreateCharacter'
+    'views/PageCreateCharacter',
+
+    // TODO: remove, only for dev
+    'views/DevTools'
+
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
@@ -25,7 +29,10 @@ define([
         // include views here
         PageHome,
         PageGame,
-        PageCreateCharacter
+        PageCreateCharacter,
+
+        // TODO: remove once out of dev
+        DevTools
     ){
 
     // console color
@@ -43,6 +50,9 @@ define([
             _.each(options.regions, function(region, key){
                 self[key] = region;
             });
+
+            // create dev tools view
+            this.regionDevTools.show(new DevTools({}));
 
             // config mobile
             this.setupMobile();
@@ -68,7 +78,9 @@ define([
                         self.modelGame = tmpGameModel;
                         self.showGame();
                     }, 
-                    error: function(){
+                    error: function(e,r){
+                        logger.log('Controller', 'Model unable to be fetched : %O, %O',
+                            e,r);
                         // Model does not exist, do nothing
                         // TODO: do anything?
                     }
@@ -109,7 +121,8 @@ define([
                 // ----------------------
                 // if user is already logged in, 
                 logger.log('Controller', 'logged in already during controller initialize');
-                handleLoggedIn();
+                // TODO: Sometimes showHome is called afterwards
+                return handleLoggedIn();
             }
 
             // Listen for controller events to show different pages

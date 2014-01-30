@@ -1,0 +1,21 @@
+$dev-tools-width: 100px;
+
+#region-dev-tools {
+    .dev-tools-wrapper {
+        @include transition("all 0.4s");
+
+        background: rgba(0,0,0,0.5);
+        bottom: 0;
+        border-left: 1px solid #a0a0a0;
+        position: fixed;
+        overflow: hidden;
+        width: $dev-tools-width;
+        right: 0;
+        top: 0;
+        text-align: right;
+    }
+    .dev-tools-wrapper.hidden {
+        display: block !important;
+        right: -$dev-tools-width;
+    }
+}

@@ -550,7 +550,9 @@ define('handleKeys',[
             'shift+1', 'shift+2', 'shift+3', 'shift+4', 'shift+5', 'shift+6',
             'backspace',
             'shift+up',
-            'shift+down'
+            'shift+down',
+
+            'shift+i'
         ];
 
         var handleKeys = function handleKeys(){
@@ -816,8 +818,8 @@ define('app',[
         var regionMain = new Backbone.Marionette.Region({
             el: '#region-main'
         });
-        var regionFriends = new Backbone.Marionette.Region({
-            el: '#region-friends'
+        var regionDevTools = new Backbone.Marionette.Region({
+            el: '#region-dev-tools'
         });
 
         // user login / profile
@@ -826,7 +828,7 @@ define('app',[
         });
         app.addRegions({
             'regionMain': regionMain,
-            'regionFriends': regionFriends,
+            'regionDevTools': regionDevTools,
             'regionAuth': regionAuth
         });
 
@@ -2482,6 +2484,7 @@ define(
 
         initialize: function gameInitialize(attrs, options){
             logger.log('models/Game', 'initialize() called');
+            var self = this;
             options = options || {};
 
             if(options.models){
@@ -2495,7 +2498,13 @@ define(
             window._GAME = this;
 
             this.on('sync', function(r){
-                console.log('SYNCED', r);
+                logger.log('models/Game', 'sync() triggered');
+            });
+
+            // TODO: DEV ::: REMOVE THIS, CHANGE SAVE LOGIC
+            this.listenTo(events, 'dev:saveGame', function(){
+                logger.log('models/Game', 'dev:saveGame event received, saving');
+                self.save();
             });
 
             return this;
@@ -7132,6 +7141,72 @@ define(
     return PageCreateCharacter;
 });
 
+// ===========================================================================
+//
+// DevTools
+//
+//  Admin / Dev utilities
+// 
+// ===========================================================================
+define(
+    'views/DevTools',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events'
+    ], function viewPageHome(
+        d3, backbone, marionette, 
+        logger, events
+    ){
+
+    var DevTools = Backbone.Marionette.Layout.extend({
+        template: '#template-dev-tools',
+
+        //hidden by default
+        'className': 'dev-tools-wrapper hidden',
+
+        events: {
+            'click .btn-save': 'save',
+            'click .btn-clear-save': 'clearSave'
+        },
+
+        initialize: function initialize(options){
+            // initialize:
+            logger.log('views/DevTools', 'initialize() called');
+
+            // show / hide dev panel
+            this.listenTo(events, 'keyPress:shift+i', this.togglePanel);
+            return this;
+        },
+
+        save: function(){
+            // Save the game
+            logger.log('views/DevTools', 'save(): triggering save');
+            events.trigger('dev:saveGame');
+        },
+        clearSave: function(){
+            // clear the saved game 
+            // NOTE: only clears local storage
+            logger.log('views/DevTools', 'clearSave(): removing items from localstorage');
+            while(window.localStorage.length){
+                window.localStorage.removeItem(localStorage.key(0));
+            }
+            logger.log('views/DevTools', 'all done: %O', window.localStorage);
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // User Interaction
+        //
+        // ------------------------------
+        togglePanel: function(e){
+            this.$el.toggleClass('hidden');
+            return this;
+        }
+    });
+
+    return DevTools;
+});
+
 //=============================================================================
 // Controller.js
 //
@@ -7149,7 +7224,11 @@ define('Controller',[
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
-    'views/PageCreateCharacter'
+    'views/PageCreateCharacter',
+
+    // TODO: remove, only for dev
+    'views/DevTools'
+
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
@@ -7159,7 +7238,10 @@ define('Controller',[
         // include views here
         PageHome,
         PageGame,
-        PageCreateCharacter
+        PageCreateCharacter,
+
+        // TODO: remove once out of dev
+        DevTools
     ){
 
     // console color
@@ -7177,6 +7259,9 @@ define('Controller',[
             _.each(options.regions, function(region, key){
                 self[key] = region;
             });
+
+            // create dev tools view
+            this.regionDevTools.show(new DevTools({}));
 
             // config mobile
             this.setupMobile();
@@ -7202,7 +7287,9 @@ define('Controller',[
                         self.modelGame = tmpGameModel;
                         self.showGame();
                     }, 
-                    error: function(){
+                    error: function(e,r){
+                        logger.log('Controller', 'Model unable to be fetched : %O, %O',
+                            e,r);
                         // Model does not exist, do nothing
                         // TODO: do anything?
                     }
@@ -7243,7 +7330,8 @@ define('Controller',[
                 // ----------------------
                 // if user is already logged in, 
                 logger.log('Controller', 'logged in already during controller initialize');
-                handleLoggedIn();
+                // TODO: Sometimes showHome is called afterwards
+                return handleLoggedIn();
             }
 
             // Listen for controller events to show different pages
@@ -7525,7 +7613,14 @@ require([
     
     //// log errors:
     logger.options.logLevel = [ 
-        'error'
+        // should always include these
+        // ------------------------------
+        'error',
+        ,'warning'
+        ,'views/DevTools'
+
+        // optional / for dev
+        // ------------------------------
         ,'Controller'
         ,'views/PageCreateCharacter'
         //,'views/subviews/Battle'

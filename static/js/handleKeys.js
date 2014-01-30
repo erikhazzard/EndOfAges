@@ -25,7 +25,9 @@ define([
             'shift+1', 'shift+2', 'shift+3', 'shift+4', 'shift+5', 'shift+6',
             'backspace',
             'shift+up',
-            'shift+down'
+            'shift+down',
+
+            'shift+i'
         ];
 
         var handleKeys = function handleKeys(){

@@ -114,7 +114,14 @@ require([
     
     //// log errors:
     logger.options.logLevel = [ 
-        'error'
+        // should always include these
+        // ------------------------------
+        'error',
+        ,'warning'
+        ,'views/DevTools'
+
+        // optional / for dev
+        // ------------------------------
         ,'Controller'
         ,'views/PageCreateCharacter'
         //,'views/subviews/Battle'
