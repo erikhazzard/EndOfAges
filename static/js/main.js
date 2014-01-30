@@ -18,9 +18,9 @@ requirejs.config({
         jwerty: 'lib/jwerty.min',
 
         backbone: 'lib/backbone',
+        localstorage: 'lib/backbone.localstorage',
         marionette: 'lib/marionette',
         bootstrap: 'lib/bootstrap',
-        localstorage: "lib/backbone.localStorage"
     },
     shim: {
         'jquery-ui': {

@@ -36,6 +36,10 @@ fonts
     -Use google web fonts
         POTENTIAL: Alegreya (provides a bunch)
 
+----------------
+
+battle AI _ each entity should have its own battle AI
+
 ---------------
 
 Ideas about gameplay - resources - if running low, start to move slower, more vulnerable?

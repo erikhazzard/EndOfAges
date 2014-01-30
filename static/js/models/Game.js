@@ -3,11 +3,13 @@
 //  Game
 //
 //      This model manages a game
+//      TODO: restructure, use a flat structure
 //
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
-        'events', 'd3', 'util/API_URL', 'util/STORAGE_PREFIX',
+        'localstorage',
+        'events', 'd3', 'util/API_URL', 
 
         'collections/Entities', 'models/Entity',
         'models/Map',
@@ -15,7 +17,8 @@ define(
 
     ], function MapModel(
         Backbone, Marionette, logger,
-        events, d3, API_URL, STORAGE_PREFIX,
+        localstorage,
+        events, d3, API_URL, 
 
         Entities, Entity,
         Map,
@@ -24,6 +27,9 @@ define(
 
     var Game = Backbone.Model.extend({
         defaults: {
+            // actual ID used on backend
+            _id: '',
+
             // current map
             activeMap: null,
 
@@ -50,19 +56,43 @@ define(
                 this.set({ playerEntities: new Entities(options.models) });
             }
 
-            window.G = this;
+
+            // TODO: Use a unique ID. FOR NOW, for dev, we're using the same ID
+            this.set({ id: 'currentGame' });
+
+            window._GAME = this;
+
+            this.on('sync', function(r){
+                console.log('SYNCED', r);
+            });
+
             return this;
         },
 
-        saveLocal: function saveLocal(){
-            // saves game to local storage
-            if(window.localStorage){
-                window.localStorage.setItem(
-                    STORAGE_PREFIX + 'game',
-                    JSON.stringify(this.toJSON())
-                );
-            }
-        }
+        parse: function(res){
+            // Need to overwrite the parse function so we can load in data
+            // from the server for nested models. 
+            // NOTE: Could automate this, store embedded collection / models
+            // as a property and include the class
+            var entities = [];
+
+            // create entity models for each entity, then add them to the
+            // collection
+            _.each(res.playerEntities, function(entity){
+                entities.push(new Entity(entity));
+            });
+
+            // create the collection, pass in the entity models
+            res.playerEntities = new Entities(entities);
+
+            // TODO: Add map, add node
+            //
+            // NOTE: if other collections or models are defined on the game,
+            // we need to add them here
+            return res;
+        },
+
+        localStorage: new Backbone.LocalStorage("gameModel")
     });
 
     return Game;

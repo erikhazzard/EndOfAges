@@ -9,7 +9,7 @@
 //  -load game state from localstorage
 //============================================================================= 
 define([
-    'backbone', 'marionette', 'logger', 'events', 'util/STORAGE_PREFIX',
+    'backbone', 'marionette', 'logger', 'events', 
     'models/appUser-object',
     'models/Game',
     'models/Entity',
@@ -17,7 +17,7 @@ define([
     'views/PageGame',
     'views/PageCreateCharacter'
     ], function(
-        Backbone, Marionette, logger, events, STORAGE_PREFIX,
+        Backbone, Marionette, logger, events,
         appUser,
         Game,
         Entity,
@@ -46,12 +46,42 @@ define([
 
             // config mobile
             this.setupMobile();
-
             this.initialUrl = window.location.pathname;
+
+
+            // HANDLE Logged in functionality
+            function handleLoggedIn(){
+                // This is called whenever a user successfully logs in
+                // Try to get an exiting game model
+                //
+                // !!!!!!!!!!!!!!!!!!!!!!
+                // TODO: We should fetch the app user, and get the game model
+                // from the app user
+                // !!!!!!!!!!!!!!!!!!!!!!
+                // Create a temporary game model and try to fetch it
+                // TODO: fetch from server instead of localhost? 
+                var tmpGameModel = new Game({ id: 'currentGame' });
+                tmpGameModel.fetch({
+                    success: function(res){
+                        logger.log('Controller', 'Model fetched from server!');
+                        // model worked, store game model reference
+                        self.modelGame = tmpGameModel;
+                        self.showGame();
+                    }, 
+                    error: function(){
+                        // Model does not exist, do nothing
+                        // TODO: do anything?
+                    }
+                });
+                return false;
+            }
+
 
             // Don't show any views other than the loading or login UNTIL the
             // user's login status has been fetched
             if(appUser.get('isLoggedIn') === false){
+                // NOT logged in
+                // ----------------------
                 // Note: it's possible the appUser may have been fetched before
                 // this is called - in that case, do nothing
                 logger.log('Controller', 'not logged in');
@@ -65,33 +95,21 @@ define([
 
                     // If user is logged in, show the called route
                     if(loggedIn){
-                        //// TODO: get game from user
-
-                        //// TODO: use localstorage if exist
-                        //if(options.useLocalStorage && 
-                            //window.localStorage.getItem(STORAGE_PREFIX + 'game')){
-
-                            //gameModel = JSON.parse(
-                                //window.localStorage.getItem(STORAGE_PREFIX + 'game')
-                            //);
-                        //}
-
-
-                        //self.showGame({});
-
+                        // LOGGED IN
+                        // --------------
+                        handleLoggedIn();
                     } else {
-                        //// User not logged in. Check localstorage
-                        ////  TODO:
-                        ////  If game model is setup, show the game
-                        //self.showGame({});
+                        // NOT LOGGED IN
+                        // --------------
+                        // TODO: do nothing(?)
                     }
                 });
             } else {
+                // LOGGED IN already
+                // ----------------------
                 // if user is already logged in, 
-                logger.log('Controller', 'logged in');
-                //// TODO: use localstorage
-                ////
-                // self.showGame({});
+                logger.log('Controller', 'logged in already during controller initialize');
+                handleLoggedIn();
             }
 
             // Listen for controller events to show different pages
@@ -183,35 +201,22 @@ define([
                 logger.log('Controller', 'creating new pageGame view');
             }
 
-            // TODO: handle creating game differently, load in models
-            // NOT from pageCreateCharacter. Get from GAME model
-            var playerEntityModels = [this.pageCreateCharacter.model];
+            if(!this.modelGame){
+                // TODO: handle creating game differently, load in models
+                // NOT from pageCreateCharacter. Get from GAME model
+                var playerEntityModels = [this.pageCreateCharacter.model];
 
-            //// TODO: To load from localstorage
-            //if(window.localStorage.getItem(STORAGE_PREFIX + 'game')){
-                //playerEntityModels = JSON.parse(window.localStorage.getItem(STORAGE_PREFIX + 'game'))
-                    //.playerEntities;
-            //console.log(">>>>>>>>", playerEntityModels);
-
-            var gameModel = null;
-            gameModel = new Game({}, {
-                models: playerEntityModels
-            });
-
-            //// TODO: use localstorage if exist
-            //if(options.useLocalStorage && 
-                //window.localStorage.getItem(STORAGE_PREFIX + 'game')){
-
-                //gameModel = JSON.parse(
-                    //window.localStorage.getItem(STORAGE_PREFIX + 'game')
-                //);
-            //}
-
+                //// TODO: To load from localstorage
+                var modelGame = null;
+                this.modelGame = new Game({}, {
+                    models: playerEntityModels
+                });
+            }
 
             // TODO: Reuse game view, don't show / hide it? Use a different
             // region?
             this.pageGame = new PageGame({
-                model: gameModel
+                model: this.modelGame
             });
 
             this.currentRegion = this.pageGame;
