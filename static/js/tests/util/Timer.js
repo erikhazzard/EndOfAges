@@ -7,7 +7,7 @@ define([
         'util/Timer'
     ], function(Timer){ 
 
-    describe('Timer tests()', function(){
+    describe('Timer', function(){
         it('should have a working pause() and resume()', function(done){
             var start = new Date();
 
