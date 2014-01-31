@@ -88,7 +88,6 @@ define([
                 return false;
             }
 
-
             // Don't show any views other than the loading or login UNTIL the
             // user's login status has been fetched
             if(appUser.get('isLoggedIn') === false){

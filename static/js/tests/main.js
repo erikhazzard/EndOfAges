@@ -13,12 +13,13 @@ requirejs.config({
         async: 'lib/async.min',
     
         // We're using lodash in place of underscore
-        lodash: 'lib/lodash.compat',
+        lodash: 'lib/lodash.min',
         
         jwerty: 'lib/jwerty.min',
         sinon: 'lib/sinon',
 
         backbone: 'lib/backbone',
+        localstorage: 'lib/backbone.localstorage',
         marionette: 'lib/marionette',
         bootstrap: 'lib/bootstrap'
     },
@@ -81,8 +82,7 @@ require(['events',
     mocha.setup('bdd');
     logger.options.logLevel = [
         'error'
-        , 'collections/Entities'
-        , 'views/subviews/Battle'
+        , 'models/Entity'
     ];
 
     //-----------------------------------
@@ -90,8 +90,10 @@ require(['events',
     //-----------------------------------
     require([
         'tests/collections/Entities'
+        , 'tests/models/Entity'
         , 'tests/views/subviews/Battle'
         , 'tests/util/generateName'
+        , 'tests/util/Timer'
         ], function( ){
 
         //Start runner

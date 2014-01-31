@@ -120,6 +120,8 @@ require([
         ,'warning'
         ,'views/DevTools'
 
+        ,'app'
+
         // optional / for dev
         // ------------------------------
         ,'Controller'
@@ -156,6 +158,19 @@ require([
             );
 
             app.router.navigate(route, true);
+        });
+
+        // ------------------------------
+        // Events for window losing focus
+        // ------------------------------
+        $(window).focus(function windowFocus() {
+            logger.log('app', 'window:focus event triggering');
+            events.trigger('window:focus');
+        });
+
+        $(window).blur(function() {
+            logger.log('app', 'window:blur event triggering');
+            events.trigger('window:blur');
         });
 
         // ------------------------------

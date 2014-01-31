@@ -1,16 +1,43 @@
 @charset "UTF-8";
-body {
-  font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  padding: 60px 50px;
+body,html {
+    background: #686c49 url(../../img/home.jpg);
+    background-size: cover;
+    bottom: 0;
+    color: #ffffff;
+    left: 0;
+    padding: 60px 50px;
+    position: fixed;
+    overflow: auto;
+    right: 0;
+    text-shadow: 0 0 1px #343434, 1px 1px 0 #000000, 2px 2px rgba(0,0,0,0.2);
+    top: 0;
+}
+
+h1,h2,h3,h4 {
+    font-family: Neosans;
+}
+h1 {
+    font-weight: 400;
+}
+#region-main { display: none; }
+
+#mocha-report > li.suite {
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 14px;
+}
+
+#mocha {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    padding: 4px 4px 20px 4px;
 }
 
 #mocha ul, #mocha li {
-  margin: 0;
+  margin: 0 0 0 6px;
   padding: 0;
 }
 
 #mocha ul {
-  list-style: none;
 }
 
 #mocha h1, #mocha h2 {
@@ -20,7 +47,6 @@ body {
 #mocha h1 {
   margin-top: 15px;
   font-size: 1em;
-  font-weight: 200;
 }
 
 #mocha h1 a {
@@ -57,7 +83,6 @@ body {
 
 #mocha .test.pending:hover h2::after {
   content: '(pending)';
-  font-family: arial;
 }
 
 #mocha .test.pass.medium .duration {
@@ -73,8 +98,10 @@ body {
   font-size: 12px;
   display: block;
   float: left;
-  margin-right: 5px;
-  color: #00d6b2;
+  margin-right: 0px;
+  font-weight: bold;
+  color: #22dd22;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.2), -1px 1px 0 rgba(0,0,0,0.2), 1px 2px 0 rgba(255,255,255,0.2)
 }
 
 #mocha .test.pass .duration {
@@ -106,7 +133,9 @@ body {
 }
 
 #mocha .test.fail {
-  color: #c00;
+  color: #dd2222;
+  background: #dd2222;
+  color: #ffffff;
 }
 
 #mocha .test.fail pre {
@@ -116,14 +145,17 @@ body {
 #mocha .test.fail::before {
   content: '✖';
   font-size: 12px;
+  font-weight: bold;
   display: block;
   float: left;
-  margin-right: 5px;
-  color: #c00;
+  margin-right: 2px;
+  color: #dd2222;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.2), -1px 1px 0 rgba(0,0,0,0.2), 1px 2px 0 rgba(255,255,255,0.2)
 }
 
 #mocha .test pre.error {
   color: #c00;
+  text-shadow: 0 0 1px #ffffff, 1px 1px 0 #ffffff;
   max-height: 300px;
   overflow: auto;
 }
@@ -187,21 +219,54 @@ body {
 }
 
 #mocha-stats {
-  position: fixed;
-  top: 15px;
-  right: 10px;
-  font-size: 12px;
+  background: rgba(255,255,255,0.8);
+  box-shadow: 0 2px 8px #000000;
+  border-bottom-left-radius: 4px;
+  color: #343434;
+  text-shadow: 1px 1px 0 #ffffff, 0 0 1px #ffffff;
+  font-size: 14px;
   margin: 0;
-  color: #888;
+  padding: 0 10px 0 0 !important;
+  position: fixed;
+  right: 0;
+  top: 0;
 }
 
 #mocha-stats .progress {
   float: right;
   padding-top: 0;
+  height: 40px;
+  width: 40px;
+}
+#mocha-stats .progress canvas {
+  height: 40px;
+  width: 40px;
 }
 
 #mocha-stats em {
-  color: black;
+  color: #000000;
+  text-shadow: 1px 1px 0 #ffffff, 0 0 1px #ffffff;
+}
+#mocha-stats .passes em {
+    color: #22aa22;
+    font-weight: bold;
+    font-size: 17px;
+    text-shadow: 1px 1px 0 #000000, 0 0 1px #ffffff;
+    background: #22dd22;
+    color: #ffffff;
+    padding: 2px 8px 2px 6px;
+    border: 1px solid #22aa22;
+    border-radius: 4px;
+}
+#mocha-stats .failures em {
+    font-weight: bold;
+    font-size: 17px;
+    text-shadow: 1px 1px 0 #000000, 0 0 1px #ffffff;
+    background: #dd2222;
+    color: #ffffff;
+    padding: 2px 8px 2px 6px;
+    border: 1px solid #aa2222;
+    border-radius: 4px;
 }
 
 #mocha-stats a {

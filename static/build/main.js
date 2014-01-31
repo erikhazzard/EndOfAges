@@ -1749,6 +1749,11 @@ define(
             //      duration: {Number} in seconds, how long the effect will last
             //      type: {string}
             //      subType: {string}
+            //      isStatic: {Boolean} Is this a static effect (e.g., a buff
+            //          that gives the entity + stats?)
+            //      isStackable: {Boolean} Can this effect be stacked with 
+            //          other effects of the same name? Usually false
+            //
             //      isDetrimental: {string}
             //
             //      effect: {Function} (OPTIONAL)
@@ -1766,14 +1771,14 @@ define(
             // --------------------------
             // STATIC effects
             // --------------------------
-            if(!options.effect){
+            if(options.isStatic){
                 // Do something 
 
             }
             // --------------------------
             // TRIGGERED EFFECTS
             // --------------------------
-            else if(options.effect){
+            else {
                 var effectCallback = function effectCallback(model, health, changeOptions){
                     options.effect.call(self, {
                         health: health, 
@@ -1881,6 +1886,7 @@ define(
             // NOTE:
             // death event is called in the `healthChanged`, which is called
             // whenever health changes
+            logger.log('models/Entity', 'amount received : %O', damage);
 
             return damage;
         },
@@ -7297,7 +7303,6 @@ define('Controller',[
                 return false;
             }
 
-
             // Don't show any views other than the loading or login UNTIL the
             // user's login status has been fetched
             if(appUser.get('isLoggedIn') === false){
@@ -7619,6 +7624,8 @@ require([
         ,'warning'
         ,'views/DevTools'
 
+        ,'app'
+
         // optional / for dev
         // ------------------------------
         ,'Controller'
@@ -7655,6 +7662,19 @@ require([
             );
 
             app.router.navigate(route, true);
+        });
+
+        // ------------------------------
+        // Events for window losing focus
+        // ------------------------------
+        $(window).focus(function windowFocus() {
+            logger.log('app', 'window:focus event triggering');
+            events.trigger('window:focus');
+        });
+
+        $(window).blur(function() {
+            logger.log('app', 'window:blur event triggering');
+            events.trigger('window:blur');
         });
 
         // ------------------------------

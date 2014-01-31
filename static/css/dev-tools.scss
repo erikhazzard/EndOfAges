@@ -1,12 +1,13 @@
-$dev-tools-width: 100px;
+$dev-tools-width: 300px;
 
 #region-dev-tools {
     .dev-tools-wrapper {
         @include transition("all 0.4s");
 
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.7);
+        box-shadow: -2px 0 8px #000000;
         bottom: 0;
-        border-left: 1px solid #a0a0a0;
+        border-left: 1px solid #000000;
         position: fixed;
         overflow: hidden;
         width: $dev-tools-width;
