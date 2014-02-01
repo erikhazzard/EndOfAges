@@ -5,7 +5,7 @@ body,html {
     bottom: 0;
     color: #ffffff;
     left: 0;
-    padding: 60px 50px;
+    padding: 10px 50px 60px 50px;
     position: fixed;
     overflow: auto;
     right: 0;
@@ -296,3 +296,46 @@ code .init { color: #F78C38; }
 code .string { color: #22dd22; }
 code .keyword { color: #6699cc; }
 code .number { color: #C291FF; }
+
+
+.logo-text {
+    position: relative;
+    font-family: 'IM Fell English', serif;
+}
+.logo-text h1 {
+    color: #850809;  
+    font-size: 8em;
+    font-family: 'IM Fell English', serif;
+    margin: 0 0 20px 0;
+    padding: 0 0 0 20%;
+    position: relative;
+
+    text-shadow:
+        -1px -1px 0 rgba(255,255,255,0.7),
+        -2px -2px 0 rgba(227,185,65,0.6),
+        -1px -1px 0 rgba(255,255,255,0.8),
+        1px 1px 0 rgba(0,0,0,0.8),
+        1px 1px 0 rgba(255,255,255,0.7),
+        2px 2px 0 rgba(255,255,255,0.7),
+        1px 1px 0 rgba(255,255,255,0.7),
+        3px 3px 0 rgba(0,0,0,0.3),
+        4px 4px 0 rgba(0,0,0,0.3),
+        5px 5px 0 rgba(0,0,0,0.3),
+        6px 6px 0 rgba(0,0,0,0.3);
+
+    word-spacing: 0.2em;
+    z-index: 1;
+}
+
+.logo-text .copy {
+    color: rgba(255,255,255,0.7);
+    left: 0;
+    opacity: 0.25;
+    position: absolute;
+    top: 0;
+    text-shadow: none;
+    -webkit-filter: url('#filter-map');
+    -moz-filter: url('#filter-map');
+    filter: url('#filter-map');
+    z-index: 2;
+}

@@ -15,17 +15,16 @@ define(['util/generateUUID'], function TIMER(generateUUID){
         // takes in a callback {Function} and a delay {Number} (same signature
         // as setTimeout)
         var self = this;
-        var start;
-        var remaining = delay;
-        var timerId;
 
-        this._id = generateUUID();
+        // how much time remains for this timer
+        this.remaining = delay;
 
         // note : we need to store also a unique ID that won't be changed when
         // the timer is cleared in pause()
+        this._id = generateUUID();
 
         // wrap the callback to remove the timer from the list when it's finished
-        var wrappedCallback = function wrappedCallback(){
+        this.callback = function wrappedCallback(){
             // remove timer
             delete Timer._timers[self._id];
 
@@ -33,39 +32,38 @@ define(['util/generateUUID'], function TIMER(generateUUID){
             return callback();
         };
 
-        // Methods
-        // ------------------------------
-        this.pause = function TimerPause() {
-            // pause the timer by clearing the original timer and keeping track
-            // of the remaining time
-            window.clearTimeout(timerId);
-
-            remaining -= new Date() - start;
-
-            return this;
-        };
-
-        this.resume = function TimerResume() {
-            // resume (or start) the timer, passing in the callback and however
-            // much time is remaning (in the case of the initial call, remaining
-            // will equal the delay)
-            start = new Date();
-
-            timerId = window.setTimeout(wrappedCallback, remaining);
-            
-            // Keep track of timers 
-            Timer._timers[this._id] = this;
-
-            return this;
-        };
-
         // start the timer when initiall called
         this.resume();
-
-        return this;
     }
 
-    // Timer class props
+    // Object Methods
+    // ------------------------------
+    Timer.prototype.pause = function TimerPause() {
+        // pause the timer by clearing the original timer and keeping track
+        // of the remaining time
+        window.clearTimeout(this.timerId);
+
+        this.remaining -= new Date() - this.start;
+
+        return this;
+    };
+
+    Timer.prototype.resume = function TimerResume() {
+        // resume (or start) the timer, passing in the callback and however
+        // much time is remaning (in the case of the initial call, remaining
+        // will equal the delay)
+        this.start = new Date();
+
+        // store the ID setTimeout returns so we can clear it in pause
+        this.timerId = window.setTimeout(this.callback, this.remaining);
+        
+        // Keep track of timers 
+        Timer._timers[this._id] = this;
+
+        return this;
+    };
+
+    // Timer class properties and methods
     // ------------------------------
     // Keep track of all timers
     Timer._timers = {};
@@ -77,7 +75,6 @@ define(['util/generateUUID'], function TIMER(generateUUID){
 
     Timer.resumeAll = function resumeAll(){
         // Resumse all timers
-        console.log(" CALLED", Timer._timers);
         _.each(Timer._timers, function(timer, key){ timer.resume(); });
         return Timer;
     };

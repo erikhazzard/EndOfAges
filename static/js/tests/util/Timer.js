@@ -33,13 +33,13 @@ define([
                 var elapsed = new Date() - start;
 
                 // must take AT LEAST 80 ms (30ms + 50ms)
-                assert(elapsed >= 80);
+                assert(elapsed >= 60);
                 // give an extra 20ms of room for other parallel tests
                 assert(elapsed <= 100);
 
                 done();
 
-            }, 30); // after 30 ms, call it (but we'll be pausing)
+            }, 20); // after some time, call it (but we'll be pausing)
 
 
             // 2. immediately pause it
@@ -47,7 +47,7 @@ define([
 
             // 3. after a delay, resume the timer
             // after 50 ms, resume timer. total time elapsed should be ~80ms
-            setTimeout(function(){ timer.resume(); }, 50); 
+            setTimeout(function(){ timer.resume(); }, 40); 
         });
 
         it('should have working pauseAll() and resumseAll()', function(done){
@@ -60,12 +60,12 @@ define([
                 assert(Timer._timers[originalId] === undefined);
 
                 // must take AT LEAST 80 ms (30ms + 50ms)
-                assert(elapsed >= 80);
+                assert(elapsed >= 60);
                 // give an extra 20ms of room for other parallel tests
                 assert(elapsed <= 100);
 
                 done();
-            }, 30);
+            }, 20);
 
             originalId = timer1._id;
 
@@ -73,9 +73,8 @@ define([
             Timer.pauseAll();
 
             setTimeout(function(){
-                console.log("< RESUMING");
                 Timer.resumeAll();
-            }, 50); // wait some time, then unpause
+            }, 40); // wait some time, then unpause
 
         });
 
