@@ -10,11 +10,11 @@ define(
     [ 
         'd3', 'backbone', 'marionette',
         'logger', 'events',
-        'Models/Map'
+        'util/Timer'
     ], function viewMap(
         d3, backbone, marionette, 
         logger, events,
-        Map
+        Timer
     ){
 
     // ----------------------------------

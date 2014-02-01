@@ -65,11 +65,13 @@
 define(
     [ 
         'd3', 'backbone', 'marionette', 'logger', 'events',
+        'util/Timer',
         'views/subviews/battle/AbilityList',
         'views/subviews/battle/SelectedEntityInfo',
         'views/subviews/battle/IntendedTargetInfo'
     ], function viewBattle(
         d3, backbone, marionette, logger, events,
+        Timer,
         AbilityListView,
         SelectedEntityInfoView,
         IntendedTargetInfoView
@@ -279,7 +281,6 @@ define(
                 slow = 1, // slow factor
                 slowStep = slow * timerStep,
 
-                timerRender = this.timerRender,
                 timerUpdate = this.timerUpdate;
 
             // store some timer refs
@@ -306,7 +307,6 @@ define(
                 }
 
                 // always call render though, so we can draw things properly
-                timerRender.call(self, timerDt);
                 timerLast = timerNow;
 
 
@@ -323,10 +323,6 @@ define(
             this.start = new Date();
             requestAnimationFrame(battleFrame);
             return this;
-        },
-
-        timerRender: function battleTimerRender(dt){
-            // if we wanted to update the battle scene
         },
 
         // TIMER UPDATE
@@ -1825,6 +1821,10 @@ define(
                     }
 
                     // draw effect from target to source
+                    // TODO: Make this a function outside of this scope, pass 
+                    // in selected ability and entities. 
+                    // Then, this allows us to just listen for a health change
+                    // or whatever other event and trigger it
                     //
                     // get a copy of the svg effect
                     //  all effects should be wrapped in a svg element with id of
@@ -1867,11 +1867,13 @@ define(
                     // do the effect
                     renderEffect();
 
-                    // if the ability has multiple ticks, do it
+                    // TODO: Don't do this here - listen for change or use ability
+                    // event, some sort of event where we can render it without
+                    // relying on ticks existing
                     var curTick = 0;
                     if(selectedAbility.attributes.ticks){
                         while(curTick < selectedAbility.attributes.ticks){
-                            setTimeout(
+                            new Timer(
                                 renderEffect,
                                 (selectedAbility.attributes.tickDuration * 1000) * (curTick + 1)
                             );
