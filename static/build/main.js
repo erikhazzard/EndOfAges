@@ -6532,6 +6532,24 @@ define(
 
     var ENTITY_CLASSES = [
         new EntityClass({
+            name: 'Cleric',
+            description: 'Healer',
+            sprite: 'cleric',
+            abilities: new Abilities([
+                // Basic heal
+                ABILITIES.healing,
+                // health and armor buff
+                // ...
+                // damage target and heal self
+                // ...
+                // res
+                // ...
+                ABILITIES.flamelick
+            ])
+        }),
+
+
+        new EntityClass({
             name: 'Shadowknight',
             description: 'An experienced warrior dabbling dark with unutterable sorrows',
             sprite: 'shadowknight',
@@ -6555,15 +6573,6 @@ define(
             sprite: 'assassin',
             abilities: new Abilities([
                 ABILITIES.magicmissle
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Ranger',
-            description: 'Pew pew with my bow',
-            sprite: 'ranger',
-            abilities: new Abilities([
-                ABILITIES.flamelick
             ])
         })
 
