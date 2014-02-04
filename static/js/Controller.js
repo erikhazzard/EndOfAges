@@ -120,8 +120,7 @@ define([
                 // ----------------------
                 // if user is already logged in, 
                 logger.log('Controller', 'logged in already during controller initialize');
-                // TODO: Sometimes showHome is called afterwards
-                return handleLoggedIn();
+                handleLoggedIn();
             }
 
             // Listen for controller events to show different pages

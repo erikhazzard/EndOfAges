@@ -136,86 +136,40 @@ define(
         getScore: function getScore(){
             // TODO: get a combat score for this entity based on abilities
             // and states
-
         },
 
-        // ===================================================================
-        // Add buff / triggered effects
-        // ===================================================================
-        addEffect: function addEffect(options){
-            // Called to add an effect to the entity's staticEffects or 
-            // triggeredEffects array. 
-            // Note: This would be called by the ability
+        addBuff: function addBuff(ability){
+            // Takes in an ability and adds the buff effect
             //
-            // params: options {object}
-            //      source: {Entity}
-            //      duration: {Number} in seconds, how long the effect will last
-            //      type: {string}
-            //      subType: {string}
-            //      isStatic: {Boolean} Is this a static effect (e.g., a buff
-            //          that gives the entity + stats?)
-            //      isStackable: {Boolean} Can this effect be stacked with 
-            //          other effects of the same name? Usually false
-            //
-            //      isDetrimental: {string}
-            //
-            //      effect: {Function} (OPTIONAL)
-            //          effect that will trigger on health change. If duration is
-            //          also passed in, will STOP listening after the duration.
-            //
-            //          TODO: WARDS - effects that are based on some condition
-            //          and NOT time - should trigger BEFORE damage is applied
-            //              -If it's just set as a change:health callback, then
-            //              damage will be done BEFORE the ward can asorb it
-            //
-            var self = this;
-            options = options || {};
+            var effects = this.get('activeEffects');
 
-            // --------------------------
-            // STATIC effects
-            // --------------------------
-            if(options.isStatic){
-                // Do something 
+            // store the attributes
+            effects.push(ability.toJSON());
 
-            }
-            // --------------------------
-            // TRIGGERED EFFECTS
-            // --------------------------
-            else {
-                var effectCallback = function effectCallback(model, health, changeOptions){
-                    options.effect.call(self, {
-                        health: health, 
-                        effectOptions: options,
-                        changeOptions: changeOptions
-                    });
-                };
+            this.set({ effects: effects });
 
-                // update active effects
-                var updatedEffects = this.get('activeEffects');
-                updatedEffects[this.get('activeEffects').length] = options.effect;
-                this.set({
-                    activeEffects: updatedEffects
-                });
+            return this;
+        },
+        removeBuff: function removeBuff(ability){
+            // Remove effect
+            var effects = this.get('activeEffects');
 
-                // add this effect on health change
-                this.listenTo(
-                    this.get('attributes'), 
-                    'change:health', 
-                    effectCallback
-                );
-                
-                // after a time, stop listening
-                if(options.duration){
-                    setTimeout(function removeEffect(){
-                        self.stopListening(
-                            self.get('attributes'),
-                            'change:health',
-                            effectCallback
-                        );
-                    }, options.duration * 1000);
+            // remove the targeted ability
+            for(var i=0, len=effects.length; i<len; i++){
+                if(effects[i].cid === ability.attributes.cid){
+                    // remove the item at current index
+                    logger.log('models/Entity', 'removeBuff(): Found ability ' +
+                        '%O  at index ' + i + ' effect : %O', 
+                        ability, effects[i]);
+
+                    effects.splice(i,1);
+                    break;
                 }
             }
 
+            this.set({ effects: effects });
+
+            return this;
         },
 
 

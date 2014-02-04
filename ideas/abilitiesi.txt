@@ -43,3 +43,17 @@ class based on a collection of abilities
 -----------------
 
 -Abilities that do an effect based on the entitiy's attribute
+
+--------------------------------------------------------
+
+Mods
+-----
+crit chance
+additional 'true' damage
+elemental modifiers
+
+-increase speed of timer (aka, decrease ability cast times - modify abilities themselves)
+
+
+
+** Modify abilities themselves (cast time, duration, etc)

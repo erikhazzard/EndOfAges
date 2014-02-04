@@ -22,18 +22,6 @@ define(
             power: 100,
             maxPower: 100,
 
-            // Combat - ability use
-            // --------------------------
-            // Each ability has a certain power cost (or no cost). There
-            // is a timer that fills up. Using an ability drains the timer
-            // by some amount (or all). 
-            //
-            // NOT SURE:
-            // The timer takes a longer time to fill up the closer it gets to 
-            // the end. 
-            //
-            // Certain items may decrease how long the timer takes to fill up
-
             //Stats
             //---------------------------
             strength: 10,
@@ -55,8 +43,9 @@ define(
             attack: 0,
             attackSpeed: 0,
 
-            defense: 0,
-
+            // ARMOR modifier
+            armor: 0,
+ 
             //Chance to deal critical damage (for all abilities)
             chanceCritical: 0,
 

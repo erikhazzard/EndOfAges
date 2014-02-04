@@ -7,6 +7,9 @@
 //      TODO: Add an ability rating - a sort of 'score' for how powerful the
 //      ability is(?)
 //
+//      TODO: Allow abilities to be modified (e.g., lower cast time) ( OR, just
+//      have some modifier on the entity )
+//
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
@@ -84,6 +87,16 @@ define(
             //      (source would be a self heal, target heals other)
             healTarget: 'target',
 
+            // Buffs
+            // --------------------------
+            // This is an example static buff. Will temporarily boost an 
+            // entity's stats for the passed in duration
+            buffEffects: null, // Will look like { strength : -10, agility: 10 }
+            buffDuration: null, // in seconds
+            // can be either 'target' (allows player to target an entity,
+            //  including self) or 'self' (only works on self)
+            buffTarget: 'target',
+
             visualEffect: function(options){
                 //TODO: figure this out...should have some way of doing an
                 //effect, but should it live here?
@@ -96,6 +109,7 @@ define(
             // is passed into the model, , it will use this function, which 
             // calculates damage based on model attributes. This function can 
             // be overriden
+            //
             // TODO: Does it need to be? How to handle DoT? Buffs?
             // 
             // options can contain the following keys:
@@ -108,18 +122,23 @@ define(
             //
             // The function body may be unique to each effect
             var self = this;
-            //
+
             logger.log('models/Ability', 
                 '>> DEFAULT ABILITY USED : this: %O, options: %O', 
                 this,
                 options);
             var amount = 0;
-                // note: multiply castDuration by 1000 (it's in seconds, we
-                // need to get milliseconds)
-            var delay = this.get('castDuration') * 1000;
+
+            // note: multiply castDuration by 1000 (it's in seconds, we
+            // need to get milliseconds)
             // TODO: lower delay if the target has some sort of delay reducting
             // stats
+            var delay = this.get('castDuration') * 1000;
 
+
+            // --------------------------
+            // Heal
+            // --------------------------
             // TODO: To damage or heal multiple targets, just call it on the passed
             // in targets
             //
@@ -162,7 +181,9 @@ define(
                 }, delay);
             }
 
-            // Then, handle damage effect
+            // --------------------------
+            // Damage
+            // --------------------------
             if(this.get('damage')){
                 setTimeout(function effectDamageDelay(){
                     function takeDamage(){
@@ -190,6 +211,66 @@ define(
 
                     if(options.callback){ options.callback(); }
                 }, delay);
+            }
+
+            // --------------------------
+            // Buffs
+            // --------------------------
+            if(this.get('buffEffects')){
+
+                setTimeout(function effectBuff(){
+
+                    // Add the effect
+                    var currentStats = options[self.get('buffTarget')].get(
+                        'attributes').attributes;
+
+                    // TODO::::: Should the logic be handled there instead of
+                    // here?
+                    // add it to the buff list
+                    //
+                    // ADD Buff
+                    // ------------------
+                    options[self.get('buffTarget')].addBuff(self);
+                    var updatedStats = {};
+
+                    // update based on effects
+                    _.each(self.get('buffEffects'), function(val, key){
+                        updatedStats = currentStats[key] + val;
+                    });
+    
+                    // update the stats
+                    options[self.get('buffTarget')].get('attributes').set(
+                        updatedStats
+                    );
+
+                    // Remove it after the duration
+                    // ------------------
+                    setTimeout(function removeBuff(){
+                        // remove effect
+                        options[self.get('buffTarget')].removeBuff(self);
+
+                        // remove the stats
+                        var currentStats = options[self.get('buffTarget')].get(
+                            'attributes').attributes;
+                        var updatedStats = {};
+
+                        // update based on effects
+                        _.each(self.get('buffEffects'), function(val, key){
+                            updatedStats = currentStats[key] - val;
+                        });
+        
+                        // update the stats
+                        options[self.get('buffTarget')].get('attributes').set(
+                            updatedStats
+                        );
+
+                         
+                    }, self.get('buffDuration'));
+
+                    if(options.callback){ options.callback(); }
+
+                }, delay);
+
             }
 
             return amount;

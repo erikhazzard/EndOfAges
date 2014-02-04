@@ -3,6 +3,7 @@
 // data-races
 //
 //      TODO: should be loaded from server and abilities should load 
+//      TODO: Think of group of classes (DPS / Tank / Healer?)
 //
 // ===========================================================================
 define(
@@ -15,28 +16,34 @@ define(
     var ENTITY_CLASSES = [
         new EntityClass({
             name: 'Cleric',
-            description: 'Healer',
+            description: 'Clerics focus on using light magic to aid their allies and disable their foes',
             sprite: 'cleric',
             abilities: new Abilities([
                 // Basic heal
-                ABILITIES.healing,
-                // health and armor buff
-                // ...
+                ABILITIES.heal,
                 // damage target and heal self
-                // ...
-                // res
-                // ...
-                ABILITIES.flamelick
+                ABILITIES.smite,
+                // health and armor buff
+                ABILITIES.virtue
+                //// res
+                //ABILITIES.resurrect
             ])
         }),
 
-
         new EntityClass({
             name: 'Shadowknight',
-            description: 'An experienced warrior dabbling dark with unutterable sorrows',
+            description: 'A veteran dabbling in dark magic',
             sprite: 'shadowknight',
             abilities: new Abilities([
-                ABILITIES.darkblade
+                // basic physical attack
+                ABILITIES.darkblade,
+                //// attack + dot
+                //ABILITIES.darkblade,
+                //// siphon abilities
+                //ABILITIES.siphonstrength,
+                //// aoe + taunt
+                //ABILITIES.deathcloud
+
             ])
         }),
 
@@ -50,13 +57,30 @@ define(
         }),
 
         new EntityClass({
+            name: 'Ranger',
+            description: 'An archer',
+            sprite: 'ranger',
+            abilities: new Abilities([
+                //// single target
+                //ABILITIES.headshot,
+                //// dot + damage
+                //ABILITIES.poisonedarrow,
+                //// increases damage of next spell
+                //ABILITIES.aim,
+                //// aoe (will increase aggro - could be bad)
+                //ABILITIES.barrage
+            ])
+        }),
+
+        new EntityClass({
             name: 'Assassin',
             description: 'Stab yo eye',
             sprite: 'assassin',
             abilities: new Abilities([
                 ABILITIES.magicmissle
             ])
-        })
+        }),
+
 
     ];
 

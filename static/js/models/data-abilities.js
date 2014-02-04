@@ -27,7 +27,6 @@ define(
             effectId: 'magicMissle',
             castTime: 2,
             timeCost: 2,
-            powerCost: 6,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'arcane',
@@ -62,7 +61,6 @@ define(
             effectId: 'flamelick',
             castTime: 3,
             timeCost: 3,
-            powerCost: 4,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'fire',
@@ -73,7 +71,6 @@ define(
             effectId: 'fireball',
             castTime: 4,
             timeCost: 4,
-            powerCost: 8,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'fire',
@@ -88,7 +85,6 @@ define(
             effectId: 'trivialHealing',
             castTime: 3,
             timeCost: 3,
-            powerCost: 1,
             validTargets: ['player'],
             type: 'magic',
             subType: 'light',
@@ -99,11 +95,55 @@ define(
             effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
-            powerCost: 3,
             validTargets: ['player'],
             type: 'magic',
             subType: 'light',
             heal: 15
+        }),
+
+        // ==============================
+        // 
+        // Cleric
+        //
+        // ==============================
+        heal: new Ability({
+            name: 'Heal',
+            effectId: 'minorHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            subType: 'light',
+            heal: 20
+        }),
+        smite: new Ability({
+            name: 'Smite',
+            effectId: 'magicmissle',
+            castTime: 3.5,
+            timeCost: 3.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            subType: 'light',
+            damage: 10,
+            heal: 5,
+            healTarget: 'source'
+        }),
+        virtue: new Ability({
+            name: 'Virtue',
+            effectId: 'minorHealing',
+            castTime: 6,
+            timeCost: 6,
+            validTargets: ['player'],
+            type: 'magic',
+            subType: 'light',
+
+            heal: 10,
+
+            buffEffects: { 
+                strength: 10, 
+                armor: 20,
+                maxHealth: 10
+            }
         })
     };
 

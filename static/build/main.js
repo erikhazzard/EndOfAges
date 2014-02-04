@@ -1143,18 +1143,6 @@ define(
             power: 100,
             maxPower: 100,
 
-            // Combat - ability use
-            // --------------------------
-            // Each ability has a certain power cost (or no cost). There
-            // is a timer that fills up. Using an ability drains the timer
-            // by some amount (or all). 
-            //
-            // NOT SURE:
-            // The timer takes a longer time to fill up the closer it gets to 
-            // the end. 
-            //
-            // Certain items may decrease how long the timer takes to fill up
-
             //Stats
             //---------------------------
             strength: 10,
@@ -1176,8 +1164,9 @@ define(
             attack: 0,
             attackSpeed: 0,
 
-            defense: 0,
-
+            // ARMOR modifier
+            armor: 0,
+ 
             //Chance to deal critical damage (for all abilities)
             chanceCritical: 0,
 
@@ -1232,6 +1221,9 @@ define(
 //
 //      TODO: Add an ability rating - a sort of 'score' for how powerful the
 //      ability is(?)
+//
+//      TODO: Allow abilities to be modified (e.g., lower cast time) ( OR, just
+//      have some modifier on the entity )
 //
 // ===========================================================================
 define(
@@ -1310,6 +1302,16 @@ define(
             //      (source would be a self heal, target heals other)
             healTarget: 'target',
 
+            // Buffs
+            // --------------------------
+            // This is an example static buff. Will temporarily boost an 
+            // entity's stats for the passed in duration
+            buffEffects: null, // Will look like { strength : -10, agility: 10 }
+            buffDuration: null, // in seconds
+            // can be either 'target' (allows player to target an entity,
+            //  including self) or 'self' (only works on self)
+            buffTarget: 'target',
+
             visualEffect: function(options){
                 //TODO: figure this out...should have some way of doing an
                 //effect, but should it live here?
@@ -1322,6 +1324,7 @@ define(
             // is passed into the model, , it will use this function, which 
             // calculates damage based on model attributes. This function can 
             // be overriden
+            //
             // TODO: Does it need to be? How to handle DoT? Buffs?
             // 
             // options can contain the following keys:
@@ -1334,18 +1337,23 @@ define(
             //
             // The function body may be unique to each effect
             var self = this;
-            //
+
             logger.log('models/Ability', 
                 '>> DEFAULT ABILITY USED : this: %O, options: %O', 
                 this,
                 options);
             var amount = 0;
-                // note: multiply castDuration by 1000 (it's in seconds, we
-                // need to get milliseconds)
-            var delay = this.get('castDuration') * 1000;
+
+            // note: multiply castDuration by 1000 (it's in seconds, we
+            // need to get milliseconds)
             // TODO: lower delay if the target has some sort of delay reducting
             // stats
+            var delay = this.get('castDuration') * 1000;
 
+
+            // --------------------------
+            // Heal
+            // --------------------------
             // TODO: To damage or heal multiple targets, just call it on the passed
             // in targets
             //
@@ -1388,7 +1396,9 @@ define(
                 }, delay);
             }
 
-            // Then, handle damage effect
+            // --------------------------
+            // Damage
+            // --------------------------
             if(this.get('damage')){
                 setTimeout(function effectDamageDelay(){
                     function takeDamage(){
@@ -1416,6 +1426,66 @@ define(
 
                     if(options.callback){ options.callback(); }
                 }, delay);
+            }
+
+            // --------------------------
+            // Buffs
+            // --------------------------
+            if(this.get('buffEffects')){
+
+                setTimeout(function effectBuff(){
+
+                    // Add the effect
+                    var currentStats = options[self.get('buffTarget')].get(
+                        'attributes').attributes;
+
+                    // TODO::::: Should the logic be handled there instead of
+                    // here?
+                    // add it to the buff list
+                    //
+                    // ADD Buff
+                    // ------------------
+                    options[self.get('buffTarget')].addBuff(self);
+                    var updatedStats = {};
+
+                    // update based on effects
+                    _.each(self.get('buffEffects'), function(val, key){
+                        updatedStats = currentStats[key] + val;
+                    });
+    
+                    // update the stats
+                    options[self.get('buffTarget')].get('attributes').set(
+                        updatedStats
+                    );
+
+                    // Remove it after the duration
+                    // ------------------
+                    setTimeout(function removeBuff(){
+                        // remove effect
+                        options[self.get('buffTarget')].removeBuff(self);
+
+                        // remove the stats
+                        var currentStats = options[self.get('buffTarget')].get(
+                            'attributes').attributes;
+                        var updatedStats = {};
+
+                        // update based on effects
+                        _.each(self.get('buffEffects'), function(val, key){
+                            updatedStats = currentStats[key] - val;
+                        });
+        
+                        // update the stats
+                        options[self.get('buffTarget')].get('attributes').set(
+                            updatedStats
+                        );
+
+                         
+                    }, self.get('buffDuration'));
+
+                    if(options.callback){ options.callback(); }
+
+                }, delay);
+
             }
 
             return amount;
@@ -1511,7 +1581,6 @@ define(
             effectId: 'magicMissle',
             castTime: 2,
             timeCost: 2,
-            powerCost: 6,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'arcane',
@@ -1546,7 +1615,6 @@ define(
             effectId: 'flamelick',
             castTime: 3,
             timeCost: 3,
-            powerCost: 4,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'fire',
@@ -1557,7 +1625,6 @@ define(
             effectId: 'fireball',
             castTime: 4,
             timeCost: 4,
-            powerCost: 8,
             validTargets: ['enemy'],
             type: 'magic',
             subType: 'fire',
@@ -1572,7 +1639,6 @@ define(
             effectId: 'trivialHealing',
             castTime: 3,
             timeCost: 3,
-            powerCost: 1,
             validTargets: ['player'],
             type: 'magic',
             subType: 'light',
@@ -1583,11 +1649,55 @@ define(
             effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
-            powerCost: 3,
             validTargets: ['player'],
             type: 'magic',
             subType: 'light',
             heal: 15
+        }),
+
+        // ==============================
+        // 
+        // Cleric
+        //
+        // ==============================
+        heal: new Ability({
+            name: 'Heal',
+            effectId: 'minorHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            subType: 'light',
+            heal: 20
+        }),
+        smite: new Ability({
+            name: 'Smite',
+            effectId: 'magicmissle',
+            castTime: 3.5,
+            timeCost: 3.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            subType: 'light',
+            damage: 10,
+            heal: 5,
+            healTarget: 'source'
+        }),
+        virtue: new Ability({
+            name: 'Virtue',
+            effectId: 'minorHealing',
+            castTime: 6,
+            timeCost: 6,
+            validTargets: ['player'],
+            type: 'magic',
+            subType: 'light',
+
+            heal: 10,
+
+            buffEffects: { 
+                strength: 10, 
+                armor: 20,
+                maxHealth: 10
+            }
         })
     };
 
@@ -1733,86 +1843,40 @@ define(
         getScore: function getScore(){
             // TODO: get a combat score for this entity based on abilities
             // and states
-
         },
 
-        // ===================================================================
-        // Add buff / triggered effects
-        // ===================================================================
-        addEffect: function addEffect(options){
-            // Called to add an effect to the entity's staticEffects or 
-            // triggeredEffects array. 
-            // Note: This would be called by the ability
+        addBuff: function addBuff(ability){
+            // Takes in an ability and adds the buff effect
             //
-            // params: options {object}
-            //      source: {Entity}
-            //      duration: {Number} in seconds, how long the effect will last
-            //      type: {string}
-            //      subType: {string}
-            //      isStatic: {Boolean} Is this a static effect (e.g., a buff
-            //          that gives the entity + stats?)
-            //      isStackable: {Boolean} Can this effect be stacked with 
-            //          other effects of the same name? Usually false
-            //
-            //      isDetrimental: {string}
-            //
-            //      effect: {Function} (OPTIONAL)
-            //          effect that will trigger on health change. If duration is
-            //          also passed in, will STOP listening after the duration.
-            //
-            //          TODO: WARDS - effects that are based on some condition
-            //          and NOT time - should trigger BEFORE damage is applied
-            //              -If it's just set as a change:health callback, then
-            //              damage will be done BEFORE the ward can asorb it
-            //
-            var self = this;
-            options = options || {};
+            var effects = this.get('activeEffects');
 
-            // --------------------------
-            // STATIC effects
-            // --------------------------
-            if(options.isStatic){
-                // Do something 
+            // store the attributes
+            effects.push(ability.toJSON());
 
-            }
-            // --------------------------
-            // TRIGGERED EFFECTS
-            // --------------------------
-            else {
-                var effectCallback = function effectCallback(model, health, changeOptions){
-                    options.effect.call(self, {
-                        health: health, 
-                        effectOptions: options,
-                        changeOptions: changeOptions
-                    });
-                };
+            this.set({ effects: effects });
 
-                // update active effects
-                var updatedEffects = this.get('activeEffects');
-                updatedEffects[this.get('activeEffects').length] = options.effect;
-                this.set({
-                    activeEffects: updatedEffects
-                });
+            return this;
+        },
+        removeBuff: function removeBuff(ability){
+            // Remove effect
+            var effects = this.get('activeEffects');
 
-                // add this effect on health change
-                this.listenTo(
-                    this.get('attributes'), 
-                    'change:health', 
-                    effectCallback
-                );
-                
-                // after a time, stop listening
-                if(options.duration){
-                    setTimeout(function removeEffect(){
-                        self.stopListening(
-                            self.get('attributes'),
-                            'change:health',
-                            effectCallback
-                        );
-                    }, options.duration * 1000);
+            // remove the targeted ability
+            for(var i=0, len=effects.length; i<len; i++){
+                if(effects[i].cid === ability.attributes.cid){
+                    // remove the item at current index
+                    logger.log('models/Entity', 'removeBuff(): Found ability ' +
+                        '%O  at index ' + i + ' effect : %O', 
+                        ability, effects[i]);
+
+                    effects.splice(i,1);
+                    break;
                 }
             }
 
+            this.set({ effects: effects });
+
+            return this;
         },
 
 
@@ -6521,6 +6585,7 @@ define(
 // data-races
 //
 //      TODO: should be loaded from server and abilities should load 
+//      TODO: Think of group of classes (DPS / Tank / Healer?)
 //
 // ===========================================================================
 define(
@@ -6533,28 +6598,34 @@ define(
     var ENTITY_CLASSES = [
         new EntityClass({
             name: 'Cleric',
-            description: 'Healer',
+            description: 'Clerics focus on using light magic to aid their allies and disable their foes',
             sprite: 'cleric',
             abilities: new Abilities([
                 // Basic heal
-                ABILITIES.healing,
-                // health and armor buff
-                // ...
+                ABILITIES.heal,
                 // damage target and heal self
-                // ...
-                // res
-                // ...
-                ABILITIES.flamelick
+                ABILITIES.smite,
+                // health and armor buff
+                ABILITIES.virtue
+                //// res
+                //ABILITIES.resurrect
             ])
         }),
 
-
         new EntityClass({
             name: 'Shadowknight',
-            description: 'An experienced warrior dabbling dark with unutterable sorrows',
+            description: 'A veteran dabbling in dark magic',
             sprite: 'shadowknight',
             abilities: new Abilities([
-                ABILITIES.darkblade
+                // basic physical attack
+                ABILITIES.darkblade,
+                //// attack + dot
+                //ABILITIES.darkblade,
+                //// siphon abilities
+                //ABILITIES.siphonstrength,
+                //// aoe + taunt
+                //ABILITIES.deathcloud
+
             ])
         }),
 
@@ -6568,13 +6639,30 @@ define(
         }),
 
         new EntityClass({
+            name: 'Ranger',
+            description: 'An archer',
+            sprite: 'ranger',
+            abilities: new Abilities([
+                //// single target
+                //ABILITIES.headshot,
+                //// dot + damage
+                //ABILITIES.poisonedarrow,
+                //// increases damage of next spell
+                //ABILITIES.aim,
+                //// aoe (will increase aggro - could be bad)
+                //ABILITIES.barrage
+            ])
+        }),
+
+        new EntityClass({
             name: 'Assassin',
             description: 'Stab yo eye',
             sprite: 'assassin',
             abilities: new Abilities([
                 ABILITIES.magicmissle
             ])
-        })
+        }),
+
 
     ];
 
@@ -7305,8 +7393,7 @@ define('Controller',[
                 // ----------------------
                 // if user is already logged in, 
                 logger.log('Controller', 'logged in already during controller initialize');
-                // TODO: Sometimes showHome is called afterwards
-                return handleLoggedIn();
+                handleLoggedIn();
             }
 
             // Listen for controller events to show different pages
