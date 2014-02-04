@@ -1335,6 +1335,11 @@ define(
             //  source: source of effect
             //      {Object} - an entity
             //
+            //  callback: optional callback {Function} 
+            //      NOTE: This is the default effect method, so in this case
+            //      the callback will be called after each damage / health /
+            //      buff section. 
+            //
             // The function body may be unique to each effect
             var self = this;
 
@@ -1440,17 +1445,20 @@ define(
                         'attributes').attributes;
 
                     // TODO::::: Should the logic be handled there instead of
-                    // here?
-                    // add it to the buff list
+                    // here? If in entity model, a lot of default logic
+                    // has to be handled there. If it's in the ability, can
+                    // customzie / tailor it more
+                    // TODO: stacking?
                     //
                     // ADD Buff
                     // ------------------
+                    // add it to the buff list
                     options[self.get('buffTarget')].addBuff(self);
                     var updatedStats = {};
 
                     // update based on effects
                     _.each(self.get('buffEffects'), function(val, key){
-                        updatedStats = currentStats[key] + val;
+                        updatedStats[key] = currentStats[key] + val;
                     });
     
                     // update the stats
@@ -1471,7 +1479,7 @@ define(
 
                         // update based on effects
                         _.each(self.get('buffEffects'), function(val, key){
-                            updatedStats = currentStats[key] - val;
+                            updatedStats[key] = currentStats[key] - val;
                         });
         
                         // update the stats
@@ -1479,11 +1487,12 @@ define(
                             updatedStats
                         );
 
-                         
-                    }, self.get('buffDuration'));
+                        if(options.callback){ options.callback(); }
 
-                    if(options.callback){ options.callback(); }
-
+                    // TODO: Allow the buffDuration to be modified by the
+                    // entity's properties.
+                    }, self.get('buffDuration') * 1000);
+                    
                 }, delay);
 
             }
@@ -1672,7 +1681,7 @@ define(
         }),
         smite: new Ability({
             name: 'Smite',
-            effectId: 'magicmissle',
+            effectId: 'magicMissle',
             castTime: 3.5,
             timeCost: 3.5,
             validTargets: ['enemy'],
@@ -1851,31 +1860,28 @@ define(
             var effects = this.get('activeEffects');
 
             // store the attributes
-            effects.push(ability.toJSON());
+            effects.push(ability.cid);
 
-            this.set({ effects: effects });
-
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
         },
+
         removeBuff: function removeBuff(ability){
-            // Remove effect
+            // Remove buff effect
+            //
+            logger.log('models/Entity', 'removeBuff(): called %O', ability);
             var effects = this.get('activeEffects');
 
             // remove the targeted ability
-            for(var i=0, len=effects.length; i<len; i++){
-                if(effects[i].cid === ability.attributes.cid){
-                    // remove the item at current index
-                    logger.log('models/Entity', 'removeBuff(): Found ability ' +
-                        '%O  at index ' + i + ' effect : %O', 
-                        ability, effects[i]);
-
-                    effects.splice(i,1);
-                    break;
-                }
+            var index = effects.indexOf(ability.cid);
+            if(index !== -1){
+                // remove the item at current index
+                effects.splice(index, 1);
             }
 
-            this.set({ effects: effects });
-
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
         },
 

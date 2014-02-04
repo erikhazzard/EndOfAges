@@ -120,6 +120,11 @@ define(
             //  source: source of effect
             //      {Object} - an entity
             //
+            //  callback: optional callback {Function} 
+            //      NOTE: This is the default effect method, so in this case
+            //      the callback will be called after each damage / health /
+            //      buff section. 
+            //
             // The function body may be unique to each effect
             var self = this;
 
@@ -225,17 +230,20 @@ define(
                         'attributes').attributes;
 
                     // TODO::::: Should the logic be handled there instead of
-                    // here?
-                    // add it to the buff list
+                    // here? If in entity model, a lot of default logic
+                    // has to be handled there. If it's in the ability, can
+                    // customzie / tailor it more
+                    // TODO: stacking?
                     //
                     // ADD Buff
                     // ------------------
+                    // add it to the buff list
                     options[self.get('buffTarget')].addBuff(self);
                     var updatedStats = {};
 
                     // update based on effects
                     _.each(self.get('buffEffects'), function(val, key){
-                        updatedStats = currentStats[key] + val;
+                        updatedStats[key] = currentStats[key] + val;
                     });
     
                     // update the stats
@@ -256,7 +264,7 @@ define(
 
                         // update based on effects
                         _.each(self.get('buffEffects'), function(val, key){
-                            updatedStats = currentStats[key] - val;
+                            updatedStats[key] = currentStats[key] - val;
                         });
         
                         // update the stats
@@ -264,11 +272,12 @@ define(
                             updatedStats
                         );
 
-                         
-                    }, self.get('buffDuration'));
+                        if(options.callback){ options.callback(); }
 
-                    if(options.callback){ options.callback(); }
-
+                    // TODO: Allow the buffDuration to be modified by the
+                    // entity's properties.
+                    }, self.get('buffDuration') * 1000);
+                    
                 }, delay);
 
             }

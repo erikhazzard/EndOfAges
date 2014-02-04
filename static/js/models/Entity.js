@@ -144,31 +144,28 @@ define(
             var effects = this.get('activeEffects');
 
             // store the attributes
-            effects.push(ability.toJSON());
+            effects.push(ability.cid);
 
-            this.set({ effects: effects });
-
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
         },
+
         removeBuff: function removeBuff(ability){
-            // Remove effect
+            // Remove buff effect
+            //
+            logger.log('models/Entity', 'removeBuff(): called %O', ability);
             var effects = this.get('activeEffects');
 
             // remove the targeted ability
-            for(var i=0, len=effects.length; i<len; i++){
-                if(effects[i].cid === ability.attributes.cid){
-                    // remove the item at current index
-                    logger.log('models/Entity', 'removeBuff(): Found ability ' +
-                        '%O  at index ' + i + ' effect : %O', 
-                        ability, effects[i]);
-
-                    effects.splice(i,1);
-                    break;
-                }
+            var index = effects.indexOf(ability.cid);
+            if(index !== -1){
+                // remove the item at current index
+                effects.splice(index, 1);
             }
 
-            this.set({ effects: effects });
-
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
         },
 

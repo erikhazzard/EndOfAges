@@ -118,7 +118,7 @@ define(
         }),
         smite: new Ability({
             name: 'Smite',
-            effectId: 'magicmissle',
+            effectId: 'magicMissle',
             castTime: 3.5,
             timeCost: 3.5,
             validTargets: ['enemy'],
