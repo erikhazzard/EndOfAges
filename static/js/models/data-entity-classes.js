@@ -1,9 +1,16 @@
 // ===========================================================================
 //
-// data-races
+// data-classes
 //
 //      TODO: should be loaded from server and abilities should load 
 //      TODO: Think of group of classes (DPS / Tank / Healer?)
+//
+//      -- Classes can be generally divided into types:
+//          Type: Physical and Magical
+//          Elements: Earth, Wind, Water, Fire, Light, Dark
+//          
+//          Class could be parts of any type / element
+//
 //
 // ===========================================================================
 define(
@@ -16,7 +23,7 @@ define(
     var ENTITY_CLASSES = [
         new EntityClass({
             name: 'Cleric',
-            description: 'Clerics focus on using light magic to aid their allies and disable their foes',
+            description: 'Clerics uselight magic to aid their allies and disable their foes',
             sprite: 'cleric',
             abilities: new Abilities([
                 // Basic heal
@@ -36,7 +43,7 @@ define(
             sprite: 'shadowknight',
             abilities: new Abilities([
                 // basic physical attack
-                ABILITIES.darkblade,
+                ABILITIES.darkblade
                 //// attack + dot
                 //ABILITIES.darkblade,
                 //// siphon abilities
@@ -48,11 +55,11 @@ define(
         }),
 
         new EntityClass({
-            name: 'Wizard',
-            description: 'Magic missle into the darkness',
+            name: 'Inferno Sage',
+            description: 'A weilder of flame',
             sprite: 'wizard',
             abilities: new Abilities([
-                ABILITIES.minorhealing
+                ABILITIES.flamelick
             ])
         }),
 

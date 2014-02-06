@@ -59,13 +59,14 @@ define([
                 var elapsed = new Date() - start;
                 assert(Timer._timers[originalId] === undefined);
 
-                // must take AT LEAST 80 ms (30ms + 50ms)
-                assert(elapsed >= 60);
+                // must take AT LEAST this timeout length + the final timeout length
+                //  (16 + 30)
+                assert(elapsed >= 20);
                 // give an extra 20ms of room for other parallel tests
-                assert(elapsed <= 100);
+                assert(elapsed <= 60);
 
                 done();
-            }, 20);
+            }, 8);
 
             originalId = timer1._id;
 
@@ -74,7 +75,7 @@ define([
 
             setTimeout(function(){
                 Timer.resumeAll();
-            }, 40); // wait some time, then unpause
+            }, 16); // wait some time, then unpause
 
         });
 

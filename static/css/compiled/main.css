@@ -57,16 +57,21 @@
 #battle .effect-magicMissle path {
   fill: #ffffff; }
 
-.page-create-character-wrapper .create-ability-wrapper {
-  display: block;
+#create-character-display-wrapper .ability-list {
+  position: relative;
+  overflow: hidden;
+  width: 100%; }
+#create-character-display-wrapper .ability-list-item {
   float: left;
   margin-right: 1%;
   width: 24%; }
-.page-create-character-wrapper .create-ability-wrapper.damage {
+#create-character-display-wrapper .create-ability-wrapper {
+  display: block; }
+#create-character-display-wrapper .create-ability-wrapper.damage {
   background: rgba(255, 20, 20, 0.8); }
-.page-create-character-wrapper .create-ability-wrapper.heal {
+#create-character-display-wrapper .create-ability-wrapper.heal {
   background: rgba(20, 255, 20, 0.8); }
-.page-create-character-wrapper .create-ability-wrapper.heal.damage {
+#create-character-display-wrapper .create-ability-wrapper.heal.damage {
   background: -webkit-radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);
   background: -moz-radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);
   background: radial-gradient(left top, ellipse cover, #dd2222 12%, #22dd22 110%);

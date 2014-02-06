@@ -1281,11 +1281,24 @@ define(
             // type / subtype
             // --------------------------
             // type could be either 'magic' or 'physical'
-            type: 'magic',
+            //  Can be either a {string}, representing 100% of the type, or
+            //  an object with keys consisting of the types (e.g., 
+            //      {physical: 0.7, magic: 0.3}
+            //
+            type: { magic: 1 },
+            // This is also valid: (will be transformed to an object)
+            // type: 'magic', 
+
             // TODO: allow multiple subtypes and percentages for sub types
+            //
             // subtypes are:
-            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
-            subType: 'fire',
+            //  none (e.g., purely physical), fire, light, dark, earth, air, water
+            //  Can be either a {string}, representing 100% of the element, or
+            //  an object with keys consisting of the element types along
+            //  with a number that combined will add to 1.0
+            element: {fire: 1},
+            // This is also valid: (will be transformed to an object)
+            // element: 'fire'
 
             // Damage
             // --------------------------
@@ -1318,7 +1331,59 @@ define(
             }
             
         },
+        
+        url: function getURL(){
+            var url = API_URL + 'abilities/' + this.get('id');
+            return url;
+        },
 
+        initialize: function gameInitialize(options){
+            // TODO: Restructure, get abilities from server.
+            // TODO: Allow ability to be modified. Store base stats(?) e.g., 
+            //  duration, cast time, etc.
+            //
+            var self = this;
+            options = options || {};
+            logger.log('models/Ability', 
+                'initialize() called : attributes: %O : options: %O',
+                this.attributes, options);
+
+            // if an effect attributes was passed in, updat the method
+            if(options.effect){ this.effect = options.effect; }
+
+            // set timeCost if it is not passed in
+            if(this.attributes.timeCost === null){
+                this.set({
+                    timeCost: this.get('castTime')
+                }, { silent: true });
+            }
+
+
+            // set type and element
+            var newType={}; 
+            if(typeof this.attributes.type === 'string'){
+                newType[this.attributes.type] = 1;
+                this.set({ type: newType }, {silent: true});
+            }
+            
+            var newElement={}; 
+            if(typeof this.attributes.element === 'string'){
+                newElement[this.attributes.element] = 1;
+                this.set({ element: newElement }, {silent: true});
+            }
+
+            // if the model is updated and a new effect attribute is set,
+            // update the effect method
+            this.on('change:effect', function(model, effect){
+                this.effect = effect;
+            });
+
+            return this;
+        },
+
+        // ------------------------------
+        // Default ability effect (NOTE: can be overriden for custom abilities)
+        // ------------------------------
         effect: function(options){
             // NOTE: This is the default effect function. If no effect attribute
             // is passed into the model, , it will use this function, which 
@@ -1355,7 +1420,6 @@ define(
             // stats
             var delay = this.get('castDuration') * 1000;
 
-
             // --------------------------
             // Heal
             // --------------------------
@@ -1377,7 +1441,7 @@ define(
                     function takeHeal(){
                         amount = options[self.get('healTarget')].takeHeal({
                             type: self.get('type'),
-                            subType: self.get('subType'),
+                            element: self.get('element'),
                             amount: self.get('heal'),
                             sourceAbility: self,
                             target: options.target,
@@ -1409,7 +1473,7 @@ define(
                     function takeDamage(){
                         amount = options[self.get('damageTarget')].takeDamage({
                             type: self.get('type'),
-                            subType: self.get('subType'),
+                            element: self.get('element'),
                             amount: self.get('damage'),
                             sourceAbility: self,
                             target: options.target,
@@ -1498,36 +1562,6 @@ define(
             }
 
             return amount;
-        },
-        
-        url: function getURL(){
-            var url = API_URL + 'abilities/' + this.get('id');
-            return url;
-        },
-
-        initialize: function gameInitialize(options){
-            options = options || {};
-            logger.log('models/Ability', 
-                'initialize() called : attributes: %O : options: %O',
-                this.attributes, options);
-
-            // if an effect attributes was passed in, updat the method
-            if(options.effect){ this.effect = options.effect; }
-
-            // set timeCost if it is not passed in
-            if(this.attributes.timeCost === null){
-                this.set({
-                    timeCost: this.get('castTime')
-                }, { silent: false });
-            }
-
-            // if the model is updated and a new effect attribute is set,
-            // update the effect method
-            this.on('change:effect', function(model, effect){
-                this.effect = effect;
-            });
-
-            return this;
         }
 
     });
@@ -1592,29 +1626,9 @@ define(
             timeCost: 2,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'arcane',
+            element: {light: 0.7, fire: 0.3},
             damage: 15
         }),
-        
-        // ------------------------------
-        // Damage - Dark - Shadowknight
-        // TODO: spell effects
-        // ------------------------------
-        'darkblade': new Ability({
-            name: 'Dark Blade',
-            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'magicMissle',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 0.3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            subType: 'dark',
-            damage: 8,
-            heal: 5,
-            healTarget: 'source'
-        }),
-
 
         // ------------------------------
         // Damage - Fire
@@ -1626,7 +1640,7 @@ define(
             timeCost: 3,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'fire',
+            element: 'fire',
             damage: 10
         }),
         'fireball': new Ability({
@@ -1636,7 +1650,7 @@ define(
             timeCost: 4,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'fire',
+            element: 'fire',
             damage: 40
         }),
 
@@ -1650,7 +1664,7 @@ define(
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             heal: 5
         }),
         'minorhealing': new Ability({
@@ -1660,7 +1674,7 @@ define(
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             heal: 15
         }),
 
@@ -1676,7 +1690,7 @@ define(
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             heal: 20
         }),
         smite: new Ability({
@@ -1686,7 +1700,7 @@ define(
             timeCost: 3.5,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             damage: 10,
             heal: 5,
             healTarget: 'source'
@@ -1698,16 +1712,37 @@ define(
             timeCost: 6,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
 
             heal: 10,
 
             buffEffects: { 
-                strength: 10, 
-                armor: 20,
+                armor: 10,
+                magicResist: 10,
                 maxHealth: 10
             }
+        }),
+
+        // ==============================
+        // 
+        // Shadowknight
+        //
+        // ==============================
+        'darkblade': new Ability({
+            name: 'Dark Blade',
+            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 0.3,
+            validTargets: ['enemy'],
+            type: {'magic': 0.3, 'physical': 0.7},
+            element: 'dark',
+            damage: 8,
+            heal: 5,
+            healTarget: 'source'
         })
+
     };
 
 
@@ -1847,6 +1882,11 @@ define(
                 this.healthChanged);
 
             return this;
+        },
+
+        resetAttributes: function(){
+            // Called after a battle, reset stats to base stats 
+            // Also, removes buffs, etc.
         },
 
         getScore: function getScore(){
@@ -6588,10 +6628,17 @@ define(
 
 // ===========================================================================
 //
-// data-races
+// data-classes
 //
 //      TODO: should be loaded from server and abilities should load 
 //      TODO: Think of group of classes (DPS / Tank / Healer?)
+//
+//      -- Classes can be generally divided into types:
+//          Type: Physical and Magical
+//          Elements: Earth, Wind, Water, Fire, Light, Dark
+//          
+//          Class could be parts of any type / element
+//
 //
 // ===========================================================================
 define(
@@ -6604,7 +6651,7 @@ define(
     var ENTITY_CLASSES = [
         new EntityClass({
             name: 'Cleric',
-            description: 'Clerics focus on using light magic to aid their allies and disable their foes',
+            description: 'Clerics uselight magic to aid their allies and disable their foes',
             sprite: 'cleric',
             abilities: new Abilities([
                 // Basic heal
@@ -6624,7 +6671,7 @@ define(
             sprite: 'shadowknight',
             abilities: new Abilities([
                 // basic physical attack
-                ABILITIES.darkblade,
+                ABILITIES.darkblade
                 //// attack + dot
                 //ABILITIES.darkblade,
                 //// siphon abilities
@@ -6636,11 +6683,11 @@ define(
         }),
 
         new EntityClass({
-            name: 'Wizard',
-            description: 'Magic missle into the darkness',
+            name: 'Inferno Sage',
+            description: 'A weilder of flame',
             sprite: 'wizard',
             abilities: new Abilities([
-                ABILITIES.minorhealing
+                ABILITIES.flamelick
             ])
         }),
 

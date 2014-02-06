@@ -29,29 +29,9 @@ define(
             timeCost: 2,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'arcane',
+            element: {light: 0.7, fire: 0.3},
             damage: 15
         }),
-        
-        // ------------------------------
-        // Damage - Dark - Shadowknight
-        // TODO: spell effects
-        // ------------------------------
-        'darkblade': new Ability({
-            name: 'Dark Blade',
-            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'magicMissle',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 0.3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            subType: 'dark',
-            damage: 8,
-            heal: 5,
-            healTarget: 'source'
-        }),
-
 
         // ------------------------------
         // Damage - Fire
@@ -63,7 +43,7 @@ define(
             timeCost: 3,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'fire',
+            element: 'fire',
             damage: 10
         }),
         'fireball': new Ability({
@@ -73,7 +53,7 @@ define(
             timeCost: 4,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'fire',
+            element: 'fire',
             damage: 40
         }),
 
@@ -87,7 +67,7 @@ define(
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             heal: 5
         }),
         'minorhealing': new Ability({
@@ -97,7 +77,7 @@ define(
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             heal: 15
         }),
 
@@ -113,7 +93,7 @@ define(
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             heal: 20
         }),
         smite: new Ability({
@@ -123,7 +103,7 @@ define(
             timeCost: 3.5,
             validTargets: ['enemy'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
             damage: 10,
             heal: 5,
             healTarget: 'source'
@@ -135,16 +115,37 @@ define(
             timeCost: 6,
             validTargets: ['player'],
             type: 'magic',
-            subType: 'light',
+            element: 'light',
 
             heal: 10,
 
             buffEffects: { 
-                strength: 10, 
-                armor: 20,
+                armor: 10,
+                magicResist: 10,
                 maxHealth: 10
             }
+        }),
+
+        // ==============================
+        // 
+        // Shadowknight
+        //
+        // ==============================
+        'darkblade': new Ability({
+            name: 'Dark Blade',
+            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 0.3,
+            validTargets: ['enemy'],
+            type: {'magic': 0.3, 'physical': 0.7},
+            element: 'dark',
+            damage: 8,
+            heal: 5,
+            healTarget: 'source'
         })
+
     };
 
 

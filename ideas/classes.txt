@@ -1,3 +1,18 @@
 A class is little more than a collection of abilities.
     Different classes may allow certain quests / events to trigger, but 
     gameplay wise they are mainly ability buckets
+
+
+---- Classes based on   
+    -Physical
+    -Magic
+
+    -Each element
+
+    -can mix physical, elements
+        -magic, elements,
+        -hybrid
+
+    -6 elements, 2 types
+        -12 base classes
+    -Hybrid

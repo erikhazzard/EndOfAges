@@ -66,11 +66,24 @@ define(
             // type / subtype
             // --------------------------
             // type could be either 'magic' or 'physical'
-            type: 'magic',
+            //  Can be either a {string}, representing 100% of the type, or
+            //  an object with keys consisting of the types (e.g., 
+            //      {physical: 0.7, magic: 0.3}
+            //
+            type: { magic: 1 },
+            // This is also valid: (will be transformed to an object)
+            // type: 'magic', 
+
             // TODO: allow multiple subtypes and percentages for sub types
+            //
             // subtypes are:
-            //  arcane, fire, light, dark, earth, air, water, or physical (for physical)
-            subType: 'fire',
+            //  none (e.g., purely physical), fire, light, dark, earth, air, water
+            //  Can be either a {string}, representing 100% of the element, or
+            //  an object with keys consisting of the element types along
+            //  with a number that combined will add to 1.0
+            element: {fire: 1},
+            // This is also valid: (will be transformed to an object)
+            // element: 'fire'
 
             // Damage
             // --------------------------
@@ -103,7 +116,59 @@ define(
             }
             
         },
+        
+        url: function getURL(){
+            var url = API_URL + 'abilities/' + this.get('id');
+            return url;
+        },
 
+        initialize: function gameInitialize(options){
+            // TODO: Restructure, get abilities from server.
+            // TODO: Allow ability to be modified. Store base stats(?) e.g., 
+            //  duration, cast time, etc.
+            //
+            var self = this;
+            options = options || {};
+            logger.log('models/Ability', 
+                'initialize() called : attributes: %O : options: %O',
+                this.attributes, options);
+
+            // if an effect attributes was passed in, updat the method
+            if(options.effect){ this.effect = options.effect; }
+
+            // set timeCost if it is not passed in
+            if(this.attributes.timeCost === null){
+                this.set({
+                    timeCost: this.get('castTime')
+                }, { silent: true });
+            }
+
+
+            // set type and element
+            var newType={}; 
+            if(typeof this.attributes.type === 'string'){
+                newType[this.attributes.type] = 1;
+                this.set({ type: newType }, {silent: true});
+            }
+            
+            var newElement={}; 
+            if(typeof this.attributes.element === 'string'){
+                newElement[this.attributes.element] = 1;
+                this.set({ element: newElement }, {silent: true});
+            }
+
+            // if the model is updated and a new effect attribute is set,
+            // update the effect method
+            this.on('change:effect', function(model, effect){
+                this.effect = effect;
+            });
+
+            return this;
+        },
+
+        // ------------------------------
+        // Default ability effect (NOTE: can be overriden for custom abilities)
+        // ------------------------------
         effect: function(options){
             // NOTE: This is the default effect function. If no effect attribute
             // is passed into the model, , it will use this function, which 
@@ -140,7 +205,6 @@ define(
             // stats
             var delay = this.get('castDuration') * 1000;
 
-
             // --------------------------
             // Heal
             // --------------------------
@@ -162,7 +226,7 @@ define(
                     function takeHeal(){
                         amount = options[self.get('healTarget')].takeHeal({
                             type: self.get('type'),
-                            subType: self.get('subType'),
+                            element: self.get('element'),
                             amount: self.get('heal'),
                             sourceAbility: self,
                             target: options.target,
@@ -194,7 +258,7 @@ define(
                     function takeDamage(){
                         amount = options[self.get('damageTarget')].takeDamage({
                             type: self.get('type'),
-                            subType: self.get('subType'),
+                            element: self.get('element'),
                             amount: self.get('damage'),
                             sourceAbility: self,
                             target: options.target,
@@ -283,36 +347,6 @@ define(
             }
 
             return amount;
-        },
-        
-        url: function getURL(){
-            var url = API_URL + 'abilities/' + this.get('id');
-            return url;
-        },
-
-        initialize: function gameInitialize(options){
-            options = options || {};
-            logger.log('models/Ability', 
-                'initialize() called : attributes: %O : options: %O',
-                this.attributes, options);
-
-            // if an effect attributes was passed in, updat the method
-            if(options.effect){ this.effect = options.effect; }
-
-            // set timeCost if it is not passed in
-            if(this.attributes.timeCost === null){
-                this.set({
-                    timeCost: this.get('castTime')
-                }, { silent: false });
-            }
-
-            // if the model is updated and a new effect attribute is set,
-            // update the effect method
-            this.on('change:effect', function(model, effect){
-                this.effect = effect;
-            });
-
-            return this;
         }
 
     });

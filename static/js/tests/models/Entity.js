@@ -1,5 +1,7 @@
 //========================================
-//Tests - Entities Collection
+//
+//Tests - Entity
+//
 //========================================
 define([
     'events',
@@ -42,20 +44,22 @@ define([
         // Buffs
         // ------------------------------
         describe('Buffs tests', function(){
-            it('should add and remove a buff', function(done){
-                var buffEffects = { strength: 10, maxHealth: 20 };
+            it('should add and remove a buff, and affect stats', function(done){
+                // TODO::::::::::::::::: This doesn't always work, might be
+                // a race condition, or a timing issue. Investigate
+                var buffEffects = { armor: 10, maxHealth: 20 };
 
                 var ability = new Ability({
                     name: 'test',
                     castDuration: 0,
                     timeCost: 0,
                     buffEffects: buffEffects,
-                    buffDuration: 0.03 // only last 100 ms
+                    buffDuration: 0.03 // last a short time
                 });
 
                 var entity = new Entity();
                 var originalStats = {
-                    strength: entity.get('attributes').get('strength'),
+                    armor: entity.get('attributes').get('armor'),
                     maxHealth: entity.get('attributes').get('maxHealth')
                 };
 
@@ -80,30 +84,30 @@ define([
                     entity.get('activeEffects')[0].should.equal(ability.cid);
 
                     // make sure stats were increased
-                    entity.get('attributes').get('strength').should.equal(
-                        originalStats.strength + buffEffects.strength
+                    entity.get('attributes').get('armor').should.equal(
+                        originalStats.armor + buffEffects.armor
                     );
                     entity.get('attributes').get('maxHealth').should.equal(
                         originalStats.maxHealth + buffEffects.maxHealth
                     );
 
-                }, 7);
+                }, 5);
 
                 // Finally, make sure buff is removed
                 setTimeout(function(){
-                    entity.get('activeEffects').length.should.equal(0);
-                    entity.get('activeEffects').length.should.equal(0);
-
                     // make sure stat was set to normal
-                    entity.get('attributes').get('strength').should.equal(
-                        originalStats.strength 
+                    entity.get('attributes').get('armor').should.equal(
+                        originalStats.armor
                     );
                     entity.get('attributes').get('maxHealth').should.equal(
                         originalStats.maxHealth
                     );
 
+                    // TODO: sometimes it's not removed??
+                    entity.get('activeEffects').length.should.equal(0);
+
                     done();
-                }, ability.get('buffDuration') * 1000 * 1.8);
+                }, ability.get('buffDuration') * 1000 * 2.7);
             });
         });
     });

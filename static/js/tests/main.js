@@ -82,7 +82,6 @@ require(['events',
     mocha.setup('bdd');
     logger.options.logLevel = [
         'error'
-        , 'models/Entity'
     ];
 
     //-----------------------------------
@@ -91,6 +90,7 @@ require(['events',
     require([
         'tests/collections/Entities'
         , 'tests/models/Entity'
+        , 'tests/models/Ability'
         , 'tests/views/subviews/Battle'
         , 'tests/util/generateName'
         , 'tests/util/Timer'

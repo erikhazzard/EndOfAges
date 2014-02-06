@@ -1,11 +1,20 @@
 // Abilities
 // --------------------------------------
-.page-create-character-wrapper {
-    .create-ability-wrapper {
-        display: block;
+#create-character-display-wrapper {
+    .ability-list {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .ability-list-item {
         float: left;
         margin-right: 1%;
         width: 24%;
+    }
+
+    .create-ability-wrapper {
+        display: block;
     }
 
     // Damage / heal 

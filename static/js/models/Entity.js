@@ -133,6 +133,11 @@ define(
             return this;
         },
 
+        resetAttributes: function(){
+            // Called after a battle, reset stats to base stats 
+            // Also, removes buffs, etc.
+        },
+
         getScore: function getScore(){
             // TODO: get a combat score for this entity based on abilities
             // and states
