@@ -23,20 +23,71 @@ define([
         // Basic damage tests
         // ------------------------------
         describe('Take damage tests', function(){
-            it('should take damage', function(){
+            describe('base stats (0 for everything)', function(){
                 var entity = new Entity();
                 var entity2 = new Entity();
 
-                var startingHealth = entity.get('attributes').get('health');
-                var amt = 20;
+                it('should take damage from a magic ability', function(){
+                    var startingHealth = entity.get('attributes').get('health');
+                    var amt = 20;
 
-                entity.takeDamage({
-                    sourceAbility: null,
-                    source: entity2,
-                    amount: amt
+                    entity.takeDamage({
+                        sourceAbility: new Ability({ type: {magic: 1}}),
+                        source: entity2,
+                        amount: amt
+                    });
+
+                    entity.get('attributes').get('health').should.equal((startingHealth - amt));
                 });
+                it('should take damage from a physcial ability', function(){
 
-                entity.get('attributes').get('health').should.equal((startingHealth - amt));
+                    var startingHealth = entity.get('attributes').get('health');
+                    var amt = 20;
+
+                    entity.takeDamage({
+                        sourceAbility: new Ability({ type: {physical: 1}}),
+                        source: entity2,
+                        amount: amt
+                    });
+
+                    entity.get('attributes').get('health').should.equal((startingHealth - amt));
+                });
+                it('should take damage from a mixed ability', function(){
+                    var startingHealth = entity.get('attributes').get('health');
+                    var amt = 20;
+
+                    entity.takeDamage({
+                        sourceAbility: new Ability({ type: {physical: 0.5, magic: 0.5}}),
+                        source: entity2,
+                        amount: amt
+                    });
+
+                    entity.get('attributes').get('health').should.equal((startingHealth - amt));
+                });
+            });
+
+            // --------------------------
+            // WITH stats
+            // --------------------------
+            describe('Some armor and magic resist', function(){
+                var entity = new Entity({
+                    baseAttributes: { armor: 25, magicResist: 25 }
+                });
+                var entity2 = new Entity();
+
+                it('should reduce when armor is 25', function(){
+                    var startingHealth = entity.get('attributes').get('health');
+                    var amt = 20;
+
+                    entity.takeDamage({
+                        sourceAbility: new Ability({ type: {magic: 1}}),
+                        source: entity2,
+                        amount: amt
+                    });
+                    console.log(">>>>>>>>>>>", amt);
+
+                    entity.get('attributes').get('health').should.equal((startingHealth - amt));
+                });
             });
         });
 

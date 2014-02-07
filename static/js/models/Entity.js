@@ -220,15 +220,45 @@ define(
             var sourceAbility = options.sourceAbility;
             var damage = options.amount * -1;
 
-            // TODO: process damage
-
             // update attributes
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
             var maxHealth = attrs.get('maxHealth');
+
+            // --------------------------
+            // process damage
+            // --------------------------
+            // Get modifier for armor and magic resist
+            var modPhysical = 0;
+            var modMagic = 0;
+            var moddedDamage = 0;
+
+            var physicalComposition = sourceAbility.get('type').physical;
+            var magicComposition = sourceAbility.get('type').magic;
+
+            // TODO: how to do composition for hybrid skills
+            if(physicalComposition){
+                modPhysical = (100 / (100+(
+                    physicalComposition * attrs.get('armor')
+                )));
+                moddedDamage += modPhysical * (damage * physicalComposition);
+            }
+            if(magicComposition){
+                modMagic = (100 / (100+(
+                    magicComposition * attrs.get('magicResist')
+                )));
+                moddedDamage += modMagic * (damage * magicComposition);
+            }
+
+            // update damage with mod
+            damage = moddedDamage;
+            
+            // --------------------------
+            // update health
+            // --------------------------
             var newHealth = curHealth + damage;
 
-            // TODO: check if there are any buffs that protect from death
+            // TODO: check if there are any buffs that protect from death?
 
             // If the health drops below 0, the target is dead
             if(newHealth <= 0){ newHealth = 0; }

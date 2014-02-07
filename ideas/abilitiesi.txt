@@ -57,3 +57,7 @@ elemental modifiers
 
 
 ** Modify abilities themselves (cast time, duration, etc)
+
+---------------
+
+Abilities that do more damage or are more effective when an enemy's timer bar is low or high

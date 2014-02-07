@@ -1139,34 +1139,40 @@ define(
             health: 100,
             maxHealth: 100,
 
-            //power is used to cast spells and use abilities
-            power: 100,
-            maxPower: 100,
-
-            //Stats
+            //Combat stats
             //---------------------------
-            strength: 10,
-            agility: 10,
-            dexterity: 10,
-            stamina: 10,
-            intelligence: 10,
-            wisdom: 10,
+            // Physcial
+            armor: 0,
+            attackPower: 0,
+
+            magicResist: 0,
+            abilityPower: 0,
 
             //Regen
             //---------------------------
             //How many points to regen per 'tick'
-            regenHealth: 1,
-            regenPower: 1,
+            regenHealth: 0,
 
-            //Combat stats
+            // element modifiers
             //---------------------------
-            // "Final" calculated values:
-            attack: 0,
-            attackSpeed: 0,
+            air: 0,
+            dark: 0,
+            earth: 0,
+            fire: 0,
+            light: 0,
+            water: 0,
 
-            // ARMOR modifier
-            armor: 0,
- 
+            //Resists
+            //---------------------------
+            resistAir: 0,
+            resistDark: 0,
+            resistEarth: 0,
+            resistFire: 0,
+            resistLight: 0,
+            resistWater: 0,
+
+            // Other modifiers
+            // --------------------------
             //Chance to deal critical damage (for all abilities)
             chanceCritical: 0,
 
@@ -1196,16 +1202,7 @@ define(
             chanceRiposte: 0,
 
             // Chance for a meele hit to do area of effect damage
-            chanceAoe: 0,
-
-            //Resists
-            //---------------------------
-            resistAir: 0,
-            resistDark: 0,
-            resistEarth: 0,
-            resistFire: 0,
-            resistLight: 0,
-            resistWater: 0
+            chanceAoe: 0
         }
     });
 
@@ -1971,15 +1968,45 @@ define(
             var sourceAbility = options.sourceAbility;
             var damage = options.amount * -1;
 
-            // TODO: process damage
-
             // update attributes
             var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
             var maxHealth = attrs.get('maxHealth');
+
+            // --------------------------
+            // process damage
+            // --------------------------
+            // Get modifier for armor and magic resist
+            var modPhysical = 0;
+            var modMagic = 0;
+            var moddedDamage = 0;
+
+            var physicalComposition = sourceAbility.get('type').physical;
+            var magicComposition = sourceAbility.get('type').magic;
+
+            // TODO: how to do composition for hybrid skills
+            if(physicalComposition){
+                modPhysical = (100 / (100+(
+                    physicalComposition * attrs.get('armor')
+                )));
+                moddedDamage += modPhysical * (damage * physicalComposition);
+            }
+            if(magicComposition){
+                modMagic = (100 / (100+(
+                    magicComposition * attrs.get('magicResist')
+                )));
+                moddedDamage += modMagic * (damage * magicComposition);
+            }
+
+            // update damage with mod
+            damage = moddedDamage;
+            
+            // --------------------------
+            // update health
+            // --------------------------
             var newHealth = curHealth + damage;
 
-            // TODO: check if there are any buffs that protect from death
+            // TODO: check if there are any buffs that protect from death?
 
             // If the health drops below 0, the target is dead
             if(newHealth <= 0){ newHealth = 0; }
@@ -6445,10 +6472,10 @@ define(
             description: 'An elf',
             sprite: 'elf',
             baseStats: {
-                agility: 19,
-                strength: 12,
-                wisdom: 17,
-                intelligence: 12
+                attackPower: 13,
+                armor: 10,
+                magicResist: 15,
+                abilityPower: 13
             }
         }),
         new Race({
@@ -6456,10 +6483,10 @@ define(
             description: 'Boring',
             sprite: 'human',
             baseStats: {
-                agility: 15,
-                strength: 15,
-                wisdom: 15,
-                intelligence: 15
+                attackPower: 12,
+                armor: 12,
+                magicResist: 12,
+                abilityPower: 12
             }
         }),
         new Race({
@@ -6467,10 +6494,10 @@ define(
             description: 'Boring',
             sprite: 'mimirian',
             baseStats: {
-                agility: 11,
-                strength: 17,
-                wisdom: 16,
-                intelligence: 16
+                attackPower: 10,
+                armor: 18,
+                magicResist: 18,
+                abilityPower: 12
             }
         })
     ];

@@ -16,10 +16,10 @@ define(
             description: 'An elf',
             sprite: 'elf',
             baseStats: {
-                agility: 19,
-                strength: 12,
-                wisdom: 17,
-                intelligence: 12
+                attackPower: 13,
+                armor: 10,
+                magicResist: 15,
+                abilityPower: 13
             }
         }),
         new Race({
@@ -27,10 +27,10 @@ define(
             description: 'Boring',
             sprite: 'human',
             baseStats: {
-                agility: 15,
-                strength: 15,
-                wisdom: 15,
-                intelligence: 15
+                attackPower: 12,
+                armor: 12,
+                magicResist: 12,
+                abilityPower: 12
             }
         }),
         new Race({
@@ -38,10 +38,10 @@ define(
             description: 'Boring',
             sprite: 'mimirian',
             baseStats: {
-                agility: 11,
-                strength: 17,
-                wisdom: 16,
-                intelligence: 16
+                attackPower: 10,
+                armor: 18,
+                magicResist: 18,
+                abilityPower: 12
             }
         })
     ];

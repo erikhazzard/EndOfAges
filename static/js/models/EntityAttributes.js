@@ -18,34 +18,40 @@ define(
             health: 100,
             maxHealth: 100,
 
-            //power is used to cast spells and use abilities
-            power: 100,
-            maxPower: 100,
-
-            //Stats
+            //Combat stats
             //---------------------------
-            strength: 10,
-            agility: 10,
-            dexterity: 10,
-            stamina: 10,
-            intelligence: 10,
-            wisdom: 10,
+            // Physcial
+            armor: 0,
+            attackPower: 0,
+
+            magicResist: 0,
+            abilityPower: 0,
 
             //Regen
             //---------------------------
             //How many points to regen per 'tick'
-            regenHealth: 1,
-            regenPower: 1,
+            regenHealth: 0,
 
-            //Combat stats
+            // element modifiers
             //---------------------------
-            // "Final" calculated values:
-            attack: 0,
-            attackSpeed: 0,
+            air: 0,
+            dark: 0,
+            earth: 0,
+            fire: 0,
+            light: 0,
+            water: 0,
 
-            // ARMOR modifier
-            armor: 0,
- 
+            //Resists
+            //---------------------------
+            resistAir: 0,
+            resistDark: 0,
+            resistEarth: 0,
+            resistFire: 0,
+            resistLight: 0,
+            resistWater: 0,
+
+            // Other modifiers
+            // --------------------------
             //Chance to deal critical damage (for all abilities)
             chanceCritical: 0,
 
@@ -75,16 +81,7 @@ define(
             chanceRiposte: 0,
 
             // Chance for a meele hit to do area of effect damage
-            chanceAoe: 0,
-
-            //Resists
-            //---------------------------
-            resistAir: 0,
-            resistDark: 0,
-            resistEarth: 0,
-            resistFire: 0,
-            resistLight: 0,
-            resistWater: 0
+            chanceAoe: 0
         }
     });
 
