@@ -2012,17 +2012,19 @@ define(
             // --------------------------
             // Get modifier for armor and magic resist
             // update damage with mod
-            var moddedDamage = 0;
+            var moddedDamage = 0,
+                physicalDamage, magicDamage;
+
             if(type.physical){
-                moddedDamage += this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
+                physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
+                moddedDamage += physicalDamage;
             }
             if(type.magic){
-                moddedDamage += this.calculateDamageMultiplier(type.magic, magicResist) * (damage * type.magic);
+                magicDamage = this.calculateDamageMultiplier(type.magic, magicResist) * (damage * type.magic);
+                moddedDamage += magicDamage;
             }
 
-
-            console.log("<<<<<<<<<<<<<", moddedDamage, damage);
-
+            // Update the damage to be the calculated modified damage
             damage = moddedDamage;
             
             // --------------------------
