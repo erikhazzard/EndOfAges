@@ -331,7 +331,9 @@ define(
             this.model.set({ 
                 race: raceModel, 
                 sprite: raceModel.get('sprite') 
-            });
+            }, { silent: true });
+            this.model.trigger('change:race');
+            this.model.trigger('change:sprite');
 
             logger.log('views/PageCreateCharacter', 'finished setting race to %O',
                 raceModel);
@@ -377,7 +379,6 @@ define(
             // TODO: hide abilities that haven't been unlocked? 
             // ... game design task
             var abilities = classModel.get('abilities');
-            this.model.set({ abilities: abilities });
 
             // update class html elements (TODO: View?)
             this.getSelector('.class-info-wrapper').removeClass('hidden');
@@ -400,7 +401,11 @@ define(
             // --------------------------
             // update model
             // --------------------------
-            this.model.set({ 'class' : classModel });
+            // TODO: TODO: !!!!!!!!!!! Think about this : should entity
+            // get a class passed in, or just the abilities? here, class
+            // is passed in, and entity model gets abilities from it
+            this.model.set({ 'class' : classModel }, { silent: true });
+            this.model.trigger('change:class');
 
             return this;
         },

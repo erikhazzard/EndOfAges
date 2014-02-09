@@ -1594,156 +1594,89 @@ define(
 
 // ===========================================================================
 //
-// data-abilities
+// generateName
 //
-//      TODO: should be loaded from server and abilities should load on a per
-//      entity level
+//      -Generates a random name
 //
 // ===========================================================================
-define(
-    'models/data-abilities',[ 'events', 'logger', 'models/Ability' ], function(
-        events, logger, Ability
-    ){
-    // TODO: think of structure.
-    // Maybe instead of damage and heal, `amount` is used, and a separate
-    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
-    // DoT, buff, etc. type spell
-    logger.log('models/data-abilities', 'Creating abilities');
+define( 'util/generateName',[], function funcGenerateName(){
+    function generateName(){
+        var vowels = "aeiouyaeiouaeioea";
+        var cons = "bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkdtr";
+        var rndname = []; // final name
+        var paircons = "ngrkndstshthphsktrdrbrgrfrclcrst";
+        var randomNum = Math.random() * 75 | 0;
+        var orig = randomNum;
+        var n=1;
 
-    // Here be abilities. This would be loaded in a DB and entities would
-    // get abilities from server
-    var abilities = {
-        // ------------------------------
-        // Damage - Arcane
-        // ------------------------------
-        'magicmissle': new Ability({
-            name: 'Magic Missle',
-            effectId: 'magicMissle',
-            castTime: 2,
-            timeCost: 2,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: {light: 0.7, fire: 0.3},
-            damage: 15
-        }),
+        var dlc=false;
+        var vwl=false;
+        var dbl=false;
 
-        // ------------------------------
-        // Damage - Fire
-        // ------------------------------
-        'flamelick': new Ability({
-            name: 'Flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 10
-        }),
-        'fireball': new Ability({
-            name: 'Fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 40
-        }),
+        if (randomNum>63) {
+            // randomNum is 0 - 75 where 64-75 is cons pair, 
+            // 17-63 is cons, 0-16 is vowel
+            randomNum=(randomNum-61)*2;	// name can't start with "ng" "nd" or "rk"
+            rndname[0]=paircons[randomNum];
+            rndname[1]=paircons[randomNum+1];
+            n=2;
+        } else if (randomNum>16) {
+            randomNum -= 17;
+            rndname[0] = cons[randomNum];
+        } else {
+            rndname[0]=vowels[randomNum];
+            vwl=true;
+        }
 
-        // ------------------------------
-        // Healing - Light
-        // ------------------------------
-        'trivialhealing': new Ability({
-            name: 'Trivial Healing',
-            effectId: 'trivialHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 5
-        }),
-        'minorhealing': new Ability({
-            name: 'Minor Healing',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 15
-        }),
+        var namlen = 5 + (Math.random() * 5 | 0);
 
-        // ==============================
-        // 
-        // Cleric
-        //
-        // ==============================
-        heal: new Ability({
-            name: 'Heal',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 20
-        }),
-        smite: new Ability({
-            name: 'Smite',
-            effectId: 'magicMissle',
-            castTime: 3.5,
-            timeCost: 3.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: 10,
-            heal: 5,
-            healTarget: 'source'
-        }),
-        virtue: new Ability({
-            name: 'Virtue',
-            effectId: 'minorHealing',
-            castTime: 6,
-            timeCost: 6,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            heal: 10,
-
-            buffEffects: { 
-                armor: 10,
-                magicResist: 10,
-                maxHealth: 10
+        for(var i=n;i<namlen;i++){
+            dlc=false;
+            if (vwl){
+                //last char was a vowel		
+                // so pick a cons or cons pair
+                randomNum=Math.random() * 62 | 0;
+                if (randomNum>46) {	
+                    // pick a cons pair
+                    if(i>namlen-3){
+                        // last 2 chars in name?
+                        // name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
+                        randomNum=(Math.random() * 7 | 0)*2;
+                    } else {	
+                        // pick any from the set
+                        randomNum=(randomNum-47)*2;
+                    }
+                    rndname[i]=paircons[randomNum];
+                    rndname[i+1]=paircons[randomNum+1];
+                    dlc=true;	// flag keeps second letter from being doubled below
+                    i+=1;
+                } else {	
+                    // select a single cons
+                    rndname[i]=cons[randomNum];
+                }
+            } else {		
+                // select a vowel
+                rndname[i]=vowels[Math.random() * 16 | 0];
             }
-        }),
+            vwl=!vwl;
+            if (!dbl && !dlc) {	
+                // one chance at double letters in name
+                if(!(Math.random() * (i+9) | 0)){
+                    // chances decrease towards end of name
+                    rndname[i+1]=rndname[i];
+                    dbl=true;
+                    i+=1;
+                }
+            }
+        }
 
-        // ==============================
-        // 
-        // Shadowknight
-        //
-        // ==============================
-        'darkblade': new Ability({
-            name: 'Dark Blade',
-            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'magicMissle',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 0.3,
-            validTargets: ['enemy'],
-            type: {'magic': 0.3, 'physical': 0.7},
-            element: 'dark',
-            damage: 8,
-            heal: 5,
-            healTarget: 'source'
-        })
-
-    };
-
-
-    return abilities;
+        // capitalize name
+        rndname[0] = rndname[0].toUpperCase();
+        rndname = rndname.join('');
+        // return it
+        return rndname;
+    }
+    return generateName;
 });
 
 // ===========================================================================
@@ -1752,6 +1685,8 @@ define(
 //
 //      This model manages an entity - a creature in the game
 //
+//      TODO: Rename attributes to something else, rethink how to store them
+//
 // ===========================================================================
 define(
     'models/Entity',[ 'backbone', 'marionette', 'logger',
@@ -1759,15 +1694,14 @@ define(
         'models/EntityAttributes',
         'collections/Abilities',
         'models/Ability',
-        'models/data-abilities'
-
+        'util/generateName'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         EntityAttributes,
         Abilities,
         Ability,
-        ABILITIES
+        generateName
     ){
 
     var Entity = Backbone.Model.extend({
@@ -1796,7 +1730,7 @@ define(
 
             //User object which owns this entity
             owner: null,
-            name: 'Soandso' + Math.random(),
+            name: generateName(),
 
             // Timer properties
             //---------------------------
@@ -1843,11 +1777,12 @@ define(
         initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
             options = options || {};
+            var self = this;
 
             // TODO: get attributes from server
             // set attributes and base attributes from server
             this.set({
-                name: 'Soandso' + Math.random(),
+                name: generateName(),
                 attributes: new EntityAttributes(options.attributes || {})
             }, {silent: true});
 
@@ -1858,20 +1793,54 @@ define(
             // TODO: allow setting just some entity attribute attributes
 
             // TODO: get AIdelay from server
-            this.set({ aiDelay: Math.random() * 2.5 });
+            // TODO: Don't set this for a player
+            this.set({ aiDelay: Math.random() * 3 });
 
-            // Setup entity abilities
-            if(!options.abilities){
-                // TODO: get from server
-                this.set({
-                    // TODO: DEV: remove random maxTimer
-                    //timerLimit: 60 * (Math.random() * 20 | 0),
-                    // TODO: get from server
-                    abilities: new Abilities([
-                        ABILITIES.magicmissle,
-                        ABILITIES.minorhealing,
-                        ABILITIES.fireball
-                    ])
+            // --------------------------
+            // SET ABILITIES FROM CLASS
+            // --------------------------
+            if(this.get('class')){
+                this.set({ abilities: this.get('class').get('abilities') }, { silent: true });
+            } else {
+                // If entity has no class yet (e.g., character create screen),
+                // change abilities when class changes
+                this.listenTo(this, 'change:class', function(){
+                    self.set({ abilities: self.get('class').get('abilities') });
+                });
+            }
+
+            // --------------------------
+            // Set stats from race
+            // --------------------------
+            // TODO: ::::::::::::: think more about this, should race ever change?
+            // Could have the create screen only change race when process is finished
+            if(this.get('race')){
+                this.set({ 
+                    attributes: new EntityAttributes(this.get('race').get('baseStats'))
+                });
+                this.set({ baseAttributes: this.get('attributes') });
+
+            } else {
+                // Entity has no race yet (e.g., create)
+                // TODO: ::::::::::: Don't always listen on this - allow
+                // race to change (e.g., spell effect) without clearing out
+                // stats
+                this.listenTo(this, 'change:race', function(){
+                    // attributes changed, need to reset listeners
+                    self.stopListening(self.get('attributes'));
+
+                    self.set({ 
+                        attributes: new EntityAttributes(self.get('race').get('baseStats'))
+                    });
+
+                    // listen to attributes
+                    self.listenTo(
+                        self.get('attributes'), 
+                        'change:health', 
+                        self.healthChanged);
+
+                    // set base attributes from attributes
+                    self.set({ baseAttributes: self.get('attributes') });
                 });
             }
 
@@ -2015,6 +1984,7 @@ define(
             var moddedDamage = 0,
                 physicalDamage, magicDamage;
 
+            // Get damage reduction from stats
             if(type.physical){
                 physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
                 moddedDamage += physicalDamage;
@@ -2024,9 +1994,15 @@ define(
                 moddedDamage += magicDamage;
             }
 
+            // TODO: Get value of damage increase from source entity's stats
+            // TODO: Get elemental boosts
+
             // Update the damage to be the calculated modified damage
             damage = moddedDamage;
-            
+
+            // round damage
+            damage = Math.round(damage);
+
             // --------------------------
             // update health
             // --------------------------
@@ -2760,6 +2736,297 @@ define(
 
 // ===========================================================================
 //
+// EntityClass
+//
+//  Model for a race (used in create process)
+//
+// ===========================================================================
+define(
+    'models/EntityClass',[ 'events', 'logger', 'util/API_URL' ], function ModelEntityClass(
+        events, logger, API_URL
+    ){
+
+        // Define the app user model. Similar to user model, but a bit different
+        var EntityClass = Backbone.Model.extend({
+            defaults: {
+                name: '',
+                description: '',
+                sprite: '',
+                // abilities will be a collection of abilities
+                abilities: [],
+                baseStats: {
+                    // todo: more...
+                    agility: 10
+                }
+            },
+
+            initialize: function appUserInitialize(){
+                var self = this;
+                logger.log('models/EntityClass', 
+                    'initialize: New entity class object created');
+
+                return this;
+            }
+
+        });
+
+    return EntityClass;
+});
+
+// ===========================================================================
+//
+// data-abilities
+//
+//      TODO: should be loaded from server and abilities should load on a per
+//      entity level
+//
+// ===========================================================================
+define(
+    'models/data-abilities',[ 'events', 'logger', 'models/Ability' ], function(
+        events, logger, Ability
+    ){
+    // TODO: think of structure.
+    // Maybe instead of damage and heal, `amount` is used, and a separate
+    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
+    // DoT, buff, etc. type spell
+    logger.log('models/data-abilities', 'Creating abilities');
+
+    // Here be abilities. This would be loaded in a DB and entities would
+    // get abilities from server
+    var abilities = {
+        // ------------------------------
+        // Damage - Arcane
+        // ------------------------------
+        'magicmissle': new Ability({
+            name: 'Magic Missle',
+            effectId: 'magicMissle',
+            castTime: 2,
+            timeCost: 2,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: {light: 0.7, fire: 0.3},
+            damage: 15
+        }),
+
+        // ------------------------------
+        // Damage - Fire
+        // ------------------------------
+        'flamelick': new Ability({
+            name: 'Flamelick',
+            effectId: 'flamelick',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 10
+        }),
+        'fireball': new Ability({
+            name: 'Fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 40
+        }),
+
+        // ------------------------------
+        // Healing - Light
+        // ------------------------------
+        'trivialhealing': new Ability({
+            name: 'Trivial Healing',
+            effectId: 'trivialHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 5
+        }),
+        'minorhealing': new Ability({
+            name: 'Minor Healing',
+            effectId: 'minorHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 15
+        }),
+
+        // ==============================
+        // 
+        // Cleric
+        //
+        // ==============================
+        heal: new Ability({
+            name: 'Heal',
+            effectId: 'minorHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 20
+        }),
+        smite: new Ability({
+            name: 'Smite',
+            effectId: 'magicMissle',
+            castTime: 3.5,
+            timeCost: 3.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: 10,
+            heal: 5,
+            healTarget: 'source'
+        }),
+        virtue: new Ability({
+            name: 'Virtue',
+            effectId: 'minorHealing',
+            castTime: 6,
+            timeCost: 6,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+
+            heal: 10,
+
+            buffEffects: { 
+                armor: 10,
+                magicResist: 10,
+                maxHealth: 10
+            }
+        }),
+
+        // ==============================
+        // 
+        // Shadowknight
+        //
+        // ==============================
+        'darkblade': new Ability({
+            name: 'Dark Blade',
+            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 0.3,
+            validTargets: ['enemy'],
+            type: {'magic': 0.3, 'physical': 0.7},
+            element: 'dark',
+            damage: 8,
+            heal: 5,
+            healTarget: 'source'
+        })
+
+    };
+
+
+    return abilities;
+});
+
+// ===========================================================================
+//
+// data-classes
+//
+//      TODO: should be loaded from server and abilities should load 
+//      TODO: Think of group of classes (DPS / Tank / Healer?)
+//
+//      -- Classes can be generally divided into types:
+//          Type: Physical and Magical
+//          Elements: Earth, Wind, Water, Fire, Light, Dark
+//          
+//          Class could be parts of any type / element
+//
+//
+// ===========================================================================
+define(
+    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass',
+        'collections/Abilities', 'models/data-abilities'], function(
+        events, logger, EntityClass,
+        Abilities, ABILITIES
+    ){
+
+    var ENTITY_CLASSES = [
+        new EntityClass({
+            name: 'Cleric',
+            description: 'Clerics uselight magic to aid their allies and disable their foes',
+            sprite: 'cleric',
+            abilities: new Abilities([
+                // Basic heal
+                ABILITIES.heal,
+                // damage target and heal self
+                ABILITIES.smite,
+                // health and armor buff
+                ABILITIES.virtue
+                //// res
+                //ABILITIES.resurrect
+            ])
+        }),
+
+        new EntityClass({
+            name: 'Shadowknight',
+            description: 'A veteran dabbling in dark magic',
+            sprite: 'shadowknight',
+            abilities: new Abilities([
+                // basic physical attack
+                ABILITIES.darkblade
+                //// attack + dot
+                //ABILITIES.darkblade,
+                //// siphon abilities
+                //ABILITIES.siphonstrength,
+                //// aoe + taunt
+                //ABILITIES.deathcloud
+
+            ])
+        }),
+
+        new EntityClass({
+            name: 'Inferno Sage',
+            description: 'A weilder of flame',
+            sprite: 'wizard',
+            abilities: new Abilities([
+                ABILITIES.flamelick
+            ])
+        }),
+
+        new EntityClass({
+            name: 'Ranger',
+            description: 'An archer',
+            sprite: 'ranger',
+            abilities: new Abilities([
+                ABILITIES.magicmissle
+                //// single target
+                //ABILITIES.headshot,
+                //// dot + damage
+                //ABILITIES.poisonedarrow,
+                //// increases damage of next spell
+                //ABILITIES.aim,
+                //// aoe (will increase aggro - could be bad)
+                //ABILITIES.barrage
+            ])
+        }),
+
+        new EntityClass({
+            name: 'Assassin',
+            description: 'Stab yo eye',
+            sprite: 'assassin',
+            abilities: new Abilities([
+                ABILITIES.magicmissle
+            ])
+        }),
+
+
+    ];
+
+
+    return ENTITY_CLASSES;
+});
+
+// ===========================================================================
+//
 //  Battle
 //
 //      This model manages an individual battle.
@@ -2771,14 +3038,15 @@ define(
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
         'models/Entity',
-        'collections/Abilities',
-        'models/data-abilities'
+        'collections/Abilities'
+        // TODO : remove this, get from server
+        ,'models/data-entity-classes'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
         Abilities,
-        ABILITIES
+        CLASSES
     ){
 
     var Battle = Backbone.Model.extend({
@@ -2831,6 +3099,8 @@ define(
             var abilities = [];
             var i = 0;
 
+            // TODO: :::::::::::::::: 
+            // Randomize enemies better, get enemies from server!
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
@@ -2853,29 +3123,19 @@ define(
 
         getRandomEntity: function getRandomEntity(){
             // Returns a randomly generate enemy entity
-            // TODO: make this more smarted, depending on player levels, etc.
+            // TODO: make this more smarter, depending on player levels, etc.
             var abilities = [];
             var entity;
             var sprites = ['tiger','man1', 'darkelf'];
 
-            if(Math.random() < 0.8){
-                abilities.push(ABILITIES.flamelick);
-            }
-            if(Math.random() < 0.6){
-                abilities.push(ABILITIES.trivialhealing);
-            }
-            if(Math.random() < 0.2){
-                abilities.push(ABILITIES.magicmissle);
-            }
-            if(Math.random() < 0.05){
-                abilities.push(ABILITIES.magicmissle);
-            }
-
             // generate new entity
             entity = new Entity({
-                sprite: sprites[ 
-                    Math.random() * sprites.length | 0],
-                abilities: new Abilities(abilities)
+                'class': CLASSES[Math.random() * CLASSES.length | 0],
+                // random stats
+                attributes: {
+                    armor: Math.random() * 10 | 0,
+                    magicResist: Math.random() * 10 | 0
+                }
             });
 
             return entity;
@@ -6203,7 +6463,6 @@ define(
 
             // show map
             logger.log('views/PageGame', '4. Showing map');
-            //this.regionMap.$el.show();
             this.regionMap.$el.css({ height: 100 });
 
             // update the map's current map node
@@ -6263,93 +6522,6 @@ define('views/EoALayoutView',[ 'backbone', 'marionette'], function(
         };
 
         return EoALayoutView;
-});
-
-// ===========================================================================
-//
-// generateName
-//
-//      -Generates a random name
-//
-// ===========================================================================
-define( 'util/generateName',[], function funcGenerateName(){
-    function generateName(){
-        var vowels = "aeiouyaeiouaeioea";
-        var cons = "bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkdtr";
-        var rndname = []; // final name
-        var paircons = "ngrkndstshthphsktrdrbrgrfrclcrst";
-        var randomNum = Math.random() * 75 | 0;
-        var orig = randomNum;
-        var n=1;
-
-        var dlc=false;
-        var vwl=false;
-        var dbl=false;
-
-        if (randomNum>63) {
-            // randomNum is 0 - 75 where 64-75 is cons pair, 
-            // 17-63 is cons, 0-16 is vowel
-            randomNum=(randomNum-61)*2;	// name can't start with "ng" "nd" or "rk"
-            rndname[0]=paircons[randomNum];
-            rndname[1]=paircons[randomNum+1];
-            n=2;
-        } else if (randomNum>16) {
-            randomNum -= 17;
-            rndname[0] = cons[randomNum];
-        } else {
-            rndname[0]=vowels[randomNum];
-            vwl=true;
-        }
-
-        var namlen = 5 + (Math.random() * 5 | 0);
-
-        for(var i=n;i<namlen;i++){
-            dlc=false;
-            if (vwl){
-                //last char was a vowel		
-                // so pick a cons or cons pair
-                randomNum=Math.random() * 62 | 0;
-                if (randomNum>46) {	
-                    // pick a cons pair
-                    if(i>namlen-3){
-                        // last 2 chars in name?
-                        // name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
-                        randomNum=(Math.random() * 7 | 0)*2;
-                    } else {	
-                        // pick any from the set
-                        randomNum=(randomNum-47)*2;
-                    }
-                    rndname[i]=paircons[randomNum];
-                    rndname[i+1]=paircons[randomNum+1];
-                    dlc=true;	// flag keeps second letter from being doubled below
-                    i+=1;
-                } else {	
-                    // select a single cons
-                    rndname[i]=cons[randomNum];
-                }
-            } else {		
-                // select a vowel
-                rndname[i]=vowels[Math.random() * 16 | 0];
-            }
-            vwl=!vwl;
-            if (!dbl && !dlc) {	
-                // one chance at double letters in name
-                if(!(Math.random() * (i+9) | 0)){
-                    // chances decrease towards end of name
-                    rndname[i+1]=rndname[i];
-                    dbl=true;
-                    i+=1;
-                }
-            }
-        }
-
-        // capitalize name
-        rndname[0] = rndname[0].toUpperCase();
-        rndname = rndname.join('');
-        // return it
-        return rndname;
-    }
-    return generateName;
 });
 
 // ===========================================================================
@@ -6637,142 +6809,6 @@ define(
     });
 
     return ClassListCollection;
-});
-
-// ===========================================================================
-//
-// EntityClass
-//
-//  Model for a race (used in create process)
-//
-// ===========================================================================
-define(
-    'models/EntityClass',[ 'events', 'logger', 'util/API_URL' ], function ModelEntityClass(
-        events, logger, API_URL
-    ){
-
-        // Define the app user model. Similar to user model, but a bit different
-        var EntityClass = Backbone.Model.extend({
-            defaults: {
-                name: '',
-                description: '',
-                sprite: '',
-                // abilities will be a collection of abilities
-                abilities: [],
-                baseStats: {
-                    // todo: more...
-                    agility: 10
-                }
-            },
-
-            initialize: function appUserInitialize(){
-                var self = this;
-                logger.log('models/EntityClass', 
-                    'initialize: New entity class object created');
-
-                return this;
-            }
-
-        });
-
-    return EntityClass;
-});
-
-// ===========================================================================
-//
-// data-classes
-//
-//      TODO: should be loaded from server and abilities should load 
-//      TODO: Think of group of classes (DPS / Tank / Healer?)
-//
-//      -- Classes can be generally divided into types:
-//          Type: Physical and Magical
-//          Elements: Earth, Wind, Water, Fire, Light, Dark
-//          
-//          Class could be parts of any type / element
-//
-//
-// ===========================================================================
-define(
-    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass',
-        'collections/Abilities', 'models/data-abilities'], function(
-        events, logger, EntityClass,
-        Abilities, ABILITIES
-    ){
-
-    var ENTITY_CLASSES = [
-        new EntityClass({
-            name: 'Cleric',
-            description: 'Clerics uselight magic to aid their allies and disable their foes',
-            sprite: 'cleric',
-            abilities: new Abilities([
-                // Basic heal
-                ABILITIES.heal,
-                // damage target and heal self
-                ABILITIES.smite,
-                // health and armor buff
-                ABILITIES.virtue
-                //// res
-                //ABILITIES.resurrect
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Shadowknight',
-            description: 'A veteran dabbling in dark magic',
-            sprite: 'shadowknight',
-            abilities: new Abilities([
-                // basic physical attack
-                ABILITIES.darkblade
-                //// attack + dot
-                //ABILITIES.darkblade,
-                //// siphon abilities
-                //ABILITIES.siphonstrength,
-                //// aoe + taunt
-                //ABILITIES.deathcloud
-
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Inferno Sage',
-            description: 'A weilder of flame',
-            sprite: 'wizard',
-            abilities: new Abilities([
-                ABILITIES.flamelick
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Ranger',
-            description: 'An archer',
-            sprite: 'ranger',
-            abilities: new Abilities([
-                //// single target
-                //ABILITIES.headshot,
-                //// dot + damage
-                //ABILITIES.poisonedarrow,
-                //// increases damage of next spell
-                //ABILITIES.aim,
-                //// aoe (will increase aggro - could be bad)
-                //ABILITIES.barrage
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Assassin',
-            description: 'Stab yo eye',
-            sprite: 'assassin',
-            abilities: new Abilities([
-                ABILITIES.magicmissle
-            ])
-        }),
-
-
-    ];
-
-
-    return ENTITY_CLASSES;
 });
 
 // ===========================================================================
@@ -7213,7 +7249,9 @@ define(
             this.model.set({ 
                 race: raceModel, 
                 sprite: raceModel.get('sprite') 
-            });
+            }, { silent: true });
+            this.model.trigger('change:race');
+            this.model.trigger('change:sprite');
 
             logger.log('views/PageCreateCharacter', 'finished setting race to %O',
                 raceModel);
@@ -7259,7 +7297,6 @@ define(
             // TODO: hide abilities that haven't been unlocked? 
             // ... game design task
             var abilities = classModel.get('abilities');
-            this.model.set({ abilities: abilities });
 
             // update class html elements (TODO: View?)
             this.getSelector('.class-info-wrapper').removeClass('hidden');
@@ -7282,7 +7319,11 @@ define(
             // --------------------------
             // update model
             // --------------------------
-            this.model.set({ 'class' : classModel });
+            // TODO: TODO: !!!!!!!!!!! Think about this : should entity
+            // get a class passed in, or just the abilities? here, class
+            // is passed in, and entity model gets abilities from it
+            this.model.set({ 'class' : classModel }, { silent: true });
+            this.model.trigger('change:class');
 
             return this;
         },

@@ -11,14 +11,15 @@ define(
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
         'models/Entity',
-        'collections/Abilities',
-        'models/data-abilities'
+        'collections/Abilities'
+        // TODO : remove this, get from server
+        ,'models/data-entity-classes'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
         Abilities,
-        ABILITIES
+        CLASSES
     ){
 
     var Battle = Backbone.Model.extend({
@@ -71,6 +72,8 @@ define(
             var abilities = [];
             var i = 0;
 
+            // TODO: :::::::::::::::: 
+            // Randomize enemies better, get enemies from server!
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
@@ -93,29 +96,19 @@ define(
 
         getRandomEntity: function getRandomEntity(){
             // Returns a randomly generate enemy entity
-            // TODO: make this more smarted, depending on player levels, etc.
+            // TODO: make this more smarter, depending on player levels, etc.
             var abilities = [];
             var entity;
             var sprites = ['tiger','man1', 'darkelf'];
 
-            if(Math.random() < 0.8){
-                abilities.push(ABILITIES.flamelick);
-            }
-            if(Math.random() < 0.6){
-                abilities.push(ABILITIES.trivialhealing);
-            }
-            if(Math.random() < 0.2){
-                abilities.push(ABILITIES.magicmissle);
-            }
-            if(Math.random() < 0.05){
-                abilities.push(ABILITIES.magicmissle);
-            }
-
             // generate new entity
             entity = new Entity({
-                sprite: sprites[ 
-                    Math.random() * sprites.length | 0],
-                abilities: new Abilities(abilities)
+                'class': CLASSES[Math.random() * CLASSES.length | 0],
+                // random stats
+                attributes: {
+                    armor: Math.random() * 10 | 0,
+                    magicResist: Math.random() * 10 | 0
+                }
             });
 
             return entity;

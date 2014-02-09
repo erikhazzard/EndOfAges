@@ -66,4 +66,5 @@ CURRENT
 
 -Abilities with some % physical / magic
 
-------------------- Magic Resist Physical calculations
+::::: Abilities : factor in attack and spellpower into damage calculations
+

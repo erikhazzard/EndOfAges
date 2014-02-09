@@ -68,6 +68,7 @@ define(
             description: 'An archer',
             sprite: 'ranger',
             abilities: new Abilities([
+                ABILITIES.magicmissle
                 //// single target
                 //ABILITIES.headshot,
                 //// dot + damage

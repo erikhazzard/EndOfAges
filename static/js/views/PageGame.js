@@ -215,7 +215,6 @@ define(
 
             // show map
             logger.log('views/PageGame', '4. Showing map');
-            //this.regionMap.$el.show();
             this.regionMap.$el.css({ height: 100 });
 
             // update the map's current map node

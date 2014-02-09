@@ -4,6 +4,8 @@
 //
 //      This model manages an entity - a creature in the game
 //
+//      TODO: Rename attributes to something else, rethink how to store them
+//
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
@@ -11,15 +13,14 @@ define(
         'models/EntityAttributes',
         'collections/Abilities',
         'models/Ability',
-        'models/data-abilities'
-
+        'util/generateName'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         EntityAttributes,
         Abilities,
         Ability,
-        ABILITIES
+        generateName
     ){
 
     var Entity = Backbone.Model.extend({
@@ -48,7 +49,7 @@ define(
 
             //User object which owns this entity
             owner: null,
-            name: 'Soandso' + Math.random(),
+            name: generateName(),
 
             // Timer properties
             //---------------------------
@@ -95,11 +96,12 @@ define(
         initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
             options = options || {};
+            var self = this;
 
             // TODO: get attributes from server
             // set attributes and base attributes from server
             this.set({
-                name: 'Soandso' + Math.random(),
+                name: generateName(),
                 attributes: new EntityAttributes(options.attributes || {})
             }, {silent: true});
 
@@ -110,20 +112,54 @@ define(
             // TODO: allow setting just some entity attribute attributes
 
             // TODO: get AIdelay from server
-            this.set({ aiDelay: Math.random() * 2.5 });
+            // TODO: Don't set this for a player
+            this.set({ aiDelay: Math.random() * 3 });
 
-            // Setup entity abilities
-            if(!options.abilities){
-                // TODO: get from server
-                this.set({
-                    // TODO: DEV: remove random maxTimer
-                    //timerLimit: 60 * (Math.random() * 20 | 0),
-                    // TODO: get from server
-                    abilities: new Abilities([
-                        ABILITIES.magicmissle,
-                        ABILITIES.minorhealing,
-                        ABILITIES.fireball
-                    ])
+            // --------------------------
+            // SET ABILITIES FROM CLASS
+            // --------------------------
+            if(this.get('class')){
+                this.set({ abilities: this.get('class').get('abilities') }, { silent: true });
+            } else {
+                // If entity has no class yet (e.g., character create screen),
+                // change abilities when class changes
+                this.listenTo(this, 'change:class', function(){
+                    self.set({ abilities: self.get('class').get('abilities') });
+                });
+            }
+
+            // --------------------------
+            // Set stats from race
+            // --------------------------
+            // TODO: ::::::::::::: think more about this, should race ever change?
+            // Could have the create screen only change race when process is finished
+            if(this.get('race')){
+                this.set({ 
+                    attributes: new EntityAttributes(this.get('race').get('baseStats'))
+                });
+                this.set({ baseAttributes: this.get('attributes') });
+
+            } else {
+                // Entity has no race yet (e.g., create)
+                // TODO: ::::::::::: Don't always listen on this - allow
+                // race to change (e.g., spell effect) without clearing out
+                // stats
+                this.listenTo(this, 'change:race', function(){
+                    // attributes changed, need to reset listeners
+                    self.stopListening(self.get('attributes'));
+
+                    self.set({ 
+                        attributes: new EntityAttributes(self.get('race').get('baseStats'))
+                    });
+
+                    // listen to attributes
+                    self.listenTo(
+                        self.get('attributes'), 
+                        'change:health', 
+                        self.healthChanged);
+
+                    // set base attributes from attributes
+                    self.set({ baseAttributes: self.get('attributes') });
                 });
             }
 
@@ -267,6 +303,7 @@ define(
             var moddedDamage = 0,
                 physicalDamage, magicDamage;
 
+            // Get damage reduction from stats
             if(type.physical){
                 physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
                 moddedDamage += physicalDamage;
@@ -276,9 +313,15 @@ define(
                 moddedDamage += magicDamage;
             }
 
+            // TODO: Get value of damage increase from source entity's stats
+            // TODO: Get elemental boosts
+
             // Update the damage to be the calculated modified damage
             damage = moddedDamage;
-            
+
+            // round damage
+            damage = Math.round(damage);
+
             // --------------------------
             // update health
             // --------------------------
