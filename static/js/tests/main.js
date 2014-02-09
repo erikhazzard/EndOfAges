@@ -90,6 +90,7 @@ require(['events',
     require([
         'tests/collections/Entities'
         , 'tests/models/Entity'
+        , 'tests/models/Entity-damage'
         , 'tests/models/Ability'
         , 'tests/views/subviews/Battle'
         , 'tests/util/generateName'

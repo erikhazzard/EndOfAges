@@ -62,7 +62,7 @@ define([
                 // must take AT LEAST this timeout length + the final timeout length
                 //  (16 + 30)
                 assert(elapsed >= 20);
-                // give an extra 20ms of room for other parallel tests
+                // give extra time for other parallel tests
                 assert(elapsed <= 60);
 
                 done();

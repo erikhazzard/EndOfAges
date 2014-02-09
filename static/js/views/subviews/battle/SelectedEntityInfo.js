@@ -20,7 +20,6 @@ define(
                 'initialize called');
 
             this.listenTo(this.model.get('attributes'), 'change', this.rerender);
-            this.listenTo(this.model.get('baseAttributes'), 'change', this.rerender);
 
             return this;
         },

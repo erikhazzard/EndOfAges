@@ -12,6 +12,7 @@ define(
         'collections/Abilities',
         'models/Ability',
         'models/data-abilities'
+
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
@@ -99,9 +100,12 @@ define(
             // set attributes and base attributes from server
             this.set({
                 name: 'Soandso' + Math.random(),
-                attributes: new EntityAttributes(),
-                baseAttributes: new EntityAttributes()
+                attributes: new EntityAttributes(options.attributes || {})
             }, {silent: true});
+
+            // set base attributes from attributes
+            this.set({ baseAttributes: this.get('attributes') },
+                {silent: true});
 
             // TODO: allow setting just some entity attribute attributes
 
@@ -200,6 +204,29 @@ define(
         },
 
         // ------------------------------
+        // FORMULA - Damage Multiplier
+        // ------------------------------
+        calculateDamageMultiplier: function calculateDamageMultiplier(factor, resist){
+            // take in a factor (0 to 1) and a resist value (e.g., the entity
+            // armor or magic resist or elemental resist value).
+            //
+            // Same formula for armor and resists
+            //
+            // Returns the multiplier, a number to multiply the original damage
+            // by
+            var multiplier;
+
+            if(resist >= 0){
+                multiplier = 100 / (100 + (factor * resist) );
+            } else {
+                multiplier = 2 - (100 / (100 - (factor * resist) ));
+            }
+
+            return multiplier;
+        },
+
+
+        // ------------------------------
         // TODO: Combine takeDamage and takeHeal
         //
         // Take / Deal damage
@@ -215,42 +242,39 @@ define(
                 return false; 
             }
 
+            var attrs = this.get('attributes');
+
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
             var sourceAbility = options.sourceAbility;
+            var type = sourceAbility.get('type');
+            var element = sourceAbility.get('element');
             var damage = options.amount * -1;
+            var armor = attrs.get('armor');
+            var magicResist = attrs.get('magicResist');
 
             // update attributes
-            var attrs = this.get('attributes');
             var curHealth = attrs.get('health');
             var maxHealth = attrs.get('maxHealth');
 
             // --------------------------
+            //
             // process damage
+            //
             // --------------------------
             // Get modifier for armor and magic resist
-            var modPhysical = 0;
-            var modMagic = 0;
-            var moddedDamage = 0;
-
-            var physicalComposition = sourceAbility.get('type').physical;
-            var magicComposition = sourceAbility.get('type').magic;
-
-            // TODO: how to do composition for hybrid skills
-            if(physicalComposition){
-                modPhysical = (100 / (100+(
-                    physicalComposition * attrs.get('armor')
-                )));
-                moddedDamage += modPhysical * (damage * physicalComposition);
-            }
-            if(magicComposition){
-                modMagic = (100 / (100+(
-                    magicComposition * attrs.get('magicResist')
-                )));
-                moddedDamage += modMagic * (damage * magicComposition);
-            }
-
             // update damage with mod
+            var moddedDamage = 0;
+            if(type.physical){
+                moddedDamage += this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
+            }
+            if(type.magic){
+                moddedDamage += this.calculateDamageMultiplier(type.magic, magicResist) * (damage * type.magic);
+            }
+
+
+            console.log("<<<<<<<<<<<<<", moddedDamage, damage);
+
             damage = moddedDamage;
             
             // --------------------------
@@ -472,5 +496,6 @@ define(
 
     });
 
+    window.E = Entity;
     return Entity;
 });
