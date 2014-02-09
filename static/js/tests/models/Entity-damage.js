@@ -110,7 +110,7 @@ define([
                     // amt * multiplier is only half of the damage that would be
                     // applied)
                     entity.get('attributes').get('health').should.equal(
-                        startingHealth - (amt * multiplier) * factor
+                        Math.round(startingHealth - (amt * multiplier) * factor)
                     );
                 });
             });

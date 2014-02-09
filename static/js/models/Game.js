@@ -15,6 +15,11 @@ define(
         'models/Map',
         'models/appUser-object'
 
+        // TODO: use a flat structure so this isn't necessary?
+        ,'collections/Abilities'
+        ,'models/EntityClass'
+        ,'models/Race'
+
     ], function MapModel(
         Backbone, Marionette, logger,
         localstorage,
@@ -23,6 +28,11 @@ define(
         Entities, Entity,
         Map,
         appUser
+
+        // TODO: Use a flat structure for entity so this isn't necessary
+        ,Abilities
+        ,EntityClass
+        ,Race
     ){
 
     var Game = Backbone.Model.extend({
@@ -77,6 +87,7 @@ define(
         },
 
         parse: function(res){
+            // Load from JSON and turn into object
             // Need to overwrite the parse function so we can load in data
             // from the server for nested models. 
             // NOTE: Could automate this, store embedded collection / models
@@ -86,6 +97,14 @@ define(
             // create entity models for each entity, then add them to the
             // collection
             _.each(res.playerEntities, function(entity){
+                // setup model / collections from JSON data
+                // For non flat structure, we need to create objects based on
+                // the data
+                // TODO: don't use class, call it entityClass in model
+                entity.class.abilities = new Abilities(entity.class.abilities);
+                entity.class = new EntityClass(entity.class);
+                entity.race = new Race(entity.race);
+
                 entities.push(new Entity(entity));
             });
 

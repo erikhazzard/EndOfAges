@@ -2580,6 +2580,82 @@ define(
 
 // ===========================================================================
 //
+// EntityClass
+//
+//  Model for a race (used in create process)
+//
+// ===========================================================================
+define(
+    'models/EntityClass',[ 'events', 'logger', 'util/API_URL' ], function ModelEntityClass(
+        events, logger, API_URL
+    ){
+
+        // Define the app user model. Similar to user model, but a bit different
+        var EntityClass = Backbone.Model.extend({
+            defaults: {
+                name: '',
+                description: '',
+                sprite: '',
+                // abilities will be a collection of abilities
+                abilities: [],
+                baseStats: {
+                    // todo: more...
+                    agility: 10
+                }
+            },
+
+            initialize: function appUserInitialize(){
+                var self = this;
+                logger.log('models/EntityClass', 
+                    'initialize: New entity class object created');
+
+                return this;
+            }
+
+        });
+
+    return EntityClass;
+});
+
+// ===========================================================================
+//
+// Race
+//
+//  Model for a race (used in create process)
+//
+// ===========================================================================
+define(
+    'models/Race',[ 'events', 'logger', 'util/API_URL' ], function ModelRace(
+        events, logger, API_URL
+    ){
+
+        // Define the app user model. Similar to user model, but a bit different
+        var Race = Backbone.Model.extend({
+            defaults: {
+                name: 'Race',
+                description: 'Some test',
+                sprite: 'race',
+                baseStats: {
+                    // todo: more...
+                    agility: 10
+                }
+            },
+
+            initialize: function appUserInitialize(){
+                var self = this;
+                logger.log('models/Race', 
+                    'initialize: New race object created');
+
+                return this;
+            }
+
+        });
+
+    return Race;
+});
+
+// ===========================================================================
+//
 //  Game
 //
 //      This model manages a game
@@ -2595,6 +2671,11 @@ define(
         'models/Map',
         'models/appUser-object'
 
+        // TODO: use a flat structure so this isn't necessary?
+        ,'collections/Abilities'
+        ,'models/EntityClass'
+        ,'models/Race'
+
     ], function MapModel(
         Backbone, Marionette, logger,
         localstorage,
@@ -2603,6 +2684,11 @@ define(
         Entities, Entity,
         Map,
         appUser
+
+        // TODO: Use a flat structure for entity so this isn't necessary
+        ,Abilities
+        ,EntityClass
+        ,Race
     ){
 
     var Game = Backbone.Model.extend({
@@ -2657,6 +2743,7 @@ define(
         },
 
         parse: function(res){
+            // Load from JSON and turn into object
             // Need to overwrite the parse function so we can load in data
             // from the server for nested models. 
             // NOTE: Could automate this, store embedded collection / models
@@ -2666,6 +2753,14 @@ define(
             // create entity models for each entity, then add them to the
             // collection
             _.each(res.playerEntities, function(entity){
+                // setup model / collections from JSON data
+                // For non flat structure, we need to create objects based on
+                // the data
+                // TODO: don't use class, call it entityClass in model
+                entity.class.abilities = new Abilities(entity.class.abilities);
+                entity.class = new EntityClass(entity.class);
+                entity.race = new Race(entity.race);
+
                 entities.push(new Entity(entity));
             });
 
@@ -2732,45 +2827,6 @@ define(
     });
 
     return PageHome;
-});
-
-// ===========================================================================
-//
-// EntityClass
-//
-//  Model for a race (used in create process)
-//
-// ===========================================================================
-define(
-    'models/EntityClass',[ 'events', 'logger', 'util/API_URL' ], function ModelEntityClass(
-        events, logger, API_URL
-    ){
-
-        // Define the app user model. Similar to user model, but a bit different
-        var EntityClass = Backbone.Model.extend({
-            defaults: {
-                name: '',
-                description: '',
-                sprite: '',
-                // abilities will be a collection of abilities
-                abilities: [],
-                baseStats: {
-                    // todo: more...
-                    agility: 10
-                }
-            },
-
-            initialize: function appUserInitialize(){
-                var self = this;
-                logger.log('models/EntityClass', 
-                    'initialize: New entity class object created');
-
-                return this;
-            }
-
-        });
-
-    return EntityClass;
 });
 
 // ===========================================================================
@@ -6616,43 +6672,6 @@ define(
 
 // ===========================================================================
 //
-// Race
-//
-//  Model for a race (used in create process)
-//
-// ===========================================================================
-define(
-    'models/Race',[ 'events', 'logger', 'util/API_URL' ], function ModelRace(
-        events, logger, API_URL
-    ){
-
-        // Define the app user model. Similar to user model, but a bit different
-        var Race = Backbone.Model.extend({
-            defaults: {
-                name: 'Race',
-                description: 'Some test',
-                sprite: 'race',
-                baseStats: {
-                    // todo: more...
-                    agility: 10
-                }
-            },
-
-            initialize: function appUserInitialize(){
-                var self = this;
-                logger.log('models/Race', 
-                    'initialize: New race object created');
-
-                return this;
-            }
-
-        });
-
-    return Race;
-});
-
-// ===========================================================================
-//
 // data-races
 //
 //      TODO: should be loaded from server and abilities should load 
@@ -7836,6 +7855,7 @@ require([
         //,'views/subviews/Battle'
         //,'views/subviews/Map'
         //,'models/Map'
+        ,'models/Entity'
     ];
 
     //// log EVERYTHING:
