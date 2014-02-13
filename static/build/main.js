@@ -3118,8 +3118,8 @@ define(
         virtue: new Ability({
             name: 'Virtue',
             effectId: 'minorHealing',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 5,
+            timeCost: 5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
