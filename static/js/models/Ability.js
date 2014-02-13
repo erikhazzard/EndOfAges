@@ -226,7 +226,11 @@ define(
             // TODO: How to precent takeHeal() or takeDamage from doing anything
             // if the ability is interuppted? Set some property on this model?
             // Check property in the takeXX() function?
-            if(this.get('heal')){
+            // 
+            // TODO: should heal WITH buffeffects still happen? Or should
+            // the buff effect itself manage a heal. For now, handle healing
+            // in the buff itself (not here, so check that buffEffects is null)
+            if(this.get('heal') && !this.get('buffEffects')){
                 new Timer(function effectHealDelay(){
                     function takeHeal(){
                         amount = options[self.get('healTarget')].takeHeal({
@@ -293,25 +297,41 @@ define(
             if(this.get('buffEffects')){
 
                 new Timer(function effectBuff(){
+                    // TODO::::: Should the logic be handled there instead of
+                    // here? If in entity model, a lot of default logic
+                    // has to be handled there. If it's in the ability, can
+                    // customzie / tailor it more
                     var targetEntity = options[self.get('buffTarget')];
 
                     // Add the effect
                     var currentStats = targetEntity.get(
                         'attributes').attributes;
 
-                    // TODO::::: Should the logic be handled there instead of
-                    // here? If in entity model, a lot of default logic
-                    // has to be handled there. If it's in the ability, can
-                    // customzie / tailor it more
                     if(!self.get('buffCanStack')){
                         // If the buff cannot stack with itself, then check
                         // to see if the effect already exists
                         if(targetEntity.hasBuff(self)){
                             logger.log('models/Ability', 
-                                'buff already exists %O', self);
+                                '[x] buff already exists %O', self);
+
                             return false;
                         }
                     }
+
+                    // Check for heals
+                    // ------------------
+                    function takeHeal(){
+                        amount = options[self.get('healTarget')].takeHeal({
+                            type: self.get('type'),
+                            element: self.get('element'),
+                            amount: self.get('heal'),
+                            sourceAbility: self,
+                            target: options.target,
+                            source: options.source
+                        });
+                    }
+                    takeHeal();
+
 
                     //
                     // ADD Buff

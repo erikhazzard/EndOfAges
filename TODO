@@ -75,6 +75,7 @@ CURRENT
 ===========================================================================
 New Idea:
     -Effect log. A small text window showing history of all effects?
+        -buff wears off, buff add, etc
 
 ====>>>> Data viz for end of fight, either on win or loss. Listen for events
 ====>>>>>>>> Track all effects by time
