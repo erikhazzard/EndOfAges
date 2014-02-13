@@ -83,6 +83,7 @@ define(
             // Listen for key presses to navigate through class / race list
             this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
             this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
+            this.listenTo(events, 'keyPress:escape', this.handleKeyBackspace);
             this.listenTo(events, 'keyPress:up', this.handleKeyUpDown);
             this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
 

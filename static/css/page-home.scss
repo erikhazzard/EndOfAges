@@ -87,7 +87,7 @@
         // Play game button
         // TODO: Extend this
         .btn-play-game {
-            @include transition("color 0.3s, text-shadow 0.3s, box-shadow 0.3s");
+            @include transition("color 0.2s, text-shadow 0.2s, box-shadow 0.2s");
 
             box-shadow: 0 0 80px #000000;
             border: 1px solid #343434;

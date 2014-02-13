@@ -13,10 +13,12 @@
 // ===========================================================================
 define(
     [ 'backbone', 'marionette', 'logger',
-        'events', 'd3', 'util/API_URL'
+        'events', 'd3', 'util/API_URL',
+        'util/Timer'
     ], function AbilityModel(
         Backbone, Marionette, logger,
-        events, d3, API_URL
+        events, d3, API_URL,
+        Timer
     ){
 
     var Ability = Backbone.Model.extend({
@@ -106,6 +108,9 @@ define(
             // entity's stats for the passed in duration
             buffEffects: null, // Will look like { strength : -10, agility: 10 }
             buffDuration: null, // in seconds
+
+            buffCanStack: false, // can this buff stack with itself?
+
             // can be either 'target' (allows player to target an entity,
             //  including self) or 'self' (only works on self)
             buffTarget: 'target',
@@ -222,7 +227,7 @@ define(
             // if the ability is interuppted? Set some property on this model?
             // Check property in the takeXX() function?
             if(this.get('heal')){
-                setTimeout(function effectHealDelay(){
+                new Timer(function effectHealDelay(){
                     function takeHeal(){
                         amount = options[self.get('healTarget')].takeHeal({
                             type: self.get('type'),
@@ -239,7 +244,7 @@ define(
                     var curTick = 0;
                     if(self.get('ticks')){
                         while(curTick < self.get('ticks')){
-                            setTimeout( takeHeal,
+                            new Timer( takeHeal,
                                 (self.get('tickDuration') * 1000) * (curTick + 1) 
                             );
                             curTick += 1;
@@ -254,7 +259,7 @@ define(
             // Damage
             // --------------------------
             if(this.get('damage')){
-                setTimeout(function effectDamageDelay(){
+                new Timer(function effectDamageDelay(){
                     function takeDamage(){
                         amount = options[self.get('damageTarget')].takeDamage({
                             type: self.get('type'),
@@ -271,7 +276,7 @@ define(
                     var curTick = 0;
                     if(self.get('ticks')){
                         while(curTick < self.get('ticks')){
-                            setTimeout( takeDamage,
+                            new Timer( takeDamage,
                                 (self.get('tickDuration') * 1000) * (curTick + 1) 
                             );
                             curTick += 1;
@@ -287,22 +292,32 @@ define(
             // --------------------------
             if(this.get('buffEffects')){
 
-                setTimeout(function effectBuff(){
+                new Timer(function effectBuff(){
+                    var targetEntity = options[self.get('buffTarget')];
 
                     // Add the effect
-                    var currentStats = options[self.get('buffTarget')].get(
+                    var currentStats = targetEntity.get(
                         'attributes').attributes;
 
                     // TODO::::: Should the logic be handled there instead of
                     // here? If in entity model, a lot of default logic
                     // has to be handled there. If it's in the ability, can
                     // customzie / tailor it more
-                    // TODO: stacking?
+                    if(!self.get('buffCanStack')){
+                        // If the buff cannot stack with itself, then check
+                        // to see if the effect already exists
+                        if(targetEntity.hasBuff(self)){
+                            logger.log('models/Ability', 
+                                'buff already exists %O', self);
+                            return false;
+                        }
+                    }
+
                     //
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
-                    options[self.get('buffTarget')].addBuff(self);
+                    targetEntity.addBuff(self);
                     var updatedStats = {};
 
                     // update based on effects
@@ -311,18 +326,27 @@ define(
                     });
     
                     // update the stats
-                    options[self.get('buffTarget')].get('attributes').set(
-                        updatedStats
-                    );
+                    targetEntity.get('attributes').set( updatedStats );
 
                     // Remove it after the duration
                     // ------------------
-                    setTimeout(function removeBuff(){
+                    new Timer(function removeBuff(){
                         // remove effect
-                        options[self.get('buffTarget')].removeBuff(self);
+                        logger.log('models/Ability', 'removing buff');
+                        
+                        // if entity is dead, do nothing
+                        if(!targetEntity.get('isAlive')){ 
+                            logger.log('models/Ability', 
+                                'tried to remove buff, but entity is dead %O',
+                                self);
+                            return false; 
+                        }
+
+                        // Otherwise, entity lives. Remove the buff
+                        targetEntity.removeBuff(self);
 
                         // remove the stats
-                        var currentStats = options[self.get('buffTarget')].get(
+                        var currentStats = targetEntity.get(
                             'attributes').attributes;
                         var updatedStats = {};
 
@@ -332,7 +356,7 @@ define(
                         });
         
                         // update the stats
-                        options[self.get('buffTarget')].get('attributes').set(
+                        targetEntity.get('attributes').set(
                             updatedStats
                         );
 

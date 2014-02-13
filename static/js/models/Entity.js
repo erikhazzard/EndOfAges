@@ -135,6 +135,7 @@ define(
             // Could have the create screen only change race when process is finished
             if(this.get('race')){
                 this.set({ 
+                    sprite: this.get('race').get('sprite'),
                     attributes: new EntityAttributes(this.get('race').get('baseStats'))
                 });
                 this.set({ baseAttributes: this.get('attributes') });
@@ -149,6 +150,7 @@ define(
                     self.stopListening(self.get('attributes'));
 
                     self.set({ 
+                        sprite: self.get('race').get('sprite'),
                         attributes: new EntityAttributes(self.get('race').get('baseStats'))
                     });
 
@@ -183,9 +185,13 @@ define(
             // and states
         },
 
+        // ------------------------------
+        // Buff related
+        // ------------------------------
         addBuff: function addBuff(ability){
             // Takes in an ability and adds the buff effect
             //
+            logger.log('models/Entity', 'addBuff(): called %O', ability);
             var effects = this.get('activeEffects');
 
             // store the attributes
@@ -194,6 +200,22 @@ define(
             this.set({ activeEffects: effects }, {silent: true});
             this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
+        },
+
+        hasBuff: function hasBuff(ability){
+            // takes in an ability and returns if the entity already has the
+            // buff
+            var index = this.get('activeEffects').indexOf(ability.cid);
+            var entityHasBuff;
+
+            if(index !== -1){
+                entityHasBuff = true;
+            } else {
+                entityHasBuff = false;
+            }
+
+            logger.log('models/Entity', 'hasBuff called : %O', entityHasBuff);
+            return entityHasBuff;
         },
 
         removeBuff: function removeBuff(ability){
@@ -232,6 +254,11 @@ define(
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
                 this.set({ isAlive: false });
+                // TODO: check to see if there is a prevent death buff?
+
+                // remove all buffs from dead entities
+                this.set({ activeEffects: null });
+
                 // trigger global event to let listeners know entity died
                 this.trigger('entity:died', {model: this});
             }
@@ -412,6 +439,8 @@ define(
         handleAI: function handleAI(time, battle){
             // TODO: don't put this here. How to handle battle context?
             // TODO: this is ugly, rework this, updates battle AI, use aggrolist
+            // TODO: Inherit AI from classes (healer, warrior, etc)
+            // TODO: make AI work for players too
             //
             //
             // called each tick to control AI

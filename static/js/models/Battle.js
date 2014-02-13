@@ -14,12 +14,14 @@ define(
         'collections/Abilities'
         // TODO : remove this, get from server
         ,'models/data-entity-classes'
+        ,'models/data-races'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
         Abilities,
-        CLASSES
+        CLASSES,
+        RACES
     ){
 
     var Battle = Backbone.Model.extend({
@@ -77,8 +79,8 @@ define(
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
-                while(i<3) {
-                    if(Math.random() < 0.5){
+                while(i<4) {
+                    if(Math.random() < (1/(i+3))){
                         entities.push(this.getRandomEntity()); 
                     }
                     i++;
@@ -99,11 +101,11 @@ define(
             // TODO: make this more smarter, depending on player levels, etc.
             var abilities = [];
             var entity;
-            var sprites = ['tiger','man1', 'darkelf'];
 
             // generate new entity
             entity = new Entity({
                 'class': CLASSES[Math.random() * CLASSES.length | 0],
+                'race': RACES[Math.random() * RACES.length | 0],
                 // random stats
                 attributes: {
                     armor: Math.random() * 10 | 0,

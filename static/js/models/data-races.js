@@ -4,6 +4,9 @@
 //
 //      TODO: should be loaded from server and abilities should load 
 //
+//      TODO: difference between locked and non unlocked races(?) No, should
+//      store playable races on user model
+//
 // ===========================================================================
 define(
     [ 'events', 'logger', 'models/Race' ], function(
@@ -31,6 +34,17 @@ define(
                 armor: 12,
                 magicResist: 12,
                 abilityPower: 12
+            }
+        }),
+        new Race({
+            name: 'Dark Elf',
+            description: 'Dark elf',
+            sprite: 'darkelf',
+            baseStats: {
+                attackPower: 13,
+                armor: 10,
+                magicResist: 15,
+                abilityPower: 13
             }
         }),
         new Race({

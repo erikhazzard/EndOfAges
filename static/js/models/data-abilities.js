@@ -111,14 +111,15 @@ define(
         virtue: new Ability({
             name: 'Virtue',
             effectId: 'minorHealing',
-            castTime: 6,
-            timeCost: 6,
+            castTime: 1,
+            timeCost: 1,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
 
             heal: 10,
 
+            buffDuration: 8,
             buffEffects: { 
                 armor: 10,
                 magicResist: 10,
@@ -135,13 +136,13 @@ define(
             name: 'Dark Blade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'magicMissle',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 3,
+            timeCost: 3,
             castDuration: 0.3,
             validTargets: ['enemy'],
             type: {'magic': 0.3, 'physical': 0.7},
             element: 'dark',
-            damage: 8,
+            damage: 9,
             heal: 5,
             healTarget: 'source'
         })

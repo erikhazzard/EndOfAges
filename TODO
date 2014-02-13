@@ -68,3 +68,13 @@ CURRENT
 
 ::::: Abilities : factor in attack and spellpower into damage calculations
 
+
+***** Duplicate effects not working
+
+
+===========================================================================
+New Idea:
+    -Effect log. A small text window showing history of all effects?
+
+====>>>> Data viz for end of fight, either on win or loss. Listen for events
+====>>>>>>>> Track all effects by time

@@ -1212,6 +1212,109 @@ define(
 
 // ===========================================================================
 //
+// generate a UUID. RFC4122 compliant http://www.ietf.org/rfc/rfc4122.txt
+//  adapted from http://stackoverflow.com/a/2117523
+//
+// ===========================================================================
+define('util/generateUUID',[], function generateUUID(){
+    function createUUID(){
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+            /[xy]/g, function(c) {
+                var r = Math.random()*16|0, 
+                    v = c == 'x' ? r : (r&0x3|0x8);
+                return v.toString(16);
+        });
+        return uuid;
+    }
+    return createUUID;
+});
+
+// ===========================================================================
+//
+// Timer
+//
+//      -Returns a {String} of the root URL for the API. For instance,
+//          '/api/'
+//
+// ===========================================================================
+define('util/Timer',['util/generateUUID'], function TIMER(generateUUID){
+    // TODO: Store all timers globally so we can pause / unpause them all
+    //
+    // Timer class to enable pause / resume. Uses setTimeout
+    //
+    function Timer(callback, delay) {
+        // takes in a callback {Function} and a delay {Number} (same signature
+        // as setTimeout)
+        var self = this;
+
+        // how much time remains for this timer
+        this.remaining = delay;
+
+        // note : we need to store also a unique ID that won't be changed when
+        // the timer is cleared in pause()
+        this._id = generateUUID();
+
+        // wrap the callback to remove the timer from the list when it's finished
+        this.callback = function wrappedCallback(){
+            // remove timer
+            delete Timer._timers[self._id];
+
+            // call original callback
+            return callback();
+        };
+
+        // start the timer when initiall called
+        this.resume();
+    }
+
+    // Object Methods
+    // ------------------------------
+    Timer.prototype.pause = function TimerPause() {
+        // pause the timer by clearing the original timer and keeping track
+        // of the remaining time
+        window.clearTimeout(this.timerId);
+
+        this.remaining -= new Date() - this.start;
+
+        return this;
+    };
+
+    Timer.prototype.resume = function TimerResume() {
+        // resume (or start) the timer, passing in the callback and however
+        // much time is remaning (in the case of the initial call, remaining
+        // will equal the delay)
+        this.start = new Date();
+
+        // store the ID setTimeout returns so we can clear it in pause
+        this.timerId = window.setTimeout(this.callback, this.remaining);
+        
+        // Keep track of timers 
+        Timer._timers[this._id] = this;
+
+        return this;
+    };
+
+    // Timer class properties and methods
+    // ------------------------------
+    // Keep track of all timers
+    Timer._timers = {};
+    Timer.pauseAll = function pauseAll(){
+        // Pause all timers
+        _.each(Timer._timers, function(timer, key){ timer.pause(); });
+        return Timer;
+    };
+
+    Timer.resumeAll = function resumeAll(){
+        // Resumse all timers
+        _.each(Timer._timers, function(timer, key){ timer.resume(); });
+        return Timer;
+    };
+
+    return Timer;
+});
+
+// ===========================================================================
+//
 //  Ability
 //
 //      This model manages a single ability
@@ -1225,10 +1328,12 @@ define(
 // ===========================================================================
 define(
     'models/Ability',[ 'backbone', 'marionette', 'logger',
-        'events', 'd3', 'util/API_URL'
+        'events', 'd3', 'util/API_URL',
+        'util/Timer'
     ], function AbilityModel(
         Backbone, Marionette, logger,
-        events, d3, API_URL
+        events, d3, API_URL,
+        Timer
     ){
 
     var Ability = Backbone.Model.extend({
@@ -1318,6 +1423,9 @@ define(
             // entity's stats for the passed in duration
             buffEffects: null, // Will look like { strength : -10, agility: 10 }
             buffDuration: null, // in seconds
+
+            buffCanStack: false, // can this buff stack with itself?
+
             // can be either 'target' (allows player to target an entity,
             //  including self) or 'self' (only works on self)
             buffTarget: 'target',
@@ -1434,7 +1542,7 @@ define(
             // if the ability is interuppted? Set some property on this model?
             // Check property in the takeXX() function?
             if(this.get('heal')){
-                setTimeout(function effectHealDelay(){
+                new Timer(function effectHealDelay(){
                     function takeHeal(){
                         amount = options[self.get('healTarget')].takeHeal({
                             type: self.get('type'),
@@ -1451,7 +1559,7 @@ define(
                     var curTick = 0;
                     if(self.get('ticks')){
                         while(curTick < self.get('ticks')){
-                            setTimeout( takeHeal,
+                            new Timer( takeHeal,
                                 (self.get('tickDuration') * 1000) * (curTick + 1) 
                             );
                             curTick += 1;
@@ -1466,7 +1574,7 @@ define(
             // Damage
             // --------------------------
             if(this.get('damage')){
-                setTimeout(function effectDamageDelay(){
+                new Timer(function effectDamageDelay(){
                     function takeDamage(){
                         amount = options[self.get('damageTarget')].takeDamage({
                             type: self.get('type'),
@@ -1483,7 +1591,7 @@ define(
                     var curTick = 0;
                     if(self.get('ticks')){
                         while(curTick < self.get('ticks')){
-                            setTimeout( takeDamage,
+                            new Timer( takeDamage,
                                 (self.get('tickDuration') * 1000) * (curTick + 1) 
                             );
                             curTick += 1;
@@ -1499,22 +1607,32 @@ define(
             // --------------------------
             if(this.get('buffEffects')){
 
-                setTimeout(function effectBuff(){
+                new Timer(function effectBuff(){
+                    var targetEntity = options[self.get('buffTarget')];
 
                     // Add the effect
-                    var currentStats = options[self.get('buffTarget')].get(
+                    var currentStats = targetEntity.get(
                         'attributes').attributes;
 
                     // TODO::::: Should the logic be handled there instead of
                     // here? If in entity model, a lot of default logic
                     // has to be handled there. If it's in the ability, can
                     // customzie / tailor it more
-                    // TODO: stacking?
+                    if(!self.get('buffCanStack')){
+                        // If the buff cannot stack with itself, then check
+                        // to see if the effect already exists
+                        if(targetEntity.hasBuff(self)){
+                            logger.log('models/Ability', 
+                                'buff already exists %O', self);
+                            return false;
+                        }
+                    }
+
                     //
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
-                    options[self.get('buffTarget')].addBuff(self);
+                    targetEntity.addBuff(self);
                     var updatedStats = {};
 
                     // update based on effects
@@ -1523,18 +1641,27 @@ define(
                     });
     
                     // update the stats
-                    options[self.get('buffTarget')].get('attributes').set(
-                        updatedStats
-                    );
+                    targetEntity.get('attributes').set( updatedStats );
 
                     // Remove it after the duration
                     // ------------------
-                    setTimeout(function removeBuff(){
+                    new Timer(function removeBuff(){
                         // remove effect
-                        options[self.get('buffTarget')].removeBuff(self);
+                        logger.log('models/Ability', 'removing buff');
+                        
+                        // if entity is dead, do nothing
+                        if(!targetEntity.get('isAlive')){ 
+                            logger.log('models/Ability', 
+                                'tried to remove buff, but entity is dead %O',
+                                self);
+                            return false; 
+                        }
+
+                        // Otherwise, entity lives. Remove the buff
+                        targetEntity.removeBuff(self);
 
                         // remove the stats
-                        var currentStats = options[self.get('buffTarget')].get(
+                        var currentStats = targetEntity.get(
                             'attributes').attributes;
                         var updatedStats = {};
 
@@ -1544,7 +1671,7 @@ define(
                         });
         
                         // update the stats
-                        options[self.get('buffTarget')].get('attributes').set(
+                        targetEntity.get('attributes').set(
                             updatedStats
                         );
 
@@ -1816,6 +1943,7 @@ define(
             // Could have the create screen only change race when process is finished
             if(this.get('race')){
                 this.set({ 
+                    sprite: this.get('race').get('sprite'),
                     attributes: new EntityAttributes(this.get('race').get('baseStats'))
                 });
                 this.set({ baseAttributes: this.get('attributes') });
@@ -1830,6 +1958,7 @@ define(
                     self.stopListening(self.get('attributes'));
 
                     self.set({ 
+                        sprite: self.get('race').get('sprite'),
                         attributes: new EntityAttributes(self.get('race').get('baseStats'))
                     });
 
@@ -1864,9 +1993,13 @@ define(
             // and states
         },
 
+        // ------------------------------
+        // Buff related
+        // ------------------------------
         addBuff: function addBuff(ability){
             // Takes in an ability and adds the buff effect
             //
+            logger.log('models/Entity', 'addBuff(): called %O', ability);
             var effects = this.get('activeEffects');
 
             // store the attributes
@@ -1875,6 +2008,22 @@ define(
             this.set({ activeEffects: effects }, {silent: true});
             this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
+        },
+
+        hasBuff: function hasBuff(ability){
+            // takes in an ability and returns if the entity already has the
+            // buff
+            var index = this.get('activeEffects').indexOf(ability.cid);
+            var entityHasBuff;
+
+            if(index !== -1){
+                entityHasBuff = true;
+            } else {
+                entityHasBuff = false;
+            }
+
+            logger.log('models/Entity', 'hasBuff called : %O', entityHasBuff);
+            return entityHasBuff;
         },
 
         removeBuff: function removeBuff(ability){
@@ -1913,6 +2062,11 @@ define(
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
                 this.set({ isAlive: false });
+                // TODO: check to see if there is a prevent death buff?
+
+                // remove all buffs from dead entities
+                this.set({ activeEffects: null });
+
                 // trigger global event to let listeners know entity died
                 this.trigger('entity:died', {model: this});
             }
@@ -2093,6 +2247,8 @@ define(
         handleAI: function handleAI(time, battle){
             // TODO: don't put this here. How to handle battle context?
             // TODO: this is ugly, rework this, updates battle AI, use aggrolist
+            // TODO: Inherit AI from classes (healer, warrior, etc)
+            // TODO: make AI work for players too
             //
             //
             // called each tick to control AI
@@ -2942,14 +3098,15 @@ define(
         virtue: new Ability({
             name: 'Virtue',
             effectId: 'minorHealing',
-            castTime: 6,
-            timeCost: 6,
+            castTime: 1,
+            timeCost: 1,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
 
             heal: 10,
 
+            buffDuration: 8,
             buffEffects: { 
                 armor: 10,
                 magicResist: 10,
@@ -2966,13 +3123,13 @@ define(
             name: 'Dark Blade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'magicMissle',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 3,
+            timeCost: 3,
             castDuration: 0.3,
             validTargets: ['enemy'],
             type: {'magic': 0.3, 'physical': 0.7},
             element: 'dark',
-            damage: 8,
+            damage: 9,
             heal: 5,
             healTarget: 'source'
         })
@@ -3083,6 +3240,71 @@ define(
 
 // ===========================================================================
 //
+// data-races
+//
+//      TODO: should be loaded from server and abilities should load 
+//
+//      TODO: difference between locked and non unlocked races(?) No, should
+//      store playable races on user model
+//
+// ===========================================================================
+define(
+    'models/data-races',[ 'events', 'logger', 'models/Race' ], function(
+        events, logger, Race
+    ){
+
+    var RACES = [
+        new Race({
+            name: 'Elf',
+            description: 'An elf',
+            sprite: 'elf',
+            baseStats: {
+                attackPower: 13,
+                armor: 10,
+                magicResist: 15,
+                abilityPower: 13
+            }
+        }),
+        new Race({
+            name: 'Human',
+            description: 'Boring',
+            sprite: 'human',
+            baseStats: {
+                attackPower: 12,
+                armor: 12,
+                magicResist: 12,
+                abilityPower: 12
+            }
+        }),
+        new Race({
+            name: 'Dark Elf',
+            description: 'Dark elf',
+            sprite: 'darkelf',
+            baseStats: {
+                attackPower: 13,
+                armor: 10,
+                magicResist: 15,
+                abilityPower: 13
+            }
+        }),
+        new Race({
+            name: 'Mimirian',
+            description: 'Boring',
+            sprite: 'mimirian',
+            baseStats: {
+                attackPower: 10,
+                armor: 18,
+                magicResist: 18,
+                abilityPower: 12
+            }
+        })
+    ];
+
+    return RACES;
+});
+
+// ===========================================================================
+//
 //  Battle
 //
 //      This model manages an individual battle.
@@ -3097,12 +3319,14 @@ define(
         'collections/Abilities'
         // TODO : remove this, get from server
         ,'models/data-entity-classes'
+        ,'models/data-races'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
         Abilities,
-        CLASSES
+        CLASSES,
+        RACES
     ){
 
     var Battle = Backbone.Model.extend({
@@ -3160,8 +3384,8 @@ define(
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
-                while(i<3) {
-                    if(Math.random() < 0.5){
+                while(i<4) {
+                    if(Math.random() < (1/(i+3))){
                         entities.push(this.getRandomEntity()); 
                     }
                     i++;
@@ -3182,11 +3406,11 @@ define(
             // TODO: make this more smarter, depending on player levels, etc.
             var abilities = [];
             var entity;
-            var sprites = ['tiger','man1', 'darkelf'];
 
             // generate new entity
             entity = new Entity({
                 'class': CLASSES[Math.random() * CLASSES.length | 0],
+                'race': RACES[Math.random() * RACES.length | 0],
                 // random stats
                 attributes: {
                     armor: Math.random() * 10 | 0,
@@ -3199,109 +3423,6 @@ define(
     });
 
     return Battle;
-});
-
-// ===========================================================================
-//
-// generate a UUID. RFC4122 compliant http://www.ietf.org/rfc/rfc4122.txt
-//  adapted from http://stackoverflow.com/a/2117523
-//
-// ===========================================================================
-define('util/generateUUID',[], function generateUUID(){
-    function createUUID(){
-        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-            /[xy]/g, function(c) {
-                var r = Math.random()*16|0, 
-                    v = c == 'x' ? r : (r&0x3|0x8);
-                return v.toString(16);
-        });
-        return uuid;
-    }
-    return createUUID;
-});
-
-// ===========================================================================
-//
-// Timer
-//
-//      -Returns a {String} of the root URL for the API. For instance,
-//          '/api/'
-//
-// ===========================================================================
-define('util/Timer',['util/generateUUID'], function TIMER(generateUUID){
-    // TODO: Store all timers globally so we can pause / unpause them all
-    //
-    // Timer class to enable pause / resume. Uses setTimeout
-    //
-    function Timer(callback, delay) {
-        // takes in a callback {Function} and a delay {Number} (same signature
-        // as setTimeout)
-        var self = this;
-
-        // how much time remains for this timer
-        this.remaining = delay;
-
-        // note : we need to store also a unique ID that won't be changed when
-        // the timer is cleared in pause()
-        this._id = generateUUID();
-
-        // wrap the callback to remove the timer from the list when it's finished
-        this.callback = function wrappedCallback(){
-            // remove timer
-            delete Timer._timers[self._id];
-
-            // call original callback
-            return callback();
-        };
-
-        // start the timer when initiall called
-        this.resume();
-    }
-
-    // Object Methods
-    // ------------------------------
-    Timer.prototype.pause = function TimerPause() {
-        // pause the timer by clearing the original timer and keeping track
-        // of the remaining time
-        window.clearTimeout(this.timerId);
-
-        this.remaining -= new Date() - this.start;
-
-        return this;
-    };
-
-    Timer.prototype.resume = function TimerResume() {
-        // resume (or start) the timer, passing in the callback and however
-        // much time is remaning (in the case of the initial call, remaining
-        // will equal the delay)
-        this.start = new Date();
-
-        // store the ID setTimeout returns so we can clear it in pause
-        this.timerId = window.setTimeout(this.callback, this.remaining);
-        
-        // Keep track of timers 
-        Timer._timers[this._id] = this;
-
-        return this;
-    };
-
-    // Timer class properties and methods
-    // ------------------------------
-    // Keep track of all timers
-    Timer._timers = {};
-    Timer.pauseAll = function pauseAll(){
-        // Pause all timers
-        _.each(Timer._timers, function(timer, key){ timer.pause(); });
-        return Timer;
-    };
-
-    Timer.resumeAll = function resumeAll(){
-        // Resumse all timers
-        _.each(Timer._timers, function(timer, key){ timer.resume(); });
-        return Timer;
-    };
-
-    return Timer;
 });
 
 // ===========================================================================
@@ -6672,57 +6793,6 @@ define(
 
 // ===========================================================================
 //
-// data-races
-//
-//      TODO: should be loaded from server and abilities should load 
-//
-// ===========================================================================
-define(
-    'models/data-races',[ 'events', 'logger', 'models/Race' ], function(
-        events, logger, Race
-    ){
-
-    var RACES = [
-        new Race({
-            name: 'Elf',
-            description: 'An elf',
-            sprite: 'elf',
-            baseStats: {
-                attackPower: 13,
-                armor: 10,
-                magicResist: 15,
-                abilityPower: 13
-            }
-        }),
-        new Race({
-            name: 'Human',
-            description: 'Boring',
-            sprite: 'human',
-            baseStats: {
-                attackPower: 12,
-                armor: 12,
-                magicResist: 12,
-                abilityPower: 12
-            }
-        }),
-        new Race({
-            name: 'Mimirian',
-            description: 'Boring',
-            sprite: 'mimirian',
-            baseStats: {
-                attackPower: 10,
-                armor: 18,
-                magicResist: 18,
-                abilityPower: 12
-            }
-        })
-    ];
-
-    return RACES;
-});
-
-// ===========================================================================
-//
 //  Races Collection
 //
 //      This collection contains a collection of races for the create screen,
@@ -7020,6 +7090,7 @@ define(
             // Listen for key presses to navigate through class / race list
             this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
             this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
+            this.listenTo(events, 'keyPress:escape', this.handleKeyBackspace);
             this.listenTo(events, 'keyPress:up', this.handleKeyUpDown);
             this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
 
@@ -7856,6 +7927,7 @@ require([
         //,'views/subviews/Map'
         //,'models/Map'
         ,'models/Entity'
+        //,'models/Ability'
     ];
 
     //// log EVERYTHING:
