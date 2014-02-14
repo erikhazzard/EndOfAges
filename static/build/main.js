@@ -3307,10 +3307,10 @@ define(
             description: 'Dark elf',
             sprite: 'darkelf',
             baseStats: {
-                attackPower: 13,
-                armor: 10,
-                magicResist: 15,
-                abilityPower: 13
+                attackPower: 900, //13,
+                armor: 900, //10,
+                magicResist: 900, //15,
+                abilityPower: 900 //13
             }
         }),
         new Race({
