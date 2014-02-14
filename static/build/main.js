@@ -11,6 +11,9 @@
 
 define("lib/jquery.transit.min", function(){});
 
+(function(window,document,$,undefined){var prefix;var property;var eventName="onfocusin"in document&&"hasFocus"in document?"focusin focusout":"focus blur";var prefixes=["webkit","o","ms","moz",""];var $support=$.support;var $event=$.event;while((prefix=prefixes.pop())!=undefined){property=(prefix?prefix+"H":"h")+"idden";if($support.pageVisibility=typeof document[property]=="boolean"){eventName=prefix+"visibilitychange";break}}$(/blur$/.test(eventName)?window:document).on(eventName,function(event){var type=event.type;var originalEvent=event.originalEvent;if(!originalEvent){return}var toElement=originalEvent.toElement;if(!/^focus./.test(type)||toElement==undefined&&originalEvent.fromElement==undefined&&originalEvent.relatedTarget==undefined){$event.trigger((property&&document[property]||/^(?:blur|focusout)$/.test(type)?"hide":"show")+".visibility")}})})(this,document,jQuery);
+define("lib/jquery.visibility", function(){});
+
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) lodash.com/license | Underscore.js 1.5.2 underscorejs.org/LICENSE
@@ -498,6 +501,109 @@ define( 'util/browserInfo',[ ], function(){
     };
 
     return browserInfo;
+});
+
+// ===========================================================================
+//
+// generate a UUID. RFC4122 compliant http://www.ietf.org/rfc/rfc4122.txt
+//  adapted from http://stackoverflow.com/a/2117523
+//
+// ===========================================================================
+define('util/generateUUID',[], function generateUUID(){
+    function createUUID(){
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+            /[xy]/g, function(c) {
+                var r = Math.random()*16|0, 
+                    v = c == 'x' ? r : (r&0x3|0x8);
+                return v.toString(16);
+        });
+        return uuid;
+    }
+    return createUUID;
+});
+
+// ===========================================================================
+//
+// Timer
+//
+//      -Returns a {String} of the root URL for the API. For instance,
+//          '/api/'
+//
+// ===========================================================================
+define('util/Timer',['util/generateUUID'], function TIMER(generateUUID){
+    // TODO: Store all timers globally so we can pause / unpause them all
+    //
+    // Timer class to enable pause / resume. Uses setTimeout
+    //
+    function Timer(callback, delay) {
+        // takes in a callback {Function} and a delay {Number} (same signature
+        // as setTimeout)
+        var self = this;
+
+        // how much time remains for this timer
+        this.remaining = delay;
+
+        // note : we need to store also a unique ID that won't be changed when
+        // the timer is cleared in pause()
+        this._id = generateUUID();
+
+        // wrap the callback to remove the timer from the list when it's finished
+        this.callback = function wrappedCallback(){
+            // remove timer
+            delete Timer._timers[self._id];
+
+            // call original callback
+            return callback();
+        };
+
+        // start the timer when initiall called
+        this.resume();
+    }
+
+    // Object Methods
+    // ------------------------------
+    Timer.prototype.pause = function TimerPause() {
+        // pause the timer by clearing the original timer and keeping track
+        // of the remaining time
+        window.clearTimeout(this.timerId);
+
+        this.remaining -= new Date() - this.start;
+
+        return this;
+    };
+
+    Timer.prototype.resume = function TimerResume() {
+        // resume (or start) the timer, passing in the callback and however
+        // much time is remaning (in the case of the initial call, remaining
+        // will equal the delay)
+        this.start = new Date();
+
+        // store the ID setTimeout returns so we can clear it in pause
+        this.timerId = window.setTimeout(this.callback, this.remaining);
+        
+        // Keep track of timers 
+        Timer._timers[this._id] = this;
+
+        return this;
+    };
+
+    // Timer class properties and methods
+    // ------------------------------
+    // Keep track of all timers
+    Timer._timers = {};
+    Timer.pauseAll = function pauseAll(){
+        // Pause all timers
+        _.each(Timer._timers, function(timer, key){ timer.pause(); });
+        return Timer;
+    };
+
+    Timer.resumeAll = function resumeAll(){
+        // Resumse all timers
+        _.each(Timer._timers, function(timer, key){ timer.resume(); });
+        return Timer;
+    };
+
+    return Timer;
 });
 
 // ===========================================================================
@@ -1208,109 +1314,6 @@ define(
 
     return EntityAttributes;
 
-});
-
-// ===========================================================================
-//
-// generate a UUID. RFC4122 compliant http://www.ietf.org/rfc/rfc4122.txt
-//  adapted from http://stackoverflow.com/a/2117523
-//
-// ===========================================================================
-define('util/generateUUID',[], function generateUUID(){
-    function createUUID(){
-        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-            /[xy]/g, function(c) {
-                var r = Math.random()*16|0, 
-                    v = c == 'x' ? r : (r&0x3|0x8);
-                return v.toString(16);
-        });
-        return uuid;
-    }
-    return createUUID;
-});
-
-// ===========================================================================
-//
-// Timer
-//
-//      -Returns a {String} of the root URL for the API. For instance,
-//          '/api/'
-//
-// ===========================================================================
-define('util/Timer',['util/generateUUID'], function TIMER(generateUUID){
-    // TODO: Store all timers globally so we can pause / unpause them all
-    //
-    // Timer class to enable pause / resume. Uses setTimeout
-    //
-    function Timer(callback, delay) {
-        // takes in a callback {Function} and a delay {Number} (same signature
-        // as setTimeout)
-        var self = this;
-
-        // how much time remains for this timer
-        this.remaining = delay;
-
-        // note : we need to store also a unique ID that won't be changed when
-        // the timer is cleared in pause()
-        this._id = generateUUID();
-
-        // wrap the callback to remove the timer from the list when it's finished
-        this.callback = function wrappedCallback(){
-            // remove timer
-            delete Timer._timers[self._id];
-
-            // call original callback
-            return callback();
-        };
-
-        // start the timer when initiall called
-        this.resume();
-    }
-
-    // Object Methods
-    // ------------------------------
-    Timer.prototype.pause = function TimerPause() {
-        // pause the timer by clearing the original timer and keeping track
-        // of the remaining time
-        window.clearTimeout(this.timerId);
-
-        this.remaining -= new Date() - this.start;
-
-        return this;
-    };
-
-    Timer.prototype.resume = function TimerResume() {
-        // resume (or start) the timer, passing in the callback and however
-        // much time is remaning (in the case of the initial call, remaining
-        // will equal the delay)
-        this.start = new Date();
-
-        // store the ID setTimeout returns so we can clear it in pause
-        this.timerId = window.setTimeout(this.callback, this.remaining);
-        
-        // Keep track of timers 
-        Timer._timers[this._id] = this;
-
-        return this;
-    };
-
-    // Timer class properties and methods
-    // ------------------------------
-    // Keep track of all timers
-    Timer._timers = {};
-    Timer.pauseAll = function pauseAll(){
-        // Pause all timers
-        _.each(Timer._timers, function(timer, key){ timer.pause(); });
-        return Timer;
-    };
-
-    Timer.resumeAll = function resumeAll(){
-        // Resumse all timers
-        _.each(Timer._timers, function(timer, key){ timer.resume(); });
-        return Timer;
-    };
-
-    return Timer;
 });
 
 // ===========================================================================
@@ -2168,8 +2171,8 @@ define(
             // type
             var bonusDmgFromPhysical = 0;
             var bonusDmgFromMagic = 0;
-            console.log(sourceEntity.get('attributes').get('attack'));
 
+            // TODO: TRACK DAMAGE
 
             // Get damage reduction from stats
             if(type.physical){
@@ -4641,6 +4644,12 @@ define(
 
             // NOTE: death listeners are setup in onShow
             
+            // ==========================
+            // Window focus events
+            // ==========================
+            this.listenTo(events, 'document:hide', this._pause);
+            this.listenTo(events, 'document:show', this._unpause);
+
             return this;
         },
 
@@ -4897,6 +4906,10 @@ define(
 
             // Show pause message
             this.$pauseBlocker.classed('active', true);
+            console.log("PPPPPPPPPPPPPPP");
+
+            // pause all timers
+            Timer.pauseAll();
 
             // cancel target and pause
             this.cancelTarget();
@@ -4925,6 +4938,9 @@ define(
             var self = this;
             logger.log('views/subviews/Battle', 
                 '1. togglePause(): UNPAUSING');
+
+            // resume all timers
+            Timer.resumeAll();
 
             // remove blocker
             this.$pauseBlocker.classed('active', false);
@@ -7906,13 +7922,14 @@ requirejs.config({
 //========================================
 require([
     //libs
-    'jquery', 'lib/jquery.transit.min',
+    'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
     'backbone', 'marionette', 'bootstrap',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
     //utils
     'logger', 
     'util/browserInfo',
+    'util/Timer',
     'handleKeys',
 
     //app
@@ -7923,12 +7940,13 @@ require([
     'appRouter'
     ],
     function main(
-        $, $transit,
+        $, $transit, $visibility,
         Backbone, marionette, bootstrap,
         d3plugins,
 
         logger, 
         browserInfo,
+        Timer,
         handleKeys,
 
         app, events,
@@ -8001,16 +8019,19 @@ require([
         });
 
         // ------------------------------
-        // Events for window losing focus
+        // Events for window losing or gaining focus / visibility 
         // ------------------------------
-        $(window).focus(function windowFocus() {
-            logger.log('app', 'window:focus event triggering');
-            events.trigger('window:focus');
-        });
-
-        $(window).blur(function() {
-            logger.log('app', 'window:blur event triggering');
-            events.trigger('window:blur');
+        $(document).on({
+            'show.visibility': function(e) {
+                logger.log('app', 'document:show event triggering at : ' + 
+                    new Date() + ' %O', e);
+                events.trigger('document:show');
+            },
+            'hide.visibility': function(e) {
+                logger.log('app', 'document:hide event triggering at : ' + 
+                    new Date() + ' %O', e);
+                events.trigger('document:hide');
+            }
         });
 
         // ------------------------------

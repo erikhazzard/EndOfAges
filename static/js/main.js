@@ -68,13 +68,14 @@ requirejs.config({
 //========================================
 require([
     //libs
-    'jquery', 'lib/jquery.transit.min',
+    'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
     'backbone', 'marionette', 'bootstrap',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
     //utils
     'logger', 
     'util/browserInfo',
+    'util/Timer',
     'handleKeys',
 
     //app
@@ -85,12 +86,13 @@ require([
     'appRouter'
     ],
     function main(
-        $, $transit,
+        $, $transit, $visibility,
         Backbone, marionette, bootstrap,
         d3plugins,
 
         logger, 
         browserInfo,
+        Timer,
         handleKeys,
 
         app, events,
@@ -163,16 +165,19 @@ require([
         });
 
         // ------------------------------
-        // Events for window losing focus
+        // Events for window losing or gaining focus / visibility 
         // ------------------------------
-        $(window).focus(function windowFocus() {
-            logger.log('app', 'window:focus event triggering');
-            events.trigger('window:focus');
-        });
-
-        $(window).blur(function() {
-            logger.log('app', 'window:blur event triggering');
-            events.trigger('window:blur');
+        $(document).on({
+            'show.visibility': function(e) {
+                logger.log('app', 'document:show event triggering at : ' + 
+                    new Date() + ' %O', e);
+                events.trigger('document:show');
+            },
+            'hide.visibility': function(e) {
+                logger.log('app', 'document:hide event triggering at : ' + 
+                    new Date() + ' %O', e);
+                events.trigger('document:hide');
+            }
         });
 
         // ------------------------------

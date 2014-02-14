@@ -340,8 +340,8 @@ define(
             // type
             var bonusDmgFromPhysical = 0;
             var bonusDmgFromMagic = 0;
-            console.log(sourceEntity.get('attributes').get('attack'));
 
+            // TODO: TRACK DAMAGE
 
             // Get damage reduction from stats
             if(type.physical){

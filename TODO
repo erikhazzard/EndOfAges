@@ -66,6 +66,9 @@ CURRENT
 
 **********************************
 
+----- Save breaks
+    save is janky
+
 change ability power to spell power
 -track all damage
 
@@ -81,3 +84,7 @@ New Idea:
 
 ====>>>> Data viz for end of fight, either on win or loss. Listen for events
 ====>>>>>>>> Track all effects by time
+
+(((((((((((((((((((((((((((((((((((((((((((((((((( BROKE IN FIREFOX )))))))))))))))))))))))))))))))))))))))
+
+------- Page visibility - doesn't stop timer when switching page

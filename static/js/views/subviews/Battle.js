@@ -188,6 +188,12 @@ define(
 
             // NOTE: death listeners are setup in onShow
             
+            // ==========================
+            // Window focus events
+            // ==========================
+            this.listenTo(events, 'document:hide', this._pause);
+            this.listenTo(events, 'document:show', this._unpause);
+
             return this;
         },
 
@@ -444,6 +450,10 @@ define(
 
             // Show pause message
             this.$pauseBlocker.classed('active', true);
+            console.log("PPPPPPPPPPPPPPP");
+
+            // pause all timers
+            Timer.pauseAll();
 
             // cancel target and pause
             this.cancelTarget();
@@ -472,6 +482,9 @@ define(
             var self = this;
             logger.log('views/subviews/Battle', 
                 '1. togglePause(): UNPAUSING');
+
+            // resume all timers
+            Timer.resumeAll();
 
             // remove blocker
             this.$pauseBlocker.classed('active', false);
