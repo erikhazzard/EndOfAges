@@ -2158,6 +2158,12 @@ define(
             var moddedDamage = 0,
                 physicalDamage, magicDamage;
 
+            // get physical damage and magic damage bonuses based on the source
+            // entity's stats
+            var dmgFromPhysical = 0;
+            var dmgFromMagic = 0;
+
+
             // Get damage reduction from stats
             if(type.physical){
                 physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
@@ -3096,8 +3102,8 @@ define(
         heal: new Ability({
             name: 'Heal',
             effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
+            castTime: 1,
+            timeCost: 1,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -3106,8 +3112,8 @@ define(
         smite: new Ability({
             name: 'Smite',
             effectId: 'magicMissle',
-            castTime: 3.5,
-            timeCost: 3.5,
+            castTime: 1.5,
+            timeCost: 1.5,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
@@ -3118,8 +3124,8 @@ define(
         virtue: new Ability({
             name: 'Virtue',
             effectId: 'minorHealing',
-            castTime: 5,
-            timeCost: 5,
+            castTime: 3,
+            timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',

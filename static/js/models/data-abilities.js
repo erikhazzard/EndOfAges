@@ -89,8 +89,8 @@ define(
         heal: new Ability({
             name: 'Heal',
             effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
+            castTime: 1,
+            timeCost: 1,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -99,8 +99,8 @@ define(
         smite: new Ability({
             name: 'Smite',
             effectId: 'magicMissle',
-            castTime: 3.5,
-            timeCost: 3.5,
+            castTime: 1.5,
+            timeCost: 1.5,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
@@ -111,8 +111,8 @@ define(
         virtue: new Ability({
             name: 'Virtue',
             effectId: 'minorHealing',
-            castTime: 5,
-            timeCost: 5,
+            castTime: 3,
+            timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',

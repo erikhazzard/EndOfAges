@@ -330,6 +330,12 @@ define(
             var moddedDamage = 0,
                 physicalDamage, magicDamage;
 
+            // get physical damage and magic damage bonuses based on the source
+            // entity's stats
+            var dmgFromPhysical = 0;
+            var dmgFromMagic = 0;
+
+
             // Get damage reduction from stats
             if(type.physical){
                 physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);

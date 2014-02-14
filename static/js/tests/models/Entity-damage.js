@@ -11,6 +11,7 @@ define([
 
     var calcFunc = Entity.prototype.calculateDamageMultiplier;
 
+
     describe('Entity - Damage tests', function(){
         describe('Formula for damage based on stats', function(){
             it('should be a 50% reduction at 100 resist for armor for 100% physical damage', function(){
@@ -82,37 +83,78 @@ define([
         });
 
 
+        // ------------------------------
+        // Basic tests of just armor and MR
+        // ------------------------------
         describe('Entity WITH armor and / or magic resist', function(){
-            _.each([ [20,100,1],[50,50,1],[50,50,0.5] ], function(d){
-                var amt = d[0];
-                var armor = d[1];
-                var factor = d[2];
-
-                it('should take damage (base of ' + amt + ') from ' + 
-                (factor * 100) + '% physical attack with ' + armor + 
-                ' armor', function(){
-                    var entity = new Entity({ attributes: { armor: armor }});
-                    var entity2 = new Entity();
-
-                    var startingHealth = entity.get('attributes').get('health');
-
+            _.each([ 'armor', 'magicResist' ], function(resist){
+                var entity = new Entity();
+                _.each([ [20,100,1],[50,50,1],[50,50,0.5], [100, 80, 1] ], function(d){
+                    var amt = d[0];
+                    var resistValue = d[1];
+                    var factor = d[2];
                     // get multiplier (pass in type and armor value)
-                    var multiplier = calcFunc(factor, armor);
+                    var multiplier = calcFunc(factor, resistValue);
+                    var dmg =  (amt * multiplier) * factor;
+                    var targetAttrs = {};
+                    targetAttrs[resist] = resistValue;
 
-                    entity.takeDamage({
-                        sourceAbility: new Ability({ type: {physical: factor}}),
-                        source: entity2,
-                        amount: amt
+                    it('should take ' + dmg + ' damage (base of ' + amt + ') from ' + 
+                    (factor * 100) + '% physical attack with ' + resistValue + 
+                    ' ' + resist, function(){
+                        var entity = new Entity({ attributes: targetAttrs });
+                        var entity2 = new Entity();
+
+                        var startingHealth = entity.get('attributes').get('health');
+
+                        var dmgType = {};
+                        if(resist === 'armor'){ 
+                            dmgType.physical = factor;
+                        } else if (resist === 'magicResist'){
+                            dmgType.magic = factor;
+                        }
+
+                        entity.takeDamage({
+                            sourceAbility: new Ability({ type: dmgType}),
+                            source: entity2,
+                            amount: amt
+                        });
+
+                        // need to multiply it all by the factor, since the types
+                        // should always add up to equal 100% ( if factor is 0.5,
+                        // amt * multiplier is only half of the damage that would be
+                        // applied)
+                        entity.get('attributes').get('health').should.equal(
+                            Math.round(startingHealth - dmg)
+                        );
                     });
-
-                    // need to multiply it all by the factor, since the types
-                    // should always add up to equal 100% ( if factor is 0.5,
-                    // amt * multiplier is only half of the damage that would be
-                    // applied)
-                    entity.get('attributes').get('health').should.equal(
-                        Math.round(startingHealth - (amt * multiplier) * factor)
-                    );
                 });
+            });
+        });
+
+        // ------------------------------
+        // attack / spellpower with armor / mr
+        // ------------------------------
+        describe('Entity with attack / spellpower', function(){
+
+            it('should take extra damage when other entity has more attack', function(){
+                var entity = new Entity();
+                var entity2 = new Entity({
+                    attributes: {
+                        attack: 10
+                    }
+                });
+
+                var startingHealth = entity.get('attributes').get('health');
+                var amt = 20;
+
+                entity.takeDamage({
+                    sourceAbility: new Ability({ type: {physical: 1}}),
+                    source: entity2,
+                    amount: amt
+                });
+
+                entity.get('attributes').get('health').should.equal((startingHealth - amt));
             });
         });
 
