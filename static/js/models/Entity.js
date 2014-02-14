@@ -310,9 +310,11 @@ define(
             // TODO: process damage based on passed in damage and type and this
             // entity's stats
             var sourceAbility = options.sourceAbility;
+            var sourceEntity = options.source;
+
             var type = sourceAbility.get('type');
             var element = sourceAbility.get('element');
-            var damage = options.amount * -1;
+            var damage = Math.abs(options.amount) * -1;
             var armor = attrs.get('armor');
             var magicResist = attrs.get('magicResist');
 
@@ -332,17 +334,29 @@ define(
 
             // get physical damage and magic damage bonuses based on the source
             // entity's stats
-            var dmgFromPhysical = 0;
-            var dmgFromMagic = 0;
+            //
+            // functionality is: get base damage, add additional damage based
+            // on the source entity's attributes * the % of the physical or magic
+            // type
+            var bonusDmgFromPhysical = 0;
+            var bonusDmgFromMagic = 0;
 
 
             // Get damage reduction from stats
             if(type.physical){
-                physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (damage * type.physical);
+                // 1. Calculate damage from base damage plus the source's 
+                // attack power. Scale the source's bonus attack damage by
+                // the % of the type of attack
+                bonusDmgFromPhysical = -1*(Math.abs(damage) + (sourceEntity.get('attributes').get('attack')));
+                // 2. get actual total physical damage done based on armor and damge from source's attack
+                physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (bonusDmgFromPhysical * type.physical);
+                // update the moddedDamage 
                 moddedDamage += physicalDamage;
             }
             if(type.magic){
-                magicDamage = this.calculateDamageMultiplier(type.magic, magicResist) * (damage * type.magic);
+                // same as above
+                bonusDmgFromMagic = -1*(Math.abs(damage) + (sourceEntity.get('attributes').get('magicPower')));
+                magicDamage = this.calculateDamageMultiplier(type.magic, magicResist) * (bonusDmgFromMagic * type.magic);
                 moddedDamage += magicDamage;
             }
 

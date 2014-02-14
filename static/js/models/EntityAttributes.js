@@ -25,7 +25,7 @@ define(
             attackPower: 0,
 
             magicResist: 0,
-            abilityPower: 0,
+            magicPower: 0,
 
             //Regen
             //---------------------------

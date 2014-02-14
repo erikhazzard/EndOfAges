@@ -136,28 +136,57 @@ define([
         // attack / spellpower with armor / mr
         // ------------------------------
         describe('Entity with attack / spellpower', function(){
+            _.each(['attack', 'magicPower'], function(type){
+                it(type + ' ::: should take extra damage when other entity has more attack', function(){
+                    var attrs = {};
+                    attrs[type] = 20;
 
-            it('should take extra damage when other entity has more attack', function(){
-                var entity = new Entity();
-                var entity2 = new Entity({
-                    attributes: {
-                        attack: 10
-                    }
+                    var entity = new Entity({ });
+                    var entity2 = new Entity({ attributes: attrs });
+
+                    var startingHealth = entity.get('attributes').get('health');
+                    var amt = 20;
+                    var abilityType = {};
+                    if(type === 'attack'){ abilityType.physical = 1; }
+                    else { abilityType.magic = 1; }
+
+                    //entity.takeDamage({
+                        //sourceAbility: new Ability({ type: abilityType }),
+                        //source: entity2,
+                        //amount: amt
+                    //});
+
+                    //// when armor is at 0, the attack should just add damage based
+                    //// on whatever the attack value is
+                    //entity.get('attributes').get('health').should.equal((startingHealth - amt - 20));
                 });
+            });
+
+            // ------------------------------
+            // mixed types
+            // ------------------------------
+            it('should correctly return values when ability is mixed', function(){
+                var entity = new Entity({ });
+                var entity2 = new Entity({ attributes: {
+                    attack: 10, magicPower: 10
+                }});
 
                 var startingHealth = entity.get('attributes').get('health');
                 var amt = 20;
 
                 entity.takeDamage({
-                    sourceAbility: new Ability({ type: {physical: 1}}),
+                    sourceAbility: new Ability({ type: {
+                        magic: 0.5, physical: 0.5
+                    }}),
                     source: entity2,
                     amount: amt
                 });
 
-                entity.get('attributes').get('health').should.equal((startingHealth - amt));
+                // when armor is at 0, the attack should just add damage based
+                // on whatever the attack value is
+                entity.get('attributes').get('health').should.equal((startingHealth - amt - 20));
             });
         });
-
     });
 
 });

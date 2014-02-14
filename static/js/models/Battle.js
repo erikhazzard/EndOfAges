@@ -79,7 +79,7 @@ define(
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
-                while(i<1) {
+                while(i<3) {
                     if(Math.random() < (1/(i+3))){
                         entities.push(this.getRandomEntity()); 
                     }

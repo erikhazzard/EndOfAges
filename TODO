@@ -70,7 +70,8 @@ CURRENT
 ::::: Abilities : factor in attack and spellpower into damage calculations
 
 
-***** Duplicate effects not working
+change ability power to spell power
+-track all damage
 
 
 ===========================================================================
