@@ -340,6 +340,7 @@ define(
             // type
             var bonusDmgFromPhysical = 0;
             var bonusDmgFromMagic = 0;
+            console.log(sourceEntity.get('attributes').get('attack'));
 
 
             // Get damage reduction from stats

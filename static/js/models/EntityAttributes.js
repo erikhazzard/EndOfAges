@@ -22,7 +22,7 @@ define(
             //---------------------------
             // Physcial
             armor: 0,
-            attackPower: 0,
+            attack: 0,
 
             magicResist: 0,
             magicPower: 0,

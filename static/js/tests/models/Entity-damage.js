@@ -186,8 +186,78 @@ define([
                 // when armor is at 0, the attack should just add damage based
                 // on whatever the attack value is
                 entity.get('attributes').get('health').should.equal(70);
+
+                // should subtract another 30 (takes into account rounding)
+                entity.takeDamage({
+                    sourceAbility: new Ability({ type: {
+                        magic: 0.2, physical: 0.8
+                    }}),
+                    source: entity2,
+                    amount: amt
+                });
+
+                entity.get('attributes').get('health').should.equal(40);
+            });
+
+            // ------------------------------
+            // armor and defense
+            // ------------------------------
+            it('should work for mixed type and armor and mr', function(){
+                var entity = new Entity({ 
+                    attributes: {
+                        armor: 10,
+                        magicResist: 10,
+                        health: 100
+                    }
+                });
+                var entity2 = new Entity({ attributes: {
+                    attack: 10, magicPower: 10
+                }});
+
+                var amt = 20;
+
+                entity.takeDamage({
+                    sourceAbility: new Ability({ type: {
+                        magic: 0.5, physical: 0.5
+                    }}),
+                    source: entity2,
+                    amount: amt
+                });
+
+                // when armor is at 0, the attack should just add damage based
+                // on whatever the attack value is
+                entity.get('attributes').get('health').should.equal(71);
+            });
+            
+            it('should work for physical type and armor', function(){
+                var entity = new Entity({ 
+                    attributes: {
+                        armor: 20,
+                        magicResist: 10,
+                        health: 100
+                    }
+                });
+                var entity2 = new Entity({ attributes: {
+                    attack: 20, 
+                    magicPower: 90 // should do nothing here
+                }});
+
+                var amt = 20;
+
+                entity.takeDamage({
+                    sourceAbility: new Ability({ type: {
+                        physical: 1
+                    }}),
+                    source: entity2,
+                    amount: amt
+                });
+
+                // when armor is at 0, the attack should just add damage based
+                // on whatever the attack value is
+                entity.get('attributes').get('health').should.equal(67);
             });
         });
+        
     });
 
 });

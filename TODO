@@ -65,14 +65,14 @@ CURRENT
 
 
 **********************************
--Abilities with some % physical / magic
-
-::::: Abilities : factor in attack and spellpower into damage calculations
-
 
 change ability power to spell power
 -track all damage
 
+-implement more abilities sucka
+
+
+*********** STUNS
 
 ===========================================================================
 New Idea:
