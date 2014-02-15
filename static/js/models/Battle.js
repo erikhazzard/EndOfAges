@@ -105,12 +105,14 @@ define(
             // generate new entity
             entity = new Entity({
                 'class': CLASSES[Math.random() * CLASSES.length | 0],
-                'race': RACES[Math.random() * RACES.length | 0],
-                // random stats
-                attributes: {
-                    armor: Math.random() * 10 | 0,
-                    magicResist: Math.random() * 10 | 0
-                }
+                'race': RACES[Math.random() * RACES.length | 0]
+            });
+            // gimp stats. TODO: Scale based on encounter
+            entity.get('attributes').set({
+                armor: Math.random() * -20,
+                attack: Math.random() * -20,
+                magicResist:  Math.random() * -20,
+                magicPower: Math.random() * -20
             });
 
             return entity;

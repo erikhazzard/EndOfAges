@@ -662,9 +662,9 @@ define('handleKeys',[
         ];
 
         var handleKeys = function handleKeys(){
-            _.each(keys, function(key){
+            _.each(keys, function setupKeyHandler(key){
                 //Site wide binding
-                jwerty.key(key, function(e){
+                jwerty.key(key, function jwertyKeyHandler(e){
                     //If user is pressing keys in an input element, don't
                     //  trigger event
                     var tag = e.target.tagName.toLowerCase();
@@ -1346,20 +1346,17 @@ define(
             effectId: null,
             description: 'Textual description of effect',
 
-            // castDuration - measured in seconds
-            // how long the spell takes to cast - how long between the source
-            // entity using the spell and the target entity receiving the effect
-            castDuration: 0.5,
-
-            // how much power the ability costs to use
-            // TODO: probably won't use power?  Think on this
-            powerCost: 10, 
-
             // Damage Over Time (DOT) properties
             // ticks: number of times to do the effect
             ticks: 0,
             // time between each tick
             tickDuration: 1,
+
+            // castDuration - measured in seconds
+            // how long the spell takes to cast - how long between the source
+            // entity using the spell and the target entity receiving the effect
+            castDuration: 0.5,
+
         
             // How long must the player wait until they can use this ability
             // This SHOULD always be greater than or equal to than the timeCost
@@ -1489,6 +1486,12 @@ define(
             return this;
         },
 
+        getCastDuration: function getDelay(options){
+            // TODO: lower delay if the target has some sort of delay reducting
+            // stats
+            return this.get('castDuration') * 1000;
+        },
+
         // ------------------------------
         // Default ability effect (NOTE: can be overriden for custom abilities)
         // ------------------------------
@@ -1524,9 +1527,7 @@ define(
 
             // note: multiply castDuration by 1000 (it's in seconds, we
             // need to get milliseconds)
-            // TODO: lower delay if the target has some sort of delay reducting
-            // stats
-            var delay = this.get('castDuration') * 1000;
+            var delay = this.getCastDuration(options);
 
             // --------------------------
             // Heal
@@ -1885,7 +1886,12 @@ define(
             // Timer properties
             //---------------------------
             // timer is measured in seconds
-            timerLimit: 10,
+            timerLimit: 15,
+
+            // reduction for casting spell. How much less does this spell cost
+            // to cast in time? Measured in seconds
+            // TODO: This. How to implement? Modify ability directly? 
+            castTimeReduction: 0,
 
             //---------------------------
             //Entity attributes
@@ -2126,7 +2132,10 @@ define(
         // Take / Deal damage
         // ------------------------------
         takeDamage: function(options){
-            // TODO: document, think of structure
+            // This function is a helper function for the entity to take damage
+            // Alternatively, the ability may manually have the entity take
+            // damage (for instance, an ability might do 10% of the entity's
+            // health in damage)
             logger.log('models/Entity', '1. takeDamage() : options: %O',
                 options);
 
@@ -2201,6 +2210,10 @@ define(
             // round damage
             damage = Math.round(damage);
 
+            // if damage is POSITIVE, set it to 0
+            // (this could happen if entity has negative stats)
+            if(damage > 0){ damage = 0; }
+
             // --------------------------
             // update health
             // --------------------------
@@ -2213,8 +2226,12 @@ define(
             // limit health
             if(newHealth > maxHealth){ newHealth = maxHealth; }
 
+            //  -------------------------
             // update the health
             //  pass in the ability that caused the damage
+            //  -------------------------
+            //  NOTE: if an ability overrides this function, it still must
+            //  called the following to update health
             attrs.set({ health: newHealth }, { 
                 sourceAbility: sourceAbility,
                 source: options.source
@@ -2227,7 +2244,36 @@ define(
 
             return damage;
         },
+
+        takeTrueDamage: function takeTrueDamage(options){
+            // Takes damage, ignoring armor and magic resist. 
+            // TODO: Should it not ignore elements?
+            var damage = Math.abs(options.amount); 
+            damage = Math.round(damage);
+
+            var attrs = this.get('attributes');
+            var curHealth = attrs.get('health');
+
+            var newHealth = curHealth - damage;
+            
+            // TODO: track damage
+            //
+            //  -------------------------
+            // update the health
+            //  -------------------------
+            attrs.set({ health: newHealth }, { 
+                sourceAbility: options.sourceAbility,
+                source: options.source
+            });
+
+            return damage;
+        },
         
+        // ------------------------------
+        //
+        // Heal
+        //
+        // ------------------------------
         takeHeal: function(options){
             // This is called by an abilty that does healing
             // TODO: document, think of structure
@@ -3038,8 +3084,8 @@ define(
 //
 // ===========================================================================
 define(
-    'models/data-abilities',[ 'events', 'logger', 'models/Ability' ], function(
-        events, logger, Ability
+    'models/data-abilities',[ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
+        events, logger, Ability, Timer
     ){
     // TODO: think of structure.
     // Maybe instead of damage and heal, `amount` is used, and a separate
@@ -3157,13 +3203,44 @@ define(
                 maxHealth: 10
             }
         }),
+        judgement: new Ability({
+            name: 'Judgement',
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: '10%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        }),
 
         // ==============================
         // 
         // Shadowknight
         //
         // ==============================
-        'darkblade': new Ability({
+        darkblade: new Ability({
             name: 'Dark Blade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'magicMissle',
@@ -3176,8 +3253,41 @@ define(
             damage: 9,
             heal: 5,
             healTarget: 'source'
-        })
+        }),
 
+        deathtouch: new Ability({
+            name: 'Death Touch',
+            description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 1.5,
+            validTargets: ['enemy'],
+            type: {'magic': 0.5, 'physical': 0.5},
+            element: 'dark',
+            damage: '25%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.25 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        })
     };
 
 
@@ -3218,6 +3328,7 @@ define(
                 ABILITIES.smite,
                 // health and armor buff
                 ABILITIES.virtue
+                ,ABILITIES.judgement
                 //// res
                 //ABILITIES.resurrect
             ])
@@ -3234,8 +3345,7 @@ define(
                 //ABILITIES.darkblade,
                 //// siphon abilities
                 //ABILITIES.siphonstrength,
-                //// aoe + taunt
-                //ABILITIES.deathcloud
+                ,ABILITIES.deathtouch
 
             ])
         }),
@@ -3303,10 +3413,10 @@ define(
             description: 'An elf',
             sprite: 'elf',
             baseStats: {
-                attack: 13,
-                armor: 10,
-                magicResist: 15,
-                magicPower: 13
+                attack: 4,
+                armor: 2,
+                magicResist: 4,
+                magicPower: 4
             }
         }),
         new Race({
@@ -3314,10 +3424,10 @@ define(
             description: 'Boring',
             sprite: 'human',
             baseStats: {
-                attack: 12,
-                armor: 12,
-                magicResist: 12,
-                magicPower: 12
+                attack: 4,
+                armor: 4,
+                magicResist: 3,
+                magicPower: 3
             }
         }),
         new Race({
@@ -3325,10 +3435,10 @@ define(
             description: 'Dark elf',
             sprite: 'darkelf',
             baseStats: {
-                attack: 13,
-                armor: 10,
-                magicResist: 15,
-                magicPower: 13
+                attack: 4,
+                armor: 2,
+                magicResist: 3,
+                magicPower: 5
             }
         }),
         new Race({
@@ -3336,10 +3446,10 @@ define(
             description: 'Boring',
             sprite: 'mimirian',
             baseStats: {
-                attack: 10,
-                armor: 18,
-                magicResist: 18,
-                magicPower: 12
+                attack: 1,
+                armor: 6,
+                magicResist: 5,
+                magicPower: 2
             }
         })
     ];
@@ -3454,12 +3564,14 @@ define(
             // generate new entity
             entity = new Entity({
                 'class': CLASSES[Math.random() * CLASSES.length | 0],
-                'race': RACES[Math.random() * RACES.length | 0],
-                // random stats
-                attributes: {
-                    armor: Math.random() * 10 | 0,
-                    magicResist: Math.random() * 10 | 0
-                }
+                'race': RACES[Math.random() * RACES.length | 0]
+            });
+            // gimp stats. TODO: Scale based on encounter
+            entity.get('attributes').set({
+                armor: Math.random() * -20,
+                attack: Math.random() * -20,
+                magicResist:  Math.random() * -20,
+                magicPower: Math.random() * -20
             });
 
             return entity;
@@ -4906,7 +5018,6 @@ define(
 
             // Show pause message
             this.$pauseBlocker.classed('active', true);
-            console.log("PPPPPPPPPPPPPPP");
 
             // pause all timers
             Timer.pauseAll();
@@ -4959,6 +5070,12 @@ define(
                 $el = d3.select(el);
                 var entityGroup = $el.attr('data-entityGroup');
                 var index = $el.attr('data-index');
+
+                // if entity is dead, don't start timer
+                if(!self.model.get(entityGroup + 'Entities').models[index].get('isAlive')){
+                    return false;
+                }
+
                 var val = self[entityGroup + 'EntityTimers'][index];
 
                 var duration = ( 
@@ -6257,8 +6374,10 @@ define(
                     // update the bounding rect
                     this.wrapperBoundingRect = this.$svg.node().getBoundingClientRect();
 
-                    // get the position of the entity sprite
-                    // TODO: cache bounding rect
+                    // get the position of the entity sprite.
+                    //  We need to do this so we can tell the effect where to go
+                    //  TODO: We could just have the effect go to the entity's
+                    //  starting location instead - would be slightly faster
                     var sourceRect = d3.select(this[sourceEntityGroup + 'EntitySprites'][0][sourceEntityIndex])
                         .node()
                         .getBoundingClientRect();
@@ -6303,8 +6422,27 @@ define(
                         // append it the ability effects group
                         $effect = $effect(self.$abilityEffects);
 
+                        var effectClass = '';
+
+                        // Set effect class based on the element
+                        // --------------
+                        // TODO: Use a gradient for multiple effects
+                        var highestElement = { value: 0, element: '' };
+
+                        _.each(selectedAbility.attributes.element, function(val,key){
+                            if(highestElement.value < val){ 
+                                highestElement.value = val; 
+                                highestElement.element = key;
+                            }
+                        });
+
+                        effectClass = highestElement.element;
+
+                        // Render the effect
+                        // --------------
                         // start in the middle of the source
                         $effect.attr({
+                            'class': $effect.attr('class') + ' ' + effectClass,
                             // set start position immediately
                             transform: 'translate(' + [
                                 // get midpoints
@@ -7148,7 +7286,7 @@ define(
             this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
             this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
             this.listenTo(events, 'keyPress:escape', this.handleKeyBackspace);
-            this.listenTo(events, 'keyPress:up', this.handleKeyUpDown);
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpUp);
             this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
 
             // TODO: if entity already has a race or class, trigger the
@@ -7168,6 +7306,10 @@ define(
             this.changeState('previous');
         },
 
+        handleKeyUpUp: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyUpUp() called');
+            // TODO : cycle through current list
+        },
         handleKeyUpDown: function(){
             logger.log('views/PageCreateCharacter', 'handleKeyUpDown() called');
             // TODO : cycle through current list

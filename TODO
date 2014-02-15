@@ -20,12 +20,6 @@ Get rid of bootstrap?
 
 ------------------
 
-A parent view for the sub views for creating characters
-
-----------------
-
-save position / game / etc.
-
 -----------------------
 
 Good solid name generation
@@ -51,9 +45,6 @@ BIG: Character sprite generation concepts / customization
 
 ---------------------------------------------------------
 
-
-ABILITIES : do all effects in ability itself
-
 -----------------------------------------
 CURRENT
 -----------------------------------------
@@ -63,16 +54,18 @@ CURRENT
 
 ---- Abilities : Cooldown
 
-
 **********************************
 
 ----- Save breaks
     save is janky
 
-change ability power to spell power
 -track all damage
 
--implement more abilities sucka
+
+*** HEAL Resists / Magic Power effects
+
+***************************************************** 
+TODO: Extra damage from elemental effects
 
 
 *********** STUNS
@@ -85,6 +78,10 @@ New Idea:
 ====>>>> Data viz for end of fight, either on win or loss. Listen for events
 ====>>>>>>>> Track all effects by time
 
-(((((((((((((((((((((((((((((((((((((((((((((((((( BROKE IN FIREFOX )))))))))))))))))))))))))))))))))))))))
-
+((((((((((MAP IS BROKE IN FIREFOX )))))))))))))))))))))))))))))))))))))))
 ------- Page visibility - doesn't stop timer when switching page
+
+------------------------------------------
+------------------------------------------
+SAVE : use localForage : https://github.com/mozilla/localForage
+

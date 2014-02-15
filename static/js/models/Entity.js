@@ -54,7 +54,12 @@ define(
             // Timer properties
             //---------------------------
             // timer is measured in seconds
-            timerLimit: 10,
+            timerLimit: 15,
+
+            // reduction for casting spell. How much less does this spell cost
+            // to cast in time? Measured in seconds
+            // TODO: This. How to implement? Modify ability directly? 
+            castTimeReduction: 0,
 
             //---------------------------
             //Entity attributes
@@ -295,7 +300,10 @@ define(
         // Take / Deal damage
         // ------------------------------
         takeDamage: function(options){
-            // TODO: document, think of structure
+            // This function is a helper function for the entity to take damage
+            // Alternatively, the ability may manually have the entity take
+            // damage (for instance, an ability might do 10% of the entity's
+            // health in damage)
             logger.log('models/Entity', '1. takeDamage() : options: %O',
                 options);
 
@@ -370,6 +378,10 @@ define(
             // round damage
             damage = Math.round(damage);
 
+            // if damage is POSITIVE, set it to 0
+            // (this could happen if entity has negative stats)
+            if(damage > 0){ damage = 0; }
+
             // --------------------------
             // update health
             // --------------------------
@@ -382,8 +394,12 @@ define(
             // limit health
             if(newHealth > maxHealth){ newHealth = maxHealth; }
 
+            //  -------------------------
             // update the health
             //  pass in the ability that caused the damage
+            //  -------------------------
+            //  NOTE: if an ability overrides this function, it still must
+            //  called the following to update health
             attrs.set({ health: newHealth }, { 
                 sourceAbility: sourceAbility,
                 source: options.source
@@ -396,7 +412,36 @@ define(
 
             return damage;
         },
+
+        takeTrueDamage: function takeTrueDamage(options){
+            // Takes damage, ignoring armor and magic resist. 
+            // TODO: Should it not ignore elements?
+            var damage = Math.abs(options.amount); 
+            damage = Math.round(damage);
+
+            var attrs = this.get('attributes');
+            var curHealth = attrs.get('health');
+
+            var newHealth = curHealth - damage;
+            
+            // TODO: track damage
+            //
+            //  -------------------------
+            // update the health
+            //  -------------------------
+            attrs.set({ health: newHealth }, { 
+                sourceAbility: options.sourceAbility,
+                source: options.source
+            });
+
+            return damage;
+        },
         
+        // ------------------------------
+        //
+        // Heal
+        //
+        // ------------------------------
         takeHeal: function(options){
             // This is called by an abilty that does healing
             // TODO: document, think of structure

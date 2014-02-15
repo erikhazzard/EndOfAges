@@ -450,7 +450,6 @@ define(
 
             // Show pause message
             this.$pauseBlocker.classed('active', true);
-            console.log("PPPPPPPPPPPPPPP");
 
             // pause all timers
             Timer.pauseAll();
@@ -503,6 +502,12 @@ define(
                 $el = d3.select(el);
                 var entityGroup = $el.attr('data-entityGroup');
                 var index = $el.attr('data-index');
+
+                // if entity is dead, don't start timer
+                if(!self.model.get(entityGroup + 'Entities').models[index].get('isAlive')){
+                    return false;
+                }
+
                 var val = self[entityGroup + 'EntityTimers'][index];
 
                 var duration = ( 
@@ -1801,8 +1806,10 @@ define(
                     // update the bounding rect
                     this.wrapperBoundingRect = this.$svg.node().getBoundingClientRect();
 
-                    // get the position of the entity sprite
-                    // TODO: cache bounding rect
+                    // get the position of the entity sprite.
+                    //  We need to do this so we can tell the effect where to go
+                    //  TODO: We could just have the effect go to the entity's
+                    //  starting location instead - would be slightly faster
                     var sourceRect = d3.select(this[sourceEntityGroup + 'EntitySprites'][0][sourceEntityIndex])
                         .node()
                         .getBoundingClientRect();
@@ -1847,8 +1854,27 @@ define(
                         // append it the ability effects group
                         $effect = $effect(self.$abilityEffects);
 
+                        var effectClass = '';
+
+                        // Set effect class based on the element
+                        // --------------
+                        // TODO: Use a gradient for multiple effects
+                        var highestElement = { value: 0, element: '' };
+
+                        _.each(selectedAbility.attributes.element, function(val,key){
+                            if(highestElement.value < val){ 
+                                highestElement.value = val; 
+                                highestElement.element = key;
+                            }
+                        });
+
+                        effectClass = highestElement.element;
+
+                        // Render the effect
+                        // --------------
                         // start in the middle of the source
                         $effect.attr({
+                            'class': $effect.attr('class') + ' ' + effectClass,
                             // set start position immediately
                             transform: 'translate(' + [
                                 // get midpoints

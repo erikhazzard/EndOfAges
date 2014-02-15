@@ -84,7 +84,7 @@ define(
             this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
             this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
             this.listenTo(events, 'keyPress:escape', this.handleKeyBackspace);
-            this.listenTo(events, 'keyPress:up', this.handleKeyUpDown);
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpUp);
             this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
 
             // TODO: if entity already has a race or class, trigger the
@@ -104,6 +104,10 @@ define(
             this.changeState('previous');
         },
 
+        handleKeyUpUp: function(){
+            logger.log('views/PageCreateCharacter', 'handleKeyUpUp() called');
+            // TODO : cycle through current list
+        },
         handleKeyUpDown: function(){
             logger.log('views/PageCreateCharacter', 'handleKeyUpDown() called');
             // TODO : cycle through current list

@@ -19,10 +19,10 @@ define(
             description: 'An elf',
             sprite: 'elf',
             baseStats: {
-                attack: 13,
-                armor: 10,
-                magicResist: 15,
-                magicPower: 13
+                attack: 4,
+                armor: 2,
+                magicResist: 4,
+                magicPower: 4
             }
         }),
         new Race({
@@ -30,10 +30,10 @@ define(
             description: 'Boring',
             sprite: 'human',
             baseStats: {
-                attack: 12,
-                armor: 12,
-                magicResist: 12,
-                magicPower: 12
+                attack: 4,
+                armor: 4,
+                magicResist: 3,
+                magicPower: 3
             }
         }),
         new Race({
@@ -41,10 +41,10 @@ define(
             description: 'Dark elf',
             sprite: 'darkelf',
             baseStats: {
-                attack: 13,
-                armor: 10,
-                magicResist: 15,
-                magicPower: 13
+                attack: 4,
+                armor: 2,
+                magicResist: 3,
+                magicPower: 5
             }
         }),
         new Race({
@@ -52,10 +52,10 @@ define(
             description: 'Boring',
             sprite: 'mimirian',
             baseStats: {
-                attack: 10,
-                armor: 18,
-                magicResist: 18,
-                magicPower: 12
+                attack: 1,
+                armor: 6,
+                magicResist: 5,
+                magicPower: 2
             }
         })
     ];

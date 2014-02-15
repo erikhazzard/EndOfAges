@@ -35,7 +35,7 @@ define([
                 // must take AT LEAST 80 ms (30ms + 50ms)
                 assert(elapsed >= 60);
                 // give an extra 20ms of room for other parallel tests
-                assert(elapsed <= 100);
+                assert(elapsed <= 180);
 
                 done();
 

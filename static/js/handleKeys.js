@@ -31,9 +31,9 @@ define([
         ];
 
         var handleKeys = function handleKeys(){
-            _.each(keys, function(key){
+            _.each(keys, function setupKeyHandler(key){
                 //Site wide binding
-                jwerty.key(key, function(e){
+                jwerty.key(key, function jwertyKeyHandler(e){
                     //If user is pressing keys in an input element, don't
                     //  trigger event
                     var tag = e.target.tagName.toLowerCase();

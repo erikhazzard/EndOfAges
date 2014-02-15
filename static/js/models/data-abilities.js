@@ -7,8 +7,8 @@
 //
 // ===========================================================================
 define(
-    [ 'events', 'logger', 'models/Ability' ], function(
-        events, logger, Ability
+    [ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
+        events, logger, Ability, Timer
     ){
     // TODO: think of structure.
     // Maybe instead of damage and heal, `amount` is used, and a separate
@@ -126,13 +126,44 @@ define(
                 maxHealth: 10
             }
         }),
+        judgement: new Ability({
+            name: 'Judgement',
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: '10%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        }),
 
         // ==============================
         // 
         // Shadowknight
         //
         // ==============================
-        'darkblade': new Ability({
+        darkblade: new Ability({
             name: 'Dark Blade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'magicMissle',
@@ -145,8 +176,41 @@ define(
             damage: 9,
             heal: 5,
             healTarget: 'source'
-        })
+        }),
 
+        deathtouch: new Ability({
+            name: 'Death Touch',
+            description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
+            effectId: 'magicMissle',
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 1.5,
+            validTargets: ['enemy'],
+            type: {'magic': 0.5, 'physical': 0.5},
+            element: 'dark',
+            damage: '25%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.25 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        })
     };
 
 

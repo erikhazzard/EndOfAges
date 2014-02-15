@@ -28,20 +28,17 @@ define(
             effectId: null,
             description: 'Textual description of effect',
 
-            // castDuration - measured in seconds
-            // how long the spell takes to cast - how long between the source
-            // entity using the spell and the target entity receiving the effect
-            castDuration: 0.5,
-
-            // how much power the ability costs to use
-            // TODO: probably won't use power?  Think on this
-            powerCost: 10, 
-
             // Damage Over Time (DOT) properties
             // ticks: number of times to do the effect
             ticks: 0,
             // time between each tick
             tickDuration: 1,
+
+            // castDuration - measured in seconds
+            // how long the spell takes to cast - how long between the source
+            // entity using the spell and the target entity receiving the effect
+            castDuration: 0.5,
+
         
             // How long must the player wait until they can use this ability
             // This SHOULD always be greater than or equal to than the timeCost
@@ -171,6 +168,12 @@ define(
             return this;
         },
 
+        getCastDuration: function getDelay(options){
+            // TODO: lower delay if the target has some sort of delay reducting
+            // stats
+            return this.get('castDuration') * 1000;
+        },
+
         // ------------------------------
         // Default ability effect (NOTE: can be overriden for custom abilities)
         // ------------------------------
@@ -206,9 +209,7 @@ define(
 
             // note: multiply castDuration by 1000 (it's in seconds, we
             // need to get milliseconds)
-            // TODO: lower delay if the target has some sort of delay reducting
-            // stats
-            var delay = this.get('castDuration') * 1000;
+            var delay = this.getCastDuration(options);
 
             // --------------------------
             // Heal

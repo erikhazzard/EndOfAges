@@ -61,3 +61,9 @@ elemental modifiers
 ---------------
 
 Abilities that do more damage or are more effective when an enemy's timer bar is low or high
+
+-----------------------------------
+Abilities that deal true damage over time
+-Stat for defending true damage, for dealing additional true damage
+    -What is true damage? Damage that ignores armor and magic resist. Should it
+    ignore elemental affects as well?

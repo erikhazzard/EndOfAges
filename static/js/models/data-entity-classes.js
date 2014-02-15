@@ -32,6 +32,7 @@ define(
                 ABILITIES.smite,
                 // health and armor buff
                 ABILITIES.virtue
+                ,ABILITIES.judgement
                 //// res
                 //ABILITIES.resurrect
             ])
@@ -48,8 +49,7 @@ define(
                 //ABILITIES.darkblade,
                 //// siphon abilities
                 //ABILITIES.siphonstrength,
-                //// aoe + taunt
-                //ABILITIES.deathcloud
+                ,ABILITIES.deathtouch
 
             ])
         }),
