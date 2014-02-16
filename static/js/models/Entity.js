@@ -306,18 +306,27 @@ define(
             //
             var healthHistory = this.get('healthHistory');
 
-            var difference = options.health - options.model._previousAttributes.health;
+            var difference = null;
+
+            // check for health / model, and check for source and sourceAbility
+            //  These should almost always exist, but this allows an entity 
+            //  taking damage from a non entity source
+            if(options.health && options.model){
+                difference = options.health - options.model._previousAttributes.health;
+            }
+            var source = options.source || {cid: -1, get: function(){}};
+            var sourceAbility = options.sourceAbility || {cid: -1, get: function(){}};
 
             // add a new history item to beginning of history array
             // update it (NOTE: it's an array, so it's updating in place without
             // triggering a change event)
             healthHistory.unshift({
-                element: options.sourceAbility.get('element'),
-                type: options.sourceAbility.get('type'),
+                element: sourceAbility.get('element'),
+                type: sourceAbility.get('type'),
                 date: new Date(),
-                abilityName: options.sourceAbility.get('name'),
-                entityCID: options.source.cid,
-                entityName: options.source.get('name'),
+                abilityName: sourceAbility.get('name'),
+                entityCID: source.cid,
+                entityName: source.get('name'),
                 amount: difference
             });
 
@@ -342,8 +351,10 @@ define(
                 '1. healthChanged() : health ' + health + ' options: %O',
                 options);
 
+            // Track damage dealt
             this.trackDamage(_.extend({ model: model, health: health }, options));
 
+            // Check for entity death
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
                 this.set({ isAlive: false });
@@ -359,9 +370,11 @@ define(
                 this.set({
                     deaths: this.get('deaths') + 1
                 });
-                options.source.set({
-                    kills: options.source.get('kills') + 1
-                });
+                if(options.source){
+                    options.source.set({
+                        kills: options.source.get('kills') + 1
+                    });
+                }
             }
 
             return this;
