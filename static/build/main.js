@@ -1650,6 +1650,7 @@ define(
                         });
                     }
                     takeHeal();
+                    // ------------------
 
 
                     //
@@ -1657,6 +1658,8 @@ define(
                     // ------------------
                     // add it to the buff list
                     targetEntity.addBuff(self);
+                    logger.log('models/Ability', 'adding buff %O', self);
+
                     var updatedStats = {};
 
                     // update based on effects
@@ -1856,73 +1859,88 @@ define(
     ){
 
     var Entity = Backbone.Model.extend({
-        defaults: {
-            // abilities will be a collection of ability models
-            abilities: null,
+        defaults: function(){
+            return {
+                // abilities will be a collection of ability models
+                abilities: null,
 
-            // effects active on the entity (e.g., buffs or DoTs)
-            activeEffects: [ 
-                // Will look like:
-                // { type: magic, subtype: fire, effect: function(){ ... }, duration: n }
-                // TODO: some sort ofDetrimental property to determine if it's
-            ],
+                // effects active on the entity (e.g., buffs or DoTs)
+                activeEffects: [ 
+                    // Will look like:
+                    // { type: magic, subtype: fire, effect: function(){ ... }, duration: n }
+                    // TODO: some sort ofDetrimental property to determine if it's
+                ],
 
-            // the entity's race
-            // tracks effects / stats, bonuses from / against races, etc.
-            // TODO: favorite / known races, give bonuses based on it
-            race: null,
+                // an array of objects that is updated whenever the entity's health
+                // changes
+                healthHistory: [],
 
-            // name of the base sprite
-            // TODO: Should this be here?
-            sprite: 'man1', 
+                // the entity's race
+                // tracks effects / stats, bonuses from / against races, etc.
+                // TODO: favorite / known races, give bonuses based on it
+                race: null,
 
-            // entity can be either alive or dead (can be revived with spell)
-            isAlive: true,
+                // name of the base sprite
+                // TODO: Should this be here?
+                sprite: 'man1', 
 
-            //User object which owns this entity
-            owner: null,
-            name: generateName(),
+                // entity can be either alive or dead (can be revived with spell)
+                isAlive: true,
 
-            // Timer properties
-            //---------------------------
-            // timer is measured in seconds
-            timerLimit: 15,
+                // generate a name
+                name: generateName(),
 
-            // reduction for casting spell. How much less does this spell cost
-            // to cast in time? Measured in seconds
-            // TODO: This. How to implement? Modify ability directly? 
-            castTimeReduction: 0,
+                // Timer properties
+                //---------------------------
+                // timer is measured in seconds
+                timerLimit: 15,
 
-            //---------------------------
-            //Entity attributes
-            //---------------------------
-            // Attributes include everything from health to attack damage, etc.
-            // Anything combat related
-            //
-            // TODO: pass in values?
-            // Starting values based on the entity's race / class
-            attributes: {},
+                // reduction for casting spell. How much less does this spell cost
+                // to cast in time? Measured in seconds
+                // TODO: This. How to implement? Modify ability directly? 
+                castTimeReduction: 0,
 
-            //Base attributes (copied over when a game starts to allow
-            //  for buffs / debuffs)
-            //---------------------------
-            baseAttributes: {},
+                // ==========================
+                // Stats
+                // ==========================
+                kills: 0,
+                deaths: 0,
 
-            // AI Related
-            // --------------------------
-            aiDelay: 0,
+                // ==========================
+                // Entity attributes
+                // ==========================
+                // TODO: Make flat structure. Copy over attributes at beginning
+                //
+                // Attributes include everything from health to attack damage, etc.
+                // Anything combat related
+                //
+                // TODO: pass in values?
+                // Starting values based on the entity's race / class
+                attributes: {},
 
-            // list of enemies and their aggro. Key is entity ID, value is
-            // aggro value
-            aggroList: {},
-            
-            // ability the entity desires to use. Is handled by the AI
-            // function, may change before using (e.g., if health changes)
-            desiredAbility: null,
+                //Base attributes (copied over when a game starts to allow
+                //  for buffs / debuffs)
+                //---------------------------
+                baseAttributes: {},
 
-            // desired target is the intended target to use the ability on
-            desiredTarget: null
-           
+                // ==========================
+                // AI Related
+                //
+                // TODO: AI Should be handled OUTSIDE of this model
+                // ==========================
+                aiDelay: 0,
+
+                // list of enemies and their aggro. Key is entity ID, value is
+                // aggro value
+                aggroList: {},
+                
+                // ability the entity desires to use. Is handled by the AI
+                // function, may change before using (e.g., if health changes)
+                desiredAbility: null,
+
+                // desired target is the intended target to use the ability on
+                desiredTarget: null
+            };
         },
         
         url: function getURL(){
@@ -2012,19 +2030,37 @@ define(
             return this;
         },
 
-        resetAttributes: function(){
+        resetAfterBattle: function resetAfterBattle(){
             // Called after a battle, reset stats to base stats 
             // Also, removes buffs, etc.
+            // TODO: This.
+            // NOTE: Should be called after the node is finished. Need to
+            // update EXP, reset attributes, remove buffs, etc.
+            //
+            // reset health and other attributes
+            this.get('attributes').set(
+                this.get('baseAttributes').attributes
+            );
+
+            // get rid of the health history
+            this.set({ healthHistory: [] });
+
+            // Remove non permanent buffs
+            this.removeAllBuffs();
+            //
+            return this;
         },
 
+        // ==============================
+        // ==============================
         getScore: function getScore(){
             // TODO: get a combat score for this entity based on abilities
             // and states
         },
 
-        // ------------------------------
+        // ==============================
         // Buff related
-        // ------------------------------
+        // ==============================
         addBuff: function addBuff(ability){
             // Takes in an ability and adds the buff effect
             //
@@ -2032,7 +2068,7 @@ define(
             var effects = this.get('activeEffects');
 
             // store the attributes
-            effects.push(ability.cid);
+            effects.push(ability);
 
             this.set({ activeEffects: effects }, {silent: true});
             this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
@@ -2042,13 +2078,16 @@ define(
         hasBuff: function hasBuff(ability){
             // takes in an ability and returns if the entity already has the
             // buff
-            var index = this.get('activeEffects').indexOf(ability.cid);
-            var entityHasBuff;
+            var effects = this.get('activeEffects');
+            var i=0, len = effects.length;
+            var entityHasBuff = false;
 
-            if(index !== -1){
-                entityHasBuff = true;
-            } else {
-                entityHasBuff = false;
+            // find the buff; if it exists, break out of the loop
+            for(i=0; i<len; i++){
+                if(effects[i].cid === ability.cid){ 
+                    entityHasBuff = true;
+                    break;
+                }
             }
 
             logger.log('models/Entity', 'hasBuff called : %O', entityHasBuff);
@@ -2060,19 +2099,67 @@ define(
             //
             logger.log('models/Entity', 'removeBuff(): called %O', ability);
             var effects = this.get('activeEffects');
+            var foundIt = false;
 
             // remove the targeted ability
             var index = effects.indexOf(ability.cid);
-            if(index !== -1){
-                // remove the item at current index
-                effects.splice(index, 1);
+            for(var i=0, len = effects.length; i<len; i++){
+                if(effects[i].cid === ability.cid){
+                    effects.splice(i, 1);
+                    foundIt = true;
+                    break;
+                }
             }
+
+            logger.log('models/Entity', 'removeBuff(): found it? : %O', foundIt);
 
             this.set({ activeEffects: effects }, {silent: true});
             this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
             return this;
         },
 
+        removeAllBuffs: function removeAllBuffs(){
+            // Remove all buffs except class specific buffs
+            var activeEffects = [];
+
+            _.each(this.get('activeEffects'), function(effect){
+                if(effect.get('isPermanent')){ activeEffects.push(effect); }
+            });
+
+            this.set({ activeEffects: activeEffects });
+        },
+
+        // ------------------------------
+        // Track damage
+        // ------------------------------
+        trackDamage: function(options){
+            // Takes in options (same as from healthChange, along with
+            // model and health). Keep track of difference in health, along
+            // with some data about the change
+            //
+            // TODO: track damage breakdown
+            //
+            var healthHistory = this.get('healthHistory');
+
+            var difference = options.health - options.model._previousAttributes.health;
+
+            // add a new history item to beginning of history array
+            // update it (NOTE: it's an array, so it's updating in place without
+            // triggering a change event)
+            healthHistory.unshift({
+                element: options.sourceAbility.get('element'),
+                type: options.sourceAbility.get('type'),
+                date: new Date(),
+                abilityName: options.sourceAbility.get('name'),
+                entityCID: options.source.cid,
+                entityName: options.source.get('name'),
+                amount: difference
+            });
+
+            this.trigger('change:healthHistory', this, this.get('healthHistory'));
+
+            return this;
+        },
 
         // ===================================================================
         //
@@ -2084,20 +2171,32 @@ define(
             // changed model (the attributes), the health amount, and an options
             // object that contains the `sourceAbility` that triggered the health
             // change
+            //
+            // TODO: Track all damage
             logger.log('models/Entity', 
                 '1. healthChanged() : health ' + health + ' options: %O',
                 options);
+
+            this.trackDamage(_.extend({ model: model, health: health }, options));
 
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
                 this.set({ isAlive: false });
                 // TODO: check to see if there is a prevent death buff?
 
-                // remove all buffs from dead entities
-                this.set({ activeEffects: null });
+                // remove all buffs from dead entities (except permanent buffs)
+                this.removeAllBuffs();
 
                 // trigger global event to let listeners know entity died
                 this.trigger('entity:died', {model: this});
+
+                // update number of deaths and kills for the entities
+                this.set({
+                    deaths: this.get('deaths') + 1
+                });
+                options.source.set({
+                    kills: options.source.get('kills') + 1
+                });
             }
 
             return this;
@@ -2136,6 +2235,13 @@ define(
             // Alternatively, the ability may manually have the entity take
             // damage (for instance, an ability might do 10% of the entity's
             // health in damage)
+            //
+            // parameters:
+            //  options: {Object} with keys:
+            //      sourceAbility: {Ability} ability object
+            //      source: {Entity} entity object
+            //      amount: {Number} amount of damage to do (is positive)
+            //
             logger.log('models/Entity', '1. takeDamage() : options: %O',
                 options);
 
@@ -2232,10 +2338,19 @@ define(
             //  -------------------------
             //  NOTE: if an ability overrides this function, it still must
             //  called the following to update health
-            attrs.set({ health: newHealth }, { 
-                sourceAbility: sourceAbility,
-                source: options.source
-            });
+            attrs.set({ health: newHealth }, { silent: true });
+            // we want to manually trigger it, because we want to capture
+            // the change in health even if there is not change (e.g., doing
+            // 0 damage should still trigger everything)
+            attrs.trigger(
+                'change:health',
+                attrs, attrs.get('health'),
+                { 
+                    sourceAbility: sourceAbility, 
+                    source: options.source
+                    // TODO: Pass in damage breakdown
+                }
+            );
 
             // NOTE:
             // death event is called in the `healthChanged`, which is called
@@ -2308,10 +2423,12 @@ define(
 
             // update the health
             //  pass in the ability that healed the entity
-            attrs.set({ health: newHealth }, {
-                sourceAbility: sourceAbility,
-                source: options.source
-            });
+            attrs.set({ health: newHealth }, {silent: true});
+            attrs.trigger(
+                'change:health',
+                attrs, attrs.get('health'),
+                { sourceAbility: sourceAbility, source: options.source }
+            );
 
             return amount;
         },
@@ -2468,7 +2585,6 @@ define(
 
     });
 
-    window.E = Entity;
     return Entity;
 });
 
@@ -3166,8 +3282,8 @@ define(
         heal: new Ability({
             name: 'Heal',
             effectId: 'minorHealing',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 0.5,
+            timeCost: 0.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -3176,8 +3292,8 @@ define(
         smite: new Ability({
             name: 'Smite',
             effectId: 'magicMissle',
-            castTime: 1.5,
-            timeCost: 1.5,
+            castTime: 1,
+            timeCost: 1,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
@@ -3378,12 +3494,24 @@ define(
 
         new EntityClass({
             name: 'Assassin',
-            description: 'Stab yo eye',
+            description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
             sprite: 'assassin',
             abilities: new Abilities([
-                ABILITIES.magicmissle
+                //// Basic damage attack
+                //ABILITIES.stab,
+                
+                //// if an ability was recently used, deal extra damage
+                //ABILITIES.backstab,
+
+                //// significantly reduces enemy's armor for a short period
+                //ABILITIES.cripple,
+
+                //// some sort of ult
+                ////  Chance to instantly kill mob. Chance scales based on 
+                ////  enemy's health
+                //ABILITIES.assassinate
             ])
-        }),
+        })
 
 
     ];
@@ -4650,6 +4778,31 @@ define(
         return window.performance && window.performance.now ? window.performance.now : new Date().getTime;
     }
 
+    function shakeBattle(intensity) {
+        // Helper function to  shake the battle element
+        //  Takes in: 
+        //      intensity: {Number} shake intensity, amount of pixels to shake 
+        //          the svg.  Around 200 would be a good upper limit
+        intensity = intensity || 40;
+        var duration = 45;
+
+        $('#battle')
+            .transit({
+                left: -intensity, top: intensity, duration: duration
+            })
+            .transit({
+                left: intensity, top: -intensity, duration: duration
+            })
+
+            // end
+            .transit({
+                left: 0, top: 0, duration: duration
+            });
+
+
+        return this;
+    }
+
     // =======================================================================
     //
     // Battle view
@@ -5809,6 +5962,22 @@ define(
             var entityGroup = options.entityGroup;
             var difference = options.health - model._previousAttributes.health;
 
+            var shakeScale = d3.scale.linear()
+                .domain([ 0, entityModel.get('attributes').get('maxHealth')])
+                .range([ 3, 24 ]);
+                        
+
+            // shake the battle container
+            // --------------------------
+            if(difference < 0){
+                // shake a lot if self is hit
+                if(entityGroup === 'player'){
+                    shakeBattle(Math.ceil(shakeScale(-difference)));
+                } else {
+                    shakeBattle(Math.ceil(shakeScale(-difference) / 3));
+                }
+            }
+
             // Show flash
             // --------------------------
             // Show a red flash whenever the player takes damage
@@ -5872,13 +6041,24 @@ define(
             // Show text
             // --------------------------
             // This is called whenever any entity's health is modified
+            var textXScale = d3.scale.linear()
+                .domain([ 0, entityModel.get('attributes').get('maxHealth') / 5 ])
+                .range([ 0, 40 ])
+                .clamp(true);
+
+            var textX = textXScale(Math.round(Math.abs(difference)));
+
+            if(difference < 0){ textX = textX * -1; }
+
             var $damageText = d3.select(
                 self[entityGroup + 'EntityDamageTextGroups'][0][index]
             ).append('text')
                 .attr({
                     'class': 'entity-group-text ' + entityGroup,
                     // position it based on positive / negative health change
-                    x: difference < 0 ? -25 : 25
+                    //  randomize position just a little bit so text doesn't
+                    //  overlap
+                    x: textX
                 });
 
             // first, start text at bottom of entity and set text
@@ -5888,16 +6068,31 @@ define(
             $damageText
                 .attr({ 
                     y: self.entityHeight - 10,
-                    opacity: 0.2
+                    opacity: 0.3
                 })
                 .text((difference < 0 ? '' : '+') + difference);
 
-            // then, fade in text and float it up
-            $damageText.transition().duration(200)
-                    .attr({ y: -10, opacity: 1 })
-                    // when that's done, fade it out
-                    .transition()
-                        .duration(300).attr({  opacity: 0 });
+
+            // then, fade in text and float it up and out
+            $damageText.transition().ease('cubic-in').duration(140)
+                    .attr({ 
+                        y: -15, 
+                        x: textX < 0 ? textX - 20 : textX + 20,
+                        opacity: 1
+                    })
+                    // reached the apex
+                    .transition().ease('cubic-out').duration(400)
+                        .attr({  
+                            y: 0, 
+                            x: textX < 0 ? textX - 50 : textX + 50,
+                            opacity: 1
+                        })
+                        .transition().ease('cubic-in').duration(250)
+                            .attr({
+                                y: 40, 
+                                'font-size': 0,
+                                opacity: 0
+                            });
         },
 
         // =====================================================================
@@ -7014,6 +7209,9 @@ define(
             this.add(RACES);
 
             return this;
+        },
+        comparator: function(model){
+            return model.get('name');
         }
 
     });
@@ -7123,6 +7321,10 @@ define(
             this.add(ENTITY_CLASSES);
 
             return this;
+        },
+
+        comparator: function(model){
+            return model.get('name');
         }
 
     });

@@ -63,7 +63,7 @@ define([
                 //  (16 + 30)
                 assert(elapsed >= 20);
                 // give extra time for other parallel tests
-                assert(elapsed <= 60);
+                assert(elapsed <= 80);
 
                 done();
             }, 8);

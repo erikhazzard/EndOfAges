@@ -89,8 +89,8 @@ define(
         heal: new Ability({
             name: 'Heal',
             effectId: 'minorHealing',
-            castTime: 1,
-            timeCost: 1,
+            castTime: 0.5,
+            timeCost: 0.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -99,8 +99,8 @@ define(
         smite: new Ability({
             name: 'Smite',
             effectId: 'magicMissle',
-            castTime: 1.5,
-            timeCost: 1.5,
+            castTime: 1,
+            timeCost: 1,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',

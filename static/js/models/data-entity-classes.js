@@ -82,12 +82,24 @@ define(
 
         new EntityClass({
             name: 'Assassin',
-            description: 'Stab yo eye',
+            description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
             sprite: 'assassin',
             abilities: new Abilities([
-                ABILITIES.magicmissle
+                //// Basic damage attack
+                //ABILITIES.stab,
+                
+                //// if an ability was recently used, deal extra damage
+                //ABILITIES.backstab,
+
+                //// significantly reduces enemy's armor for a short period
+                //ABILITIES.cripple,
+
+                //// some sort of ult
+                ////  Chance to instantly kill mob. Chance scales based on 
+                ////  enemy's health
+                //ABILITIES.assassinate
             ])
-        }),
+        })
 
 
     ];

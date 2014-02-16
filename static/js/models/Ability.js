@@ -332,6 +332,7 @@ define(
                         });
                     }
                     takeHeal();
+                    // ------------------
 
 
                     //
@@ -339,6 +340,8 @@ define(
                     // ------------------
                     // add it to the buff list
                     targetEntity.addBuff(self);
+                    logger.log('models/Ability', 'adding buff %O', self);
+
                     var updatedStats = {};
 
                     // update based on effects

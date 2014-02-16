@@ -67,3 +67,8 @@ Abilities that deal true damage over time
 -Stat for defending true damage, for dealing additional true damage
     -What is true damage? Damage that ignores armor and magic resist. Should it
     ignore elemental affects as well?
+
+----
+Abilities that improve based on entity killing another entity
+    -e.g., when entity kills another entity, they get some massive stat boost or
+        do more damage or can attack faster

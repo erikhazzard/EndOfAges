@@ -258,6 +258,29 @@ define([
             });
         });
         
+        // ------------------------------
+        // Death
+        // ------------------------------
+        describe('Entity death', function(){
+            it('should kill entity when health drops below 0', function(){
+                var entity1 = new Entity();
+                var entity2 = new Entity();
+                var ability = new Ability();
+
+                // update health
+                entity1.get('attributes').set({
+                    health: -10
+                }, { 
+                    sourceAbility: ability, 
+                    source: entity2
+                });
+
+                entity1.get('isAlive').should.equal(false);
+                entity1.get('deaths').should.equal(1);
+                entity2.get('kills').should.equal(1);
+
+            });
+        });
     });
 
 });

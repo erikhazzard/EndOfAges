@@ -23,6 +23,7 @@ define([
         // Buffs
         // ------------------------------
         describe('Buffs tests', function(){
+
             it('should add and remove a buff, and affect stats', function(done){
                 // TODO::::::::::::::::: This doesn't always work, might be
                 // a race condition, or a timing issue. Investigate
@@ -60,7 +61,7 @@ define([
                 // NOTE: use setTimeout, don't use timer library here
                 setTimeout(function(){
                     entity.get('activeEffects').length.should.equal(1);
-                    entity.get('activeEffects')[0].should.equal(ability.cid);
+                    entity.get('activeEffects')[0].cid.should.equal(ability.cid);
 
                     // make sure stats were increased
                     entity.get('attributes').get('armor').should.equal(
@@ -86,7 +87,7 @@ define([
                     entity.get('activeEffects').length.should.equal(0);
 
                     done();
-                }, ability.get('buffDuration') * 1000 * 2.7);
+                }, ability.get('buffDuration') * 1000 * 3.7);
             });
         });
     });

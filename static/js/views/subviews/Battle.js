@@ -82,6 +82,31 @@ define(
         return window.performance && window.performance.now ? window.performance.now : new Date().getTime;
     }
 
+    function shakeBattle(intensity) {
+        // Helper function to  shake the battle element
+        //  Takes in: 
+        //      intensity: {Number} shake intensity, amount of pixels to shake 
+        //          the svg.  Around 200 would be a good upper limit
+        intensity = intensity || 40;
+        var duration = 45;
+
+        $('#battle')
+            .transit({
+                left: -intensity, top: intensity, duration: duration
+            })
+            .transit({
+                left: intensity, top: -intensity, duration: duration
+            })
+
+            // end
+            .transit({
+                left: 0, top: 0, duration: duration
+            });
+
+
+        return this;
+    }
+
     // =======================================================================
     //
     // Battle view
@@ -1241,6 +1266,22 @@ define(
             var entityGroup = options.entityGroup;
             var difference = options.health - model._previousAttributes.health;
 
+            var shakeScale = d3.scale.linear()
+                .domain([ 0, entityModel.get('attributes').get('maxHealth')])
+                .range([ 3, 24 ]);
+                        
+
+            // shake the battle container
+            // --------------------------
+            if(difference < 0){
+                // shake a lot if self is hit
+                if(entityGroup === 'player'){
+                    shakeBattle(Math.ceil(shakeScale(-difference)));
+                } else {
+                    shakeBattle(Math.ceil(shakeScale(-difference) / 3));
+                }
+            }
+
             // Show flash
             // --------------------------
             // Show a red flash whenever the player takes damage
@@ -1304,13 +1345,24 @@ define(
             // Show text
             // --------------------------
             // This is called whenever any entity's health is modified
+            var textXScale = d3.scale.linear()
+                .domain([ 0, entityModel.get('attributes').get('maxHealth') / 5 ])
+                .range([ 0, 40 ])
+                .clamp(true);
+
+            var textX = textXScale(Math.round(Math.abs(difference)));
+
+            if(difference < 0){ textX = textX * -1; }
+
             var $damageText = d3.select(
                 self[entityGroup + 'EntityDamageTextGroups'][0][index]
             ).append('text')
                 .attr({
                     'class': 'entity-group-text ' + entityGroup,
                     // position it based on positive / negative health change
-                    x: difference < 0 ? -25 : 25
+                    //  randomize position just a little bit so text doesn't
+                    //  overlap
+                    x: textX
                 });
 
             // first, start text at bottom of entity and set text
@@ -1320,16 +1372,31 @@ define(
             $damageText
                 .attr({ 
                     y: self.entityHeight - 10,
-                    opacity: 0.2
+                    opacity: 0.3
                 })
                 .text((difference < 0 ? '' : '+') + difference);
 
-            // then, fade in text and float it up
-            $damageText.transition().duration(200)
-                    .attr({ y: -10, opacity: 1 })
-                    // when that's done, fade it out
-                    .transition()
-                        .duration(300).attr({  opacity: 0 });
+
+            // then, fade in text and float it up and out
+            $damageText.transition().ease('cubic-in').duration(140)
+                    .attr({ 
+                        y: -15, 
+                        x: textX < 0 ? textX - 20 : textX + 20,
+                        opacity: 1
+                    })
+                    // reached the apex
+                    .transition().ease('cubic-out').duration(400)
+                        .attr({  
+                            y: 0, 
+                            x: textX < 0 ? textX - 50 : textX + 50,
+                            opacity: 1
+                        })
+                        .transition().ease('cubic-in').duration(250)
+                            .attr({
+                                y: 40, 
+                                'font-size': 0,
+                                opacity: 0
+                            });
         },
 
         // =====================================================================
