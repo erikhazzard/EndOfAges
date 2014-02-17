@@ -19,7 +19,15 @@ define(
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'initialize called');
 
+            // Listen for changes to attributes.
+            // TODO: break it out even more, have functions for each group of
+            // changes
             this.listenTo(this.model.get('attributes'), 'change', this.rerender);
+            this.listenTo(this.model.get('attributes'), 'change:health', this.rerenderHealth);
+
+            // render components the first time this view renders
+            //  subsequent renders happen on attribute change callbacks
+            this.listenToOnce(this, 'render', this.rerenderHealth);
 
             return this;
         },
@@ -69,6 +77,17 @@ define(
         rerender: function infoRerender(){
             this.render();
             this.onShow();
+            return this;
+        },
+
+        rerenderHealth: function healthRerender(){
+            // Update the health
+            $('.health-wrapper', this.$el).html(
+                Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
+                    this.model.toJSON()    
+                )
+            );
+
             return this;
         }
     });

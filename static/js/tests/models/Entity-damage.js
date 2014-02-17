@@ -135,7 +135,7 @@ define([
         // ------------------------------
         // attack / spellpower with armor / mr
         // ------------------------------
-        describe('Entity with attack / spellpower', function(){
+        describe('Entity with attack / magic power', function(){
             _.each(['attack', 'magicPower'], function(type){
                 it(type + ' ::: should take extra damage when other entity has more attack', function(){
                     var attrs = {};
@@ -158,7 +158,71 @@ define([
 
                     // when armor is at 0, the attack should just add damage based
                     // on whatever the attack value is
-                    entity.get('attributes').get('health').should.equal((startingHealth - amt - 20));
+                    entity.get('attributes').get('health').should.equal((startingHealth - amt ));
+                });
+            });
+
+            describe("Ability with bonuses", function(){
+                _.each(['attack', 'magicPower'], function(type){
+                    it(type + ' ::: should take extra damage when ability bonuses are 100%', function(){
+                        var attrs = {};
+                        attrs[type] = 20;
+
+                        var entity = new Entity({ });
+                        var entity2 = new Entity({ attributes: attrs });
+
+                        var startingHealth = entity.get('attributes').get('health');
+                        var amt = 20;
+                        var abilityType = {};
+
+                        if(type === 'attack'){ abilityType.physical = 1; }
+                        else { abilityType.magic = 1; }
+
+                        entity.takeDamage({
+                            sourceAbility: new Ability({ 
+                                type: abilityType,
+                                attackBonusPercent: 1,
+                                magicPowerBonusPercent: 1
+                            }),
+                            source: entity2,
+                            amount: amt
+                        });
+
+                        // when armor is at 0, the attack should just add damage based
+                        // on whatever the attack value is
+                        entity.get('attributes').get('health').should.equal((startingHealth - amt ) - 20);
+                    });
+                });
+
+                _.each(['attack', 'magicPower'], function(type){
+                    it(type + ' ::: should take extra damage when ability bonuses are 50%', function(){
+                        var attrs = {};
+                        attrs[type] = 20;
+
+                        var entity = new Entity({ });
+                        var entity2 = new Entity({ attributes: attrs });
+
+                        var startingHealth = entity.get('attributes').get('health');
+                        var amt = 20;
+                        var abilityType = {};
+
+                        if(type === 'attack'){ abilityType.physical = 1; }
+                        else { abilityType.magic = 1; }
+
+                        entity.takeDamage({
+                            sourceAbility: new Ability({ 
+                                type: abilityType,
+                                attackBonusPercent: 0.5,
+                                magicPowerBonusPercent: 0.5
+                            }),
+                            source: entity2,
+                            amount: amt
+                        });
+
+                        // when armor is at 0, the attack should just add damage based
+                        // on whatever the attack value is
+                        entity.get('attributes').get('health').should.equal((startingHealth - amt ) - 10);
+                    });
                 });
             });
 
@@ -185,7 +249,7 @@ define([
 
                 // when armor is at 0, the attack should just add damage based
                 // on whatever the attack value is
-                entity.get('attributes').get('health').should.equal(70);
+                entity.get('attributes').get('health').should.equal(80);
 
                 // should subtract another 30 (takes into account rounding)
                 entity.takeDamage({
@@ -196,7 +260,7 @@ define([
                     amount: amt
                 });
 
-                entity.get('attributes').get('health').should.equal(40);
+                entity.get('attributes').get('health').should.equal(60);
             });
 
             // ------------------------------
@@ -226,7 +290,7 @@ define([
 
                 // when armor is at 0, the attack should just add damage based
                 // on whatever the attack value is
-                entity.get('attributes').get('health').should.equal(71);
+                entity.get('attributes').get('health').should.equal(81);
             });
             
             it('should work for physical type and armor', function(){
@@ -254,7 +318,7 @@ define([
 
                 // when armor is at 0, the attack should just add damage based
                 // on whatever the attack value is
-                entity.get('attributes').get('health').should.equal(67);
+                entity.get('attributes').get('health').should.equal(83);
             });
         });
         

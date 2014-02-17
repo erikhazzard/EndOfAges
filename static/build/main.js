@@ -549,6 +549,8 @@ define('util/Timer',['util/generateUUID'], function TIMER(generateUUID){
 
         // start the timer when initiall called
         this.resume();
+
+        return this;
     }
 
     // Object Methods
@@ -1397,8 +1399,16 @@ define(
             // This is also valid: (will be transformed to an object)
             // element: 'fire'
 
+            // Bonus from entity's attack and / or magicPower
+            //  (e.g., an ability may do 10 base damage + 50% of entity's attack)
+            // --------------------------
+            // values are from 0 to 1
+            attackBonusPercent: 0,
+            magicPowerBonusPercent: 0,
+
             // Damage
             // --------------------------
+            // Base damage
             damage: undefined,
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
@@ -1406,6 +1416,7 @@ define(
 
             // Heal
             // --------------------------
+            // Base Heal
             heal: undefined,
             // could be either 'source' or 'target', will heal the entities
             // that are either the source or target of the used ability
@@ -1622,6 +1633,10 @@ define(
                     var currentStats = targetEntity.get(
                         'attributes').attributes;
 
+                    // should the buff timer be reset? This will only be true
+                    // if this ability does NOT stack AND is already active
+                    var resetTimer = false;
+
                     if(!self.get('buffCanStack')){
                         // If the buff cannot stack with itself, then check
                         // to see if the effect already exists
@@ -1630,6 +1645,7 @@ define(
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
                             self.removeBuffEffect.call(self, targetEntity);
+                            resetTimer = true;
                         }
                     }
 
@@ -1668,26 +1684,35 @@ define(
 
                     // Remove it after the duration
                     // ------------------
-                    new Timer(function removeBuff(){
-                        // remove effect
-                        logger.log('models/Ability', 'removing buff');
-                        
-                        // if entity is dead, do nothing
-                        if(!targetEntity.get('isAlive')){ 
-                            logger.log('models/Ability', 
-                                'tried to remove buff, but entity is dead %O',
-                                self);
-                            return false; 
-                        }
-
-                        // remove the buff
-                        self.removeBuffEffect.call(self, targetEntity);
-
-                        if(options.callback){ options.callback(); }
-
                     // TODO: Allow the buffDuration to be modified by the
                     // entity's properties.
-                    }, self.get('buffDuration') * 1000);
+                    var buffDuration = self.get('buffDuration') * 1000;
+
+                    if(this._buffCancelTimer && resetTimer){
+                        this._buffCancelTimer.pause();
+                        this._buffCancelTimer.remaining = buffDuration;
+                        this._buffCancelTimer.resume();
+                    } else { 
+                        // cancel timer does not yet exist, create it
+                        this._buffCancelTimer = new Timer(function removeBuff(){
+                            // remove effect
+                            logger.log('models/Ability', 'removing buff');
+                            
+                            // if entity is dead, do nothing
+                            if(!targetEntity.get('isAlive')){ 
+                                logger.log('models/Ability', 
+                                    'tried to remove buff, but entity is dead %O',
+                                    self);
+                                return false; 
+                            }
+
+                            // remove the buff
+                            self.removeBuffEffect.call(self, targetEntity);
+
+                            if(options.callback){ options.callback(); }
+
+                        }, buffDuration);
+                    }
                     
                 }, delay);
 
@@ -2250,11 +2275,13 @@ define(
         },
 
 
-        // ------------------------------
-        // TODO: Combine takeDamage and takeHeal
+        // ==============================
         //
         // Take / Deal damage
-        // ------------------------------
+        //
+        // ==============================
+        // TODO: Combine takeDamage and takeHeal
+
         takeDamage: function(options){
             // This function is a helper function for the entity to take damage
             // Alternatively, the ability may manually have the entity take
@@ -2319,7 +2346,14 @@ define(
                 // 1. Calculate damage from base damage plus the source's 
                 // attack power. Scale the source's bonus attack damage by
                 // the % of the type of attack
-                bonusDmgFromPhysical = -1*(Math.abs(damage) + (sourceEntity.get('attributes').get('attack')));
+                //
+                // TODO: RENAME - bonusDmgFrom___ is actually just damage
+                // TODO: Track how much damage is taken vs. absorbed
+                bonusDmgFromPhysical = -1 * (Math.abs(damage) + 
+                    // bonus damage
+                    (sourceEntity.get('attributes').get('attack') * sourceAbility.attributes.attackBonusPercent)
+                );
+
                 // 2. get actual total physical damage done based on armor and damge from source's attack
                 physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (bonusDmgFromPhysical * type.physical);
                 // update the moddedDamage 
@@ -2327,7 +2361,11 @@ define(
             }
             if(type.magic){
                 // same as above
-                bonusDmgFromMagic = -1*(Math.abs(damage) + (sourceEntity.get('attributes').get('magicPower')));
+                bonusDmgFromMagic = -1 * (Math.abs(damage) + 
+                    // bonus
+                    (sourceEntity.get('attributes').get('magicPower') * sourceAbility.attributes.magicPowerBonusPercent)
+                );
+
                 magicDamage = this.calculateDamageMultiplier(type.magic, magicResist) * (bonusDmgFromMagic * type.magic);
                 moddedDamage += magicDamage;
             }
@@ -4647,7 +4685,15 @@ define(
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'initialize called');
 
+            // Listen for changes to attributes.
+            // TODO: break it out even more, have functions for each group of
+            // changes
             this.listenTo(this.model.get('attributes'), 'change', this.rerender);
+            this.listenTo(this.model.get('attributes'), 'change:health', this.rerenderHealth);
+
+            // render components the first time this view renders
+            //  subsequent renders happen on attribute change callbacks
+            this.listenToOnce(this, 'render', this.rerenderHealth);
 
             return this;
         },
@@ -4697,6 +4743,17 @@ define(
         rerender: function infoRerender(){
             this.render();
             this.onShow();
+            return this;
+        },
+
+        rerenderHealth: function healthRerender(){
+            // Update the health
+            $('.health-wrapper', this.$el).html(
+                Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
+                    this.model.toJSON()    
+                )
+            );
+
             return this;
         }
     });

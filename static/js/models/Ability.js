@@ -88,8 +88,16 @@ define(
             // This is also valid: (will be transformed to an object)
             // element: 'fire'
 
+            // Bonus from entity's attack and / or magicPower
+            //  (e.g., an ability may do 10 base damage + 50% of entity's attack)
+            // --------------------------
+            // values are from 0 to 1
+            attackBonusPercent: 0,
+            magicPowerBonusPercent: 0,
+
             // Damage
             // --------------------------
+            // Base damage
             damage: undefined,
             // could be either 'source' or 'target', will damage the entities
             // that are either the source or target of the used ability
@@ -97,6 +105,7 @@ define(
 
             // Heal
             // --------------------------
+            // Base Heal
             heal: undefined,
             // could be either 'source' or 'target', will heal the entities
             // that are either the source or target of the used ability
@@ -313,6 +322,10 @@ define(
                     var currentStats = targetEntity.get(
                         'attributes').attributes;
 
+                    // should the buff timer be reset? This will only be true
+                    // if this ability does NOT stack AND is already active
+                    var resetTimer = false;
+
                     if(!self.get('buffCanStack')){
                         // If the buff cannot stack with itself, then check
                         // to see if the effect already exists
@@ -321,6 +334,7 @@ define(
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
                             self.removeBuffEffect.call(self, targetEntity);
+                            resetTimer = true;
                         }
                     }
 
@@ -359,26 +373,35 @@ define(
 
                     // Remove it after the duration
                     // ------------------
-                    new Timer(function removeBuff(){
-                        // remove effect
-                        logger.log('models/Ability', 'removing buff');
-                        
-                        // if entity is dead, do nothing
-                        if(!targetEntity.get('isAlive')){ 
-                            logger.log('models/Ability', 
-                                'tried to remove buff, but entity is dead %O',
-                                self);
-                            return false; 
-                        }
-
-                        // remove the buff
-                        self.removeBuffEffect.call(self, targetEntity);
-
-                        if(options.callback){ options.callback(); }
-
                     // TODO: Allow the buffDuration to be modified by the
                     // entity's properties.
-                    }, self.get('buffDuration') * 1000);
+                    var buffDuration = self.get('buffDuration') * 1000;
+
+                    if(this._buffCancelTimer && resetTimer){
+                        this._buffCancelTimer.pause();
+                        this._buffCancelTimer.remaining = buffDuration;
+                        this._buffCancelTimer.resume();
+                    } else { 
+                        // cancel timer does not yet exist, create it
+                        this._buffCancelTimer = new Timer(function removeBuff(){
+                            // remove effect
+                            logger.log('models/Ability', 'removing buff');
+                            
+                            // if entity is dead, do nothing
+                            if(!targetEntity.get('isAlive')){ 
+                                logger.log('models/Ability', 
+                                    'tried to remove buff, but entity is dead %O',
+                                    self);
+                                return false; 
+                            }
+
+                            // remove the buff
+                            self.removeBuffEffect.call(self, targetEntity);
+
+                            if(options.callback){ options.callback(); }
+
+                        }, buffDuration);
+                    }
                     
                 }, delay);
 

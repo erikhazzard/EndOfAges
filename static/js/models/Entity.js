@@ -405,11 +405,13 @@ define(
         },
 
 
-        // ------------------------------
-        // TODO: Combine takeDamage and takeHeal
+        // ==============================
         //
         // Take / Deal damage
-        // ------------------------------
+        //
+        // ==============================
+        // TODO: Combine takeDamage and takeHeal
+
         takeDamage: function(options){
             // This function is a helper function for the entity to take damage
             // Alternatively, the ability may manually have the entity take
@@ -474,7 +476,14 @@ define(
                 // 1. Calculate damage from base damage plus the source's 
                 // attack power. Scale the source's bonus attack damage by
                 // the % of the type of attack
-                bonusDmgFromPhysical = -1*(Math.abs(damage) + (sourceEntity.get('attributes').get('attack')));
+                //
+                // TODO: RENAME - bonusDmgFrom___ is actually just damage
+                // TODO: Track how much damage is taken vs. absorbed
+                bonusDmgFromPhysical = -1 * (Math.abs(damage) + 
+                    // bonus damage
+                    (sourceEntity.get('attributes').get('attack') * sourceAbility.attributes.attackBonusPercent)
+                );
+
                 // 2. get actual total physical damage done based on armor and damge from source's attack
                 physicalDamage = this.calculateDamageMultiplier(type.physical, armor) * (bonusDmgFromPhysical * type.physical);
                 // update the moddedDamage 
@@ -482,7 +491,11 @@ define(
             }
             if(type.magic){
                 // same as above
-                bonusDmgFromMagic = -1*(Math.abs(damage) + (sourceEntity.get('attributes').get('magicPower')));
+                bonusDmgFromMagic = -1 * (Math.abs(damage) + 
+                    // bonus
+                    (sourceEntity.get('attributes').get('magicPower') * sourceAbility.attributes.magicPowerBonusPercent)
+                );
+
                 magicDamage = this.calculateDamageMultiplier(type.magic, magicResist) * (bonusDmgFromMagic * type.magic);
                 moddedDamage += magicDamage;
             }

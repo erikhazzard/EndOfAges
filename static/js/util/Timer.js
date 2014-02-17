@@ -34,6 +34,8 @@ define(['util/generateUUID'], function TIMER(generateUUID){
 
         // start the timer when initiall called
         this.resume();
+
+        return this;
     }
 
     // Object Methods
