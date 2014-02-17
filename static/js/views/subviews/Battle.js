@@ -1166,7 +1166,8 @@ define(
                 // ----------------------
                 // There can be multiple text elements at once, anytime health
                 // changes create a floating text element for it
-                self[entityGroup + 'EntityDamageTextGroups'] = groups.append('g');
+                self[entityGroup + 'EntityDamageTextGroups'] = groups.append('g')
+                    .attr({ 'class': 'text-group-wrapper' });
 
                 return this;
             }
@@ -1396,6 +1397,10 @@ define(
                                 y: 40, 
                                 'font-size': 0,
                                 opacity: 0
+                            })
+                            // remove the element when it's over
+                            .each('end', function(){
+                                d3.select(this).remove();
                             });
         },
 

@@ -325,8 +325,7 @@
     -moz-animation: targetHoverInactive 0.2s infinite alternate;
     -webkit-animation: targetHoverInactive 0.2s infinite alternate;
     animation: targetHoverInactive 0.2s infinite alternate; }
-  .game-battle-wrapper .entity-hover .selected-ability-damage .target-indicator,
-  .game-battle-wrapper .entity-hover .selected-ability-heal .target-indicator {
+  .game-battle-wrapper .state-ability .entity-hover .target-indicator {
     -o-animation: targetHover 0.2s infinite alternate;
     -moz-animation: targetHover 0.2s infinite alternate;
     -webkit-animation: targetHover 0.2s infinite alternate;

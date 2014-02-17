@@ -76,10 +76,11 @@
     .entity-hover .target-indicator {
         @include animation(targetHoverInactive 0.2s infinite alternate);
     }
-    .entity-hover .selected-ability-damage .target-indicator,
-    .entity-hover .selected-ability-heal .target-indicator {
+    .state-ability .entity-hover .target-indicator {
         @include animation(targetHover 0.2s infinite alternate);
     }
+
+    // TODO: invalid target effect
 
     // --------------------------------------
     //
