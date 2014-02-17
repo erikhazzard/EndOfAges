@@ -17,6 +17,13 @@
   display: block !important;
   right: -300px; }
 
+.page-game-wrapper {
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  left: 0; }
+
 #region-map {
   z-index: 100; }
 
@@ -218,6 +225,70 @@
   .page-create-character-wrapper #create-state-buttons-wrapper .btn-next {
     right: 0; }
 
+@-webkit-keyframes targetHover {
+  0% {
+    opacity: 0.5;
+    fill-opacity: 0.2; }
+
+  100% {
+    opacity: 1;
+    fill-opacity: 1; } }
+
+@-moz-keyframes targetHover {
+  0% {
+    opacity: 0.5;
+    fill-opacity: 0.2; }
+
+  100% {
+    opacity: 1;
+    fill-opacity: 1; } }
+
+@-ms-keyframes targetHover {
+  0% {
+    opacity: 0.5;
+    fill-opacity: 0.2; }
+
+  100% {
+    opacity: 1;
+    fill-opacity: 1; } }
+
+@keyframes targetHover {
+  0% {
+    opacity: 0.5;
+    fill-opacity: 0.2; }
+
+  100% {
+    opacity: 1;
+    fill-opacity: 1; } }
+
+@-webkit-keyframes targetHoverInactive {
+  0% {
+    opacity: 0.6; }
+
+  100% {
+    opacity: 0.8; } }
+
+@-moz-keyframes targetHoverInactive {
+  0% {
+    opacity: 0.6; }
+
+  100% {
+    opacity: 0.8; } }
+
+@-ms-keyframes targetHoverInactive {
+  0% {
+    opacity: 0.6; }
+
+  100% {
+    opacity: 0.8; } }
+
+@keyframes targetHoverInactive {
+  0% {
+    opacity: 0.6; }
+
+  100% {
+    opacity: 0.8; } }
+
 .game-battle-wrapper {
   bottom: 0;
   left: 0;
@@ -250,7 +321,16 @@
   .game-battle-wrapper .state-ability.selected-ability-heal.selected-ability-enemy .enemy .target-indicator {
     fill: #22dd22; }
   .game-battle-wrapper .entity-hover .target-indicator {
-    opacity: 1; }
+    -o-animation: targetHoverInactive 0.2s infinite alternate;
+    -moz-animation: targetHoverInactive 0.2s infinite alternate;
+    -webkit-animation: targetHoverInactive 0.2s infinite alternate;
+    animation: targetHoverInactive 0.2s infinite alternate; }
+  .game-battle-wrapper .entity-hover .selected-ability-damage .target-indicator,
+  .game-battle-wrapper .entity-hover .selected-ability-heal .target-indicator {
+    -o-animation: targetHover 0.2s infinite alternate;
+    -moz-animation: targetHover 0.2s infinite alternate;
+    -webkit-animation: targetHover 0.2s infinite alternate;
+    animation: targetHover 0.2s infinite alternate; }
   .game-battle-wrapper .battle-entity-health .health-bar {
     fill: #dd2222; }
   .game-battle-wrapper .battle-entity-health .health-bar-border {
