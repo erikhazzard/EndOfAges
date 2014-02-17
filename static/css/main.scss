@@ -17,6 +17,8 @@ $header-font: 'IM Fell English', san-serif;
 //
 // --------------------------------------
 @import "_mixins";
+@import "layout";
+
 @import "dev-tools";
 @import "game";
 @import "map";

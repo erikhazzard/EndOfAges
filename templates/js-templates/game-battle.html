@@ -3,28 +3,47 @@
 {{ include battle/intended-target-info.html }}
 
 <script id='template-game-battle' type='text/template'>
+    {{ // Left side - selected entity, abilities, etc. }}
+    <div id='battle-left-wrapper'>
+        <!-- Entity info -->
+        <div id='region-battle-selected-entity-wrapper'></div>
 
-    <button class='finish-instance btn btn-large'>Finish</button>
-    <button class='btn-pause btn btn-large'>Pause</button>
+        <!-- Ability menu -->
+        <div id='region-battle-ability-wrapper'></div>
 
-    {{// Dev: show state }}
-    State: <span class='state'></span> 
-
-    <!-- Battle scene -->
-    <div id='battle-wrapper'> 
-        <svg id='battle' 
-            viewBox='0 0 1000 500'
-            preserveAspectRation='xMinYMin'
-            xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
-        </svg>
     </div>
 
-    <!-- Entity info -->
-    <div id='region-battle-selected-entity-wrapper'></div>
+    {{// Middle - battle, chat }}
+    <div id='battle-center-wrapper'>
 
-    <!-- Ability menu -->
-    <div id='region-battle-ability-wrapper'></div>
+        <!-- Battle scene -->
+        <div id='battle-wrapper'> 
+            <svg id='battle' 
+                viewBox='0 0 1000 500'
+                preserveAspectRation='xMinYMin'
+                xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
+            </svg>
+        </div>
 
-    <!-- Hover Intended Target info -->
-    <div id='region-battle-intended-target-wrapper'></div>
+        <div id='battle-log-wrapper'>
+            Sup
+        </div>
+
+    </div>
+
+    {{// Right - intended target, options }}
+    <div id='battle-right-wrapper'>
+        <!-- Hover Intended Target info -->
+        <div id='region-battle-intended-target-wrapper'></div>
+
+        <div id='battle-meta-options'>
+            <button class='finish-instance btn btn-large'>Finish</button>
+            <br />
+            <button class='btn-pause btn btn-large'>Pause</button>
+            <br />
+
+            {{// Dev: show state }}
+            State: <span class='state'></span> 
+        </div>
+    </div>
 </script>

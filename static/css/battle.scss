@@ -1,142 +1,48 @@
-// --------------------------------------
-// keyframes
-// --------------------------------------
-@include keyframes(targetHover) {
-    0% {
-        opacity: 0.5;
-        fill-opacity: 0.2;
-    }
-    100% {
-        opacity: 1;
-        fill-opacity: 1;
-    }
-}
+@import "battle-svg";
 
-@include keyframes(targetHoverInactive) {
-    0% {
-        opacity: 0.6;
-    }
-    100% {
-        opacity: 0.8;
-    }
-}
+$ui-left-side-width: 200px;
+$ui-right-side-width: 200px;
+$ui-log-height: 100px;
 
 // --------------------------------------
 //
 // Game battle
 //
 // --------------------------------------
+// battle node
 .game-battle-wrapper {
+    background: #343434 url('../../img/ui/combat-ui.png'); 
     bottom: 0;
     left: 0;
-    position: absolute;
+    position: fixed;
+    overflow: hidden;
     right: 0;
     top: 0;
 
 
-    // SVG wrapper and SVG
-    #battle-wrapper {
-        position: relative;
-        width: 1000px;
-        height: 70%;
-
-        #battle {
-            height: 100%;
-            left: 0;
-            position: absolute;
-            top: 0;
-            width:100%; 
-        }
-    }
-
-
-    .entity-group-wrapper {
-        cursor: pointer
-    }
-
-    .target-indicator {
-        opacity: 0;
-        fill: #343434;
-        fill-opacity: 0.5;
-        stroke: #ffffff;
-        stroke-opacity: 0.5;
-        stroke-width: 2px;
-    }
-
-    // Only highlight valid targets
-    .state-ability.selected-ability-damage.selected-ability-enemy .enemy .target-indicator, 
-    .state-ability.selected-ability-damage.selected-ability-player .player .target-indicator {
-        fill: #dd2222;
-    }
-    .state-ability.selected-ability-heal.selected-ability-player .player .target-indicator,
-    .state-ability.selected-ability-heal.selected-ability-enemy .enemy .target-indicator {
-        fill: #22dd22;
-    }
-    
-    .entity-hover .target-indicator {
-        @include animation(targetHoverInactive 0.2s infinite alternate);
-    }
-    .state-ability .entity-hover .target-indicator {
-        @include animation(targetHover 0.2s infinite alternate);
-    }
-
-    // TODO: invalid target effect
-
     // --------------------------------------
     //
-    // health bar
+    // left side
     //
     // --------------------------------------
-    .battle-entity-health .health-bar {
-        fill: #dd2222;
-    }
-
-    .battle-entity-health .health-bar-border {
-        fill: none;
-        stroke: #ffffff;
-    }
-
-    // Damage text
-    .entity-group-text {
-        font-size: 1.5em;
-        font-weight: bold;
-    }
-    .entity-group-text.damage.negative {
-        fill: #dd3333;
-        stroke: #990000;
-    }
-    .entity-group-text.damage.positive {
-        fill: #33dd33;
-        stroke: #009900;
+    #battle-left-wrapper {
+        background: #ffffff;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: $ui-left-side-width;
     }
 
     // --------------------------------------
-    //
-    // Timer
-    //
-    // --------------------------------------
-    .timer-bar-border {
-        fill: none;
-        stroke: #343434;
-    }
-    .timer-bar {
-        fill: #ffffff;
-        stroke: none;
-    }
-
-    // --------------------------------------
-    //
     // Ability
-    //
     // --------------------------------------
     .ability-list-wrapper {
-        min-height: 150px;
         position: relative;
 
         .ability-item-wrapper {
             border: 1px solid #343434;
-            float: left;
-            width: 24%;
+            width: 100%;
           
             background-color:transparent;
             -moz-transition:background-color 0.1s;
@@ -145,6 +51,7 @@
         }
 
         // Blocker when entity is dead
+        // TODO: This should cover the entire left side
         .entity-dead {
             background: #343434;
             bottom: 0;
@@ -169,6 +76,67 @@
 
     }
 
+
+
+    // --------------------------------------
+    // middle area - battle, chat log
+    // --------------------------------------
+    #battle-center-wrapper {
+        bottom: 0;
+        left: $ui-left-side-width;
+        position: absolute;
+        right: $ui-right-side-width;
+        top: 0;
+    }
+
+        // SVG wrapper and SVG
+        #battle-wrapper {
+            bottom: $ui-log-height;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+
+            #battle {
+                // this is the actual SVG element. it should take up 100% width
+                // and height so it scales to fit the parent
+                height: 100%;
+                left: 0;
+                position: absolute;
+                top: 0;
+                width:100%; 
+            }
+        }
+
+        #battle-log-wrapper {
+            background: #ffffff;
+            bottom: 0;
+            height: $ui-log-height;
+            left: 0;
+            position: absolute;
+            right: 0;
+        }
+
+
+    // --------------------------------------
+    // right side
+    // --------------------------------------
+    #battle-right-wrapper {
+        bottom: 0;
+        background: #ffffff;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: $ui-right-side-width;
+
+        #battle-meta-options { 
+            bottom: 0;
+            left: 0;
+            height: 300px;
+            position: absolute;
+            right: 0;
+        }
+    }
     // --------------------------------------
     //
     // pause
