@@ -100,7 +100,7 @@ define([
                     targetAttrs[resist] = resistValue;
 
                     it('should take ' + dmg + ' damage (base of ' + amt + ') from ' + 
-                    (factor * 100) + '% physical attack with ' + resistValue + 
+                    (factor * 100) + '% ' + resist + ' attack with ' + resistValue + 
                     ' ' + resist, function(){
                         var entity = new Entity({ attributes: targetAttrs });
                         var entity2 = new Entity();

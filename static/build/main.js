@@ -1,14 +1,5 @@
 
-/*!
- * jQuery Transit - CSS3 transitions and transformations
- * (c) 2011-2012 Rico Sta. Cruz <rico@ricostacruz.com>
- * MIT Licensed.
- *
- * http://ricostacruz.com/jquery.transit
- * http://github.com/rstacruz/jquery.transit
- */
-(function(k){k.transit={version:"0.9.9",propertyMap:{marginLeft:"margin",marginRight:"margin",marginBottom:"margin",marginTop:"margin",paddingLeft:"padding",paddingRight:"padding",paddingBottom:"padding",paddingTop:"padding"},enabled:true,useTransitionEnd:false};var d=document.createElement("div");var q={};function b(v){if(v in d.style){return v}var u=["Moz","Webkit","O","ms"];var r=v.charAt(0).toUpperCase()+v.substr(1);if(v in d.style){return v}for(var t=0;t<u.length;++t){var s=u[t]+r;if(s in d.style){return s}}}function e(){d.style[q.transform]="";d.style[q.transform]="rotateY(90deg)";return d.style[q.transform]!==""}var a=navigator.userAgent.toLowerCase().indexOf("chrome")>-1;q.transition=b("transition");q.transitionDelay=b("transitionDelay");q.transform=b("transform");q.transformOrigin=b("transformOrigin");q.transform3d=e();var i={transition:"transitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd",WebkitTransition:"webkitTransitionEnd",msTransition:"MSTransitionEnd"};var f=q.transitionEnd=i[q.transition]||null;for(var p in q){if(q.hasOwnProperty(p)&&typeof k.support[p]==="undefined"){k.support[p]=q[p]}}d=null;k.cssEase={_default:"ease","in":"ease-in",out:"ease-out","in-out":"ease-in-out",snap:"cubic-bezier(0,1,.5,1)",easeOutCubic:"cubic-bezier(.215,.61,.355,1)",easeInOutCubic:"cubic-bezier(.645,.045,.355,1)",easeInCirc:"cubic-bezier(.6,.04,.98,.335)",easeOutCirc:"cubic-bezier(.075,.82,.165,1)",easeInOutCirc:"cubic-bezier(.785,.135,.15,.86)",easeInExpo:"cubic-bezier(.95,.05,.795,.035)",easeOutExpo:"cubic-bezier(.19,1,.22,1)",easeInOutExpo:"cubic-bezier(1,0,0,1)",easeInQuad:"cubic-bezier(.55,.085,.68,.53)",easeOutQuad:"cubic-bezier(.25,.46,.45,.94)",easeInOutQuad:"cubic-bezier(.455,.03,.515,.955)",easeInQuart:"cubic-bezier(.895,.03,.685,.22)",easeOutQuart:"cubic-bezier(.165,.84,.44,1)",easeInOutQuart:"cubic-bezier(.77,0,.175,1)",easeInQuint:"cubic-bezier(.755,.05,.855,.06)",easeOutQuint:"cubic-bezier(.23,1,.32,1)",easeInOutQuint:"cubic-bezier(.86,0,.07,1)",easeInSine:"cubic-bezier(.47,0,.745,.715)",easeOutSine:"cubic-bezier(.39,.575,.565,1)",easeInOutSine:"cubic-bezier(.445,.05,.55,.95)",easeInBack:"cubic-bezier(.6,-.28,.735,.045)",easeOutBack:"cubic-bezier(.175, .885,.32,1.275)",easeInOutBack:"cubic-bezier(.68,-.55,.265,1.55)"};k.cssHooks["transit:transform"]={get:function(r){return k(r).data("transform")||new j()},set:function(s,r){var t=r;if(!(t instanceof j)){t=new j(t)}if(q.transform==="WebkitTransform"&&!a){s.style[q.transform]=t.toString(true)}else{s.style[q.transform]=t.toString()}k(s).data("transform",t)}};k.cssHooks.transform={set:k.cssHooks["transit:transform"].set};if(k.fn.jquery<"1.8"){k.cssHooks.transformOrigin={get:function(r){return r.style[q.transformOrigin]},set:function(r,s){r.style[q.transformOrigin]=s}};k.cssHooks.transition={get:function(r){return r.style[q.transition]},set:function(r,s){r.style[q.transition]=s}}}n("scale");n("translate");n("rotate");n("rotateX");n("rotateY");n("rotate3d");n("perspective");n("skewX");n("skewY");n("x",true);n("y",true);function j(r){if(typeof r==="string"){this.parse(r)}return this}j.prototype={setFromString:function(t,s){var r=(typeof s==="string")?s.split(","):(s.constructor===Array)?s:[s];r.unshift(t);j.prototype.set.apply(this,r)},set:function(s){var r=Array.prototype.slice.apply(arguments,[1]);if(this.setter[s]){this.setter[s].apply(this,r)}else{this[s]=r.join(",")}},get:function(r){if(this.getter[r]){return this.getter[r].apply(this)}else{return this[r]||0}},setter:{rotate:function(r){this.rotate=o(r,"deg")},rotateX:function(r){this.rotateX=o(r,"deg")},rotateY:function(r){this.rotateY=o(r,"deg")},scale:function(r,s){if(s===undefined){s=r}this.scale=r+","+s},skewX:function(r){this.skewX=o(r,"deg")},skewY:function(r){this.skewY=o(r,"deg")},perspective:function(r){this.perspective=o(r,"px")},x:function(r){this.set("translate",r,null)},y:function(r){this.set("translate",null,r)},translate:function(r,s){if(this._translateX===undefined){this._translateX=0}if(this._translateY===undefined){this._translateY=0}if(r!==null&&r!==undefined){this._translateX=o(r,"px")}if(s!==null&&s!==undefined){this._translateY=o(s,"px")}this.translate=this._translateX+","+this._translateY}},getter:{x:function(){return this._translateX||0},y:function(){return this._translateY||0},scale:function(){var r=(this.scale||"1,1").split(",");if(r[0]){r[0]=parseFloat(r[0])}if(r[1]){r[1]=parseFloat(r[1])}return(r[0]===r[1])?r[0]:r},rotate3d:function(){var t=(this.rotate3d||"0,0,0,0deg").split(",");for(var r=0;r<=3;++r){if(t[r]){t[r]=parseFloat(t[r])}}if(t[3]){t[3]=o(t[3],"deg")}return t}},parse:function(s){var r=this;s.replace(/([a-zA-Z0-9]+)\((.*?)\)/g,function(t,v,u){r.setFromString(v,u)})},toString:function(t){var s=[];for(var r in this){if(this.hasOwnProperty(r)){if((!q.transform3d)&&((r==="rotateX")||(r==="rotateY")||(r==="perspective")||(r==="transformOrigin"))){continue}if(r[0]!=="_"){if(t&&(r==="scale")){s.push(r+"3d("+this[r]+",1)")}else{if(t&&(r==="translate")){s.push(r+"3d("+this[r]+",0)")}else{s.push(r+"("+this[r]+")")}}}}}return s.join(" ")}};function m(s,r,t){if(r===true){s.queue(t)}else{if(r){s.queue(r,t)}else{t()}}}function h(s){var r=[];k.each(s,function(t){t=k.camelCase(t);t=k.transit.propertyMap[t]||k.cssProps[t]||t;t=c(t);if(k.inArray(t,r)===-1){r.push(t)}});return r}function g(s,v,x,r){var t=h(s);if(k.cssEase[x]){x=k.cssEase[x]}var w=""+l(v)+" "+x;if(parseInt(r,10)>0){w+=" "+l(r)}var u=[];k.each(t,function(z,y){u.push(y+" "+w)});return u.join(", ")}k.fn.transition=k.fn.transit=function(z,s,y,C){var D=this;var u=0;var w=true;if(typeof s==="function"){C=s;s=undefined}if(typeof y==="function"){C=y;y=undefined}if(typeof z.easing!=="undefined"){y=z.easing;delete z.easing}if(typeof z.duration!=="undefined"){s=z.duration;delete z.duration}if(typeof z.complete!=="undefined"){C=z.complete;delete z.complete}if(typeof z.queue!=="undefined"){w=z.queue;delete z.queue}if(typeof z.delay!=="undefined"){u=z.delay;delete z.delay}if(typeof s==="undefined"){s=k.fx.speeds._default}if(typeof y==="undefined"){y=k.cssEase._default}s=l(s);var E=g(z,s,y,u);var B=k.transit.enabled&&q.transition;var t=B?(parseInt(s,10)+parseInt(u,10)):0;if(t===0){var A=function(F){D.css(z);if(C){C.apply(D)}if(F){F()}};m(D,w,A);return D}var x={};var r=function(H){var G=false;var F=function(){if(G){D.unbind(f,F)}if(t>0){D.each(function(){this.style[q.transition]=(x[this]||null)})}if(typeof C==="function"){C.apply(D)}if(typeof H==="function"){H()}};if((t>0)&&(f)&&(k.transit.useTransitionEnd)){G=true;D.bind(f,F)}else{window.setTimeout(F,t)}D.each(function(){if(t>0){this.style[q.transition]=E}k(this).css(z)})};var v=function(F){this.offsetWidth;r(F)};m(D,w,v);return this};function n(s,r){if(!r){k.cssNumber[s]=true}k.transit.propertyMap[s]=q.transform;k.cssHooks[s]={get:function(v){var u=k(v).css("transit:transform");return u.get(s)},set:function(v,w){var u=k(v).css("transit:transform");u.setFromString(s,w);k(v).css({"transit:transform":u})}}}function c(r){return r.replace(/([A-Z])/g,function(s){return"-"+s.toLowerCase()})}function o(s,r){if((typeof s==="string")&&(!s.match(/^[\-0-9\.]+$/))){return s}else{return""+s+r}}function l(s){var r=s;if(k.fx.speeds[r]){r=k.fx.speeds[r]}return o(r,"ms")}k.transit.getTransitionValue=g})(jQuery);
-
+(function($){$.transit={version:"0.9.9",propertyMap:{marginLeft:"margin",marginRight:"margin",marginBottom:"margin",marginTop:"margin",paddingLeft:"padding",paddingRight:"padding",paddingBottom:"padding",paddingTop:"padding"},enabled:true,useTransitionEnd:false};var div=document.createElement("div");var support={};function getVendorPropertyName(prop){if(prop in div.style)return prop;var prefixes=["Moz","Webkit","O","ms"];var prop_=prop.charAt(0).toUpperCase()+prop.substr(1);if(prop in div.style){return prop}for(var i=0;i<prefixes.length;++i){var vendorProp=prefixes[i]+prop_;if(vendorProp in div.style){return vendorProp}}}function checkTransform3dSupport(){div.style[support.transform]="";div.style[support.transform]="rotateY(90deg)";return div.style[support.transform]!==""}var isChrome=navigator.userAgent.toLowerCase().indexOf("chrome")>-1;support.transition=getVendorPropertyName("transition");support.transitionProperty=getVendorPropertyName("transitionProperty");support.transitionDelay=getVendorPropertyName("transitionDelay");support.transform=getVendorPropertyName("transform");support.transformOrigin=getVendorPropertyName("transformOrigin");support.transform3d=checkTransform3dSupport();var eventNames={transition:"transitionEnd",MozTransition:"transitionend",OTransition:"oTransitionEnd",WebkitTransition:"webkitTransitionEnd",msTransition:"MSTransitionEnd"};var transitionEnd=support.transitionEnd=eventNames[support.transition]||null;for(var key in support){if(support.hasOwnProperty(key)&&typeof $.support[key]==="undefined"){$.support[key]=support[key]}}div=null;$.cssEase={_default:"ease","in":"ease-in",out:"ease-out","in-out":"ease-in-out",snap:"cubic-bezier(0,1,.5,1)",easeOutCubic:"cubic-bezier(.215,.61,.355,1)",easeInOutCubic:"cubic-bezier(.645,.045,.355,1)",easeInCirc:"cubic-bezier(.6,.04,.98,.335)",easeOutCirc:"cubic-bezier(.075,.82,.165,1)",easeInOutCirc:"cubic-bezier(.785,.135,.15,.86)",easeInExpo:"cubic-bezier(.95,.05,.795,.035)",easeOutExpo:"cubic-bezier(.19,1,.22,1)",easeInOutExpo:"cubic-bezier(1,0,0,1)",easeInQuad:"cubic-bezier(.55,.085,.68,.53)",easeOutQuad:"cubic-bezier(.25,.46,.45,.94)",easeInOutQuad:"cubic-bezier(.455,.03,.515,.955)",easeInQuart:"cubic-bezier(.895,.03,.685,.22)",easeOutQuart:"cubic-bezier(.165,.84,.44,1)",easeInOutQuart:"cubic-bezier(.77,0,.175,1)",easeInQuint:"cubic-bezier(.755,.05,.855,.06)",easeOutQuint:"cubic-bezier(.23,1,.32,1)",easeInOutQuint:"cubic-bezier(.86,0,.07,1)",easeInSine:"cubic-bezier(.47,0,.745,.715)",easeOutSine:"cubic-bezier(.39,.575,.565,1)",easeInOutSine:"cubic-bezier(.445,.05,.55,.95)",easeInBack:"cubic-bezier(.6,-.28,.735,.045)",easeOutBack:"cubic-bezier(.175, .885,.32,1.275)",easeInOutBack:"cubic-bezier(.68,-.55,.265,1.55)"};$.cssHooks["transit:transform"]={get:function(elem){return $(elem).data("transform")||new Transform},set:function(elem,v){var value=v;if(!(value instanceof Transform)){value=new Transform(value)}if(support.transform==="WebkitTransform"&&!isChrome){elem.style[support.transform]=value.toString(true)}else{elem.style[support.transform]=value.toString()}$(elem).data("transform",value)}};$.cssHooks.transform={set:$.cssHooks["transit:transform"].set};if($.fn.jquery<"1.8"){$.cssHooks.transformOrigin={get:function(elem){return elem.style[support.transformOrigin]},set:function(elem,value){elem.style[support.transformOrigin]=value}};$.cssHooks.transition={get:function(elem){return elem.style[support.transition]},set:function(elem,value){elem.style[support.transition]=value}}}registerCssHook("scale");registerCssHook("translate");registerCssHook("rotate");registerCssHook("rotateX");registerCssHook("rotateY");registerCssHook("rotate3d");registerCssHook("perspective");registerCssHook("skewX");registerCssHook("skewY");registerCssHook("x",true);registerCssHook("y",true);function Transform(str){if(typeof str==="string"){this.parse(str)}return this}Transform.prototype={setFromString:function(prop,val){var args=typeof val==="string"?val.split(","):val.constructor===Array?val:[val];args.unshift(prop);Transform.prototype.set.apply(this,args)},set:function(prop){var args=Array.prototype.slice.apply(arguments,[1]);if(this.setter[prop]){this.setter[prop].apply(this,args)}else{this[prop]=args.join(",")}},get:function(prop){if(this.getter[prop]){return this.getter[prop].apply(this)}else{return this[prop]||0}},setter:{rotate:function(theta){this.rotate=unit(theta,"deg")},rotateX:function(theta){this.rotateX=unit(theta,"deg")},rotateY:function(theta){this.rotateY=unit(theta,"deg")},scale:function(x,y){if(y===undefined){y=x}this.scale=x+","+y},skewX:function(x){this.skewX=unit(x,"deg")},skewY:function(y){this.skewY=unit(y,"deg")},perspective:function(dist){this.perspective=unit(dist,"px")},x:function(x){this.set("translate",x,null)},y:function(y){this.set("translate",null,y)},translate:function(x,y){if(this._translateX===undefined){this._translateX=0}if(this._translateY===undefined){this._translateY=0}if(x!==null&&x!==undefined){this._translateX=unit(x,"px")}if(y!==null&&y!==undefined){this._translateY=unit(y,"px")}this.translate=this._translateX+","+this._translateY}},getter:{x:function(){return this._translateX||0},y:function(){return this._translateY||0},scale:function(){var s=(this.scale||"1,1").split(",");if(s[0]){s[0]=parseFloat(s[0])}if(s[1]){s[1]=parseFloat(s[1])}return s[0]===s[1]?s[0]:s},rotate3d:function(){var s=(this.rotate3d||"0,0,0,0deg").split(",");for(var i=0;i<=3;++i){if(s[i]){s[i]=parseFloat(s[i])}}if(s[3]){s[3]=unit(s[3],"deg")}return s}},parse:function(str){var self=this;str.replace(/([a-zA-Z0-9]+)\((.*?)\)/g,function(x,prop,val){self.setFromString(prop,val)})},toString:function(use3d){var re=[];for(var i in this){if(this.hasOwnProperty(i)){if(!support.transform3d&&(i==="rotateX"||i==="rotateY"||i==="perspective"||i==="transformOrigin")){continue}if(i[0]!=="_"){if(use3d&&i==="scale"){re.push(i+"3d("+this[i]+",1)")}else if(use3d&&i==="translate"){re.push(i+"3d("+this[i]+",0)")}else{re.push(i+"("+this[i]+")")}}}}return re.join(" ")}};function callOrQueue(self,queue,fn){if(queue===true){self.queue(fn)}else if(queue){self.queue(queue,fn)}else{fn()}}function getProperties(props){var re=[];$.each(props,function(key){key=$.camelCase(key);key=$.transit.propertyMap[key]||$.cssProps[key]||key;key=uncamel(key);if($.inArray(key,re)===-1){re.push(key)}});return re}function getTransition(properties,duration,easing,delay){var props=getProperties(properties);if($.cssEase[easing]){easing=$.cssEase[easing]}var attribs=""+toMS(duration)+" "+easing;if(parseInt(delay,10)>0){attribs+=" "+toMS(delay)}var transitions=[];$.each(props,function(i,name){transitions.push(name+" "+attribs)});return transitions.join(", ")}$.fn.transition=$.fn.transit=function(properties,duration,easing,callback){var self=this;var delay=0;var queue=true;var theseProperties=jQuery.extend(true,{},properties);if(typeof duration==="function"){callback=duration;duration=undefined}if(typeof duration==="object"){easing=duration.easing;delay=duration.delay||0;queue=duration.queue||true;callback=duration.complete;duration=duration.duration}if(typeof easing==="function"){callback=easing;easing=undefined}if(typeof theseProperties.easing!=="undefined"){easing=theseProperties.easing;delete theseProperties.easing}if(typeof theseProperties.duration!=="undefined"){duration=theseProperties.duration;delete theseProperties.duration}if(typeof theseProperties.complete!=="undefined"){callback=theseProperties.complete;delete theseProperties.complete}if(typeof theseProperties.queue!=="undefined"){queue=theseProperties.queue;delete theseProperties.queue}if(typeof theseProperties.delay!=="undefined"){delay=theseProperties.delay;delete theseProperties.delay}if(typeof duration==="undefined"){duration=$.fx.speeds._default}if(typeof easing==="undefined"){easing=$.cssEase._default}duration=toMS(duration);var transitionValue=getTransition(theseProperties,duration,easing,delay);var work=$.transit.enabled&&support.transition;var i=work?parseInt(duration,10)+parseInt(delay,10):0;if(i===0){var fn=function(next){self.css(theseProperties);if(callback){callback.apply(self)}if(next){next()}};callOrQueue(self,queue,fn);return self}var run=function(nextCall,element){var bound=false;var self=$(element);var oldTransitions={};var cb=function(e){self.data("transitCallback",null);if(e)e.stopPropagation();if(bound){self.unbind(transitionEnd,cb)}element.style[support.transition]=oldTransitions[this]||null;if(typeof callback==="function"){callback.apply(self)}if(typeof nextCall==="function"){nextCall()}};if(transitionEnd&&$.transit.useTransitionEnd){bound=true;self.bind(transitionEnd,cb)}else{var id=window.setTimeout(cb,i);self.data("transitTimer",id)}element.style[support.transition]=transitionValue;self.css(properties);self.data("transitCallback",cb)};var deferredRun=function(next){this.offsetWidth;run(next,this)};callOrQueue(self,queue,deferredRun);return this};$.fn.transitionStop=$.fn.transitStop=function(clearQueue,jumpToEnd){this.each(function(){var self=$(this);var id=self.data("transitTimer");clearTimeout(id);self.data("transitTimer",null);var properties=this.style[support.transitionProperty];if(properties){properties=properties.replace(/\s*/g,"").split(",");var style=window.getComputedStyle(this),css={};for(var i=0;i<properties.length;i++){css[properties[i]]=this.style[properties[i]];this.style[properties[i]]=style[properties[i]]}this.offsetWidth;this.style[support.transition]="none";if(clearQueue){self.clearQueue();self.unbind(transitionEnd)}if(jumpToEnd){for(var i=0;i<properties.length;i++)this.style[properties[i]]=css[properties[i]];var cb=self.data("transitCallback");if(typeof cb==="function")cb()}else if(!clearQueue){self.dequeue()}}});return this};function registerCssHook(prop,isPixels){if(!isPixels){$.cssNumber[prop]=true}$.transit.propertyMap[prop]=support.transform;$.cssHooks[prop]={get:function(elem){var t=$(elem).css("transit:transform");return t.get(prop)},set:function(elem,value){var t=$(elem).css("transit:transform");t.setFromString(prop,value);$(elem).css({"transit:transform":t})}}}function uncamel(str){return str.replace(/([A-Z])/g,function(letter){return"-"+letter.toLowerCase()})}function unit(i,units){if(typeof i==="string"&&!i.match(/^[\-0-9\.]+$/)){return i}else{return""+i+units}}function toMS(duration){var i=duration;if(typeof i==="string"&&!i.match(/^[\-0-9\.]+/)){i=$.fx.speeds[i]||$.fx.speeds._default}return unit(i,"ms")}$.transit.getTransitionValue=getTransition})(jQuery);
 define("lib/jquery.transit.min", function(){});
 
 (function(window,document,$,undefined){var prefix;var property;var eventName="onfocusin"in document&&"hasFocus"in document?"focusin focusout":"focus blur";var prefixes=["webkit","o","ms","moz",""];var $support=$.support;var $event=$.event;while((prefix=prefixes.pop())!=undefined){property=(prefix?prefix+"H":"h")+"idden";if($support.pageVisibility=typeof document[property]=="boolean"){eventName=prefix+"visibilitychange";break}}$(/blur$/.test(eventName)?window:document).on(eventName,function(event){var type=event.type;var originalEvent=event.originalEvent;if(!originalEvent){return}var toElement=originalEvent.toElement;if(!/^focus./.test(type)||toElement==undefined&&originalEvent.fromElement==undefined&&originalEvent.relatedTarget==undefined){$event.trigger((property&&document[property]||/^(?:blur|focusout)$/.test(type)?"hide":"show")+".visibility")}})})(this,document,jQuery);
@@ -1344,7 +1335,7 @@ define(
             name: 'Magic Missle',
             // ID of the effect element
             effectId: null,
-            description: 'Textual description of effect',
+            description: 'PLACEHOLDER TEXT :::::::::::',
 
             // Damage Over Time (DOT) properties
             // ticks: number of times to do the effect
@@ -1375,6 +1366,10 @@ define(
             //
             // Measured in seconds
             timeCost: null, // By default, will be set to castTime
+
+            // How long (in seconds) the user must wait before using the
+            // ability again
+            cooldown: 0,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
@@ -1423,6 +1418,7 @@ define(
             // entity's stats for the passed in duration
             buffEffects: null, // Will look like { strength : -10, agility: 10 }
             buffDuration: null, // in seconds
+            buffStartDate: null,
 
             buffCanStack: false, // can this buff stack with itself?
 
@@ -1631,9 +1627,9 @@ define(
                         // to see if the effect already exists
                         if(targetEntity.hasBuff(self)){
                             logger.log('models/Ability', 
-                                '[x] buff already exists %O', self);
-
-                            return false;
+                                '[x] buff already exists %O : removing and re-adding', self);
+                            // remove the buff so we can re-apply it
+                            self.removeBuffEffect.call(self, targetEntity);
                         }
                     }
 
@@ -1684,23 +1680,8 @@ define(
                             return false; 
                         }
 
-                        // Otherwise, entity lives. Remove the buff
-                        targetEntity.removeBuff(self);
-
-                        // remove the stats
-                        var currentStats = targetEntity.get(
-                            'attributes').attributes;
-                        var updatedStats = {};
-
-                        // update based on effects
-                        _.each(self.get('buffEffects'), function(val, key){
-                            updatedStats[key] = currentStats[key] - val;
-                        });
-        
-                        // update the stats
-                        targetEntity.get('attributes').set(
-                            updatedStats
-                        );
+                        // remove the buff
+                        self.removeBuffEffect.call(self, targetEntity);
 
                         if(options.callback){ options.callback(); }
 
@@ -1713,6 +1694,35 @@ define(
             }
 
             return amount;
+        },
+
+        // ==============================
+        // Buff helpers
+        // ==============================
+        removeBuffEffect: function removeBuffEffect(targetEntity){
+            // TODO: !!!!!!!!!!!!!!!!!!!!!!
+            // This should live in the entity
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            var self = this;
+
+            // remove the buff from the entity
+            targetEntity.removeBuff(self);
+
+            // remove the stats this buff added
+            var currentStats = targetEntity.get(
+                'attributes').attributes;
+            var updatedStats = {};
+
+            // update based on effects
+            _.each(self.get('buffEffects'), function(val, key){
+                updatedStats[key] = currentStats[key] - val;
+            });
+
+            // update the stats
+            targetEntity.get('attributes').set(
+                updatedStats
+            );
+            return this;
         }
 
     });
@@ -2068,6 +2078,8 @@ define(
             var effects = this.get('activeEffects');
 
             // store the attributes
+            // set the time the buff was applied
+            ability.set({ buffStartDate: new Date() }, { silent: true });
             effects.push(ability);
 
             this.set({ activeEffects: effects }, {silent: true});
@@ -3304,7 +3316,7 @@ define(
         }),
         smite: new Ability({
             name: 'Smite',
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
             validTargets: ['enemy'],
@@ -3316,9 +3328,10 @@ define(
         }),
         virtue: new Ability({
             name: 'Virtue',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
+            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -3334,7 +3347,7 @@ define(
         }),
         judgement: new Ability({
             name: 'Judgement',
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
             validTargets: ['enemy'],
@@ -3372,7 +3385,7 @@ define(
         darkblade: new Ability({
             name: 'Dark Blade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 3,
             timeCost: 3,
             castDuration: 0.3,
@@ -3387,7 +3400,7 @@ define(
         deathtouch: new Ability({
             name: 'Death Touch',
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
             castDuration: 1.5,
@@ -4644,33 +4657,46 @@ define(
         },
 
         onShow: function infoOnShow(){
+            var self = this;
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'onShow() called');
 
-            this.$timerNode = $('.timer', this.$el)[0];
+            // Set the fade duration for all the active effects based on their
+            // duration
+            // The active effect elements are in order of the activeEffects
+            //  array on the entity
+            _.each($('.active-effect', this.$el), function(el, i){
+                var duration = self.model.attributes.activeEffects[i].get('buffDuration');
+
+                // Don't do anything for buffs that have no duration
+                if(duration < 1){ 
+                    return false;
+                }
+
+                // convert to seconds
+                duration *= 1000;
+
+                // Get the time the buff was started
+                var start = self.model.attributes.activeEffects[i].get('buffStartDate');
+                // how much time has passed between the start and now
+                var timeDiff = new Date() - start;
+                // and the time left before the buff is finished
+                duration = duration - timeDiff;
+
+                // stop the existing transition
+                $(el).transitionStop();
+
+                // start a new one
+                $(el).transit({
+                    opacity: 0
+                }, duration, 'easeInSine');
+            });
             return this;
         },
 
         rerender: function infoRerender(){
             this.render();
             this.onShow();
-            return this;
-        },
-
-        updateTimer: function infoUpdateTimer(time){
-            // called by the battle controller, the current game time is
-            // passed in
-            //
-            return this;
-
-            // TODO: DOM updates too slow
-            var current = Math.round(time * 100) / 100;
-
-            // don't update DOM if value is same
-            if(current !== this.last){
-                this.$timerNode.innerHTML = this.last;
-                this.last = current;
-            }
             return this;
         }
     });

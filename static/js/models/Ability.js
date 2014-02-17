@@ -26,7 +26,7 @@ define(
             name: 'Magic Missle',
             // ID of the effect element
             effectId: null,
-            description: 'Textual description of effect',
+            description: 'PLACEHOLDER TEXT :::::::::::',
 
             // Damage Over Time (DOT) properties
             // ticks: number of times to do the effect
@@ -57,6 +57,10 @@ define(
             //
             // Measured in seconds
             timeCost: null, // By default, will be set to castTime
+
+            // How long (in seconds) the user must wait before using the
+            // ability again
+            cooldown: 0,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
@@ -105,6 +109,7 @@ define(
             // entity's stats for the passed in duration
             buffEffects: null, // Will look like { strength : -10, agility: 10 }
             buffDuration: null, // in seconds
+            buffStartDate: null,
 
             buffCanStack: false, // can this buff stack with itself?
 
@@ -313,9 +318,9 @@ define(
                         // to see if the effect already exists
                         if(targetEntity.hasBuff(self)){
                             logger.log('models/Ability', 
-                                '[x] buff already exists %O', self);
-
-                            return false;
+                                '[x] buff already exists %O : removing and re-adding', self);
+                            // remove the buff so we can re-apply it
+                            self.removeBuffEffect.call(self, targetEntity);
                         }
                     }
 
@@ -366,23 +371,8 @@ define(
                             return false; 
                         }
 
-                        // Otherwise, entity lives. Remove the buff
-                        targetEntity.removeBuff(self);
-
-                        // remove the stats
-                        var currentStats = targetEntity.get(
-                            'attributes').attributes;
-                        var updatedStats = {};
-
-                        // update based on effects
-                        _.each(self.get('buffEffects'), function(val, key){
-                            updatedStats[key] = currentStats[key] - val;
-                        });
-        
-                        // update the stats
-                        targetEntity.get('attributes').set(
-                            updatedStats
-                        );
+                        // remove the buff
+                        self.removeBuffEffect.call(self, targetEntity);
 
                         if(options.callback){ options.callback(); }
 
@@ -395,6 +385,35 @@ define(
             }
 
             return amount;
+        },
+
+        // ==============================
+        // Buff helpers
+        // ==============================
+        removeBuffEffect: function removeBuffEffect(targetEntity){
+            // TODO: !!!!!!!!!!!!!!!!!!!!!!
+            // This should live in the entity
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            var self = this;
+
+            // remove the buff from the entity
+            targetEntity.removeBuff(self);
+
+            // remove the stats this buff added
+            var currentStats = targetEntity.get(
+                'attributes').attributes;
+            var updatedStats = {};
+
+            // update based on effects
+            _.each(self.get('buffEffects'), function(val, key){
+                updatedStats[key] = currentStats[key] - val;
+            });
+
+            // update the stats
+            targetEntity.get('attributes').set(
+                updatedStats
+            );
+            return this;
         }
 
     });

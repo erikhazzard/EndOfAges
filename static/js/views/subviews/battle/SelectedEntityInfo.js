@@ -29,33 +29,46 @@ define(
         },
 
         onShow: function infoOnShow(){
+            var self = this;
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'onShow() called');
 
-            this.$timerNode = $('.timer', this.$el)[0];
+            // Set the fade duration for all the active effects based on their
+            // duration
+            // The active effect elements are in order of the activeEffects
+            //  array on the entity
+            _.each($('.active-effect', this.$el), function(el, i){
+                var duration = self.model.attributes.activeEffects[i].get('buffDuration');
+
+                // Don't do anything for buffs that have no duration
+                if(duration < 1){ 
+                    return false;
+                }
+
+                // convert to seconds
+                duration *= 1000;
+
+                // Get the time the buff was started
+                var start = self.model.attributes.activeEffects[i].get('buffStartDate');
+                // how much time has passed between the start and now
+                var timeDiff = new Date() - start;
+                // and the time left before the buff is finished
+                duration = duration - timeDiff;
+
+                // stop the existing transition
+                $(el).transitionStop();
+
+                // start a new one
+                $(el).transit({
+                    opacity: 0
+                }, duration, 'easeInSine');
+            });
             return this;
         },
 
         rerender: function infoRerender(){
             this.render();
             this.onShow();
-            return this;
-        },
-
-        updateTimer: function infoUpdateTimer(time){
-            // called by the battle controller, the current game time is
-            // passed in
-            //
-            return this;
-
-            // TODO: DOM updates too slow
-            var current = Math.round(time * 100) / 100;
-
-            // don't update DOM if value is same
-            if(current !== this.last){
-                this.$timerNode.innerHTML = this.last;
-                this.last = current;
-            }
             return this;
         }
     });

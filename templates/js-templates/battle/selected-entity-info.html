@@ -4,8 +4,22 @@
     <div class='entity'>
         <h4><%= name %></h4>
     </div>
+    <div class='active-effecs'>
+        <% _.each(activeEffects, function(effect){ %>
+            <div class='active-effect'>
+                <%= JSON.stringify(effect) %>
+            </div>
+        <% }); %>
+    </div>
+
     Health: <%= attributes.get('health') %> / <%= attributes.get('maxHealth') %>
     <br />
-    Power: <%= attributes.get('power') %> / <%= attributes.get('power') %>
-    Timer: <span class='timer'></span>
+    Attack: <%= attributes.get('attack') %> 
+    <br />
+    Armor: <%= attributes.get('armor') %> 
+    <br />
+    Magic Power: <%= attributes.get('magicPower') %> 
+    <br />
+    Magic Resist: <%= attributes.get('magicResist') %> 
+    
 </script>

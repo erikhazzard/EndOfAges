@@ -233,6 +233,8 @@ define(
             var effects = this.get('activeEffects');
 
             // store the attributes
+            // set the time the buff was applied
+            ability.set({ buffStartDate: new Date() }, { silent: true });
             effects.push(ability);
 
             this.set({ activeEffects: effects }, {silent: true});

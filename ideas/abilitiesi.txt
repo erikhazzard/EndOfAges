@@ -1,3 +1,39 @@
+===================
+
+Ability order should be similar as possible
+could be the same format for each class;
+
+e.g., for DPS: 
+    q = basic damage
+    w = second damage
+    e = debuff
+    r = ult
+
+for heal:
+    q = self heal
+    w = other heal
+    e = buff
+    r = ult
+
+tank
+    q = dmg
+    w = taunt
+    e = ?
+    r = ult
+
+
+
+doesn't have to follow format, but should try to maintain context
+
+Maybe all q and w are always for others, e is reserved
+for self / group?
+    
+
+===================
+
+
+
+
 Each ability has at least one elemental type
 
 Abilities should be able to both heal and do damage

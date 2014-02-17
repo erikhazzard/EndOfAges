@@ -98,7 +98,7 @@ define(
         }),
         smite: new Ability({
             name: 'Smite',
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
             validTargets: ['enemy'],
@@ -110,9 +110,10 @@ define(
         }),
         virtue: new Ability({
             name: 'Virtue',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
+            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -128,7 +129,7 @@ define(
         }),
         judgement: new Ability({
             name: 'Judgement',
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
             validTargets: ['enemy'],
@@ -166,7 +167,7 @@ define(
         darkblade: new Ability({
             name: 'Dark Blade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 3,
             timeCost: 3,
             castDuration: 0.3,
@@ -181,7 +182,7 @@ define(
         deathtouch: new Ability({
             name: 'Death Touch',
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
-            effectId: 'magicMissle',
+            effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
             castDuration: 1.5,

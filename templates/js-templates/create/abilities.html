@@ -5,6 +5,10 @@
         <div class='create-ability-inner'>
             <h3><%= name %></h3>
             {{// Damage or heal or dot }}
+            <div class='description'>
+                <%= description %>
+            </div>
+
             <div class='damage-heal-info'>
                 <% if(damage){  %>
                     Damage: <%= damage %>
@@ -14,7 +18,8 @@
             </div>
 
             <div class='type-info'>
-                Type: <%= type %> | Element: <%= element %>
+                Type: <%= JSON.stringify(type) %> 
+                <br /> Element: <%= JSON.stringify(element) %>
             </div>
 
             <div class='cast-info'>

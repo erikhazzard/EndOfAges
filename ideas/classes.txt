@@ -16,3 +16,10 @@ A class is little more than a collection of abilities.
     -6 elements, 2 types
         -12 base classes
     -Hybrid
+
+-Healers
+    -Reactive, Regenerative, Wards
+
+-Support
+
+*** Tank, Healer, DPS, Support / Utility
