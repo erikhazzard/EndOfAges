@@ -1,0 +1,51 @@
+<script id='template-game-battle-log' type='text/template'>
+    <div id='battle-log'>
+        <!-- Logs go here -->
+    </div>
+</script>
+
+<script id='template-game-battle-log-item' type='text/template'>
+    <div class='log'>
+        {{// show source }}
+        <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
+            <%= source.get('name') %>'s
+        </span>
+
+        <span class='ability'> <%= ability.get('name') %> </span>
+        
+        {{// show health change }}
+        <% if(healthDifference < 0){ %>
+            <!-- NEGATIVE damage -->
+
+            deals
+            <span class='damage'>
+                <%= healthDifference %>
+            </span>
+            damage 
+
+        <% } else if (healthDifference > 0){ %>
+            <!-- POSITIVE damage (healt) -->
+            
+            <% if( source === target ){ %>
+                heals themselves for
+            <% } else { %>
+                restores
+            <% } %>
+                
+            <span class='heal'>
+                <%= healthDifference %>
+            </span>
+            health
+
+        <% } else if (healthDifference === 0){ %>
+        <% } %>
+
+        {{// show target  }}
+        <% if( source !== target && healthDifference !== 0){ %>
+            to
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } %>
+    </div>
+</script>

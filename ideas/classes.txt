@@ -23,3 +23,6 @@ A class is little more than a collection of abilities.
 -Support
 
 *** Tank, Healer, DPS, Support / Utility
+
+AoE DoT
+AoE DD

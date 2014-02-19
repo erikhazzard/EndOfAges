@@ -377,13 +377,13 @@ define(
                     // entity's properties.
                     var buffDuration = self.get('buffDuration') * 1000;
 
-                    if(this._buffCancelTimer && resetTimer){
-                        this._buffCancelTimer.pause();
-                        this._buffCancelTimer.remaining = buffDuration;
-                        this._buffCancelTimer.resume();
+                    if(self._buffCancelTimer && resetTimer){
+                        self._buffCancelTimer.pause();
+                        self._buffCancelTimer.remaining = buffDuration;
+                        self._buffCancelTimer.resume();
                     } else { 
                         // cancel timer does not yet exist, create it
-                        this._buffCancelTimer = new Timer(function removeBuff(){
+                        self._buffCancelTimer = new Timer(function removeBuff(){
                             // remove effect
                             logger.log('models/Ability', 'removing buff');
                             

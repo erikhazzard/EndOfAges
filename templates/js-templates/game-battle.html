@@ -1,5 +1,6 @@
 {{ include battle/ability.html }}
 {{ include battle/selected-entity-info.html }}
+{{ include battle/battle-log.html }}
 {{ include battle/intended-target-info.html }}
 
 <script id='template-game-battle' type='text/template'>
@@ -7,9 +8,6 @@
     <div id='battle-left-wrapper'>
         <!-- Entity info -->
         <div id='region-battle-selected-entity-wrapper'></div>
-
-        <!-- Ability menu -->
-        <div id='region-battle-ability-wrapper'></div>
 
     </div>
 
@@ -25,8 +23,14 @@
             </svg>
         </div>
 
-        <div id='battle-log-wrapper'>
-            Sup
+
+        <!-- Ability menu -->
+        <div id='region-battle-ability-wrapper'></div>
+
+        <!-- health? -->
+
+        <!-- Battle log -->
+        <div id='region-battle-log-wrapper'>
         </div>
 
     </div>

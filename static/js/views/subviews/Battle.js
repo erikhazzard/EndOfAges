@@ -68,13 +68,15 @@ define(
         'util/Timer',
         'views/subviews/battle/AbilityList',
         'views/subviews/battle/SelectedEntityInfo',
-        'views/subviews/battle/IntendedTargetInfo'
+        'views/subviews/battle/IntendedTargetInfo',
+        'views/subviews/battle/BattleLog'
     ], function viewBattle(
         d3, backbone, marionette, logger, events,
         Timer,
         AbilityListView,
         SelectedEntityInfoView,
-        IntendedTargetInfoView
+        IntendedTargetInfoView,
+        BattleLogView
     ){
 
     // Utility functions
@@ -125,7 +127,8 @@ define(
         regions: {
             'regionSelectedEntity': '#region-battle-selected-entity-wrapper',
             'regionIntendedTarget': '#region-battle-intended-target-wrapper',
-            'regionAbility': '#region-battle-ability-wrapper'
+            'regionAbility': '#region-battle-ability-wrapper',
+            'regionBattleLog': '#region-battle-log-wrapper'
         },
 
         initialize: function battleViewInitialize(options){
@@ -219,6 +222,12 @@ define(
             this.listenTo(events, 'document:hide', this._pause);
             this.listenTo(events, 'document:show', this._unpause);
 
+            // ==========================
+            // Battle log Subview
+            // ==========================
+            this.battleLogView = new BattleLogView({
+                model: this.model
+            });
             return this;
         },
 
@@ -822,6 +831,10 @@ define(
             // When the mousewheel is scrolled, determine if it's up or down,
             // then select the player's entity above or below the current one
             // stop scrolling on the page
+            if(!this.$battleWrapper.is(':hover')){ 
+                return false;
+            }
+
             if(e){
                 e.preventDefault();
             }
@@ -858,11 +871,16 @@ define(
         // =====================================================================
         onShow: function battleOnShow(){
             // Render the scene
+            logger.log('views/subviews/Battle', '1. onShow() called');
             var self = this;
+
             // TODO: remove timer el for dev
             this.$timerEl = $('.timer', this.$el);
 
-            logger.log('views/subviews/Battle', '1. onShow() called');
+            // show the battle log
+            this.regionBattleLog.show(this.battleLogView);
+
+            this.$battleWrapper = $('#battle-wrapper');
             
             // Setup svg
             var svg = d3.select('#battle');
@@ -977,7 +995,7 @@ define(
 
                 // if enemy entities, place near edge of map
                 // TODO: get map width
-                var entityGroupX = (entityGroup === 'player' ? 40 : 500);
+                var entityGroupX = (entityGroup === 'player' ? 40 : 740);
 
                 // Setup the wrapper group
                 // Whenever interaction happens with it, select or hover the 
@@ -999,7 +1017,7 @@ define(
                             .on('click', function entityClicked(d,i){ 
                                 return self.selectEntity({index: i, entityGroup: entityGroup});
                             })
-                            .on('touchend', function entityTouchEnd(d,i){ 
+                            .on('touchstart', function entityTouchEnd(d,i){ 
                                 return self.selectEntity({index: i, entityGroup: entityGroup});
                             })
                             .on('mouseenter',function entityMouseEnter(d,i){ 
@@ -1834,6 +1852,12 @@ define(
                 // --------------------------
                 this[sourceEntityGroup + 'EntityTimers'][sourceEntityIndex] -= 
                     selectedAbility.get('timeCost');
+
+                // trigger ability usage on entiy model
+                sourceEntity.trigger('ability:use', {
+                    target: target,
+                    ability: selectedAbility
+                });
 
                 // --------------------------
                 // reset animation

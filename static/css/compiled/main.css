@@ -362,30 +362,44 @@
     position: absolute;
     top: 0;
     width: 200px; }
-  .game-battle-wrapper .ability-list-wrapper {
-    position: relative; }
-    .game-battle-wrapper .ability-list-wrapper .ability-item-wrapper {
-      border: 1px solid #343434;
-      width: 100%;
-      background-color: transparent;
-      -moz-transition: background-color 0.1s;
-      -webkit-transition: background-color 0.1s;
-      transition: background-color 0.1s; }
-    .game-battle-wrapper .ability-list-wrapper .entity-dead {
-      background: #343434;
+  .game-battle-wrapper #region-battle-ability-wrapper {
+    left: 0;
+    position: absolute;
+    bottom: 120px;
+    height: 80px;
+    right: 0;
+    z-index: 100; }
+    .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper {
       bottom: 0;
       left: 0;
-      opacity: 0.7;
       position: absolute;
       right: 0;
-      top: 0;
-      z-index: 999; }
-    .game-battle-wrapper .ability-list-wrapper .ability-item-wrapper.inactive {
-      background: #a0a0a0; }
-    .game-battle-wrapper .ability-list-wrapper .ability-item-wrapper.use-invalid {
-      background-color: #cdcdcd; }
-    .game-battle-wrapper .ability-list-wrapper .ability-item-wrapper.use {
-      background-color: #44dd44; }
+      top: 0; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper {
+        border: 1px solid #343434;
+        cursor: pointer;
+        float: left;
+        margin: 0 0 0 1%;
+        width: 23.5%;
+        background-color: #ffffff;
+        -moz-transition: background-color 0.1s;
+        -webkit-transition: background-color 0.1s;
+        transition: background-color 0.1s; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .entity-dead {
+        background: #343434;
+        bottom: 0;
+        left: 0;
+        opacity: 0.7;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 999; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.inactive {
+        background: #a0a0a0; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.use-invalid {
+        background-color: #cdcdcd; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.use {
+        background-color: #44dd44; }
   .game-battle-wrapper #battle-center-wrapper {
     bottom: 0;
     left: 200px;
@@ -397,20 +411,57 @@
     left: 0;
     position: absolute;
     right: 0;
-    top: 0; }
+    top: 0;
+    z-index: 80; }
     .game-battle-wrapper #battle-wrapper #battle {
       height: 100%;
       left: 0;
       position: absolute;
       top: 0;
       width: 100%; }
-  .game-battle-wrapper #battle-log-wrapper {
+  .game-battle-wrapper #region-battle-log-wrapper {
     background: #ffffff;
     bottom: 0;
     height: 100px;
     left: 0;
     position: absolute;
     right: 0; }
+    .game-battle-wrapper #region-battle-log-wrapper .battle-log-container {
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0; }
+  .game-battle-wrapper #battle-log {
+    bottom: 0;
+    left: 0;
+    font-family: "Averia";
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: absolute;
+    right: 0;
+    height: 100px; }
+    .game-battle-wrapper #battle-log .entity-name,
+    .game-battle-wrapper #battle-log .ability,
+    .game-battle-wrapper #battle-log .damage,
+    .game-battle-wrapper #battle-log .heal {
+      font-weight: bold;
+      margin: 0 4px;
+      text-shadow: 0px 1px 0 #121212; }
+    .game-battle-wrapper #battle-log .heal {
+      color: #1CB51C; }
+    .game-battle-wrapper #battle-log .ability {
+      color: #c5a92f; }
+    .game-battle-wrapper #battle-log .enemy {
+      color: #987256; }
+    .game-battle-wrapper #battle-log .player {
+      color: #336699; }
+    .game-battle-wrapper #battle-log .damage {
+      color: #dd2222; }
+    .game-battle-wrapper #battle-log .critical {
+      font-size: 1.1em; }
+    .game-battle-wrapper #battle-log .critical:after {
+      content: '!'; }
   .game-battle-wrapper #battle-right-wrapper {
     bottom: 0;
     background: #ffffff;
@@ -524,7 +575,6 @@ body {
   color: #000; }
 
 html, body, #site-container, #region-main {
-  -webkit-overflow-scrolling: touch;
   bottom: 0;
   left: 0;
   position: absolute;

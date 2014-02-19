@@ -1688,13 +1688,13 @@ define(
                     // entity's properties.
                     var buffDuration = self.get('buffDuration') * 1000;
 
-                    if(this._buffCancelTimer && resetTimer){
-                        this._buffCancelTimer.pause();
-                        this._buffCancelTimer.remaining = buffDuration;
-                        this._buffCancelTimer.resume();
+                    if(self._buffCancelTimer && resetTimer){
+                        self._buffCancelTimer.pause();
+                        self._buffCancelTimer.remaining = buffDuration;
+                        self._buffCancelTimer.resume();
                     } else { 
                         // cancel timer does not yet exist, create it
-                        this._buffCancelTimer = new Timer(function removeBuff(){
+                        self._buffCancelTimer = new Timer(function removeBuff(){
                             // remove effect
                             logger.log('models/Ability', 'removing buff');
                             
@@ -3627,10 +3627,10 @@ define(
             description: 'Dark elf',
             sprite: 'darkelf',
             baseStats: {
-                attack: 4,
-                armor: 2,
-                magicResist: 3,
-                magicPower: 5
+                attack: 8,
+                armor: 4,
+                magicResist: 26,
+                magicPower: 10
             }
         }),
         new Race({
@@ -3755,7 +3755,9 @@ define(
 
             // generate new entity
             entity = new Entity({
-                'class': CLASSES[Math.random() * CLASSES.length | 0],
+                //// FOR ALL : 
+                // 'class': CLASSES[Math.random() * CLASSES.length | 0],
+                'class': CLASSES[2],
                 'race': RACES[Math.random() * RACES.length | 0]
             });
             // gimp stats. TODO: Scale based on encounter
@@ -4790,6 +4792,100 @@ define(
     return Entity;
 });
 
+// ============================================================================
+//
+// BattleLog
+//
+//      Logs all battle related actions
+//
+// ============================================================================
+define(
+    'views/subviews/battle/BattleLog',[ 
+        'd3', 'backbone', 'marionette', 'logger', 'events'
+    ], function viewBattle(
+        d3, backbone, marionette, logger, events
+    ){
+    // =======================================================================
+    var BattleLogView = Backbone.Marionette.Layout.extend({
+        // This will use the existing battle-log element
+        template: '#template-game-battle-log',
+        'className': 'battle-log-container',
+
+        initialize: function battleLogViewInitialize(options){
+            var self = this;
+            logger.log('views/subviews/battle/BattleLog',
+                'battleLog initialized');
+
+            // --------------------------
+            // Setup event listens to log
+            // --------------------------
+            _.each([
+                this.model.get('playerEntities'),
+                this.model.get('enemyEntities')
+            ], function(group){
+                _.each(group.models, function(model){
+                    self.listenTo(model.get('attributes'), 'change:health', function(attrsModel, health, options){
+                        // add the log
+                        self.addLog.call(self, {
+                            attrsModel: attrsModel, 
+                            model: model,
+                            health: health, 
+                            options: options
+                        });
+                    });
+                });
+            });
+
+            return this;
+        },
+        onShow: function(){
+            this.$log = $('#battle-log', this.$el);
+            return this;
+        },
+
+        addLog: function addLog(options){
+            options = options || {};
+            
+            // get health change
+            // --------------------------
+            var healthDifference = options.health - options.attrsModel._previousAttributes.health;
+
+            // Get target and source info
+            // --------------------------
+            var targetIsPlayer = true;
+            var sourceIsPlayer = true;
+
+            // determine if target and source are player models
+            if(options.model.collection !== this.model.get('playerEntities')){
+                targetIsPlayer = false;
+            }
+            if(options.options.source.collection !== this.model.get('playerEntities')){
+                sourceIsPlayer = false;
+            }
+
+            // update the log
+            // --------------------------
+            this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-item')({
+                target: options.model,
+                source: options.options.source,
+                ability: options.options.sourceAbility,
+
+                healthDifference: healthDifference,
+                targetIsPlayer: targetIsPlayer,
+                sourceIsPlayer: sourceIsPlayer
+            }));
+
+            // scroll to bottom
+            this.$log[0].scrollTop = this.$log[0].scrollHeight;
+
+            return this;
+        }
+
+        
+    });
+    return BattleLogView;
+});
+
 // ===========================================================================
 //
 // Battle Controller / View
@@ -4860,13 +4956,15 @@ define(
         'util/Timer',
         'views/subviews/battle/AbilityList',
         'views/subviews/battle/SelectedEntityInfo',
-        'views/subviews/battle/IntendedTargetInfo'
+        'views/subviews/battle/IntendedTargetInfo',
+        'views/subviews/battle/BattleLog'
     ], function viewBattle(
         d3, backbone, marionette, logger, events,
         Timer,
         AbilityListView,
         SelectedEntityInfoView,
-        IntendedTargetInfoView
+        IntendedTargetInfoView,
+        BattleLogView
     ){
 
     // Utility functions
@@ -4917,7 +5015,8 @@ define(
         regions: {
             'regionSelectedEntity': '#region-battle-selected-entity-wrapper',
             'regionIntendedTarget': '#region-battle-intended-target-wrapper',
-            'regionAbility': '#region-battle-ability-wrapper'
+            'regionAbility': '#region-battle-ability-wrapper',
+            'regionBattleLog': '#region-battle-log-wrapper'
         },
 
         initialize: function battleViewInitialize(options){
@@ -5011,6 +5110,12 @@ define(
             this.listenTo(events, 'document:hide', this._pause);
             this.listenTo(events, 'document:show', this._unpause);
 
+            // ==========================
+            // Battle log Subview
+            // ==========================
+            this.battleLogView = new BattleLogView({
+                model: this.model
+            });
             return this;
         },
 
@@ -5614,6 +5719,10 @@ define(
             // When the mousewheel is scrolled, determine if it's up or down,
             // then select the player's entity above or below the current one
             // stop scrolling on the page
+            if(!this.$battleWrapper.is(':hover')){ 
+                return false;
+            }
+
             if(e){
                 e.preventDefault();
             }
@@ -5650,11 +5759,16 @@ define(
         // =====================================================================
         onShow: function battleOnShow(){
             // Render the scene
+            logger.log('views/subviews/Battle', '1. onShow() called');
             var self = this;
+
             // TODO: remove timer el for dev
             this.$timerEl = $('.timer', this.$el);
 
-            logger.log('views/subviews/Battle', '1. onShow() called');
+            // show the battle log
+            this.regionBattleLog.show(this.battleLogView);
+
+            this.$battleWrapper = $('#battle-wrapper');
             
             // Setup svg
             var svg = d3.select('#battle');
@@ -5769,7 +5883,7 @@ define(
 
                 // if enemy entities, place near edge of map
                 // TODO: get map width
-                var entityGroupX = (entityGroup === 'player' ? 40 : 500);
+                var entityGroupX = (entityGroup === 'player' ? 40 : 740);
 
                 // Setup the wrapper group
                 // Whenever interaction happens with it, select or hover the 
@@ -5791,7 +5905,7 @@ define(
                             .on('click', function entityClicked(d,i){ 
                                 return self.selectEntity({index: i, entityGroup: entityGroup});
                             })
-                            .on('touchend', function entityTouchEnd(d,i){ 
+                            .on('touchstart', function entityTouchEnd(d,i){ 
                                 return self.selectEntity({index: i, entityGroup: entityGroup});
                             })
                             .on('mouseenter',function entityMouseEnter(d,i){ 
@@ -6626,6 +6740,12 @@ define(
                 // --------------------------
                 this[sourceEntityGroup + 'EntityTimers'][sourceEntityIndex] -= 
                     selectedAbility.get('timeCost');
+
+                // trigger ability usage on entiy model
+                sourceEntity.trigger('ability:use', {
+                    target: target,
+                    ability: selectedAbility
+                });
 
                 // --------------------------
                 // reset animation

@@ -41,10 +41,10 @@ define(
             description: 'Dark elf',
             sprite: 'darkelf',
             baseStats: {
-                attack: 4,
-                armor: 2,
-                magicResist: 3,
-                magicPower: 5
+                attack: 8,
+                armor: 4,
+                magicResist: 26,
+                magicPower: 10
             }
         }),
         new Race({

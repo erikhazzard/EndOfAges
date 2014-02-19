@@ -104,7 +104,9 @@ define(
 
             // generate new entity
             entity = new Entity({
-                'class': CLASSES[Math.random() * CLASSES.length | 0],
+                //// FOR ALL : 
+                // 'class': CLASSES[Math.random() * CLASSES.length | 0],
+                'class': CLASSES[2],
                 'race': RACES[Math.random() * RACES.length | 0]
             });
             // gimp stats. TODO: Scale based on encounter

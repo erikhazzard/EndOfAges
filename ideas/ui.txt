@@ -1,1 +1,10 @@
 --Think about dieagetic UI 
+
+-Rules
+
+-Have a color scheme
+    -use consistent colors
+        -e.g., AoEs have a certain color icon, heals, dd, etc.
+
+    -for UI interaction, follow same kind of idea
+        -e.g., all interactive buttons have a specific border or something
