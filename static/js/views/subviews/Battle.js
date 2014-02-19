@@ -730,6 +730,7 @@ define(
             }
 
             var key = options.key;
+
             // If user has an ability selected, only targetting allowed is
             // using 1 - n, shift + 1 - n, and clicking / selecting an entity
             if(this.model.get('state') === 'ability' &&
@@ -739,12 +740,19 @@ define(
                 return false;
             }
 
-            
+            // set default group
             var entityGroup = 'player';
 
             // TODO: Handle different functions based on state
             var targetIndex = this.selectedEntityIndex;
             if(targetIndex === undefined){ targetIndex = -1; }
+
+            // store reference to the valid targets of the selectedAbility
+            var abilityTargets = [];
+
+            if(this.model.get('selectedAbility')){
+                abilityTargets = this.model.get('selectedAbility').get('validTargets');
+            }
 
             // reverse up down - down key should go down the entity list
             if(key === 'up' || key === 'k'){ targetIndex -= 1; }
@@ -759,7 +767,13 @@ define(
                 // enemy
                 if(this.model.get('state') === 'ability'){
                     targetIndex = +key - 1;
-                    entityGroup = 'enemy';
+
+                    // if the first type of valid target is an enemy, have
+                    // the 1-n keys target the enemy. Otherwise, it will target
+                    // the player entities
+                    if(abilityTargets && abilityTargets[0] === 'enemy'){
+                        entityGroup = 'enemy';
+                    } 
                 } else { 
                     // when the user is not in ability mode, do nothing when
                     // 1 - n key is pressed
