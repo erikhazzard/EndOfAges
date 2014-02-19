@@ -602,11 +602,18 @@ define(
 
         stateChange: function stateChange(model,state){
             // Called when the model state changes
+            var self = this;
             logger.log('views/subviews/Battle', 
                 '1. stateChange(): model state changed to: ' + state);
 
             // remove all classes
             this.$wrapper.classed('state-normal state-ability', false);
+
+            // remove shown indicators
+            _.each(['player', 'enemy'], function(entityGroup){
+                self[entityGroup + 'KeyIndicators'].classed('hidden', true);
+                self[entityGroup + 'AlternativeKeyIndicators'].classed('hidden', true);
+            });
 
             // TODO: do stuff based on state change
             if(state === 'normal'){
@@ -616,6 +623,31 @@ define(
             } else if (state === 'ability'){
                 // From ability to normal
                 this.$wrapper.classed('state-ability', true);
+                
+                // ----------------------
+                // change the indicator keys based on selected ability
+                // ----------------------
+                var validTargets = [];
+                if(this.model.get('selectedAbility')){
+                    validTargets = this.model.get('selectedAbility').get('validTargets');
+                }
+                // show the key indicators for the corresponding targets
+                if(validTargets){
+                    // primary keys
+                    if(validTargets[0] === 'enemy'){
+                        self.enemyKeyIndicators.classed('hidden', false);
+                    } else if(validTargets[0] === 'player'){
+                        self.playerKeyIndicators.classed('hidden', false);
+                    }
+
+                    //alternative keys
+                    if(validTargets[1] === 'enemy'){
+                        self.enemyAlternativeKeyIndicators.classed('hidden', false);
+                    } else if(validTargets[1] === 'player'){
+                        self.playerAlternativeKeyIndicators.classed('hidden', false);
+                    }
+                }
+
             }
 
             // DEV: TODO: REMOVE
@@ -681,6 +713,8 @@ define(
             // --------------------------
             // if same ability was used, do nothing
             if(this.model.get('selectedAbility') === options.ability){
+                // remove the ability
+                this.cancelTarget();
                 return false;
             }
 
@@ -749,7 +783,6 @@ define(
 
             // store reference to the valid targets of the selectedAbility
             var abilityTargets = [];
-
             if(this.model.get('selectedAbility')){
                 abilityTargets = this.model.get('selectedAbility').get('validTargets');
             }
@@ -758,14 +791,23 @@ define(
             if(key === 'up' || key === 'k'){ targetIndex -= 1; }
             else if (key === 'down' || key === 'j'){ targetIndex += 1; }
             else if(key.match(/^shift\+[0-9]+/)){ 
+                // Key shift + 1 -n
+                // ----------------------
                 // If the keys are number keys, select the specific entity 
                 // for the player
+                // TODO: Have shift + n target alternate (i.e., whatever
+                // the secondary target is)
                 targetIndex = +(key.replace('shift+', '')) - 1;
+                if(abilityTargets && abilityTargets[1] === 'enemy'){
+                    entityGroup = 'enemy';
+                }
             }
             else if(key.match(/[0-9]+/)){
-                // When in ability mode, using the 1 - n keys will select an
-                // enemy
+                // Key 1 - n 
+                // ----------------------
                 if(this.model.get('state') === 'ability'){
+                    // When in ability mode, using the 1 - n keys will select
+                    // either an enemy or player entity
                     targetIndex = +key - 1;
 
                     // if the first type of valid target is an enemy, have
@@ -1012,6 +1054,7 @@ define(
                 var entityGroupX = (entityGroup === 'player' ? 40 : 740);
 
                 // Setup the wrapper group
+                // ----------------------
                 // Whenever interaction happens with it, select or hover the 
                 // entity
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
@@ -1046,6 +1089,7 @@ define(
                             });
 
                 // Append an invisible rect for interaction
+                // ----------------------
                 //  this is a large rect behind the sprites that allows the user
                 //  to click / tap it
                 groupsWrapper.append('rect')
@@ -1192,6 +1236,33 @@ define(
                         width: 0,
                         height: 10
                     }); 
+
+                // selection key
+                // ----------------------
+                // Shows the key to select the entity. The keys should match
+                // the index of the entity displayed. Showing / hiding the
+                // group is handled in the game logic when the state changes
+                //
+                // regular key
+                self[entityGroup + 'KeyIndicators'] = groups.append('text')
+                    .attr({
+                        'class': entityGroup + '-key-indicator key-indicator hidden',
+                        y: entityHeight/1.2,
+                        x: entityWidth/1.9 + 20
+                    }).text(function(d,i){
+                        return i + 1;
+                    });
+
+                // alternative key
+                self[entityGroup + 'AlternativeKeyIndicators'] = groups.append('text')
+                    .attr({
+                        'class': 'alternative-' + entityGroup + '-key-indicator alternative-key-indicator hidden',
+                        y: entityHeight/1.2,
+                        x: entityWidth/1.9 + 20
+                    }).text(function(d,i){
+                        return 'Shift + ' + (i + 1);
+                    });
+
 
                 // ----------------------
                 // Damage Text animation

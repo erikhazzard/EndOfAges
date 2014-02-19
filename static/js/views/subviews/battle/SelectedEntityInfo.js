@@ -24,6 +24,7 @@ define(
             // changes
             this.listenTo(this.model.get('attributes'), 'change', this.rerender);
             this.listenTo(this.model.get('attributes'), 'change:health', this.rerenderHealth);
+            this.listenTo(this.model.get('attributes'), 'change:maxHealth', this.rerenderHealth);
 
             // render components the first time this view renders
             //  subsequent renders happen on attribute change callbacks
