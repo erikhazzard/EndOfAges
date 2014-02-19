@@ -1244,14 +1244,24 @@ define(
                 // group is handled in the game logic when the state changes
                 //
                 // regular key
-                self[entityGroup + 'KeyIndicators'] = groups.append('text')
+                self[entityGroup + 'KeyIndicators'] = groups.append('g')
                     .attr({
-                        'class': entityGroup + '-key-indicator key-indicator hidden',
-                        y: entityHeight/1.2,
-                        x: entityWidth/1.9 + 20
-                    }).text(function(d,i){
-                        return i + 1;
+                        'class': entityGroup + '-key-indicator key-indicator hidden'
                     });
+
+                // add background circle
+                self[entityGroup + 'KeyIndicators'].append('circle')
+                    .attr({
+                        cy: Math.round(entityHeight/1.2) - 10,
+                        cx: Math.round(entityWidth/1.9) + 38,
+                        r: 20
+                    });
+                // add text
+                self[entityGroup + 'KeyIndicators'].append('text')
+                    .attr({
+                        y: Math.round(entityHeight/1.2) + 2,
+                        x: Math.round(entityWidth/1.9) + 31
+                    }).text(function(d,i){ return i + 1; });
 
                 // alternative key
                 self[entityGroup + 'AlternativeKeyIndicators'] = groups.append('text')
@@ -1259,9 +1269,7 @@ define(
                         'class': 'alternative-' + entityGroup + '-key-indicator alternative-key-indicator hidden',
                         y: entityHeight/1.2,
                         x: entityWidth/1.9 + 20
-                    }).text(function(d,i){
-                        return 'Shift + ' + (i + 1);
-                    });
+                    }).text(function(d,i){ return 'Shift + ' + (i + 1); });
 
 
                 // ----------------------

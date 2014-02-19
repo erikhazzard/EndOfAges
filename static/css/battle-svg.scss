@@ -72,6 +72,12 @@
         font-size: 2em;
         fill: #ffffff;
         text-shadow: 0 1px 0 #000000;
+        @include animation(targetHoverInactive 0.4s infinite alternate);
+
+        circle {
+            fill: #a0a0a0;
+            fill-opacity: 1;
+        }
     }
 
     .key-indicator.hidden, 

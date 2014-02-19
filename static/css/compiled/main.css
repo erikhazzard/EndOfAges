@@ -318,7 +318,15 @@
 #battle .alternative-key-indicator {
   font-size: 2em;
   fill: #ffffff;
-  text-shadow: 0 1px 0 #000000; }
+  text-shadow: 0 1px 0 #000000;
+  -o-animation: targetHoverInactive 0.4s infinite alternate;
+  -moz-animation: targetHoverInactive 0.4s infinite alternate;
+  -webkit-animation: targetHoverInactive 0.4s infinite alternate;
+  animation: targetHoverInactive 0.4s infinite alternate; }
+  #battle .key-indicator circle,
+  #battle .alternative-key-indicator circle {
+    fill: #a0a0a0;
+    fill-opacity: 1; }
 #battle .key-indicator.hidden,
 #battle .alternative-key-indicator.hidden {
   display: block;
