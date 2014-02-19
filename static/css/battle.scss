@@ -153,30 +153,24 @@ $ui-log-height: 100px;
 
                 .entity-name,
                 .ability,
+                .zero,
                 .damage,
                 .heal {
                     font-weight: bold;
                     margin: 0 4px;
                     text-shadow: 0px 1px 0 #121212;
                 }
-                .heal {
-                    color: #1CB51C;
-                }
-                .ability { 
-                    color: #c5a92f;
-                }
-                .enemy {
-                    color: #987256;
-                }
-                .player {
-                    color: #336699;
-                }
-                .damage {
-                    color: #dd2222;
-                }
+                .heal { color: #1CB51C; }
+                .ability { color: #c5a92f; }
 
-                .critical {
-                    font-size: 1.1em;
+                .enemy { color: #987256; }
+                .player { color: #336699; }
+
+                .zero { color: #888888; }
+                .damage { color: #dd2222; }
+
+                .critical { 
+                    font-size: 1.1em; 
                 }
                 .critical:after {
                     content: '!';

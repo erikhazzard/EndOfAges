@@ -72,6 +72,7 @@ define(
             // update the log
             // --------------------------
             this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-item')({
+                d3: d3,
                 target: options.model,
                 source: options.options.source,
                 ability: options.options.sourceAbility,

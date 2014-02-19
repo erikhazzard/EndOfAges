@@ -443,6 +443,7 @@
     height: 100px; }
     .game-battle-wrapper #battle-log .entity-name,
     .game-battle-wrapper #battle-log .ability,
+    .game-battle-wrapper #battle-log .zero,
     .game-battle-wrapper #battle-log .damage,
     .game-battle-wrapper #battle-log .heal {
       font-weight: bold;
@@ -456,6 +457,8 @@
       color: #987256; }
     .game-battle-wrapper #battle-log .player {
       color: #336699; }
+    .game-battle-wrapper #battle-log .zero {
+      color: #888888; }
     .game-battle-wrapper #battle-log .damage {
       color: #dd2222; }
     .game-battle-wrapper #battle-log .critical {

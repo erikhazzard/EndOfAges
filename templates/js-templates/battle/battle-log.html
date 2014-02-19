@@ -8,44 +8,45 @@
     <div class='log'>
         {{// show source }}
         <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
-            <%= source.get('name') %>'s
+            <%= source.get('name') %>
         </span>
 
+        uses 
+
         <span class='ability'> <%= ability.get('name') %> </span>
-        
+
+        on
+
+        {{// show target  }}
+        <% if( source !== target && healthDifference !== 0){ %>
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } else {  %>
+            themsevles
+        <% } %>
+
         {{// show health change }}
         <% if(healthDifference < 0){ %>
             <!-- NEGATIVE damage -->
 
-            deals
+            for
             <span class='damage'>
-                <%= healthDifference %>
+                <%= d3.format(',')(Math.abs(healthDifference)) %>
             </span>
             damage 
 
         <% } else if (healthDifference > 0){ %>
             <!-- POSITIVE damage (healt) -->
             
-            <% if( source === target ){ %>
-                heals themselves for
-            <% } else { %>
-                restores
-            <% } %>
-                
+            for 
             <span class='heal'>
-                <%= healthDifference %>
+                <%= d3.format(',')(healthDifference) %>
             </span>
             health
 
         <% } else if (healthDifference === 0){ %>
-        <% } %>
-
-        {{// show target  }}
-        <% if( source !== target && healthDifference !== 0){ %>
-            to
-            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
-                <%= target.get('name') %>
-            </span>
+            for <span class='zero'>0</span> health
         <% } %>
     </div>
 </script>
