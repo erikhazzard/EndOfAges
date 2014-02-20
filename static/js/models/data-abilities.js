@@ -251,6 +251,8 @@ define(
                 var delay = this.getCastDuration(options);
                 var amount = this.get('damage');
                 var intendedTarget = options[this.get('damageTarget')];
+                // TODO: make sure castDuration is always the current castDuration
+                var castDuration = self.attributes.castDuration * 1000;
 
                 new Timer(function effectDamageDelay(){
                     var healthHistory = intendedTarget.get('healthHistory');
@@ -259,9 +261,8 @@ define(
                     if(healthHistory){
                         for(i=0,len=healthHistory.length;i<len;i++){
                             // only check for effects that have happened since this was cast
-                            console.log(">>>>>>>>>>>", healthHistory);
-                            if((now - healthHistory[i].date) <= self.attributes.castDuration){
-                                damage += 10;
+                            if((now - healthHistory[i].date) <= castDuration){
+                                amount += 10;
                             } else {
                                 // otherwise, break
                                 break;
