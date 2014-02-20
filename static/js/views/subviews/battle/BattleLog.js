@@ -42,6 +42,11 @@ define(
                 });
             });
 
+            // --------------------------
+            // Also, listen for manual log messages
+            // --------------------------
+            this.listenTo(this.model, 'logMessage', this.addManualLog);
+
             return this;
         },
         onShow: function(){
@@ -86,6 +91,22 @@ define(
             this.$log[0].scrollTop = this.$log[0].scrollHeight;
 
             return this;
+        },
+
+        // ------------------------------
+        // Add a manual log message
+        // ------------------------------
+        addManualLog: function addLog(options){
+            var message = options.message;
+
+            // update the log
+            // --------------------------
+            this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-item-manual')({
+                message: message
+            }));
+
+            // scroll to bottom
+            this.$log[0].scrollTop = this.$log[0].scrollHeight;
         }
 
         

@@ -259,6 +259,7 @@ define(
             };
 
             console.log("so win." + JSON.stringify(reward));
+            alert("You win");
             return this;
         },
         playerGroupDied: function playerGroupDied(options){
@@ -268,7 +269,7 @@ define(
             this.isTimerActive = false;
 
             console.log(">>>>>>>>>>>>>>>> entity group died ", options);
-            console.log("so lose.");
+            alert("You lose");
             return this;
         },
 

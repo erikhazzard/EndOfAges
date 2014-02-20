@@ -127,6 +127,8 @@ define(
                 maxHealth: 10
             }
         }),
+
+        // TODO:  Have truedamage be a side effect in the default damage func
         judgement: new Ability({
             name: 'Judgement',
             effectId: 'placeHolder',
@@ -179,6 +181,7 @@ define(
             healTarget: 'source'
         }),
 
+        // TODO: Have true damage be a part of the damage func
         deathtouch: new Ability({
             name: 'Death Touch',
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
@@ -211,7 +214,74 @@ define(
 
                 }, delay);
             }
+        }),
+
+        // ==============================
+        // 
+        // Assassin
+        //
+        // ==============================
+        stab: new Ability({
+            name: 'Stab',
+            description: 'A quick stabbing attack which deals a small amount of damage',
+            effectId: 'placeHolder',
+            castTime: 0.6,
+            timeCost: 0.6,
+            castDuration: 0.2,
+            validTargets: ['enemy'],
+            type: {'physical': 1},
+            element: 'air',
+            damage: 3,
+            attackBonusPercent: 0.1
+        }),
+        backstab: new Ability({
+            name: 'Backstab',
+            description: 'A powerful attack which will do additional damage if the enemy has recently been stabbed',
+            effectId: 'placeHolder',
+            castTime: 0.6,
+            timeCost: 0.6,
+            castDuration: 1,
+            validTargets: ['enemy'],
+            type: {'physical': 1},
+            element: 'air',
+            damage: 7,
+            attackBonusPercent: 0.2,
+            effect: function effect(options){
+                var self = this;
+                var delay = this.getCastDuration(options);
+                var amount = this.get('damage');
+                var intendedTarget = options[this.get('damageTarget')];
+
+                new Timer(function effectDamageDelay(){
+                    var healthHistory = intendedTarget.get('healthHistory');
+                    var i,len;
+                    var now = new Date();
+                    if(healthHistory){
+                        for(i=0,len=healthHistory.length;i<len;i++){
+                            // only check for effects that have happened since this was cast
+                            console.log(">>>>>>>>>>>", healthHistory);
+                            if((now - healthHistory[i].date) <= self.attributes.castDuration){
+                                damage += 10;
+                            } else {
+                                // otherwise, break
+                                break;
+                            }
+                        }
+                    }
+                    amount = intendedTarget.takeDamage({
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount,
+                        sourceAbility: self,
+                        target: options.target,
+                        source: options.source
+                    });
+                    if(options.callback){ options.callback(); }
+                }, delay);
+
+            }
         })
+
     };
 
 

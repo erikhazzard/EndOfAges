@@ -86,10 +86,10 @@ define(
             sprite: 'assassin',
             abilities: new Abilities([
                 //// Basic damage attack
-                //ABILITIES.stab,
+                ABILITIES.stab,
                 
                 //// if an ability was recently used, deal extra damage
-                //ABILITIES.backstab,
+                ABILITIES.backstab
 
                 //// significantly reduces enemy's armor for a short period
                 //ABILITIES.cripple,

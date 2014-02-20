@@ -15,6 +15,12 @@
                 <% } else if (heal){ %>
                     Heal: <%= heal %>
                 <% } %>
+                <% if(attackBonusPercent){ %> 
+                    +<%= (attackBonusPercent * 100) + '%' %> attack
+                <% } %>
+                <% if(magicPowerBonusPercent){ %> 
+                    +<%= (magicPowerBonusPercent * 100) + '%' %> magic power 
+                <% } %>
             </div>
 
             <div class='type-info'>
