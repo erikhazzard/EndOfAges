@@ -180,9 +180,25 @@ define(
                 options.e.preventDefault();
             });
 
-            _.each([1,2,3,4,6], function eachKey(key){
+            this.keyupFuncs = {};
+
+            // Handle keys for selecting entities
+            _.each([1,2,3,4,6,7,8,9], function eachKey(key){
+                // handle key press
+                // NOTE: these also set the active key pressed button
                 self.listenTo(events, 'keyPress:' + key, self.handleKeyUpdateSelection);
                 self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyUpdateSelection);
+                
+                // TODO: think of better way to do this
+                //  keep track of functions so we can unbind when battle closes
+                //  NOTE: this will be unbound when the view closes
+                self.keyupFuncs[key] = jwerty.event(key, function(){
+                    logger.log('views/subviews/Battle', 'keyUp presesd for key : %O, setting _numberKeyPressed to null', key);
+                    self._numberKeyPressed = null;
+                });
+
+                // keep track of currently active key
+                $(document).on('keyup', self.keyupFuncs[key]);
             });
 
             // escape pressed
@@ -232,10 +248,17 @@ define(
         },
 
         onBeforeClose: function close(){
+            // Called when the view is closed. Unbind global window / doc events
+            var self = this;
             logger.log('views/subviews/Battle', 'onBeforeClose() called');
 
             // remove mouse wheel listener
             $(window).off('mousewheel', this.handleMouseWheelProxy);
+
+            // keep track of currently active key
+            _.each(this.keyupFuncs, function(func){
+                $(document).off('keyup', func);
+            });
 
             this.isTimerActive = false;
             return this;
@@ -252,7 +275,6 @@ define(
             // stop timer
             this.isTimerActive = false;
 
-            console.log(">>>>>>>>>>>>>>>> entity group died ", options);
             var reward = {
                 gold: this.model.get('rewardGold'),
                 exp: this.model.get('rewardExp')
@@ -743,6 +765,14 @@ define(
             // call the useCallback
             if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
 
+            // Auto key press usage
+            // --------------------------
+            // If a key is being pressed, handle it (which will trigger
+            // the ability usage)
+            if(this._numberKeyPressed){
+                this.handleKeyUpdateSelection({ key: this._numberKeyPressed });
+            }
+
             return this;
         },
 
@@ -758,6 +788,7 @@ define(
             //
             // To select an enemy : use keys 1 - n
             // To select a player entity : use keys shift + 1 - n
+            var self = this;
 
             // disable page scrolling with up / down arrow key
             if(options.e){
@@ -777,6 +808,7 @@ define(
 
             // set default group
             var entityGroup = 'player';
+            var entities, modelsLength;
 
             // TODO: Handle different functions based on state
             var targetIndex = this.selectedEntityIndex;
@@ -794,11 +826,14 @@ define(
             else if(key.match(/^shift\+[0-9]+/)){ 
                 // Key shift + 1 -n
                 // ----------------------
+                // set the key being pressed to the number
+                this._numberKeyPressed = key;
+                targetIndex = +(key.replace('shift+', '')) - 1;
+
                 // If the keys are number keys, select the specific entity 
                 // for the player
                 // TODO: Have shift + n target alternate (i.e., whatever
                 // the secondary target is)
-                targetIndex = +(key.replace('shift+', '')) - 1;
                 if(abilityTargets && abilityTargets[1] === 'enemy'){
                     entityGroup = 'enemy';
                 }
@@ -806,6 +841,9 @@ define(
             else if(key.match(/[0-9]+/)){
                 // Key 1 - n 
                 // ----------------------
+                // set the key being pressed to the number
+                this._numberKeyPressed = key;
+
                 if(this.model.get('state') === 'ability'){
                     // When in ability mode, using the 1 - n keys will select
                     // either an enemy or player entity
@@ -826,7 +864,6 @@ define(
                 }
             } 
 
-            var entities, modelsLength;
             if(entityGroup === 'player'){
                 entities = this.model.get('playerEntities');
                 modelsLength = entities.models.length;

@@ -120,18 +120,20 @@ require([
         // ------------------------------
         'error',
         ,'warning'
-        ,'views/DevTools'
+        //,'views/DevTools'
 
-        ,'app'
+        //,'app'
+
+        //,'views/subviews/Battle'
 
         // optional / for dev
         // ------------------------------
         ,'Controller'
-        ,'views/PageCreateCharacter'
+        //,'views/PageCreateCharacter'
         //,'views/subviews/Battle'
         //,'views/subviews/Map'
         //,'models/Map'
-        ,'models/Entity'
+        //,'models/Entity'
         //,'models/Ability'
     ];
 

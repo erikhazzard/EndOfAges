@@ -262,6 +262,8 @@ define(
                         for(i=0,len=healthHistory.length;i<len;i++){
                             // only check for effects that have happened since this was cast
                             if((now - healthHistory[i].date) <= castDuration){
+                                // TODO: check for a single ability
+                                // TODO: scale based on entity's attack bonus
                                 amount += 10;
                             } else {
                                 // otherwise, break
