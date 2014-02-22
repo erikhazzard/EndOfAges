@@ -1350,7 +1350,6 @@ define(
             // entity using the spell and the target entity receiving the effect
             castDuration: 0.5,
 
-        
             // How long must the player wait until they can use this ability
             // This SHOULD always be greater than or equal to than the timeCost
             //  (e.g., if you need to wait 3 seconds to cast it but the cost is 4
@@ -1440,8 +1439,11 @@ define(
             visualEffect: function(options){
                 //TODO: figure this out...should have some way of doing an
                 //effect, but should it live here?
-            }
-            
+            },
+
+            // Meta
+            // --------------------------
+            _lastUseTime: null  // keep track of last cast time (for cooldown)
         },
         
         url: function getURL(){
@@ -1499,6 +1501,22 @@ define(
             return this.get('castDuration') * 1000;
         },
 
+        canBeUsed: function canBeUsed(){
+            // returns a {boolean} indicating if the ability can be used
+            var canUse = true;
+
+            if(this.get('cooldown')){
+                // If there's a cooldown, and the difference between now and
+                // the _lastUseTime is less than the cooldown, it cannot be
+                // used yet
+                if(new Date() - this.get('_lastUseTime') < (this.get('cooldown') * 1000)){
+                    canUse = false;
+                }
+            } 
+
+            return canUse;
+        },
+
         // ------------------------------
         // Default ability effect (NOTE: can be overriden for custom abilities)
         // ------------------------------
@@ -1530,11 +1548,19 @@ define(
                 '>> DEFAULT ABILITY USED : this: %O, options: %O', 
                 this,
                 options);
-            var amount = 0;
+
+            // Check if ability can be used
+            if(!this.canBeUsed()){
+                logger.log('models/Ability', 'cannot cast, cooldown not yet met');
+                return false;
+            }
 
             // note: multiply castDuration by 1000 (it's in seconds, we
             // need to get milliseconds)
             var delay = this.getCastDuration(options);
+
+            // keep track of when spell was last cast. Do it immediately
+            this.set({ _lastUseTime: new Date() });
 
             // --------------------------
             // Heal
@@ -1559,7 +1585,7 @@ define(
             if(this.get('heal') && !this.get('buffEffects')){
                 new Timer(function effectHealDelay(){
                     function takeHeal(){
-                        amount = options[self.get('healTarget')].takeHeal({
+                        options[self.get('healTarget')].takeHeal({
                             type: self.get('type'),
                             element: self.get('element'),
                             amount: self.get('heal'),
@@ -1591,7 +1617,7 @@ define(
             if(this.get('damage')){
                 new Timer(function effectDamageDelay(){
                     function takeDamage(){
-                        amount = options[self.get('damageTarget')].takeDamage({
+                        options[self.get('damageTarget')].takeDamage({
                             type: self.get('type'),
                             element: self.get('element'),
                             amount: self.get('damage'),
@@ -1652,7 +1678,7 @@ define(
                     // Check for heals
                     // ------------------
                     function takeHeal(){
-                        amount = options[self.get('healTarget')].takeHeal({
+                        options[self.get('healTarget')].takeHeal({
                             type: self.get('type'),
                             element: self.get('element'),
                             amount: self.get('heal'),
@@ -1690,7 +1716,7 @@ define(
 
                     if(self._buffCancelTimer && resetTimer){
                         self._buffCancelTimer.pause();
-                        self._buffCancelTimer.remaining = buffDuration;
+                        zself._buffCancelTimer.remaining = buffDuration;
                         self._buffCancelTimer.resume();
                     } else { 
                         // cancel timer does not yet exist, create it
@@ -1718,7 +1744,9 @@ define(
 
             }
 
-            return amount;
+            // NOTE: this function makes async calls, don't rely on the return
+            // value for anything
+            return this;
         },
 
         // ==============================

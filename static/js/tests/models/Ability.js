@@ -28,5 +28,29 @@ define([
                 ability.attributes.element.should.deep.equal({fire:1}); 
             });
         });
+
+        describe('USAGE', function(){
+            it('should have and use a cooldown timer properly', function(done){
+                var ability = new Ability({
+                    damage: 2,
+                    cooldown: 0.03
+                });
+                var entity1 = new Entity();
+                var entity2 = new Entity();
+
+                ability.canBeUsed().should.be.true;
+                ability.effect({ source: entity1, target: entity2 });
+                ability.canBeUsed().should.be.false;
+
+                // make sure the effect has no effect if cooldown not met
+                ability.effect({ source: entity1, target: entity2 }).should.equal(false);
+
+                setTimeout(function(){
+                    ability.canBeUsed().should.true;
+                    done();
+                }, 60);
+
+            });
+        });
     });
 });
