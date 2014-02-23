@@ -48,6 +48,10 @@
         <% } else if (healthDifference === 0){ %>
             for <span class='zero'>0</span> health
         <% } %>
+
+        <div class='date'>
+            <%= (new Date()).toTimeString().split(" ")[0] %>
+        </div>
     </div>
 </script>
 
@@ -81,7 +85,7 @@
 
         <!-- date -->
         <div class='date'>
-            <%= new Date() %>
+            <%= (new Date()).toTimeString().split(" ")[0] %>
         </div>
 
     </div>
@@ -116,7 +120,7 @@
 
         <!-- date -->
         <div class='date'>
-            <%= new Date() %>
+            <%= (new Date()).toTimeString().split(" ")[0] %>
         </div>
 
     </div>

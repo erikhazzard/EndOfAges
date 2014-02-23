@@ -2454,6 +2454,7 @@ define(
             //  NOTE: if an ability overrides this function, it still must
             //  called the following to update health
             attrs.set({ health: newHealth }, { silent: true });
+            
             // we want to manually trigger it, because we want to capture
             // the change in health even if there is not change (e.g., doing
             // 0 damage should still trigger everything)
