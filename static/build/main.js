@@ -1677,18 +1677,21 @@ define(
 
                     // Check for heals
                     // ------------------
-                    function takeHeal(){
-                        options[self.get('healTarget')].takeHeal({
-                            type: self.get('type'),
-                            element: self.get('element'),
-                            amount: self.get('heal'),
-                            sourceAbility: self,
-                            target: options.target,
-                            source: options.source
-                        });
+                    if(self.get('heal')){
+                        function takeHeal(){
+                            options[self.get('healTarget')].takeHeal({
+                                type: self.get('type'),
+                                element: self.get('element'),
+                                amount: self.get('heal'),
+                                sourceAbility: self,
+                                target: options.target,
+                                source: options.source
+                            });
+                        }
+                        takeHeal();
                     }
-                    takeHeal();
                     // ------------------
+                    // TODO: Check for damage?
 
 
                     //
@@ -1716,7 +1719,7 @@ define(
 
                     if(self._buffCancelTimer && resetTimer){
                         self._buffCancelTimer.pause();
-                        zself._buffCancelTimer.remaining = buffDuration;
+                        self._buffCancelTimer.remaining = buffDuration;
                         self._buffCancelTimer.resume();
                     } else { 
                         // cancel timer does not yet exist, create it
@@ -3567,6 +3570,24 @@ define(
                 }, delay);
 
             }
+        }),
+
+        cripple: new Ability({
+            name: 'Cripple',
+            description: "Cripple weakens an enemy, lowering their attack and defense",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'air',
+
+            buffDuration: 8,
+            // TODO : scale effect
+            buffEffects: { 
+                armor: -10,
+                attack: -10
+            }
         })
 
     };
@@ -3666,10 +3687,10 @@ define(
                 ABILITIES.stab,
                 
                 //// if an ability was recently used, deal extra damage
-                ABILITIES.backstab
+                ABILITIES.backstab,
 
                 //// significantly reduces enemy's armor for a short period
-                //ABILITIES.cripple,
+                ABILITIES.cripple
 
                 //// some sort of ult
                 ////  Chance to instantly kill mob. Chance scales based on 

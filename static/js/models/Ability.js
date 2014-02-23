@@ -366,18 +366,21 @@ define(
 
                     // Check for heals
                     // ------------------
-                    function takeHeal(){
-                        options[self.get('healTarget')].takeHeal({
-                            type: self.get('type'),
-                            element: self.get('element'),
-                            amount: self.get('heal'),
-                            sourceAbility: self,
-                            target: options.target,
-                            source: options.source
-                        });
+                    if(self.get('heal')){
+                        function takeHeal(){
+                            options[self.get('healTarget')].takeHeal({
+                                type: self.get('type'),
+                                element: self.get('element'),
+                                amount: self.get('heal'),
+                                sourceAbility: self,
+                                target: options.target,
+                                source: options.source
+                            });
+                        }
+                        takeHeal();
                     }
-                    takeHeal();
                     // ------------------
+                    // TODO: Check for damage?
 
 
                     //
@@ -405,7 +408,7 @@ define(
 
                     if(self._buffCancelTimer && resetTimer){
                         self._buffCancelTimer.pause();
-                        zself._buffCancelTimer.remaining = buffDuration;
+                        self._buffCancelTimer.remaining = buffDuration;
                         self._buffCancelTimer.resume();
                     } else { 
                         // cancel timer does not yet exist, create it

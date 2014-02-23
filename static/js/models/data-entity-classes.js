@@ -89,10 +89,10 @@ define(
                 ABILITIES.stab,
                 
                 //// if an ability was recently used, deal extra damage
-                ABILITIES.backstab
+                ABILITIES.backstab,
 
                 //// significantly reduces enemy's armor for a short period
-                //ABILITIES.cripple,
+                ABILITIES.cripple
 
                 //// some sort of ult
                 ////  Chance to instantly kill mob. Chance scales based on 

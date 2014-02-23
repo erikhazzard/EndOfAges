@@ -283,6 +283,24 @@ define(
                 }, delay);
 
             }
+        }),
+
+        cripple: new Ability({
+            name: 'Cripple',
+            description: "Cripple weakens an enemy, lowering their attack and defense",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'air',
+
+            buffDuration: 8,
+            // TODO : scale effect
+            buffEffects: { 
+                armor: -10,
+                attack: -10
+            }
         })
 
     };
