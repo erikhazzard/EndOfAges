@@ -226,7 +226,7 @@ define(
         // ==============================
         // Buff related
         // ==============================
-        addBuff: function addBuff(ability){
+        addBuff: function addBuff(ability, source){
             // Takes in an ability and adds the buff effect
             //
             logger.log('models/Entity', 'addBuff(): called %O', ability);
@@ -238,7 +238,12 @@ define(
             effects.push(ability);
 
             this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
+            this.trigger('change:activeEffects', this, ability.cid, {
+                sourceAbility: ability,
+                source: source,
+                target: this,
+                type: 'add'
+            });
             return this;
         },
 
@@ -261,7 +266,7 @@ define(
             return entityHasBuff;
         },
 
-        removeBuff: function removeBuff(ability){
+        removeBuff: function removeBuff(ability, source){
             // Remove buff effect
             //
             logger.log('models/Entity', 'removeBuff(): called %O', ability);
@@ -281,7 +286,12 @@ define(
             logger.log('models/Entity', 'removeBuff(): found it? : %O', foundIt);
 
             this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
+            this.trigger('change:activeEffects', this, ability.cid, {
+                sourceAbility: ability,
+                source: source,
+                target: this,
+                type: 'remove'
+            });
             return this;
         },
 
@@ -349,6 +359,8 @@ define(
             // change
             //
             // TODO: Track all damage
+            // TODO: for res spels, trigger isAlive change, pass in sourceAbility
+            // and source
             logger.log('models/Entity', 
                 '1. healthChanged() : health ' + health + ' options: %O',
                 options);
@@ -359,14 +371,20 @@ define(
             // Check for entity death
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
-                this.set({ isAlive: false });
-                // TODO: check to see if there is a prevent death buff?
-
+                this.set({ isAlive: false }, { 
+                    source: options.source,
+                    sourceAbility: options.sourceAbility
+                });
+                
+                // TODO: check to see if there is a prevent death buff? Or
+                // should it go in take damage?
+                //
                 // remove all buffs from dead entities (except permanent buffs)
                 this.removeAllBuffs();
 
                 // trigger global event to let listeners know entity died
-                this.trigger('entity:died', {model: this});
+                // TODO:  just listen for change:isAlive, don't need this
+                this.trigger('entity:died', {model: this, source: options.source});
 
                 // update number of deaths and kills for the entities
                 this.set({

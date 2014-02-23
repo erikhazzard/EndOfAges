@@ -291,6 +291,7 @@ define(
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
+            damage: 0,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'air',

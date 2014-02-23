@@ -53,7 +53,7 @@ define([
                 // NOTE: There's a small delay AFTER the activeEffects are
                 // changed, so this is not the last thing to happen
                 entity.on('change:activeEffects', function(model, changed, options){
-                    assert(options.ability !== undefined);
+                    assert(options.sourceAbility !== undefined);
                 });
 
                 // make sure effect got added (small delay for castDuration 

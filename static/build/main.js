@@ -1670,7 +1670,7 @@ define(
                             logger.log('models/Ability', 
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
-                            self.removeBuffEffect.call(self, targetEntity);
+                            self.removeBuffEffect.call(self, targetEntity, options.source);
                             resetTimer = true;
                         }
                     }
@@ -1698,7 +1698,7 @@ define(
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
-                    targetEntity.addBuff(self);
+                    targetEntity.addBuff(self, options.source);
                     logger.log('models/Ability', 'adding buff %O', self);
 
                     var updatedStats = {};
@@ -1736,7 +1736,9 @@ define(
                             }
 
                             // remove the buff
-                            self.removeBuffEffect.call(self, targetEntity);
+                            self.removeBuffEffect.call(self, 
+                                targetEntity, 
+                                options.source);
 
                             if(options.callback){ options.callback(); }
 
@@ -1755,14 +1757,15 @@ define(
         // ==============================
         // Buff helpers
         // ==============================
-        removeBuffEffect: function removeBuffEffect(targetEntity){
+        removeBuffEffect: function removeBuffEffect(targetEntity, source){
+            // Reset the stats to the pre buff values
             // TODO: !!!!!!!!!!!!!!!!!!!!!!
             // This should live in the entity
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             var self = this;
 
             // remove the buff from the entity
-            targetEntity.removeBuff(self);
+            targetEntity.removeBuff.call(targetEntity, this, source);
 
             // remove the stats this buff added
             var currentStats = targetEntity.get(
@@ -2127,7 +2130,7 @@ define(
         // ==============================
         // Buff related
         // ==============================
-        addBuff: function addBuff(ability){
+        addBuff: function addBuff(ability, source){
             // Takes in an ability and adds the buff effect
             //
             logger.log('models/Entity', 'addBuff(): called %O', ability);
@@ -2139,7 +2142,12 @@ define(
             effects.push(ability);
 
             this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
+            this.trigger('change:activeEffects', this, ability.cid, {
+                sourceAbility: ability,
+                source: source,
+                target: this,
+                type: 'add'
+            });
             return this;
         },
 
@@ -2162,7 +2170,7 @@ define(
             return entityHasBuff;
         },
 
-        removeBuff: function removeBuff(ability){
+        removeBuff: function removeBuff(ability, source){
             // Remove buff effect
             //
             logger.log('models/Entity', 'removeBuff(): called %O', ability);
@@ -2182,7 +2190,12 @@ define(
             logger.log('models/Entity', 'removeBuff(): found it? : %O', foundIt);
 
             this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {ability: ability});
+            this.trigger('change:activeEffects', this, ability.cid, {
+                sourceAbility: ability,
+                source: source,
+                target: this,
+                type: 'remove'
+            });
             return this;
         },
 
@@ -2250,6 +2263,8 @@ define(
             // change
             //
             // TODO: Track all damage
+            // TODO: for res spels, trigger isAlive change, pass in sourceAbility
+            // and source
             logger.log('models/Entity', 
                 '1. healthChanged() : health ' + health + ' options: %O',
                 options);
@@ -2260,14 +2275,20 @@ define(
             // Check for entity death
             if(health <= 0){
                 logger.log('models/Entity', '2. entity is dead!');
-                this.set({ isAlive: false });
-                // TODO: check to see if there is a prevent death buff?
-
+                this.set({ isAlive: false }, { 
+                    source: options.source,
+                    sourceAbility: options.sourceAbility
+                });
+                
+                // TODO: check to see if there is a prevent death buff? Or
+                // should it go in take damage?
+                //
                 // remove all buffs from dead entities (except permanent buffs)
                 this.removeAllBuffs();
 
                 // trigger global event to let listeners know entity died
-                this.trigger('entity:died', {model: this});
+                // TODO:  just listen for change:isAlive, don't need this
+                this.trigger('entity:died', {model: this, source: options.source});
 
                 // update number of deaths and kills for the entities
                 this.set({
@@ -3578,6 +3599,7 @@ define(
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
+            damage: 0,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'air',
@@ -4947,12 +4969,36 @@ define(
                 this.model.get('enemyEntities')
             ], function(group){
                 _.each(group.models, function(model){
+                    // HEALTH Changes 
+                    // ------------------
                     self.listenTo(model.get('attributes'), 'change:health', function(attrsModel, health, options){
                         // add the log
-                        self.addLog.call(self, {
+                        self.addHealthLog.call(self, {
                             attrsModel: attrsModel, 
                             model: model,
                             health: health, 
+                            options: options
+                        });
+                    });
+
+                    // Life changes
+                    // ------------------
+                    self.listenTo(model, 'change:isAlive', function(attrsModel, isAlive, options){
+                        // add the log
+                        self.addDeathLog.call(self, {
+                            model: model,
+                            isAlive: isAlive, 
+                            options: options
+                        });
+                    });
+
+                    // Buff Changes 
+                    // ------------------
+                    self.listenTo(model, 'change:activeEffects', function(attrsModel, effects, options){
+                        // add the log
+                        self.addEffectLog.call(self, {
+                            model: model,
+                            effects: effects,
                             options: options
                         });
                     });
@@ -4971,7 +5017,14 @@ define(
             return this;
         },
 
-        addLog: function addLog(options){
+        // ==============================
+        //
+        // Logging funcs
+        //
+        // ==============================
+        addHealthLog: function addHealthLog(options){
+            // Called whenever health changes
+            //
             options = options || {};
             
             // get health change
@@ -4993,7 +5046,7 @@ define(
 
             // update the log
             // --------------------------
-            this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-item')({
+            this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-health-item')({
                 d3: d3,
                 target: options.model,
                 source: options.options.source,
@@ -5010,10 +5063,105 @@ define(
             return this;
         },
 
+        // ==============================
+        //
+        // Effects Log
+        //
+        // ==============================
+        addEffectLog: function addEffectLog(options){
+            // Called whenever health changes
+            //
+            options = options || {};
+            
+            // Get target and source info
+            // --------------------------
+            var targetIsPlayer = true;
+            var sourceIsPlayer = true;
+
+            // if there are no options given, it means the entity has died
+            // and all buffs have been removed - no need to log it
+            if(!options.options.source || !options.options.sourceAbility){
+                return false;
+            }
+
+            // determine if target and source are player models
+            if(options.model.collection !== this.model.get('playerEntities')){
+                targetIsPlayer = false;
+            }
+            if(options.options.source.collection !== this.model.get('playerEntities')){
+                sourceIsPlayer = false;
+            }
+
+            // update the log
+            // --------------------------
+            this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-effect-item')({
+                d3: d3,
+                target: options.model,
+                source: options.options.source,
+                ability: options.options.sourceAbility,
+
+                targetIsPlayer: targetIsPlayer,
+                sourceIsPlayer: sourceIsPlayer,
+
+                type: options.options.type
+            }));
+
+            // scroll to bottom
+            this.$log[0].scrollTop = this.$log[0].scrollHeight;
+
+            return this;
+        },
+
+        // ------------------------------
+        // entity died / res'ed
+        // ------------------------------
+        addDeathLog: function addDeathLog(options){
+            var message = options.message;
+
+            // Get target and source info
+            // --------------------------
+            var targetIsPlayer = true;
+            var sourceIsPlayer = true;
+
+            // if there are no options given, it means the entity has died
+            // and all buffs have been removed - no need to log it
+            if(!options.options.source || !options.options.sourceAbility){
+                return false;
+            }
+
+            // determine if target and source are player models
+            if(options.model.collection !== this.model.get('playerEntities')){
+                targetIsPlayer = false;
+            }
+            if(options.options.source.collection !== this.model.get('playerEntities')){
+                sourceIsPlayer = false;
+            }
+
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>", options.isAlive);
+
+            // update the log
+            // --------------------------
+            this.$log.append(Backbone.Marionette.TemplateCache.get('#template-game-battle-log-death-item')({
+                d3: d3,
+                target: options.model,
+                isAlive: options.isAlive,
+                source: options.options.source,
+                ability: options.options.sourceAbility,
+
+                targetIsPlayer: targetIsPlayer,
+                sourceIsPlayer: sourceIsPlayer
+            }));
+
+            // scroll to bottom
+            this.$log[0].scrollTop = this.$log[0].scrollHeight;
+
+            return this;
+        },
+
         // ------------------------------
         // Add a manual log message
         // ------------------------------
-        addManualLog: function addLog(options){
+        addManualLog: function addManualLog(options){
             var message = options.message;
 
             // update the log
@@ -6414,11 +6562,13 @@ define(
 
 
             // --------------------------
-            // show damage text whenever entitiy's health changes
+            // Event Listeners
             // --------------------------
             _.each(['player', 'enemy'], function healthGroup(entityGroup){
                 var models = self.model.get(entityGroup + 'Entities').models;
                 _.each(models, function setupHealthCallback(model, index){
+                    // show damage text whenever entitiy's health changes
+                    // ----------------------
                     self.listenTo(
                         model.get('attributes'), 
                         'change:health', 
@@ -6435,13 +6585,47 @@ define(
                                     changeOptions: changeOptions
                                 }
                             );
-                        });
+                        }
+                    );
+
+                    self.listenTo(
+                        model,
+                        'change:activeEffects', 
+                        // model changes get passed in the model and the
+                        // changed attribute value
+                        function callUpdateEffects(entityModel, effects, changeOptions){
+                            return self.showEffectOnActiveEffectChange.call(
+                                self, {
+                                    entityModel: entityModel,
+                                    effects: effects,
+                                    index: index,
+                                    entityGroup: entityGroup,
+                                    changeOptions: changeOptions
+                                }
+                            );
+                        }
+                    );
                 });
             });
 
             return this;
         },
 
+        // ------------------------------
+        //
+        // Buff effect
+        //
+        // ------------------------------
+        showEffectOnActiveEffectChange: function showEffectChange(options){
+            console.log("SUPPPPPP");
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // Text effect
+        //
+        // ------------------------------
         showEffectOnHealthChange: function showTextEffect(options){
             // This is called whenever any entity's health is changed.
             // Text will appear, along with the screen flashing
@@ -6563,14 +6747,20 @@ define(
 
             // first, start text at bottom of entity and set text
             //  will have either 'positive damage' or 'negative damage' classes
-            $damageText.classed((difference < 0 ? 'negative' : 'positive') + ' damage', true);
+            var dmgClass = 'neutral damage';
+            if(difference < 0){
+                dmgClass = 'negative damage';
+            } else if(difference > 0){
+                dmgClass = 'positive damage';
+            }
+            $damageText.classed(dmgClass, true);
 
             $damageText
                 .attr({ 
                     y: self.entityHeight - 10,
                     opacity: 0.3
                 })
-                .text((difference < 0 ? '' : '+') + difference);
+                .text((difference < 1 ? '' : '+') + difference);
 
 
             // then, fade in text and float it up and out

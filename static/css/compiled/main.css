@@ -446,6 +446,8 @@
     position: absolute;
     right: 0;
     height: 100px; }
+    .game-battle-wrapper #battle-log .log {
+      position: relative; }
     .game-battle-wrapper #battle-log .entity-name,
     .game-battle-wrapper #battle-log .ability,
     .game-battle-wrapper #battle-log .zero,
@@ -470,6 +472,12 @@
       font-size: 1.1em; }
     .game-battle-wrapper #battle-log .critical:after {
       content: '!'; }
+    .game-battle-wrapper #battle-log .date {
+      color: #707070;
+      font-size: .9em;
+      position: absolute;
+      right: 0;
+      top: 0; }
   .game-battle-wrapper #battle-right-wrapper {
     bottom: 0;
     background: #ffffff;

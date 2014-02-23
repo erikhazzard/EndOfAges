@@ -1381,11 +1381,13 @@ define(
 
 
             // --------------------------
-            // show damage text whenever entitiy's health changes
+            // Event Listeners
             // --------------------------
             _.each(['player', 'enemy'], function healthGroup(entityGroup){
                 var models = self.model.get(entityGroup + 'Entities').models;
                 _.each(models, function setupHealthCallback(model, index){
+                    // show damage text whenever entitiy's health changes
+                    // ----------------------
                     self.listenTo(
                         model.get('attributes'), 
                         'change:health', 
@@ -1402,13 +1404,47 @@ define(
                                     changeOptions: changeOptions
                                 }
                             );
-                        });
+                        }
+                    );
+
+                    self.listenTo(
+                        model,
+                        'change:activeEffects', 
+                        // model changes get passed in the model and the
+                        // changed attribute value
+                        function callUpdateEffects(entityModel, effects, changeOptions){
+                            return self.showEffectOnActiveEffectChange.call(
+                                self, {
+                                    entityModel: entityModel,
+                                    effects: effects,
+                                    index: index,
+                                    entityGroup: entityGroup,
+                                    changeOptions: changeOptions
+                                }
+                            );
+                        }
+                    );
                 });
             });
 
             return this;
         },
 
+        // ------------------------------
+        //
+        // Buff effect
+        //
+        // ------------------------------
+        showEffectOnActiveEffectChange: function showEffectChange(options){
+            console.log("SUPPPPPP");
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // Text effect
+        //
+        // ------------------------------
         showEffectOnHealthChange: function showTextEffect(options){
             // This is called whenever any entity's health is changed.
             // Text will appear, along with the screen flashing
@@ -1530,14 +1566,20 @@ define(
 
             // first, start text at bottom of entity and set text
             //  will have either 'positive damage' or 'negative damage' classes
-            $damageText.classed((difference < 0 ? 'negative' : 'positive') + ' damage', true);
+            var dmgClass = 'neutral damage';
+            if(difference < 0){
+                dmgClass = 'negative damage';
+            } else if(difference > 0){
+                dmgClass = 'positive damage';
+            }
+            $damageText.classed(dmgClass, true);
 
             $damageText
                 .attr({ 
                     y: self.entityHeight - 10,
                     opacity: 0.3
                 })
-                .text((difference < 0 ? '' : '+') + difference);
+                .text((difference < 1 ? '' : '+') + difference);
 
 
             // then, fade in text and float it up and out

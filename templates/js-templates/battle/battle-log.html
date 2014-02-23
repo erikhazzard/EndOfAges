@@ -4,7 +4,7 @@
     </div>
 </script>
 
-<script id='template-game-battle-log-item' type='text/template'>
+<script id='template-game-battle-log-health-item' type='text/template'>
     <div class='log'>
         {{// show source }}
         <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
@@ -48,6 +48,77 @@
         <% } else if (healthDifference === 0){ %>
             for <span class='zero'>0</span> health
         <% } %>
+    </div>
+</script>
+
+<script id='template-game-battle-log-effect-item' type='text/template'>
+    <div class='log'>
+        {{// show source }}
+        <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
+            <%= source.get('name') %>
+        </span><% if(type === 'remove'){ %>'s<% } %>
+
+        <% if(type === 'add'){ %>
+            uses 
+        <% } %>
+
+        <span class='ability'> <%= ability.get('name') %> </span>
+
+        <% if(type === 'add'){ %>
+            on
+        <% } else { %>
+            effect ends on 
+        <% } %>
+
+        {{// show target  }}
+        <% if( source !== target ){ %>
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } else {  %>
+            themsevles
+        <% } %>
+
+        <!-- date -->
+        <div class='date'>
+            <%= new Date() %>
+        </div>
+
+    </div>
+</script>
+
+<script id='template-game-battle-log-death-item' type='text/template'>
+    <div class='log'>
+        {{// show source }}
+        <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
+            <%= source.get('name') %>
+        </span>
+
+        <% if(isAlive){ %>
+            is brought to life by
+        <% } else { %>
+            kills
+        <% } %>
+
+        {{// show target  }}
+        <% if( source !== target ){ %>
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } else {  %>
+            themsevles
+        <% } %>
+
+        <% if(ability){ %>
+            with 
+            <span class='ability'> <%= ability.get('name') %> </span>
+        <% } %>
+
+        <!-- date -->
+        <div class='date'>
+            <%= new Date() %>
+        </div>
+
     </div>
 </script>
 

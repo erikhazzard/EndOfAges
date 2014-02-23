@@ -359,7 +359,7 @@ define(
                             logger.log('models/Ability', 
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
-                            self.removeBuffEffect.call(self, targetEntity);
+                            self.removeBuffEffect.call(self, targetEntity, options.source);
                             resetTimer = true;
                         }
                     }
@@ -387,7 +387,7 @@ define(
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
-                    targetEntity.addBuff(self);
+                    targetEntity.addBuff(self, options.source);
                     logger.log('models/Ability', 'adding buff %O', self);
 
                     var updatedStats = {};
@@ -425,7 +425,9 @@ define(
                             }
 
                             // remove the buff
-                            self.removeBuffEffect.call(self, targetEntity);
+                            self.removeBuffEffect.call(self, 
+                                targetEntity, 
+                                options.source);
 
                             if(options.callback){ options.callback(); }
 
@@ -444,14 +446,15 @@ define(
         // ==============================
         // Buff helpers
         // ==============================
-        removeBuffEffect: function removeBuffEffect(targetEntity){
+        removeBuffEffect: function removeBuffEffect(targetEntity, source){
+            // Reset the stats to the pre buff values
             // TODO: !!!!!!!!!!!!!!!!!!!!!!
             // This should live in the entity
             // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             var self = this;
 
             // remove the buff from the entity
-            targetEntity.removeBuff(self);
+            targetEntity.removeBuff.call(targetEntity, this, source);
 
             // remove the stats this buff added
             var currentStats = targetEntity.get(

@@ -150,6 +150,10 @@ $ui-log-height: 100px;
                 right: 0;
                 height: $ui-log-height;
 
+                .log {
+                    position: relative;
+                }
+
 
                 .entity-name,
                 .ability,
@@ -174,6 +178,14 @@ $ui-log-height: 100px;
                 }
                 .critical:after {
                     content: '!';
+                }
+
+                .date {
+                    color: #707070;
+                    font-size: .9em;
+                    position: absolute; 
+                    right: 0;
+                    top: 0;
                 }
             }
 
