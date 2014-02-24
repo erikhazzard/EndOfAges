@@ -51,6 +51,21 @@ define([
                 }, 60);
 
             });
+
+            describe('Buffs', function(){
+                it('should increase or decrease ability casting time for an entity', function(done){
+                    var ability = new Ability({
+                        damage: 2,
+                        cooldown: 0.03
+                    });
+                    var entity1 = new Entity();
+                    var entity2 = new Entity();
+
+                    done();
+                });
+            });
         });
+
+
     });
 });

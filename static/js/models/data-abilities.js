@@ -302,7 +302,50 @@ define(
                 armor: -10,
                 attack: -10
             }
+        }),
+
+        assassinate: new Ability({
+            name: 'Assassinate',
+            description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
+            effectId: 'placeHolder',
+            castTime: 0.6,
+            timeCost: 0.6,
+            castDuration: 1,
+            validTargets: ['enemy'],
+            type: {'physical': 1},
+            element: 'air',
+            damage: 10,
+            attackBonusPercent: 0.6,
+            effect: function effect(options){
+                var self = this;
+                var delay = this.getCastDuration(options);
+                var amount = this.get('damage');
+                var intendedTarget = options[this.get('damageTarget')];
+                // TODO: make sure castDuration is always the current castDuration
+                var castDuration = self.attributes.castDuration * 1000;
+
+                // Add the entity's health to the effect.
+                // TODO: calculate entity difficultly and scale damage based on
+                // it
+                amount += (
+                    intendedTarget.get('attributes').get('health') / (Math.random() * 4 | 0)
+                );
+
+                new Timer(function effectDamageDelay(){
+                    amount = intendedTarget.takeDamage({
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount,
+                        sourceAbility: self,
+                        target: options.target,
+                        source: options.source
+                    });
+                    if(options.callback){ options.callback(); }
+                }, delay);
+
+            }
         })
+
 
     };
 

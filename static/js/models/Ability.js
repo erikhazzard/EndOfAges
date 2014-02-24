@@ -59,7 +59,7 @@ define(
 
             // How long (in seconds) the user must wait before using the
             // ability again
-            cooldown: 0,
+            cooldown: 0.1,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
@@ -185,8 +185,10 @@ define(
         },
 
         getCastDuration: function getDelay(options){
+            // returns, in seconds, the delay before ability should take effect
             // TODO: lower delay if the target has some sort of delay reducting
             // stats
+            //
             return this.get('castDuration') * 1000;
         },
 
@@ -387,18 +389,43 @@ define(
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
-                    targetEntity.addBuff(self, options.source);
                     logger.log('models/Ability', 'adding buff %O', self);
 
+                    targetEntity.addBuff(self, options.source);
+
                     var updatedStats = {};
+                    var abilityUpdates = null;
 
                     // update based on effects
                     _.each(self.get('buffEffects'), function(val, key){
-                        updatedStats[key] = currentStats[key] + val;
+                        if(key === 'abilities'){
+                            // Effects relating to abilities
+                            // If the buff has a ability option, update the actual
+                            // ability stats
+                            abilityUpdates = {};
+                            _.each(val, function abilityParams(abilityProp, k){
+                                abilityUpdates[k] = abilityProp;
+                            });
+                        } else {
+                            // Regular ability property (health, attack, etc)
+                            updatedStats[key] = currentStats[key] + val;
+                        }
                     });
     
-                    // update the stats
+                    // update the attribute based stats
                     targetEntity.get('attributes').set( updatedStats );
+
+                    // TODO: THIS
+                    // update ability properties
+                    if(abilityUpdates && targetEntity.get('abilities')){
+                        _.each(targetEntity.get('abilities').models, function(ability){
+                            // DO STUFF based on the abilityUpdates
+                            // e.g., if value is between 0 and 1, view it as
+                            // a percentage. from 1 to n, as time in seconds
+                            //  Any ability property should work - damage, ticks,
+                            //  castitme, etc...
+                        });
+                    }
 
                     // Remove it after the duration
                     // ------------------

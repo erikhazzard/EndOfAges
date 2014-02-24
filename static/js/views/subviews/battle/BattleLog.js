@@ -7,9 +7,10 @@
 // ============================================================================
 define(
     [ 
-        'd3', 'backbone', 'marionette', 'logger', 'events'
+        'd3', 'backbone', 'marionette', 'logger', 'events',
+        'util/Timer'
     ], function viewBattle(
-        d3, backbone, marionette, logger, events
+        d3, backbone, marionette, logger, events, Timer
     ){
     // =======================================================================
     var BattleLogView = Backbone.Marionette.Layout.extend({
@@ -45,12 +46,15 @@ define(
                     // Life changes
                     // ------------------
                     self.listenTo(model, 'change:isAlive', function(attrsModel, isAlive, options){
-                        // add the log
-                        self.addDeathLog.call(self, {
-                            model: model,
-                            isAlive: isAlive, 
-                            options: options
-                        });
+                        // add the log after a smal delay so health callback
+                        // fires first
+                        new Timer( function(){ 
+                            self.addDeathLog.call(self, {
+                                model: model,
+                                isAlive: isAlive, 
+                                options: options
+                            });
+                        }, 300);
                     });
 
                     // Buff Changes 
@@ -198,7 +202,6 @@ define(
                 sourceIsPlayer = false;
             }
 
-            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>", options.isAlive);
 
             // update the log
             // --------------------------

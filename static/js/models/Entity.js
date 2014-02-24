@@ -27,6 +27,8 @@ define(
         defaults: function(){
             return {
                 // abilities will be a collection of ability models
+                // NOTE: these abilities are mutable, can be changed based on
+                // buffs
                 abilities: null,
 
                 // effects active on the entity (e.g., buffs or DoTs)
@@ -217,6 +219,7 @@ define(
         },
 
         // ==============================
+        // TODO: calculate score / difficultly
         // ==============================
         getScore: function getScore(){
             // TODO: get a combat score for this entity based on abilities

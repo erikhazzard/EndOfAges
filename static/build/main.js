@@ -1370,7 +1370,7 @@ define(
 
             // How long (in seconds) the user must wait before using the
             // ability again
-            cooldown: 0,
+            cooldown: 0.1,
 
             // validTargets specifies the entities the ability can be
             // used on. for now, only 'enemy' or 'player' are valid targets. 
@@ -1496,8 +1496,10 @@ define(
         },
 
         getCastDuration: function getDelay(options){
+            // returns, in seconds, the delay before ability should take effect
             // TODO: lower delay if the target has some sort of delay reducting
             // stats
+            //
             return this.get('castDuration') * 1000;
         },
 
@@ -1698,18 +1700,43 @@ define(
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
-                    targetEntity.addBuff(self, options.source);
                     logger.log('models/Ability', 'adding buff %O', self);
 
+                    targetEntity.addBuff(self, options.source);
+
                     var updatedStats = {};
+                    var abilityUpdates = null;
 
                     // update based on effects
                     _.each(self.get('buffEffects'), function(val, key){
-                        updatedStats[key] = currentStats[key] + val;
+                        if(key === 'abilities'){
+                            // Effects relating to abilities
+                            // If the buff has a ability option, update the actual
+                            // ability stats
+                            abilityUpdates = {};
+                            _.each(val, function abilityParams(abilityProp, k){
+                                abilityUpdates[k] = abilityProp;
+                            });
+                        } else {
+                            // Regular ability property (health, attack, etc)
+                            updatedStats[key] = currentStats[key] + val;
+                        }
                     });
     
-                    // update the stats
+                    // update the attribute based stats
                     targetEntity.get('attributes').set( updatedStats );
+
+                    // TODO: THIS
+                    // update ability properties
+                    if(abilityUpdates && targetEntity.get('abilities')){
+                        _.each(targetEntity.get('abilities').models, function(ability){
+                            // DO STUFF based on the abilityUpdates
+                            // e.g., if value is between 0 and 1, view it as
+                            // a percentage. from 1 to n, as time in seconds
+                            //  Any ability property should work - damage, ticks,
+                            //  castitme, etc...
+                        });
+                    }
 
                     // Remove it after the duration
                     // ------------------
@@ -1931,6 +1958,8 @@ define(
         defaults: function(){
             return {
                 // abilities will be a collection of ability models
+                // NOTE: these abilities are mutable, can be changed based on
+                // buffs
                 abilities: null,
 
                 // effects active on the entity (e.g., buffs or DoTs)
@@ -2121,6 +2150,7 @@ define(
         },
 
         // ==============================
+        // TODO: calculate score / difficultly
         // ==============================
         getScore: function getScore(){
             // TODO: get a combat score for this entity based on abilities
@@ -3611,7 +3641,50 @@ define(
                 armor: -10,
                 attack: -10
             }
+        }),
+
+        assassinate: new Ability({
+            name: 'Assassinate',
+            description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
+            effectId: 'placeHolder',
+            castTime: 0.6,
+            timeCost: 0.6,
+            castDuration: 1,
+            validTargets: ['enemy'],
+            type: {'physical': 1},
+            element: 'air',
+            damage: 10,
+            attackBonusPercent: 0.6,
+            effect: function effect(options){
+                var self = this;
+                var delay = this.getCastDuration(options);
+                var amount = this.get('damage');
+                var intendedTarget = options[this.get('damageTarget')];
+                // TODO: make sure castDuration is always the current castDuration
+                var castDuration = self.attributes.castDuration * 1000;
+
+                // Add the entity's health to the effect.
+                // TODO: calculate entity difficultly and scale damage based on
+                // it
+                amount += (
+                    intendedTarget.get('attributes').get('health') / (Math.random() * 4 | 0)
+                );
+
+                new Timer(function effectDamageDelay(){
+                    amount = intendedTarget.takeDamage({
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount,
+                        sourceAbility: self,
+                        target: options.target,
+                        source: options.source
+                    });
+                    if(options.callback){ options.callback(); }
+                }, delay);
+
+            }
         })
+
 
     };
 
@@ -3713,12 +3786,12 @@ define(
                 ABILITIES.backstab,
 
                 //// significantly reduces enemy's armor for a short period
-                ABILITIES.cripple
+                ABILITIES.cripple,
 
                 //// some sort of ult
                 ////  Chance to instantly kill mob. Chance scales based on 
                 ////  enemy's health
-                //ABILITIES.assassinate
+                ABILITIES.assassinate
             ])
         })
 
@@ -4947,9 +5020,10 @@ define(
 // ============================================================================
 define(
     'views/subviews/battle/BattleLog',[ 
-        'd3', 'backbone', 'marionette', 'logger', 'events'
+        'd3', 'backbone', 'marionette', 'logger', 'events',
+        'util/Timer'
     ], function viewBattle(
-        d3, backbone, marionette, logger, events
+        d3, backbone, marionette, logger, events, Timer
     ){
     // =======================================================================
     var BattleLogView = Backbone.Marionette.Layout.extend({
@@ -4985,12 +5059,15 @@ define(
                     // Life changes
                     // ------------------
                     self.listenTo(model, 'change:isAlive', function(attrsModel, isAlive, options){
-                        // add the log
-                        self.addDeathLog.call(self, {
-                            model: model,
-                            isAlive: isAlive, 
-                            options: options
-                        });
+                        // add the log after a smal delay so health callback
+                        // fires first
+                        new Timer( function(){ 
+                            self.addDeathLog.call(self, {
+                                model: model,
+                                isAlive: isAlive, 
+                                options: options
+                            });
+                        }, 300);
                     });
 
                     // Buff Changes 
@@ -5138,7 +5215,6 @@ define(
                 sourceIsPlayer = false;
             }
 
-            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>", options.isAlive);
 
             // update the log
             // --------------------------

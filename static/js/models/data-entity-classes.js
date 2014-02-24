@@ -92,12 +92,12 @@ define(
                 ABILITIES.backstab,
 
                 //// significantly reduces enemy's armor for a short period
-                ABILITIES.cripple
+                ABILITIES.cripple,
 
                 //// some sort of ult
                 ////  Chance to instantly kill mob. Chance scales based on 
                 ////  enemy's health
-                //ABILITIES.assassinate
+                ABILITIES.assassinate
             ])
         })
 
