@@ -1713,6 +1713,8 @@ define(
                             // Effects relating to abilities
                             // If the buff has a ability option, update the actual
                             // ability stats
+                            // would look like:
+                            //  { strength: 10, abilities: { cooldown: -0.5 } }
                             abilityUpdates = {};
                             _.each(val, function abilityParams(abilityProp, k){
                                 abilityUpdates[k] = abilityProp;
@@ -1726,8 +1728,9 @@ define(
                     // update the attribute based stats
                     targetEntity.get('attributes').set( updatedStats );
 
-                    // TODO: THIS
-                    // update ability properties
+                    // TODO: ::::::::::::::::::::: 
+                    // REMOVE EFFECT
+                    // update ALL ability properties
                     if(abilityUpdates && targetEntity.get('abilities')){
                         _.each(targetEntity.get('abilities').models, function(ability){
                             // DO STUFF based on the abilityUpdates
@@ -1735,6 +1738,20 @@ define(
                             // a percentage. from 1 to n, as time in seconds
                             //  Any ability property should work - damage, ticks,
                             //  castitme, etc...
+                            var newProps = {};
+                            _.each(abilityUpdates, function(val, key){
+                                var newValue = self.attributes[key];
+                                var tmp = 0;
+
+                                // use either percentages or values
+                                if(val > -1 && val < 1){
+                                    tmp = newValue + (newValue * val);
+                                }
+
+                                newProps[key] = tmp;
+                            });
+
+                            self.set(newProps);
                         });
                     }
 
@@ -1800,6 +1817,7 @@ define(
             var updatedStats = {};
 
             // update based on effects
+            // NOTE: TODO: This won't work for percentages
             _.each(self.get('buffEffects'), function(val, key){
                 updatedStats[key] = currentStats[key] - val;
             });
@@ -1808,6 +1826,35 @@ define(
             targetEntity.get('attributes').set(
                 updatedStats
             );
+
+            //// Remove updates on abilities
+            //// TODO: THIS 
+            //// this is how they're added , need to remove
+            //
+            //if(abilityUpdates && targetEntity.get('abilities')){
+                //_.each(targetEntity.get('abilities').models, function(ability){
+                    //// DO STUFF based on the abilityUpdates
+                    //// e.g., if value is between 0 and 1, view it as
+                    //// a percentage. from 1 to n, as time in seconds
+                    ////  Any ability property should work - damage, ticks,
+                    ////  castitme, etc...
+                    //var newProps = {};
+                    //_.each(abilityUpdates, function(val, key){
+                        //var newValue = self.attributes[key];
+                        //var tmp = 0;
+
+                        //// use either percentages or values
+                        //if(val > -1 && val < 1){
+                            //tmp = newValue + (newValue * val);
+                        //}
+
+                        //newProps[key] = tmp;
+                    //});
+
+                    //self.set(newProps);
+                //});
+            //}
+
             return this;
         }
 

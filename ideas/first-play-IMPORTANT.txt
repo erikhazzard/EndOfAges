@@ -19,3 +19,13 @@ things here, but make it obvious that you need to actually travel back next time
 First time playing, you get a single character with a single skill. As you beat
 levels, you get a choice of other characters. After beating the first "tutorial" map,
 you could continue with the part or get sent back to reselect / rebuild your group
+
+----------------------------------------------------
+
+Race / Class selection
+    -Start off with just a couple races
+    -Start off with just one or two classes? (Same type - DPS?)
+        -Meele fighter or spell casting wizard
+
+    -First playthrough will let you unlock other classes
+        -Heal, DPS, Utility, Tank, Spell caster
