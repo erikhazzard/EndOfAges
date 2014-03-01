@@ -58,7 +58,7 @@ define([
                     var ability = new Ability({
                         castTime: 1,
                         castDuration: 0.0001,
-                        buffDuration: 8,
+                        buffDuration: 1,
                         buffEffects: { 
                             armor: 10,
                             abilities: {
@@ -68,12 +68,19 @@ define([
                             }
                         }
                     });
+                    var ability2 = new Ability({
+                        castTime: 1
+                    });
+
+                    // TODO: buffEffects should affect ALL abilities
+                    //
                     var entity1 = new Entity({
-                        abilities: new Abilities(ability)
+                        abilities: new Abilities([ability, ability2])
                     });
 
                     // base cast time should be the same
                     ability.attributes.castTime.should.equal(1);
+                    ability2.attributes.castTime.should.equal(1);
 
                     // Apply buff
                     // >>>>>>
@@ -82,6 +89,7 @@ define([
                     // give it time to do the effect
                     setTimeout(function(){
                         ability.attributes.castTime.should.equal(0.8);
+                        ability2.attributes.castTime.should.equal(0.8);
                         done();
                     }, 30);
                 });

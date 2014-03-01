@@ -108,3 +108,13 @@ Abilities that deal true damage over time
 Abilities that improve based on entity killing another entity
     -e.g., when entity kills another entity, they get some massive stat boost or
         do more damage or can attack faster
+
+=========================
+
+Chance for multiple hits for physical abilities.
+    -Chance to consume less time for magic abilities?
+
+Abilities as components? Ability's effect function calls different funcs based on props...e.g., effect: ... callDamage(); callHeal(); callBuff(); etc. Custom effects can use the prototype to make it easier to define things
+
+
+-Some special when timer bar is all the way full. Abilities do more damage, you take less damage

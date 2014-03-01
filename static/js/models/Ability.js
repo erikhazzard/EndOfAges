@@ -417,9 +417,10 @@ define(
                     // update the attribute based stats
                     targetEntity.get('attributes').set( updatedStats );
 
-                    // TODO: ::::::::::::::::::::: 
-                    // REMOVE EFFECT
+                    // ABILITY Effect updates
+                    // ------------------
                     // update ALL ability properties
+                    // TODO: Update all OTHER abilities
                     if(abilityUpdates && targetEntity.get('abilities')){
                         _.each(targetEntity.get('abilities').models, function(ability){
                             // DO STUFF based on the abilityUpdates
@@ -429,7 +430,7 @@ define(
                             //  castitme, etc...
                             var newProps = {};
                             _.each(abilityUpdates, function(val, key){
-                                var newValue = self.attributes[key];
+                                var newValue = ability.attributes[key];
                                 var tmp = 0;
 
                                 // use either percentages or values
@@ -440,7 +441,7 @@ define(
                                 newProps[key] = tmp;
                             });
 
-                            self.set(newProps);
+                            ability.set(newProps);
                         });
                     }
 

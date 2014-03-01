@@ -1728,9 +1728,10 @@ define(
                     // update the attribute based stats
                     targetEntity.get('attributes').set( updatedStats );
 
-                    // TODO: ::::::::::::::::::::: 
-                    // REMOVE EFFECT
+                    // ABILITY Effect updates
+                    // ------------------
                     // update ALL ability properties
+                    // TODO: Update all OTHER abilities
                     if(abilityUpdates && targetEntity.get('abilities')){
                         _.each(targetEntity.get('abilities').models, function(ability){
                             // DO STUFF based on the abilityUpdates
@@ -1740,7 +1741,7 @@ define(
                             //  castitme, etc...
                             var newProps = {};
                             _.each(abilityUpdates, function(val, key){
-                                var newValue = self.attributes[key];
+                                var newValue = ability.attributes[key];
                                 var tmp = 0;
 
                                 // use either percentages or values
@@ -1751,7 +1752,7 @@ define(
                                 newProps[key] = tmp;
                             });
 
-                            self.set(newProps);
+                            ability.set(newProps);
                         });
                     }
 
@@ -3510,7 +3511,14 @@ define(
             buffEffects: { 
                 armor: 10,
                 magicResist: 10,
-                maxHealth: 10
+                maxHealth: 10,
+                abilities: {
+                    // 20% faster, so decrease time by 20%
+                    coolDown: -0.99,
+                    castDuration: -0.9,
+                    castTime: -0.9,
+                    timeCost: -0.9
+                }
             }
         }),
 
@@ -3518,7 +3526,7 @@ define(
         judgement: new Ability({
             name: 'Judgement',
             effectId: 'placeHolder',
-            castTime: 1,
+            castTime: 5,
             timeCost: 1,
             validTargets: ['enemy'],
             type: 'magic',

@@ -124,7 +124,14 @@ define(
             buffEffects: { 
                 armor: 10,
                 magicResist: 10,
-                maxHealth: 10
+                maxHealth: 10,
+                abilities: {
+                    // 20% faster, so decrease time by 20%
+                    coolDown: -0.99,
+                    castDuration: -0.9,
+                    castTime: -0.9,
+                    timeCost: -0.9
+                }
             }
         }),
 
@@ -132,7 +139,7 @@ define(
         judgement: new Ability({
             name: 'Judgement',
             effectId: 'placeHolder',
-            castTime: 1,
+            castTime: 5,
             timeCost: 1,
             validTargets: ['enemy'],
             type: 'magic',
