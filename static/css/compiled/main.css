@@ -340,11 +340,9 @@
   font-size: 1.5em;
   font-weight: bold; }
 #battle .entity-group-text.damage.negative {
-  fill: #dd3333;
-  stroke: #990000; }
+  color: #dd0000; }
 #battle .entity-group-text.damage.positive {
-  fill: #33dd33;
-  stroke: #009900; }
+  color: #33dd33; }
 #battle .timer-bar-border {
   fill: none;
   stroke: #343434; }

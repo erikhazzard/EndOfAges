@@ -1432,7 +1432,6 @@ define(
             // entity's stats for the passed in duration
             buffEffects: null, // Will look like { strength : -10, agility: 10 }
             buffDuration: null, // in seconds
-            buffStartDate: null,
 
             buffCanStack: false, // can this buff stack with itself?
 
@@ -1663,11 +1662,6 @@ define(
                     // has to be handled there. If it's in the ability, can
                     // customzie / tailor it more
                     var targetEntity = options[self.get('buffTarget')];
-
-                    // Add the effect
-                    var currentStats = targetEntity.get(
-                        'attributes').attributes;
-
                     // should the buff timer be reset? This will only be true
                     // if this ability does NOT stack AND is already active
                     var resetTimer = false;
@@ -1711,7 +1705,6 @@ define(
 
                     targetEntity.addBuff(self, options.source);
 
-                    var updatedStats = {};
                     var abilityUpdates = null;
 
                     // update based on effects
@@ -1726,14 +1719,8 @@ define(
                             _.each(val, function abilityParams(abilityProp, k){
                                 abilityUpdates[k] = abilityProp;
                             });
-                        } else {
-                            // Regular ability property (health, attack, etc)
-                            updatedStats[key] = currentStats[key] + val;
                         }
                     });
-    
-                    // update the attribute based stats
-                    targetEntity.get('attributes').set( updatedStats );
 
                     // ABILITY Effect updates
                     // ------------------
@@ -1813,19 +1800,12 @@ define(
         // ==============================
         removeBuffEffect: function removeBuffEffect(targetEntity, source){
             // Reset the stats to the pre buff values
-            // TODO: !!!!!!!!!!!!!!!!!!!!!!
-            // This should live in the entity
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             var self = this;
 
-            // remove the buff from the entity
-            targetEntity.removeBuff.call(targetEntity, this, source);
-
             // remove the stats this buff added
-            var currentStats = targetEntity.get(
-                'attributes').attributes;
-            var updatedStats = {};
             var abilityUpdates = null;
+
+            targetEntity.removeBuff.call(targetEntity, this, source);
 
             // update based on effects
             // NOTE: TODO: This won't work for percentages
@@ -1840,16 +1820,8 @@ define(
                     _.each(val, function abilityParams(abilityProp, k){
                         abilityUpdates[k] = abilityProp;
                     });
-                } else {
-                    // Regular ability property (health, attack, etc)
-                    updatedStats[key] = currentStats[key] - val;
                 }
             });
-
-            // update the stats
-            targetEntity.get('attributes').set(
-                updatedStats
-            );
 
             //// Remove updates on abilities
             //// TODO: THIS 
@@ -2240,37 +2212,17 @@ define(
         // ==============================
         // Buff related
         // ==============================
-        addBuff: function addBuff(ability, source){
-            // Takes in an ability and adds the buff effect
-            //
-            logger.log('models/Entity', 'addBuff(): called %O', ability);
-            var effects = this.get('activeEffects');
-
-            // store the attributes
-            // set the time the buff was applied
-            ability.set({ buffStartDate: new Date() }, { silent: true });
-            effects.push(ability);
-
-            this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {
-                sourceAbility: ability,
-                source: source,
-                target: this,
-                type: 'add'
-            });
-            return this;
-        },
-
         hasBuff: function hasBuff(ability){
             // takes in an ability and returns if the entity already has the
-            // buff
+            // buff. NOTE: Use the ability NAME, not an ID. The reason for this 
+            // is so that abilities that aren't stackable can't be stacked
             var effects = this.get('activeEffects');
             var i=0, len = effects.length;
             var entityHasBuff = false;
 
             // find the buff; if it exists, break out of the loop
             for(i=0; i<len; i++){
-                if(effects[i].cid === ability.cid){ 
+                if(effects[i].name === ability.name){ 
                     entityHasBuff = true;
                     break;
                 }
@@ -2280,24 +2232,111 @@ define(
             return entityHasBuff;
         },
 
+        addBuff: function addBuff(ability, source){
+            // Takes in an ability and adds the buff effect
+            //  TODO: Document How it works
+            //
+            //
+            var self = this;
+            logger.log('models/Entity', 'addBuff(): called %O', ability);
+
+            // Add it
+            // --------------------------
+            var effects = this.get('activeEffects');
+
+            // Make a copy of the ability. We need to do this for a few reasons:
+            //  1. Properities will be added to the ability (e.g., a timestamp)
+            //  2. If the ability is modified, we don't want to reflect that in
+            //      the active buff
+            ability = new Ability( 
+                _.extend({ _cidCopy: ability.cid }, 
+                ability.attributes) 
+            );
+
+            // store the attributes
+            // set the time the buff was applied
+            ability.set({ startDate: new Date() }, { silent: true });
+            effects.push(ability);
+
+            // Update the entity's stats
+            // --------------------------
+            var updatedStats = {}; // new attributes to set
+            // Keep track of the differences between the new value and the old
+            // value, used for removing the effect and tracking changes
+            var statDifferences = {}; 
+
+            // Add the effect
+            var currentStats = this.get('attributes').attributes;
+
+            _.each(ability.get('buffEffects'), function(val, key){
+                if(key !== 'abilities'){
+                    // check for % or absolute value
+                    if(val > -1 && val < 1){
+                        // a percentage
+                        updatedStats[key] = currentStats[key] + (currentStats[key] * val);
+                    } else {
+                        // a whole number
+                        updatedStats[key] = currentStats[key] + val;
+                    }
+
+                    // keep track of differences
+                    statDifferences[key] = updatedStats[key] - currentStats[key];
+                }
+            });
+            // update this model's attributes stats
+            this.get('attributes').set(updatedStats);
+
+            // store the updated differences for removal and tracking
+            ability.set({statDifferences: statDifferences}, { silent: true });
+
+            // update activeEffects and stats
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, ability.cid, {
+                sourceAbility: ability,
+                source: source,
+                target: this,
+                type: 'add'
+            });
+
+            return this;
+        },
+
         removeBuff: function removeBuff(ability, source){
             // Remove buff effect
+            //  TODO: Document How it works
             //
             logger.log('models/Entity', 'removeBuff(): called %O', ability);
             var effects = this.get('activeEffects');
-            var foundIt = false;
+            var foundAbility = null;
 
             // remove the targeted ability
-            var index = effects.indexOf(ability.cid);
             for(var i=0, len = effects.length; i<len; i++){
-                if(effects[i].cid === ability.cid){
-                    effects.splice(i, 1);
-                    foundIt = true;
+                // check on _cidCopy , which is a copy of the passed in
+                // ability's cid
+                if(effects[i].attributes._cidCopy === ability.cid){
+                    foundAbility = effects.splice(i, 1)[0];
                     break;
                 }
             }
 
-            logger.log('models/Entity', 'removeBuff(): found it? : %O', foundIt);
+            // Update the entity's stats
+            // --------------------------
+            // Reset the stats with the found ability
+            if(foundAbility){
+                var updatedStats = {};
+                var statDifferences = foundAbility.attributes.statDifferences;
+
+                // Add the effect
+                var currentStats = this.get('attributes').attributes;
+
+                _.each(statDifferences, function(difference, key){
+                    updatedStats[key] = currentStats[key] - difference;
+                });
+                this.get('attributes').set(updatedStats);
+            }
+
+
+            logger.log('models/Entity', 'removeBuff(): found it? : %O', !!foundAbility);
 
             this.set({ activeEffects: effects }, {silent: true});
             this.trigger('change:activeEffects', this, ability.cid, {
@@ -5031,7 +5070,7 @@ define(
                 duration *= 1000;
 
                 // Get the time the buff was started
-                var start = self.model.attributes.activeEffects[i].get('buffStartDate');
+                var start = self.model.attributes.activeEffects[i].get('startDate');
                 // how much time has passed between the start and now
                 var timeDiff = new Date() - start;
                 // and the time left before the buff is finished
@@ -6781,7 +6820,7 @@ define(
         //
         // ------------------------------
         showEffectOnActiveEffectChange: function showEffectChange(options){
-            console.log("SUPPPPPP");
+            console.log("active effect change : ", options);
             return this;
         },
 

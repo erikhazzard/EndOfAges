@@ -58,7 +58,7 @@ define(
                 duration *= 1000;
 
                 // Get the time the buff was started
-                var start = self.model.attributes.activeEffects[i].get('buffStartDate');
+                var start = self.model.attributes.activeEffects[i].get('startDate');
                 // how much time has passed between the start and now
                 var timeDiff = new Date() - start;
                 // and the time left before the buff is finished

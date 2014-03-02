@@ -93,6 +93,7 @@ require(['events',
         'tests/collections/Entities'
         , 'tests/models/Entity'
         , 'tests/models/Entity-damage'
+        , 'tests/models/Entity-buffs'
         , 'tests/models/Entity-damage-tracking'
         , 'tests/models/Ability'
         , 'tests/views/subviews/Battle'

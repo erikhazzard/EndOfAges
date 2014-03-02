@@ -121,7 +121,6 @@ define(
             // entity's stats for the passed in duration
             buffEffects: null, // Will look like { strength : -10, agility: 10 }
             buffDuration: null, // in seconds
-            buffStartDate: null,
 
             buffCanStack: false, // can this buff stack with itself?
 
@@ -352,11 +351,6 @@ define(
                     // has to be handled there. If it's in the ability, can
                     // customzie / tailor it more
                     var targetEntity = options[self.get('buffTarget')];
-
-                    // Add the effect
-                    var currentStats = targetEntity.get(
-                        'attributes').attributes;
-
                     // should the buff timer be reset? This will only be true
                     // if this ability does NOT stack AND is already active
                     var resetTimer = false;
@@ -400,7 +394,6 @@ define(
 
                     targetEntity.addBuff(self, options.source);
 
-                    var updatedStats = {};
                     var abilityUpdates = null;
 
                     // update based on effects
@@ -415,14 +408,8 @@ define(
                             _.each(val, function abilityParams(abilityProp, k){
                                 abilityUpdates[k] = abilityProp;
                             });
-                        } else {
-                            // Regular ability property (health, attack, etc)
-                            updatedStats[key] = currentStats[key] + val;
                         }
                     });
-    
-                    // update the attribute based stats
-                    targetEntity.get('attributes').set( updatedStats );
 
                     // ABILITY Effect updates
                     // ------------------
@@ -502,19 +489,12 @@ define(
         // ==============================
         removeBuffEffect: function removeBuffEffect(targetEntity, source){
             // Reset the stats to the pre buff values
-            // TODO: !!!!!!!!!!!!!!!!!!!!!!
-            // This should live in the entity
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!!
             var self = this;
 
-            // remove the buff from the entity
-            targetEntity.removeBuff.call(targetEntity, this, source);
-
             // remove the stats this buff added
-            var currentStats = targetEntity.get(
-                'attributes').attributes;
-            var updatedStats = {};
             var abilityUpdates = null;
+
+            targetEntity.removeBuff.call(targetEntity, this, source);
 
             // update based on effects
             // NOTE: TODO: This won't work for percentages
@@ -529,16 +509,8 @@ define(
                     _.each(val, function abilityParams(abilityProp, k){
                         abilityUpdates[k] = abilityProp;
                     });
-                } else {
-                    // Regular ability property (health, attack, etc)
-                    updatedStats[key] = currentStats[key] - val;
                 }
             });
-
-            // update the stats
-            targetEntity.get('attributes').set(
-                updatedStats
-            );
 
             //// Remove updates on abilities
             //// TODO: THIS 

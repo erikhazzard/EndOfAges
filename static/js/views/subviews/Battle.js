@@ -1436,7 +1436,7 @@ define(
         //
         // ------------------------------
         showEffectOnActiveEffectChange: function showEffectChange(options){
-            console.log("SUPPPPPP");
+            console.log("active effect change : ", options);
             return this;
         },
 

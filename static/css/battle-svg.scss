@@ -107,12 +107,14 @@
         font-weight: bold;
     }
     .entity-group-text.damage.negative {
-        fill: #dd3333;
-        stroke: #990000;
+        //fill: #dd3333;
+        //stroke: #990000;
+        color: #dd0000;
     }
     .entity-group-text.damage.positive {
-        fill: #33dd33;
-        stroke: #009900;
+        //fill: #33dd33;
+        //stroke: #009900;
+        color: #33dd33;
     }
 
     // --------------------------------------
