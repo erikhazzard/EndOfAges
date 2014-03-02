@@ -46,3 +46,8 @@ Exploration : capture essential experience of Battlestar Galatica - lost, cannot
 First experience:
     Each class has an ability or skill that does extra damage to a creaate type.
     First battle should include a creature of that type
+
+===========================================================
+
+After combat : Show experience and gold window, have exp go up one by one like 
+in ff / bravely default

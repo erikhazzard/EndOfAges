@@ -189,10 +189,17 @@ define(
 
             // Listen when health drops to 0 or below, trigger entity
             // death event
+            // --------------------------
             this.listenTo(
                 this.get('attributes'), 
                 'change:health', 
                 this.healthChanged);
+
+            // When entity dies, remove all buffs
+            this.listenTo(
+                this,
+                'entity:died',
+                this.removeAllBuffs);
 
             return this;
         },
@@ -300,13 +307,16 @@ define(
 
         removeAllBuffs: function removeAllBuffs(){
             // Remove all buffs except class specific buffs
-            var activeEffects = [];
+            var activeEffects = this.get('activeEffects');
 
-            _.each(this.get('activeEffects'), function(effect){
-                if(effect.get('isPermanent')){ activeEffects.push(effect); }
+            // only keep isPermanent buffs
+            activeEffects = _.filter(activeEffects, function(effect){
+                if(effect.attributes.isPermanent){ return true; }
+                else { return false; }
             });
 
             this.set({ activeEffects: activeEffects });
+            return this;
         },
 
         // ------------------------------
@@ -381,9 +391,6 @@ define(
                 
                 // TODO: check to see if there is a prevent death buff? Or
                 // should it go in take damage?
-                //
-                // remove all buffs from dead entities (except permanent buffs)
-                this.removeAllBuffs();
 
                 // trigger global event to let listeners know entity died
                 // TODO:  just listen for change:isAlive, don't need this

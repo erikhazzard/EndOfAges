@@ -20,13 +20,14 @@ define([
 
         }); 
 
+        // ==============================
+        //
         // Buffs
-        // ------------------------------
+        //
+        // ==============================
         describe('Buffs tests', function(){
 
             it('should add and remove a buff, and affect stats', function(done){
-                // TODO::::::::::::::::: This doesn't always work, might be
-                // a race condition, or a timing issue. Investigate
                 var buffEffects = { armor: 10, maxHealth: 20 };
 
                 var ability = new Ability({
@@ -88,6 +89,53 @@ define([
 
                     done();
                 }, ability.get('buffDuration') * 1000 * 3.7);
+            });
+
+            // --------------------------
+            //
+            // Remove tests
+            //
+            // --------------------------
+            it('should remove all activeEffects', function(){
+                var ability = new Ability({ buffEffects: { armor: 10, maxHealth: 20 }});
+
+                var entity = new Entity();
+                entity.addBuff(ability);
+
+                assert(entity.attributes.activeEffects.length === 1);
+                entity.removeAllBuffs();
+                assert(entity.attributes.activeEffects.length === 0);
+            });
+            it('should remove all activeEffects except permanent effects', function(){
+                var ability = new Ability({ isPermanent: false, buffEffects: { armor: 10, maxHealth: 20 }});
+                var ability2 = new Ability({ isPermanent: true, buffEffects: { armor: 10, maxHealth: 20 }});
+
+                var entity = new Entity();
+                entity.addBuff(ability);
+                entity.addBuff(ability2);
+
+                assert(entity.attributes.activeEffects.length === 2);
+                entity.removeAllBuffs();
+                // should not remove permanent effects
+                assert(entity.attributes.activeEffects.length === 1);
+            });
+            it('should remove all activeEffects when entity dies', function(done){
+                var ability = new Ability({ isPermanent: false, buffEffects: { armor: 10, maxHealth: 20 }});
+                var ability2 = new Ability({ isPermanent: true, buffEffects: { armor: 10, maxHealth: 20 }});
+
+                var entity = new Entity();
+                entity.addBuff(ability);
+                entity.addBuff(ability2);
+
+                assert(entity.attributes.activeEffects.length === 2);
+                entity.trigger('entity:died');
+                // should not remove permanent effects
+                assert(entity.attributes.activeEffects.length === 1);
+
+                // give some time for the trigger
+                setTimeout(function(){
+                    done();
+                }, 16);
             });
         });
     });

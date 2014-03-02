@@ -118,3 +118,29 @@ Abilities as components? Ability's effect function calls different funcs based o
 
 
 -Some special when timer bar is all the way full. Abilities do more damage, you take less damage
+
+
+=========================================
+
+
+Stacking:
+Effects that stack additively
+Ability power
+Armor
+Armor penetration, flat
+Armor reduction, flat
+Attack damage
+Attack speed (has a hard cap)
+Cooldown reduction (has a hard cap)
+Critical strike chance (has a hard cap)
+Critical strike damage
+Health
+Health regeneration
+Life steal
+Magic penetration, flat
+Magic resistance
+Magic resistance reduction, flat
+Mana
+Mana regeneration
+Spell vamp
+Damage amplification
