@@ -4,10 +4,11 @@
 //
 //========================================
 define([
+    'logger',
     'events',
     'models/Ability',
     'models/Entity'
-    ], function(events, Ability, Entity){
+    ], function(logger, events, Ability, Entity){
 
     describe('Entity Model Buff Tests', function(){
         // ==============================
@@ -50,7 +51,6 @@ define([
             // NOTE: use setTimeout, don't use timer library here
             setTimeout(function(){
                 entity.get('activeEffects').length.should.equal(1);
-                entity.get('activeEffects')[0].attributes._cidCopy.should.equal(ability.cid);
 
                 // make sure stats were increased
                 entity.get('attributes').get('armor').should.equal(
@@ -103,7 +103,6 @@ define([
             // NOTE: use setTimeout, don't use timer library here
             setTimeout(function(){
                 entity.get('activeEffects').length.should.equal(1);
-                entity.get('activeEffects')[0].attributes._cidCopy.should.equal(ability.cid);
 
                 // make sure stats were increased
                 entity.get('attributes').get('maxHealth').should.equal(240);
@@ -128,30 +127,37 @@ define([
             var ability = new Ability({ 
                 cooldown: 0, castDuration: 0, timeCost: 0,
                 buffEffects: { armor: 10, maxHealth: 20 },
-                buffDuration: 0.03, // last a short time
+                buffDuration: 0.15, // last a short time
                 buffCanStack: false
             });
 
             var entity = new Entity();
             ability.effect({ source: entity, target: entity });
 
+            var effects = entity.attributes.activeEffects;
+
             setTimeout(function(){
-                assert(entity.attributes.activeEffects.length === 1);
-                var originalStart = entity.attributes.activeEffects[0].get(
-                    'startDate');
+                // using the ability should replace the existing one with a new
+                // one, check the startDate 
+                assert(effects.length === 1);
+
+                var originalStart = effects[0].get('_buffStartDate').getMilliseconds();
 
                 ability.effect({ source: entity, target: entity });
 
                 setTimeout(function(){
-                    assert(originalStart !== entity.attributes.activeEffects[0].get(
-                        'startDate'));
-                    assert(entity.attributes.activeEffects.length === 1);
-
+                    originalStart.should.not.equal(
+                        effects[0].get('_buffStartDate')
+                        .getMilliseconds()
+                    );
+                    entity.attributes.activeEffects.length.should.equal(1);
                     done();
-                }, 20);
-            }, 20);
+
+                }, 30);
+            }, 10);
         });
-        it('should be stackable', function(){
+
+        it('should be stackable (called manually)', function(){
             var ability = new Ability({ 
                 cooldown: 0, castDuration: 0, timeCost: 0,
                 buffEffects: { armor: 10, maxHealth: 20 },
@@ -167,6 +173,60 @@ define([
             entity.removeAllBuffs();
             assert(entity.attributes.activeEffects.length === 0);
         });
+
+        it('should properly stack damage %', function(){
+            var ability = new Ability({ 
+                cooldown: 0, castDuration: 0, timeCost: 0,
+                buffEffects: { maxHealth: 0.2 },
+                buffDuration: 0.03, // last a short time
+                buffCanStack: true
+            });
+
+            var entity = new Entity({ attributes: { maxHealth: 100 }});
+            entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(120);
+            // add again, should be stacking
+            entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(144);
+            // add again, should be stacking
+            entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(172.8);
+        });
+
+        it('should properly remove stack damage %', function(){
+            var ability = new Ability({ 
+                cooldown: 0, castDuration: 0, timeCost: 0,
+                buffEffects: { maxHealth: 0.2 },
+                buffDuration: 0.03, // last a short time
+                buffCanStack: true
+            });
+
+            var entity = new Entity({ attributes: { maxHealth: 100 }});
+
+            var buff1 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(120);
+            // add again, should be stacking
+            var buff2 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(144);
+
+            // add again, should be stacking
+            var buff3 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(172.8);
+
+            // just removes the first occurence of the buff
+            entity.removeBuff(buff3);
+            entity.get('attributes').attributes.maxHealth.should.equal(144);
+
+            // just removes the first occurence of the buff
+            entity.removeBuff(buff2);
+            entity.get('attributes').attributes.maxHealth.should.equal(120);
+
+            entity.removeBuff(buff1);
+            entity.get('attributes').attributes.maxHealth.should.equal(100);
+
+
+        });
+
 
         // stack - use ability
         // --------------------------
@@ -189,7 +249,7 @@ define([
                 ability.effect({ source: entity, target: entity });
 
                 setTimeout(function(){
-                    console.log("adding again", new Date() - start);
+                    logger.log('tests/models/Entity-buffs', "adding again", new Date() - start);
                     entity.attributes.activeEffects.length.should.equal(2);
 
                     // After 50ms since the original cast, the first buff
@@ -197,16 +257,18 @@ define([
                     var firstBuffRemoveDelay = 20;
                     if(new Date() - start < 42 ){
                         firstBuffRemoveDelay = 28;
+                    } else if(new Date() - start > 80){
+                        firstBuffRemoveDelay = 5;
                     }
 
                     setTimeout(function(){
-                        console.log("remove original ", new Date() - start);
+                        logger.log('tests/models/Entity-buffs', "remove original ", new Date() - start);
                         entity.attributes.activeEffects.length.should.equal(1);
 
                         // After 50ms + 20ms since the original cast, second
                         // buff should have worn off
                         setTimeout(function(){
-                            console.log("all done", new Date() - start);
+                            logger.log('tests/models/Entity-buffs', "all done", new Date() - start);
                             assert(entity.attributes.activeEffects.length === 0);
                             done();
                         }, 55);

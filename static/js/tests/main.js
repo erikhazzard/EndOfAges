@@ -84,6 +84,7 @@ require(['events',
         'error'
         //,'models/Entity'
         //,'models/Ability'
+        ,'tests/models/Entity-buffs'
     ];
 
     //-----------------------------------

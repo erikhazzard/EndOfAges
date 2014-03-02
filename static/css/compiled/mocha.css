@@ -20,6 +20,9 @@ h1,h2,h3,h4 {
 h1 {
     font-weight: 400;
 }
+h2 { 
+    text-shadow: 1px 1px 0 #343434;
+}
 #region-main { display: none; }
 
 #mocha-report > li.suite {

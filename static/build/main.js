@@ -1325,11 +1325,13 @@ define(
 define(
     'models/Ability',[ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL',
-        'util/Timer'
+        'util/Timer',
+        'util/generateUUID'
     ], function AbilityModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
-        Timer
+        Timer,
+        generateUUID
     ){
 
     var Ability = Backbone.Model.extend({
@@ -1434,6 +1436,9 @@ define(
             buffDuration: null, // in seconds
 
             buffCanStack: false, // can this buff stack with itself?
+
+            // used to keep track of start date of NON stackable buffs
+            _buffStartDate: null, 
 
             // can be either 'target' (allows player to target an entity,
             //  including self) or 'self' (only works on self)
@@ -1669,13 +1674,17 @@ define(
                     if(!self.get('buffCanStack')){
                         // If the buff cannot stack with itself, then check
                         // to see if the effect already exists
-                        if(targetEntity.hasBuff(self)){
+                        //
+                        if(targetEntity.hasBuffByName(self)){
                             logger.log('models/Ability', 
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
                             self.removeBuffEffect.call(self, targetEntity, options.source);
                             resetTimer = true;
                         }
+
+                        // set the time the buff was applied
+                        self.set({ _buffStartDate: new Date() }, { silent: true });
                     }
 
                     // Check for heals
@@ -1703,7 +1712,10 @@ define(
                     // add it to the buff list
                     logger.log('models/Ability', 'adding buff %O', self);
 
-                    targetEntity.addBuff(self, options.source);
+                    // add the buff, which returns a clone of the ability object
+                    //  we need to do this so we can track unique stackable
+                    //  buff effects and remove the correct buff
+                    var buffInstance = targetEntity.addBuff(self, options.source);
 
                     var abilityUpdates = null;
 
@@ -1779,7 +1791,9 @@ define(
                             // remove the buff
                             self.removeBuffEffect.call(self, 
                                 targetEntity, 
-                                options.source);
+                                options.source,
+                                buffInstance
+                            );
 
                             if(options.callback){ options.callback(); }
 
@@ -1798,14 +1812,18 @@ define(
         // ==============================
         // Buff helpers
         // ==============================
-        removeBuffEffect: function removeBuffEffect(targetEntity, source){
+        removeBuffEffect: function removeBuffEffect(targetEntity, source, buffInstance){
             // Reset the stats to the pre buff values
             var self = this;
 
             // remove the stats this buff added
             var abilityUpdates = null;
 
-            targetEntity.removeBuff.call(targetEntity, this, source);
+            // if no buff instance was passed in, it means the ability can NOT 
+            // stack, so no need to create a unique ID for it
+            buffInstance = buffInstance || this;
+
+            targetEntity.removeBuff.call(targetEntity, buffInstance, source);
 
             // update based on effects
             // NOTE: TODO: This won't work for percentages
@@ -2212,7 +2230,7 @@ define(
         // ==============================
         // Buff related
         // ==============================
-        hasBuff: function hasBuff(ability){
+        hasBuffByName: function hasBuffByName(ability){
             // takes in an ability and returns if the entity already has the
             // buff. NOTE: Use the ability NAME, not an ID. The reason for this 
             // is so that abilities that aren't stackable can't be stacked
@@ -2228,7 +2246,7 @@ define(
                 }
             }
 
-            logger.log('models/Entity', 'hasBuff called : %O', entityHasBuff);
+            logger.log('models/Entity', 'hasBuffByName called : %O', entityHasBuff);
             return entityHasBuff;
         },
 
@@ -2244,19 +2262,19 @@ define(
             // --------------------------
             var effects = this.get('activeEffects');
 
-            // Make a copy of the ability. We need to do this for a few reasons:
-            //  1. Properities will be added to the ability (e.g., a timestamp)
-            //  2. If the ability is modified, we don't want to reflect that in
-            //      the active buff
-            ability = new Ability( 
-                _.extend({ _cidCopy: ability.cid }, 
-                ability.attributes) 
-            );
+            var abilityBuffInstance = ability;
 
-            // store the attributes
-            // set the time the buff was applied
-            ability.set({ startDate: new Date() }, { silent: true });
-            effects.push(ability);
+            // Make a copy of the ability if it is stackable, so we can add or
+            // remove instances of it
+            // if the buff can stack, we need a unique instance of it
+            if(ability.attributes.buffCanStack){
+                abilityBuffInstance = new Ability( 
+                    _.extend({}, ability.attributes) 
+                );
+            }
+
+            // add to the effecst array
+            effects.push(abilityBuffInstance);
 
             // Update the entity's stats
             // --------------------------
@@ -2268,7 +2286,7 @@ define(
             // Add the effect
             var currentStats = this.get('attributes').attributes;
 
-            _.each(ability.get('buffEffects'), function(val, key){
+            _.each(abilityBuffInstance.get('buffEffects'), function(val, key){
                 if(key !== 'abilities'){
                     // check for % or absolute value
                     if(val > -1 && val < 1){
@@ -2287,33 +2305,40 @@ define(
             this.get('attributes').set(updatedStats);
 
             // store the updated differences for removal and tracking
-            ability.set({statDifferences: statDifferences}, { silent: true });
+            abilityBuffInstance.set({statDifferences: statDifferences}, { silent: true });
 
             // update activeEffects and stats
             this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {
-                sourceAbility: ability,
+            this.trigger('change:activeEffects', this, abilityBuffInstance.cid, {
+                sourceAbility: abilityBuffInstance,
                 source: source,
                 target: this,
                 type: 'add'
             });
 
-            return this;
+            // return the cloned ability
+            return abilityBuffInstance;
         },
 
-        removeBuff: function removeBuff(ability, source){
+        removeBuff: function removeBuff(abilityBuffInstance, source){
             // Remove buff effect
-            //  TODO: Document How it works
             //
-            logger.log('models/Entity', 'removeBuff(): called %O', ability);
+            //  Takes in a abilityBuffInstance (the ability instance returned 
+            //  in addBuff) and a source entity.
+            //      Note: If the ability is NOT stackable, the 
+            //      abilityBuffInstance will just be the actual ability object
+            //
+            //  If found, will remove the effects from the entity
+            //
+            logger.log('models/Entity', 'removeBuff(): called %O', abilityBuffInstance);
             var effects = this.get('activeEffects');
             var foundAbility = null;
 
-            // remove the targeted ability
+            // remove the FIRST occurence of the targeted ability
+            //      abilities are added in order of cast time, so the first
+            //      one found is the oldest ability
             for(var i=0, len = effects.length; i<len; i++){
-                // check on _cidCopy , which is a copy of the passed in
-                // ability's cid
-                if(effects[i].attributes._cidCopy === ability.cid){
+                if(effects[i].cid === abilityBuffInstance.cid){
                     foundAbility = effects.splice(i, 1)[0];
                     break;
                 }
@@ -2339,8 +2364,8 @@ define(
             logger.log('models/Entity', 'removeBuff(): found it? : %O', !!foundAbility);
 
             this.set({ activeEffects: effects }, {silent: true});
-            this.trigger('change:activeEffects', this, ability.cid, {
-                sourceAbility: ability,
+            this.trigger('change:activeEffects', this, abilityBuffInstance.cid, {
+                sourceAbility: abilityBuffInstance,
                 source: source,
                 target: this,
                 type: 'remove'

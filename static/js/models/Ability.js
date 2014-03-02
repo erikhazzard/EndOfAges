@@ -14,11 +14,13 @@
 define(
     [ 'backbone', 'marionette', 'logger',
         'events', 'd3', 'util/API_URL',
-        'util/Timer'
+        'util/Timer',
+        'util/generateUUID'
     ], function AbilityModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
-        Timer
+        Timer,
+        generateUUID
     ){
 
     var Ability = Backbone.Model.extend({
@@ -123,6 +125,9 @@ define(
             buffDuration: null, // in seconds
 
             buffCanStack: false, // can this buff stack with itself?
+
+            // used to keep track of start date of NON stackable buffs
+            _buffStartDate: null, 
 
             // can be either 'target' (allows player to target an entity,
             //  including self) or 'self' (only works on self)
@@ -358,13 +363,17 @@ define(
                     if(!self.get('buffCanStack')){
                         // If the buff cannot stack with itself, then check
                         // to see if the effect already exists
-                        if(targetEntity.hasBuff(self)){
+                        //
+                        if(targetEntity.hasBuffByName(self)){
                             logger.log('models/Ability', 
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
                             self.removeBuffEffect.call(self, targetEntity, options.source);
                             resetTimer = true;
                         }
+
+                        // set the time the buff was applied
+                        self.set({ _buffStartDate: new Date() }, { silent: true });
                     }
 
                     // Check for heals
@@ -392,7 +401,10 @@ define(
                     // add it to the buff list
                     logger.log('models/Ability', 'adding buff %O', self);
 
-                    targetEntity.addBuff(self, options.source);
+                    // add the buff, which returns a clone of the ability object
+                    //  we need to do this so we can track unique stackable
+                    //  buff effects and remove the correct buff
+                    var buffInstance = targetEntity.addBuff(self, options.source);
 
                     var abilityUpdates = null;
 
@@ -468,7 +480,9 @@ define(
                             // remove the buff
                             self.removeBuffEffect.call(self, 
                                 targetEntity, 
-                                options.source);
+                                options.source,
+                                buffInstance
+                            );
 
                             if(options.callback){ options.callback(); }
 
@@ -487,14 +501,18 @@ define(
         // ==============================
         // Buff helpers
         // ==============================
-        removeBuffEffect: function removeBuffEffect(targetEntity, source){
+        removeBuffEffect: function removeBuffEffect(targetEntity, source, buffInstance){
             // Reset the stats to the pre buff values
             var self = this;
 
             // remove the stats this buff added
             var abilityUpdates = null;
 
-            targetEntity.removeBuff.call(targetEntity, this, source);
+            // if no buff instance was passed in, it means the ability can NOT 
+            // stack, so no need to create a unique ID for it
+            buffInstance = buffInstance || this;
+
+            targetEntity.removeBuff.call(targetEntity, buffInstance, source);
 
             // update based on effects
             // NOTE: TODO: This won't work for percentages
