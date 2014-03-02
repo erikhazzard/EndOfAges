@@ -193,7 +193,9 @@ define([
             entity.get('attributes').attributes.maxHealth.should.equal(172.8);
         });
 
-        it('should properly remove stack damage %', function(){
+        // REMOVE stack % damage
+        // ------------------------------
+        it('should properly remove stack damage % in reverse order', function(){
             var ability = new Ability({ 
                 cooldown: 0, castDuration: 0, timeCost: 0,
                 buffEffects: { maxHealth: 0.2 },
@@ -223,8 +225,62 @@ define([
 
             entity.removeBuff(buff1);
             entity.get('attributes').attributes.maxHealth.should.equal(100);
+        });
+        
+        it('should properly remove stack damage % in random order', function(){
+            var ability = new Ability({ 
+                cooldown: 0, castDuration: 0, timeCost: 0,
+                buffEffects: { maxHealth: 0.2 },
+                buffDuration: 0.03, // last a short time
+                buffCanStack: true
+            });
 
+            var entity = new Entity({ attributes: { maxHealth: 100 }});
 
+            var buff1 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(120);
+            // add again, should be stacking
+            var buff2 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(144);
+            // add again, should be stacking
+            var buff3 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(172.8);
+
+            // now, we should be able to remove the buffs in a random order
+            // and have the proper health amount returned
+            entity.removeBuff(buff2);
+            entity.get('attributes').attributes.maxHealth.should.equal(148.8);
+            entity.removeBuff(buff1);
+            entity.get('attributes').attributes.maxHealth.should.equal(128.8);
+            // final buff, no matter the order, should return the health to the
+            // starting value
+            entity.removeBuff(buff3);
+            entity.get('attributes').attributes.maxHealth.should.equal(100);
+        });
+
+        it('should properly remove stack damage (values) in order', function(){
+            var ability = new Ability({ 
+                cooldown: 0, castDuration: 0, timeCost: 0,
+                buffEffects: { maxHealth: 20 },
+                buffDuration: 0.03, // last a short time
+                buffCanStack: true
+            });
+
+            var entity = new Entity({ attributes: { maxHealth: 100 }});
+
+            var buff1 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(120);
+            var buff2 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(140);
+            var buff3 = entity.addBuff(ability);
+            entity.get('attributes').attributes.maxHealth.should.equal(160);
+
+            entity.removeBuff(buff3);
+            entity.get('attributes').attributes.maxHealth.should.equal(140);
+            entity.removeBuff(buff2);
+            entity.get('attributes').attributes.maxHealth.should.equal(120);
+            entity.removeBuff(buff1);
+            entity.get('attributes').attributes.maxHealth.should.equal(100);
         });
 
 
