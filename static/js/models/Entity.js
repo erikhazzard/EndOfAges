@@ -307,11 +307,16 @@ define(
                     statDifferences[key] = updatedStats[key] - currentStats[key];
                 }
             });
+
             // update this model's attributes stats
             this.get('attributes').set(updatedStats);
 
             // store the updated differences for removal and tracking
             abilityBuffInstance.set({statDifferences: statDifferences}, { silent: true });
+
+            // --------------------------
+            // TODO :::::::: Track the stat difference 
+            // --------------------------
 
             // update activeEffects and stats
             this.set({ activeEffects: effects }, {silent: true});
@@ -393,9 +398,11 @@ define(
             return this;
         },
 
-        // ------------------------------
+        // ==============================
+        //
         // Track damage
-        // ------------------------------
+        //
+        // ==============================
         trackDamage: function(options){
             // Takes in options (same as from healthChange, along with
             // model and health). Keep track of difference in health, along

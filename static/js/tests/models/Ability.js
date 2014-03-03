@@ -52,13 +52,65 @@ define([
                 }, 60);
 
             });
+            // --------------------------
+            // Ability Buffs
+            // --------------------------
+            describe('Buffs', function(){
 
-            describe('Buffs', function(done){
+                describe("Adding buffs", function(){
+                    it('ability buffs should add an ability buff', function(done){
+                        var ability = new Ability({
+                            name: 'Test 1',
+                            castTime: 0, cooldown: 0, castDuration: 0.0001,
+                            buffDuration: 1,
+                            buffEffects: { 
+                                abilities: {
+                                    // decrease duration by 20%
+                                    buffDuration: -0.2
+                                }
+                            }
+                        });
+
+                        var ability2 = new Ability({ name: 'Test 2', buffDuration: 1 });
+                        var ability3 = new Ability({ name: 'Test 3', buffDuration: 1 });
+
+                        var entity1 = new Entity({
+                            abilities: new Abilities([ability, ability2, ability3])
+                        });
+
+                        // base cast time should be the same
+                        ability.attributes.buffDuration.should.equal(1);
+                        ability2.attributes.buffDuration.should.equal(1);
+                        ability3.attributes.buffDuration.should.equal(1);
+
+                        ability.attributes.activeEffects.length.should.equal(0);
+                        ability2.attributes.activeEffects.length.should.equal(0);
+                        ability3.attributes.activeEffects.length.should.equal(0);
+
+                        // Apply buff
+                        ability.effect({ source: entity1, target: entity1 });
+
+                        setTimeout(function(){
+
+                            ability.attributes.buffDuration.should.equal(0.8);
+                            ability2.attributes.buffDuration.should.equal(0.8);
+                            ability3.attributes.buffDuration.should.equal(0.8);
+
+                            ability.attributes.activeEffects.length.should.equal(1);
+                            ability2.attributes.activeEffects.length.should.equal(1);
+                            ability3.attributes.activeEffects.length.should.equal(1);
+
+
+                            done();
+
+                        }, 16);
+                    });
+                });
+
+
                 it('ability buffs should affect self target', function(done){
                     var ability = new Ability({
-                        castTime: 1,
-                        cooldown: 0,
-                        castDuration: 0.0001,
+                        castTime: 1, cooldown: 0, castDuration: 0.0001,
                         buffDuration: 1,
                         buffEffects: { 
                             armor: 10,

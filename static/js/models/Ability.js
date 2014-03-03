@@ -7,8 +7,8 @@
 //      TODO: Add an ability rating - a sort of 'score' for how powerful the
 //      ability is(?)
 //
-//      TODO: Allow abilities to be modified (e.g., lower cast time) ( OR, just
-//      have some modifier on the entity )
+//      TODO::::::::::: Implement buff effect tracking, similar to entity's 
+//      method
 //
 // ===========================================================================
 define(
@@ -24,123 +24,125 @@ define(
     ){
 
     var Ability = Backbone.Model.extend({
-        defaults: {
-            name: 'Magic Missle',
+        defaults: function(){
+            return {
+                name: 'Magic Missle',
 
-            // Keep track of buffs / effects that affect the ability object
-            activeEffects: [],
+                // Keep track of buffs / effects that affect the ability object
+                activeEffects: [],
 
-            // ID of the effect element
-            effectId: null,
-            description: 'PLACEHOLDER TEXT :::::::::::',
+                // ID of the effect element
+                effectId: null,
+                description: 'PLACEHOLDER TEXT :::::::::::',
 
-            // Damage Over Time (DOT) properties
-            // ticks: number of times to do the effect
-            ticks: 0,
-            // time between each tick
-            tickDuration: 1,
+                // Damage Over Time (DOT) properties
+                // ticks: number of times to do the effect
+                ticks: 0,
+                // time between each tick
+                tickDuration: 1,
 
-            // castDuration - measured in seconds
-            // how long the spell takes to cast - how long between the source
-            // entity using the spell and the target entity receiving the effect
-            castDuration: 0.5,
+                // castDuration - measured in seconds
+                // how long the spell takes to cast - how long between the source
+                // entity using the spell and the target entity receiving the effect
+                castDuration: 0.5,
 
-            // How long must the player wait until they can use this ability
-            // This SHOULD always be greater than or equal to than the timeCost
-            //  (e.g., if you need to wait 3 seconds to cast it but the cost is 4
-            //  seconds, you'll have negative time)
-            //
-            // Measured in seconds
-            castTime: 1,
+                // How long must the player wait until they can use this ability
+                // This SHOULD always be greater than or equal to than the timeCost
+                //  (e.g., if you need to wait 3 seconds to cast it but the cost is 4
+                //  seconds, you'll have negative time)
+                //
+                // Measured in seconds
+                castTime: 1,
 
-            // How much this ability costs in time units. Normally, this
-            // is the same as the cast time. THIS property is subtracted from
-            // the entity's timer.
-            // This may be lower than the cast time (e,g., if a spell takes a
-            // while to cast but doesn't take down the timer much - maybe not
-            // as powerful a spell)
-            //
-            // Measured in seconds
-            timeCost: null, // By default, will be set to castTime
+                // How much this ability costs in time units. Normally, this
+                // is the same as the cast time. THIS property is subtracted from
+                // the entity's timer.
+                // This may be lower than the cast time (e,g., if a spell takes a
+                // while to cast but doesn't take down the timer much - maybe not
+                // as powerful a spell)
+                //
+                // Measured in seconds
+                timeCost: null, // By default, will be set to castTime
 
-            // How long (in seconds) the user must wait before using the
-            // ability again
-            cooldown: 0.1,
+                // How long (in seconds) the user must wait before using the
+                // ability again
+                cooldown: 0.1,
 
-            // validTargets specifies the entities the ability can be
-            // used on. for now, only 'enemy' or 'player' are valid targets. 
-            validTargets: ['enemy'],
-        
-            // type / subtype
-            // --------------------------
-            // type could be either 'magic' or 'physical'
-            //  Can be either a {string}, representing 100% of the type, or
-            //  an object with keys consisting of the types (e.g., 
-            //      {physical: 0.7, magic: 0.3}
-            //
-            type: { magic: 1 },
-            // This is also valid: (will be transformed to an object)
-            // type: 'magic', 
+                // validTargets specifies the entities the ability can be
+                // used on. for now, only 'enemy' or 'player' are valid targets. 
+                validTargets: ['enemy'],
+            
+                // type / subtype
+                // --------------------------
+                // type could be either 'magic' or 'physical'
+                //  Can be either a {string}, representing 100% of the type, or
+                //  an object with keys consisting of the types (e.g., 
+                //      {physical: 0.7, magic: 0.3}
+                //
+                type: { magic: 1 },
+                // This is also valid: (will be transformed to an object)
+                // type: 'magic', 
 
-            // TODO: allow multiple subtypes and percentages for sub types
-            //
-            // subtypes are:
-            //  none (e.g., purely physical), fire, light, dark, earth, air, water
-            //  Can be either a {string}, representing 100% of the element, or
-            //  an object with keys consisting of the element types along
-            //  with a number that combined will add to 1.0
-            element: {fire: 1},
-            // This is also valid: (will be transformed to an object)
-            // element: 'fire'
+                // TODO: allow multiple subtypes and percentages for sub types
+                //
+                // subtypes are:
+                //  none (e.g., purely physical), fire, light, dark, earth, air, water
+                //  Can be either a {string}, representing 100% of the element, or
+                //  an object with keys consisting of the element types along
+                //  with a number that combined will add to 1.0
+                element: {fire: 1},
+                // This is also valid: (will be transformed to an object)
+                // element: 'fire'
 
-            // Bonus from entity's attack and / or magicPower
-            //  (e.g., an ability may do 10 base damage + 50% of entity's attack)
-            // --------------------------
-            // values are from 0 to 1
-            attackBonusPercent: 0,
-            magicPowerBonusPercent: 0,
+                // Bonus from entity's attack and / or magicPower
+                //  (e.g., an ability may do 10 base damage + 50% of entity's attack)
+                // --------------------------
+                // values are from 0 to 1
+                attackBonusPercent: 0,
+                magicPowerBonusPercent: 0,
 
-            // Damage
-            // --------------------------
-            // Base damage
-            damage: undefined,
-            // could be either 'source' or 'target', will damage the entities
-            // that are either the source or target of the used ability
-            damageTarget: 'target',
+                // Damage
+                // --------------------------
+                // Base damage
+                damage: undefined,
+                // could be either 'source' or 'target', will damage the entities
+                // that are either the source or target of the used ability
+                damageTarget: 'target',
 
-            // Heal
-            // --------------------------
-            // Base Heal
-            heal: undefined,
-            // could be either 'source' or 'target', will heal the entities
-            // that are either the source or target of the used ability
-            //      (source would be a self heal, target heals other)
-            healTarget: 'target',
+                // Heal
+                // --------------------------
+                // Base Heal
+                heal: undefined,
+                // could be either 'source' or 'target', will heal the entities
+                // that are either the source or target of the used ability
+                //      (source would be a self heal, target heals other)
+                healTarget: 'target',
 
-            // Buffs
-            // --------------------------
-            // This is an example static buff. Will temporarily boost an 
-            // entity's stats for the passed in duration
-            buffEffects: null, // Will look like { strength : -10, agility: 10 }
-            buffDuration: null, // in seconds
+                // Buffs
+                // --------------------------
+                // This is an example static buff. Will temporarily boost an 
+                // entity's stats for the passed in duration
+                buffEffects: null, // Will look like { strength : -10, agility: 10 }
+                buffDuration: null, // in seconds
 
-            buffCanStack: false, // can this buff stack with itself?
+                buffCanStack: false, // can this buff stack with itself?
 
-            // used to keep track of start date of NON stackable buffs
-            _buffStartDate: null, 
+                // used to keep track of start date of NON stackable buffs
+                _buffStartDate: null, 
 
-            // can be either 'target' (allows player to target an entity,
-            //  including self) or 'self' (only works on self)
-            buffTarget: 'target',
+                // can be either 'target' (allows player to target an entity,
+                //  including self) or 'self' (only works on self)
+                buffTarget: 'target',
 
-            visualEffect: function(options){
-                //TODO: figure this out...should have some way of doing an
-                //effect, but should it live here?
-            },
+                visualEffect: function(options){
+                    //TODO: figure this out...should have some way of doing an
+                    //effect, but should it live here?
+                },
 
-            // Meta
-            // --------------------------
-            _lastUseTime: null  // keep track of last cast time (for cooldown)
+                // Meta
+                // --------------------------
+                _lastUseTime: null  // keep track of last cast time (for cooldown)
+            };
         },
         
         url: function getURL(){
@@ -393,9 +395,10 @@ define(
                     }
                     // ------------------
                     // TODO: Check for damage?
+                    // ------------------
 
 
-                    //
+                    // ------------------
                     // ADD Buff
                     // ------------------
                     // add it to the buff list
@@ -406,54 +409,27 @@ define(
                     //  buff effects and remove the correct buff
                     var buffInstance = targetEntity.addBuff(self, options.source);
 
+                    // Add effect to all the abilities if the buff affects the
+                    // entities's abilities (e.g., reduce casting time for all
+                    // abilities by 10%)
                     var abilityUpdates = null;
 
-                    // update based on effects
-                    _.each(self.get('buffEffects'), function(val, key){
-                        if(key === 'abilities'){
-                            // Effects relating to abilities
-                            // If the buff has a ability option, update the actual
-                            // ability stats
-                            // would look like:
-                            //  { strength: 10, abilities: { cooldown: -0.5 } }
-                            abilityUpdates = {};
-                            _.each(val, function abilityParams(abilityProp, k){
-                                abilityUpdates[k] = abilityProp;
-                            });
-                        }
-                    });
-
-                    // ABILITY Effect updates
-                    // ------------------
-                    // update ALL ability properties
-                    // TODO: Update all OTHER abilities
-                    if(abilityUpdates && targetEntity.get('abilities')){
+                    // Add buff /debuff effect to the ability if the buffeffects
+                    // contain abilities properties
+                    if(self.attributes.buffEffects && 
+                    self.attributes.buffEffects.abilities && 
+                    targetEntity.get('abilities')){
+                        // call addBuff for each of the target entity's abilities
                         _.each(targetEntity.get('abilities').models, function(ability){
-                            // DO STUFF based on the abilityUpdates
-                            // e.g., if value is between 0 and 1, view it as
-                            // a percentage. from 1 to n, as time in seconds
-                            //  Any ability property should work - damage, ticks,
-                            //  castitme, etc...
-                            var newProps = {};
-                            _.each(abilityUpdates, function(val, key){
-                                var newValue = ability.attributes[key];
-                                var tmp = 0;
-
-                                // use either percentages or values
-                                if(val > -1 && val < 1){
-                                    tmp = newValue + (newValue * val);
-                                } else {
-                                    tmp = newValue + val;
-                                }
-
-                                newProps[key] = tmp;
-                            });
-
-                            ability.set(newProps);
+                            // pass in this ability so other abilities can have
+                            // their properties modified 
+                            ability.addBuff.call(ability, self, targetEntity, options.source);
                         });
                     }
 
-                    // Remove it after the duration
+
+                    // ------------------
+                    // REMOVE Buff
                     // ------------------
                     // TODO: Allow the buffDuration to be modified by the
                     // entity's properties.
@@ -483,6 +459,8 @@ define(
                                 options.source,
                                 buffInstance
                             );
+
+                            // TODO: remove buff from each ability
 
                             if(options.callback){ options.callback(); }
 
@@ -560,6 +538,184 @@ define(
                 });
             }
 
+            return this;
+        },
+
+        // ==============================
+        //
+        // Buff related
+        //
+        // ==============================
+        hasBuffByName: function hasBuffByName(ability){
+            // takes in an ability and returns if the entity already has the
+            // buff. NOTE: Use the ability NAME, not an ID. The reason for this 
+            // is so that abilities that aren't stackable can't be stacked
+            var effects = this.get('activeEffects');
+            var i=0, len = effects.length;
+            var entityHasBuff = false;
+
+            // find the buff; if it exists, break out of the loop
+            for(i=0; i<len; i++){
+                if(effects[i].name === ability.name){ 
+                    entityHasBuff = true;
+                    break;
+                }
+            }
+
+            logger.log('models/Ability', 'hasBuffByName called : %O', entityHasBuff);
+            return entityHasBuff;
+        },
+
+        addBuff: function addBuff(sourceAbility, targetEntity, source){
+            // Modifies *this* ability's properties based on the properties 
+            // defined in `abilities` in `buffEffects` of the passed in ability
+            //
+            // Takes in a target entity and source entity
+            //
+            //
+            var self = this;
+            logger.log('models/Ability', 'addBuff(): called : source :%O, this: %O', 
+                sourceAbility, this);
+
+            // Add it
+            // --------------------------
+            var effects = this.get('activeEffects');
+
+            // Clone the passed in ability
+            // NOTE: Use a basic backbone model; we only need to keep track of
+            // property values, don't need the overhead of all the other methods
+            //
+            // Futhermore, it shouldn't be thought of as an actual Ability object,
+            // it's essentially just a property store to keep track of stat
+            // differences
+            var abilityBuffInstance = new Backbone.Model( 
+                _.extend({}, sourceAbility.attributes) 
+            );
+            // remove the activeEffects on the instance to avoid recursion
+            abilityBuffInstance.set({ activeEffects: null }, { silent: true });
+
+            // if the buff cannot stack, the cid should be the same as original
+            if(!sourceAbility.attributes.buffCanStack){
+                abilityBuffInstance.cid = sourceAbility.cid;
+            }
+
+            // add to the effects array
+            effects.push(abilityBuffInstance);
+            
+            // Update the entity's stats
+            // --------------------------
+            var updatedStats = {}; // new attributes to set
+            // Keep track of the differences between the new value and the old
+            // value, used for removing the effect and tracking changes
+            var statDifferences = {}; 
+
+            // Add the effect
+            var currentStats = this.attributes;
+
+            // stats to affect
+            var abilityEffects = abilityBuffInstance.attributes.buffEffects.abilities;
+
+            _.each(abilityEffects, function(val, key){
+                // check for % or absolute value
+                if(val > -1 && val < 1){
+                    // a percentage
+                    updatedStats[key] = currentStats[key] + (currentStats[key] * val);
+                } else {
+                    // a whole number
+                    updatedStats[key] = currentStats[key] + val;
+                }
+
+                // keep track of differences
+                statDifferences[key] = updatedStats[key] - currentStats[key];
+            });
+
+            // update this ability's properties
+            this.set(updatedStats);
+
+            // store the updated differences for removal and tracking
+            abilityBuffInstance.set({statDifferences: statDifferences}, { silent: true });
+
+            // --------------------------
+            // TODO :::::::: Track the stat difference 
+            // --------------------------
+
+            // update activeEffects and stats
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, abilityBuffInstance.cid, {
+                sourceAbility: sourceAbility,
+                source: source,
+                target: targetEntity,
+                type: 'add'
+            });
+
+            // return the cloned ability
+            return abilityBuffInstance;
+        },
+
+        removeBuff: function removeBuff(abilityBuffInstance, source){
+            // Remove buff effect
+            //
+            //  Takes in a abilityBuffInstance (the ability instance returned 
+            //  in addBuff) and a source entity.
+            //      Note: If the ability is NOT stackable, the 
+            //      abilityBuffInstance will just be the actual ability object
+            //
+            //  If found, will remove the effects from the entity
+            //
+            logger.log('models/Ability', 'removeBuff(): called %O', abilityBuffInstance);
+            var effects = this.get('activeEffects');
+            var foundAbility = null;
+
+            // remove the FIRST occurence of the targeted ability
+            //      abilities are added in order of cast time, so the first
+            //      one found is the oldest ability
+            for(var i=0, len = effects.length; i<len; i++){
+                if(effects[i].cid === abilityBuffInstance.cid){
+                    foundAbility = effects.splice(i, 1)[0];
+                    break;
+                }
+            }
+
+            // Update the entity's stats
+            // --------------------------
+            // Reset the stats with the found ability
+            if(foundAbility){
+                var updatedStats = {};
+                var statDifferences = foundAbility.attributes.statDifferences;
+
+                // Add the effect
+                var currentStats = this.get('attributes').attributes;
+
+                _.each(statDifferences, function(difference, key){
+                    updatedStats[key] = currentStats[key] - difference;
+                });
+                this.get('attributes').set(updatedStats);
+            }
+
+
+            logger.log('models/Ability', 'removeBuff(): found it? : %O', !!foundAbility);
+
+            this.set({ activeEffects: effects }, {silent: true});
+            this.trigger('change:activeEffects', this, abilityBuffInstance.cid, {
+                sourceAbility: abilityBuffInstance,
+                source: source,
+                target: this,
+                type: 'remove'
+            });
+            return this;
+        },
+
+        removeAllBuffs: function removeAllBuffs(){
+            // Remove all buffs except class specific buffs
+            var activeEffects = this.get('activeEffects');
+
+            // only keep isPermanent buffs
+            activeEffects = _.filter(activeEffects, function(effect){
+                if(effect.attributes.isPermanent){ return true; }
+                else { return false; }
+            });
+
+            this.set({ activeEffects: activeEffects });
             return this;
         }
 
