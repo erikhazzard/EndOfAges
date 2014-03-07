@@ -290,13 +290,13 @@ define([
             var ability = new Ability({ 
                 cooldown: 0, castDuration: 0, timeCost: 0,
                 buffEffects: { armor: 10, maxHealth: 20 },
-                buffDuration: 0.06, // last a short time
+                buffDuration: 0.04, 
                 buffCanStack: true
             });
 
             var entity = new Entity();
+            // cast buff
             ability.effect({ source: entity, target: entity });
-            var start = new Date();
 
             setTimeout(function(){
                 assert(entity.attributes.activeEffects.length === 1);
@@ -305,35 +305,23 @@ define([
                 ability.effect({ source: entity, target: entity });
 
                 setTimeout(function(){
-                    logger.log('tests/models/Entity-buffs', "adding again", new Date() - start);
                     entity.attributes.activeEffects.length.should.equal(2);
 
-                    // After 50ms since the original cast, the first buff
-                    // should have worn off
-                    var firstBuffRemoveDelay = 20;
-                    if(new Date() - start < 42 ){
-                        firstBuffRemoveDelay = 28;
-                    } else if(new Date() - start > 80){
-                        firstBuffRemoveDelay = 5;
-                    }
-
+                    // first buff should have worn off
                     setTimeout(function(){
-                        logger.log('tests/models/Entity-buffs', "remove original ", new Date() - start);
                         entity.attributes.activeEffects.length.should.equal(1);
 
-                        // After 50ms + 20ms since the original cast, second
-                        // buff should have worn off
+                        // second buff should be worn off
                         setTimeout(function(){
-                            logger.log('tests/models/Entity-buffs', "all done", new Date() - start);
                             assert(entity.attributes.activeEffects.length === 0);
                             done();
-                        }, 55);
+                        }, 55); // 15 + 20 + 20 = 55, is > than buffDuration
 
-                    }, firstBuffRemoveDelay);
+                    }, 20); // 15 + 15 + 20 = 50, which is > than buffDuration
 
-                }, 5);
+                }, 15);
 
-            }, 30);
+            }, 15);
         });
 
         // --------------------------
@@ -351,6 +339,7 @@ define([
             entity.removeAllBuffs();
             assert(entity.attributes.activeEffects.length === 0);
         });
+
         it('should remove all activeEffects except permanent effects', function(){
             var ability = new Ability({ isPermanent: false, buffEffects: { armor: 10, maxHealth: 20 }});
             var ability2 = new Ability({ isPermanent: true, buffEffects: { armor: 10, maxHealth: 20 }});
@@ -364,6 +353,7 @@ define([
             // should not remove permanent effects
             assert(entity.attributes.activeEffects.length === 1);
         });
+
         it('should remove all activeEffects when entity dies', function(done){
             var ability = new Ability({ isPermanent: false, buffEffects: { armor: 10, maxHealth: 20 }});
             var ability2 = new Ability({ isPermanent: true, buffEffects: { armor: 10, maxHealth: 20 }});

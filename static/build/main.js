@@ -1682,6 +1682,26 @@ define(
                                 '[x] buff already exists %O : removing and re-adding', self);
                             // remove the buff so we can re-apply it
                             self.removeBuffEffect.call(self, targetEntity, options.source);
+
+                            // remove all ability buff effects
+                            if(self.attributes.buffEffects && 
+                            self.attributes.buffEffects.abilities && 
+                            targetEntity.get('abilities')){
+                                logger.log('models/Ability', 'removing all ability buff effects from non-stackable buff');
+                                // remove existing ability buff modifiers 
+                                _.each(targetEntity.get('abilities').models, function(ability){
+                                    // pass in this ability so other abilities can have
+                                    // their properties modified 
+                                    _.each(ability.get('activeEffects'), function(abilityBuffEffect){
+                                        ability.removeBuff.call(
+                                            ability,
+                                            abilityBuffEffect,
+                                            options.source
+                                        );
+                                    });
+                                });
+                            }
+
                             resetTimer = true;
                         }
 
@@ -1896,6 +1916,9 @@ define(
             var abilityEffects = abilityBuffInstance.attributes.buffEffects.abilities;
 
             _.each(abilityEffects, function(val, key){
+                // ignore buffEffects key, just as a safety catch
+                if(key === 'buffEffects'){ return false; }
+
                 // check for % or absolute value
                 if(val > -1 && val < 1){
                     // a percentage
