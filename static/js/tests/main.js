@@ -83,6 +83,7 @@ require(['events',
     logger.options.logLevel = [
         'error'
         //,'models/Entity'
+        ,'models/Ability'
         ,'tests/models/Entity-buffs'
     ];
 

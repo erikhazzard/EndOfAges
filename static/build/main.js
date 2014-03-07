@@ -1720,10 +1720,9 @@ define(
                     //  buff effects and remove the correct buff
                     var buffInstance = targetEntity.addBuff(self, options.source);
 
-                    // Add effect to all the abilities if the buff affects the
-                    // entities's abilities (e.g., reduce casting time for all
-                    // abilities by 10%)
-                    var abilityUpdates = null;
+
+                    // Keep track of buff effects on the ability itself
+                    var abilityBuffInstances = [];
 
                     // Add buff /debuff effect to the ability if the buffeffects
                     // contain abilities properties
@@ -1734,7 +1733,12 @@ define(
                         _.each(targetEntity.get('abilities').models, function(ability){
                             // pass in this ability so other abilities can have
                             // their properties modified 
-                            ability.addBuff.call(ability, self, targetEntity, options.source);
+                            abilityBuffInstances.push({
+                                instance: ability.addBuff.call(ability, self, targetEntity, options.source),
+                                ability: ability,
+                                targetEntity: targetEntity,
+                                source: options.source
+                            }); 
                         });
                     }
 
@@ -1752,7 +1756,7 @@ define(
                         self._buffCancelTimer.resume();
                     } else { 
                         // cancel timer does not yet exist, create it
-                        self._buffCancelTimer = new Timer(function removeBuff(){
+                        self._buffCancelTimer = new Timer(function buffCancelTimer(){
                             // remove effect
                             logger.log('models/Ability', 'removing buff');
                             
@@ -1771,7 +1775,18 @@ define(
                                 buffInstance
                             );
 
-                            // TODO: remove buff from each ability
+                            // remove each buff instance from the ability
+                            _.each(abilityBuffInstances, function removeAbiltiyBuffInstance(options){
+                                // remove it
+                                options.ability.removeBuff.call(
+                                    options.ability, // context
+                                    options.instance, // buff instance
+                                    options.source // source 
+                                );
+                            });
+
+                            // remove references
+                            abilityBuffInstances.length = 0;
 
                             if(options.callback){ options.callback(); }
 
@@ -1794,60 +1809,12 @@ define(
             // Reset the stats to the pre buff values
             var self = this;
 
-            // remove the stats this buff added
-            var abilityUpdates = null;
-
             // if no buff instance was passed in, it means the ability can NOT 
             // stack, so no need to create a unique ID for it
             buffInstance = buffInstance || this;
 
+            //remove buff from entity
             targetEntity.removeBuff.call(targetEntity, buffInstance, source);
-
-            // update based on effects
-            // NOTE: TODO: This won't work for percentages
-            _.each(self.get('buffEffects'), function(val, key){
-                if(key === 'abilities'){
-                    // Effects relating to abilities
-                    // If the buff has a ability option, update the actual
-                    // ability stats
-                    // would look like:
-                    //  { strength: 10, abilities: { cooldown: -0.5 } }
-                    abilityUpdates = {};
-                    _.each(val, function abilityParams(abilityProp, k){
-                        abilityUpdates[k] = abilityProp;
-                    });
-                }
-            });
-
-            //// Remove updates on abilities
-            //// TODO: THIS 
-            //// this is how they're added , need to remove
-            //
-            if(abilityUpdates && targetEntity.get('abilities')){
-                _.each(targetEntity.get('abilities').models, function(ability){
-                    // DO STUFF based on the abilityUpdates
-                    // e.g., if value is between 0 and 1, view it as
-                    // a percentage. from 1 to n, as time in seconds
-                    //  Any ability property should work - damage, ticks,
-                    //  castitme, etc...
-                    var newProps = {};
-                    _.each(abilityUpdates, function(val, key){
-                        var newValue = self.attributes[key];
-                        var tmp = 0;
-
-                        // use either percentages or values
-                        if(val > -1 && val < 1){
-                            tmp = newValue - (newValue * val);
-                        } else {
-                            tmp = newValue - val;
-                        }
-
-                        newProps[key] = tmp;
-                    });
-
-                    self.set(newProps);
-                });
-            }
 
             return this;
         },
@@ -1883,6 +1850,8 @@ define(
             //
             // Takes in a target entity and source entity
             //
+            //
+            // TODO: Modify based on entity stats?
             //
             var self = this;
             logger.log('models/Ability', 'addBuff(): called : source :%O, this: %O', 
@@ -1940,15 +1909,14 @@ define(
                 statDifferences[key] = updatedStats[key] - currentStats[key];
             });
 
-            // update this ability's properties
+            // update this ability's properties based on the changes described
+            // in the passed in ability
             this.set(updatedStats);
 
             // store the updated differences for removal and tracking
+            // (note: this object is pushed to the effects array, so the 
+            // reference is updated)
             abilityBuffInstance.set({statDifferences: statDifferences}, { silent: true });
-
-            // --------------------------
-            // TODO :::::::: Track the stat difference 
-            // --------------------------
 
             // update activeEffects and stats
             this.set({ activeEffects: effects }, {silent: true});
@@ -1995,12 +1963,12 @@ define(
                 var statDifferences = foundAbility.attributes.statDifferences;
 
                 // Add the effect
-                var currentStats = this.get('attributes').attributes;
+                var currentStats = this.attributes;
 
                 _.each(statDifferences, function(difference, key){
                     updatedStats[key] = currentStats[key] - difference;
                 });
-                this.get('attributes').set(updatedStats);
+                this.set(updatedStats);
             }
 
 
