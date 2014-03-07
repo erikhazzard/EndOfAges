@@ -3,10 +3,11 @@
 //========================================
 define([
     'events',
+    'logger',
     'models/Ability',
     'collections/Abilities',
     'models/Entity'
-    ], function(events, Ability, Abilities, Entity){
+    ], function(events, logger, Ability, Abilities, Entity){
 
     describe('Ability Model Tests', function(){
         describe('INITIALIZE', function(){
@@ -57,12 +58,12 @@ define([
             // --------------------------
             describe('Buffs', function(){
 
-                describe("Adding buffs", function(){
-                    it('ability buffs should add an ability buff', function(done){
+                describe("Ability buffs", function(){
+                    it('ability buffs should add and remove an ability buff', function(done){
                         var ability = new Ability({
                             name: 'Test 1',
                             castTime: 0, cooldown: 0, castDuration: 0.0001,
-                            buffDuration: 1,
+                            buffDuration: 0.05,
                             buffEffects: { 
                                 abilities: {
                                     // decrease duration by 20%
@@ -79,7 +80,7 @@ define([
                         });
 
                         // base cast time should be the same
-                        ability.attributes.buffDuration.should.equal(1);
+                        ability.attributes.buffDuration.should.equal(0.05);
                         ability2.attributes.buffDuration.should.equal(1);
                         ability3.attributes.buffDuration.should.equal(1);
 
@@ -90,9 +91,10 @@ define([
                         // Apply buff
                         ability.effect({ source: entity1, target: entity1 });
 
+                        // test adding the buff
                         setTimeout(function(){
 
-                            ability.attributes.buffDuration.should.equal(0.8);
+                            ability.attributes.buffDuration.should.equal(0.04);
                             ability2.attributes.buffDuration.should.equal(0.8);
                             ability3.attributes.buffDuration.should.equal(0.8);
 
@@ -100,8 +102,18 @@ define([
                             ability2.attributes.activeEffects.length.should.equal(1);
                             ability3.attributes.activeEffects.length.should.equal(1);
 
+                            setTimeout(function(){
+                                // now, it should have worn off
+                                ability.attributes.buffDuration.should.equal(0.05);
+                                ability2.attributes.buffDuration.should.equal(1);
+                                ability3.attributes.buffDuration.should.equal(1);
 
-                            done();
+                                ability.attributes.activeEffects.length.should.equal(0);
+                                ability2.attributes.activeEffects.length.should.equal(0);
+                                ability3.attributes.activeEffects.length.should.equal(0);
+
+                                done();
+                            }, 70);
 
                         }, 16);
                     });
