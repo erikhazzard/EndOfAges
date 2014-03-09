@@ -290,7 +290,7 @@ define([
             var ability = new Ability({ 
                 cooldown: 0, castDuration: 0, timeCost: 0,
                 buffEffects: { armor: 10, maxHealth: 20 },
-                buffDuration: 0.04, 
+                buffDuration: 0.045, 
                 buffCanStack: true
             });
 
@@ -315,11 +315,11 @@ define([
                         setTimeout(function(){
                             assert(entity.attributes.activeEffects.length === 0);
                             done();
-                        }, 55); // 15 + 20 + 20 = 55, is > than buffDuration
+                        }, 55); // sum is > buffDuration
 
-                    }, 20); // 15 + 15 + 20 = 50, which is > than buffDuration
+                    }, 10); // sum is > than buffDuration
 
-                }, 15);
+                }, 25);
 
             }, 15);
         });

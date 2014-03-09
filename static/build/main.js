@@ -2202,6 +2202,9 @@ define(
                 //---------------------------
                 // timer is measured in seconds
                 timerLimit: 15,
+                // specifies how much to multiply the timer ticks by
+                //  higher values speed it up (haste), lower values slow it down
+                timerFactor: 0,
 
                 // reduction for casting spell. How much less does this spell cost
                 // to cast in time? Measured in seconds
@@ -5963,6 +5966,9 @@ define(
             //
             var self = this;
 
+            // TODO:::: Should timer logic live in entity?
+            // TODO: Handle rendering in separate func, not using d3?
+            //
             // 1. Update timers
             _.each(['player', 'enemy'], function timerEachGroup(entityGroup){
                 var models = self.model.attributes[entityGroup + 'Entities'].models;
@@ -5984,7 +5990,9 @@ define(
                         if( val < model.attributes.timerLimit){
                             // increase the timer by the timer step - e.g., if FPS is
                             // 60, each update tick is 1/60
-                            self[entityGroup + 'EntityTimers'][index] += self.timerStep;
+                            self[entityGroup + 'EntityTimers'][index] += (
+                                self.timerStep * model.attributes.timerFactor
+                            );
                         }
                         if ( val < 0){
                             self[entityGroup + 'EntityTimers'][index] = 0;
@@ -6002,7 +6010,9 @@ define(
                                     self[entityGroup + 'EntityTimers'][index]);
                             }
 
+                            // TODO:
                             // If auto attack is enabled, let AI decide behavior
+                            
                         } else {
                             // ENEMY
                             // ----------
@@ -6122,16 +6132,19 @@ define(
                 $el = d3.select(el);
                 var entityGroup = $el.attr('data-entityGroup');
                 var index = $el.attr('data-index');
+                var targetModel = self.model.get(entityGroup + 'Entities').models[index];
 
                 // if entity is dead, don't start timer
                 if(!self.model.get(entityGroup + 'Entities').models[index].get('isAlive')){
                     return false;
                 }
 
+                // Otherwise, resume the timer
                 var val = self[entityGroup + 'EntityTimers'][index];
 
                 var duration = ( 
-                    self.model.get(entityGroup + 'Entities').models[index].get('timerLimit') - val
+                    (targetModel.attributes.timerLimit - val) /
+                    (targetModel.attributes.timerFactor)
                 ) * 1000;
 
                 $el.transition().ease('linear') 
@@ -7187,7 +7200,7 @@ define(
             //  index: {Number} index of entity
             //  entityGroup: {String} 'player' or 'enemy'
             //
-            logger.log("views/subviews/Battle", 
+            logger.log("views/subviews/Battle",
                 '1. startTimerAnimation: << started : %O', options);
 
             // check options
@@ -7237,9 +7250,10 @@ define(
                     'data-entityGroup': entityGroup
                 }).each('end', function startTimerAnimationTransitionEnd(){
                     // 2. After bar is reset, transition to specified width
-                    var duration = ( 
-                        targetModel.get('timerLimit') - options.value
-                    ) * 1000;
+                    // must divide by the timerFactor
+                    var duration = (( 
+                        targetModel.attributes.timerLimit - options.value
+                    ) / targetModel.attributes.timerFactor) * 1000;
 
                     // keep track of duration and end width for pausing
                     // we multiply data-time by data-duration to get the

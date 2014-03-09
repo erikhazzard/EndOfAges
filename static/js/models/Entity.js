@@ -61,6 +61,9 @@ define(
                 //---------------------------
                 // timer is measured in seconds
                 timerLimit: 15,
+                // specifies how much to multiply the timer ticks by
+                //  higher values speed it up (haste), lower values slow it down
+                timerFactor: 0,
 
                 // reduction for casting spell. How much less does this spell cost
                 // to cast in time? Measured in seconds

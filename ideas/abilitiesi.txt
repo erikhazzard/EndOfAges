@@ -149,3 +149,6 @@ Damage amplification
 -----
 Ability that turns all other abilities into some random element
 
+
+------
+Ability that reflects other abilities
