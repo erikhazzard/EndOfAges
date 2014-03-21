@@ -133,7 +133,7 @@ require([
         //,'views/subviews/Map'
         //,'models/Map'
         //,'models/Entity'
-        ,'models/Ability'
+        //,'models/Ability'
     ];
 
     //// log EVERYTHING:

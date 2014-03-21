@@ -126,15 +126,12 @@ define(
                 magicResist: 10,
                 maxHealth: 10,
 
-                // DEV TESTS 
-                timerFactor: -0.8,
-
                 abilities: {
-                    // 20% faster, so decrease time by 20%
-                    coolDown: -0.5,
-                    castDuration: -0.5,
-                    castTime: -0.5,
-                    timeCost: -0.5
+                    //// 20% faster, so decrease time by 20%
+                    //coolDown: -0.5,
+                    //castDuration: -0.5,
+                    //castTime: -0.5,
+                    //timeCost: -0.5
                 }
             }
         }),
@@ -355,8 +352,88 @@ define(
                 }, delay);
 
             }
-        })
+        }),
 
+        // ------------------------------
+        // Other effects
+        // ------------------------------
+        freezeTime: new Ability({
+            name: 'Freeze Time',
+            description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+
+            buffDuration: 8,
+            buffEffects: { 
+                timerFactor: -1.0,
+
+                abilities: {
+                }
+            }
+        }),
+        stun: new Ability({
+            name: 'Stun',
+            description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+
+            buffDuration: 8,
+            // to prevent ability usage, set the time to be greater than the
+            // entitiy's max timer value. Setting to something ridiculously high
+            // also accomplishes this
+            buffEffects: { 
+                abilities: {
+                    castTime: 9999999
+                }
+            }
+        }),
+        comatose: new Ability({
+            name: 'Comatose',
+            description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+
+            damage: 1,
+            // TODO: Deal damage based on entity's timer value
+
+            buffDuration: 8,
+            // to prevent ability usage, set the time to be greater than the
+            // entitiy's max timer value. Setting to something ridiculously high
+            // also accomplishes this
+            buffEffects: { 
+                timerFactor: -1.0,
+                abilities: {
+                    castTime: 9999999
+                }
+            }
+        }),
+        haste: new Ability({
+            name: 'Haste',
+            description: "Increases your timer speed by 50%",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+
+            buffDuration: 8,
+            buffEffects: { 
+                timerFactor: 0.5
+            }
+        })
 
     };
 

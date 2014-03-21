@@ -71,9 +71,6 @@ TODO: Extra damage from elemental effects
 *********** STUNS
 
 ===========================================================================
-New Idea:
-    -Effect log. A small text window showing history of all effects?
-        -buff wears off, buff add, etc
 
 ====>>>> Data viz for end of fight, either on win or loss. Listen for events
 ====>>>>>>>> Track all effects by time
@@ -85,3 +82,12 @@ New Idea:
 ------------------------------------------
 SAVE : use localForage : https://github.com/mozilla/localForage
 
+
+==========================================================================
+==========================================================================
+Notes on Pixijs
+    -Can use a DisplayObjectContainer to contain groups of sprites, then
+    set position on the container
+    -Can use spritesheets to load assets
+    -check spritesheet example for using spritesheet with frames
+    -use JSON Hash in texture packer

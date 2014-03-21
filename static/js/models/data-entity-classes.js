@@ -64,6 +64,18 @@ define(
         }),
 
         new EntityClass({
+            name: 'Time Mage',
+            description: 'Bla',
+            sprite: 'timemage',
+            abilities: new Abilities([
+                ABILITIES.freezeTime,
+                ABILITIES.stun,
+                ABILITIES.comatose,
+                ABILITIES.haste
+            ])
+        }),
+
+        new EntityClass({
             name: 'Ranger',
             description: 'An archer',
             sprite: 'ranger',

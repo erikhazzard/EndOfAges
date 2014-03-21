@@ -35,24 +35,22 @@ define(
                 effectId: null,
                 description: 'PLACEHOLDER TEXT :::::::::::',
 
-                // Damage Over Time (DOT) properties
-                // ticks: number of times to do the effect
-                ticks: 0,
-                // time between each tick
-                tickDuration: 1,
-
-                // castDuration - measured in seconds
-                // how long the spell takes to cast - how long between the source
-                // entity using the spell and the target entity receiving the effect
-                castDuration: 0.5,
-
                 // How long must the player wait until they can use this ability
                 // This SHOULD always be greater than or equal to than the timeCost
                 //  (e.g., if you need to wait 3 seconds to cast it but the cost is 4
                 //  seconds, you'll have negative time)
                 //
+                //  This property determines if the entity can cast the spell or
+                //  not. If the castTime is >= the current tick counter,
+                //  entity can cast
+                //
                 // Measured in seconds
                 castTime: 1,
+
+                // castDuration - measured in seconds
+                // how long the spell takes to cast - how long between the source
+                // entity using the spell and the target entity receiving the effect
+                castDuration: 0.5,
 
                 // How much this ability costs in time units. Normally, this
                 // is the same as the cast time. THIS property is subtracted from
@@ -108,6 +106,14 @@ define(
                 // could be either 'source' or 'target', will damage the entities
                 // that are either the source or target of the used ability
                 damageTarget: 'target',
+
+                // DOT
+                // ----------------------
+                // Damage Over Time (DOT) properties
+                // ticks: number of times to do the effect
+                ticks: 0,
+                // time between each tick
+                tickDuration: 1,
 
                 // Heal
                 // --------------------------
