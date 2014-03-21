@@ -421,11 +421,11 @@ define(
                         // ALIVE
                         // --------------
                         // increase timer
-                        if( val < model.attributes.timerLimit){
+                        if( val < model.attributes.attributes.attributes.timerLimit){
                             // increase the timer by the timer step - e.g., if FPS is
                             // 60, each update tick is 1/60
                             self[entityGroup + 'EntityTimers'][index] += (
-                                self.timerStep * model.attributes.timerFactor
+                                self.timerStep * model.attributes.attributes.attributes.timerFactor
                             );
                         }
                         if ( val < 0){
@@ -562,6 +562,7 @@ define(
             var sel = d3.selectAll('#battle .timer-bar');
 
             // for each selection, update transition
+            // TODO: pull this into a function, call for each entity
             _.each(sel[0], function unpauseEachSelection(el){
                 $el = d3.select(el);
                 var entityGroup = $el.attr('data-entityGroup');
@@ -577,8 +578,8 @@ define(
                 var val = self[entityGroup + 'EntityTimers'][index];
 
                 var duration = ( 
-                    (targetModel.attributes.timerLimit - val) /
-                    (targetModel.attributes.timerFactor)
+                    (targetModel.attributes.attributes.attributes.timerLimit - val) /
+                    (targetModel.attributes.attributes.attributes.timerFactor)
                 ) * 1000;
 
                 $el.transition().ease('linear') 
@@ -1026,7 +1027,7 @@ define(
                     // the domain units is in seconds
                     self[entityGroup + 'EntityTimeScales'].push(
                         d3.scale.linear()
-                            .domain([ 0, model.get('timerLimit')])
+                            .domain([ 0, model.attributes.attributes.attributes.timerLimit])
                             .range([ 0, entityWidth ])
                     );
                 });
@@ -1685,9 +1686,9 @@ define(
                 }).each('end', function startTimerAnimationTransitionEnd(){
                     // 2. After bar is reset, transition to specified width
                     // must divide by the timerFactor
-                    var duration = (( 
-                        targetModel.attributes.timerLimit - options.value
-                    ) / targetModel.attributes.timerFactor) * 1000;
+                    var duration = (
+                        (targetModel.attributes.attributes.attributes.timerLimit - options.value) / 
+                        targetModel.attributes.attributes.attributes.timerFactor) * 1000;
 
                     // keep track of duration and end width for pausing
                     // we multiply data-time by data-duration to get the

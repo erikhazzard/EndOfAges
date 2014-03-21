@@ -14,74 +14,88 @@ define(
     ){
 
     var EntityAttributes = Backbone.Model.extend({
-        defaults: {
-            health: 100,
-            maxHealth: 100,
+        defaults: function(){ 
+            return {
+                // timer related
+                //---------------------------
+                timerLimit: 15, // (seconds)
+                // specifies how much to multiply the timer ticks by
+                //  higher values speed it up (haste), lower values slow it down
+                timerFactor: 1,
 
-            //Combat stats
-            //---------------------------
-            // Physcial
-            armor: 0,
-            attack: 0,
+                // ======================
+                //
+                // Stats
+                //
+                // ======================
+                health: 100,
+                maxHealth: 100,
 
-            magicResist: 0,
-            magicPower: 0,
+                //Combat stats
+                //---------------------------
+                // Physcial
+                armor: 0,
+                attack: 0,
 
-            //Regen
-            //---------------------------
-            //How many points to regen per 'tick'
-            regenHealth: 0,
+                magicResist: 0,
+                magicPower: 0,
 
-            // element modifiers
-            //---------------------------
-            air: 0,
-            dark: 0,
-            earth: 0,
-            fire: 0,
-            light: 0,
-            water: 0,
+                //Regen
+                //---------------------------
+                //How many points to regen per 'tick'
+                regenHealth: 0,
 
-            //Resists
-            //---------------------------
-            resistAir: 0,
-            resistDark: 0,
-            resistEarth: 0,
-            resistFire: 0,
-            resistLight: 0,
-            resistWater: 0,
+                // element modifiers
+                //---------------------------
+                air: 0,
+                dark: 0,
+                earth: 0,
+                fire: 0,
+                light: 0,
+                water: 0,
 
-            // Other modifiers
-            // --------------------------
-            //Chance to deal critical damage (for all abilities)
-            chanceCritical: 0,
+                //Resists
+                //---------------------------
+                resistAir: 0,
+                resistDark: 0,
+                resistEarth: 0,
+                resistFire: 0,
+                resistLight: 0,
+                resistWater: 0,
 
-            //Base crit damage is 100% of normal damage. This raises that
-            criticalModifier: 0,
+                // Other modifiers
+                // --------------------------
+                //Chance to deal critical damage (for all abilities)
+                chanceCritical: 0,
 
-            //Combat stats which affect above values
-            //---------------------------
-            //Every 100 points of multiattack means a chance to strike
-            ////  opponent N number of times
-            chanceMultiAttack: 0,
+                //Base crit damage is 100% of normal damage. This raises that
+                criticalModifier: 0,
 
-            //Block will absorb some % of meele attacks if shield
-            chanceBlock: 0,
+                //Combat stats which affect above values
+                //---------------------------
+                //Every 100 points of multiattack means a chance to strike
+                ////  opponent N number of times
+                chanceMultiAttack: 0,
 
-            //Chance to completely avoid an attack
-            //  NOTE: Should avoid only a single attack. Dodge should
-            //  check all multi attacks as well
-            chanceDodge: 0,
+                //Block will absorb some % of meele attacks if shield
+                chanceBlock: 0,
 
-            // Chance to parry (avoid) some damage
-            chanceParry: 0,
+                //Chance to completely avoid an attack
+                //  NOTE: Should avoid only a single attack. Dodge should
+                //  check all multi attacks as well
+                chanceDodge: 0,
 
-            //  Chance to avoid some damage AND return part of that damage back
-            //  to the attack. Must first Parry, then this is the % chance that
-            //  a parry will turn into a Riposte
-            chanceRiposte: 0,
+                // Chance to parry (avoid) some damage
+                chanceParry: 0,
 
-            // Chance for a meele hit to do area of effect damage
-            chanceAoe: 0
+                //  Chance to avoid some damage AND return part of that damage back
+                //  to the attack. Must first Parry, then this is the % chance that
+                //  a parry will turn into a Riposte
+                chanceRiposte: 0,
+
+                // Chance for a meele hit to do area of effect damage
+                chanceAoe: 0
+            };
         }
     });
 

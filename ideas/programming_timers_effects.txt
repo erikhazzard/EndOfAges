@@ -1,0 +1,5 @@
+Timer Ideas:
+-Time could live in entity model as a property (not an attribute that gets changed and triggered with overhead)
+    -could store reference in the battle controller if lookup is expensive
+
+All the rendering code / d3 code looks at the entity model to get the current time / max time to draw timer bars

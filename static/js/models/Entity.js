@@ -57,19 +57,6 @@ define(
                 // generate a name
                 name: generateName(),
 
-                // Timer properties
-                //---------------------------
-                // timer is measured in seconds
-                timerLimit: 15,
-                // specifies how much to multiply the timer ticks by
-                //  higher values speed it up (haste), lower values slow it down
-                timerFactor: 0,
-
-                // reduction for casting spell. How much less does this spell cost
-                // to cast in time? Measured in seconds
-                // TODO: This. How to implement? Modify ability directly? 
-                castTimeReduction: 0,
-
                 // ==========================
                 // Stats
                 // ==========================
@@ -86,6 +73,7 @@ define(
                 //
                 // TODO: pass in values?
                 // Starting values based on the entity's race / class
+                // Note: Timer properties are set in attributes
                 attributes: {},
 
                 //Base attributes (copied over when a game starts to allow

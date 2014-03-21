@@ -125,12 +125,16 @@ define(
                 armor: 10,
                 magicResist: 10,
                 maxHealth: 10,
+
+                // DEV TESTS 
+                timerFactor: -0.8,
+
                 abilities: {
                     // 20% faster, so decrease time by 20%
-                    coolDown: -0.99,
-                    castDuration: -0.9,
-                    castTime: -0.9,
-                    timeCost: -0.9
+                    coolDown: -0.5,
+                    castDuration: -0.5,
+                    castTime: -0.5,
+                    timeCost: -0.5
                 }
             }
         }),
