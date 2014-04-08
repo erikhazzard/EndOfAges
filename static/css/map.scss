@@ -14,41 +14,67 @@
         fill: #343434;
         stroke: #ffffff;
         stroke-width: 2px;
-        -webkit-transition: all .4s;
-    }
-    .node-visited {
-        cursor: no-drop;
+
+        stroke-width: 1px;
+        //stroke: rgba(20,20,20,0.4);
+        //fill: rgba(255,255,255,0.0);
+        
+        //stroke: rgba(255,255,255,0.9);
+        stroke: rgba(20,20,20,0.8);
+        fill: rgba(255,255,255,0.7);
+
+
+        /*filter: url(#filter-outline);*/
     }
     .node-hover .map-node {
-        fill: #f0f0f0;
+        fill: rgba(0,0,0,0.6);
+        stroke: rgba(255,255,255,0.6);
+    }
+
+    .node-visited {
+        cursor: no-drop;
     }
     .node-current .map-node {
         cursor: default !important;
     }
 
     .node-visited .map-node.node-visited {
-        fill: #44aa44 !important;
+        //fill: #44aa44 !important;
+
+        //fill: #40C81F !important; // other green
+        fill: #49B726 !important;
+        filter: none;
     }
 
     // Paths
     // ----------------------------------
     .visited-path-dotted {
+        filter: url(#filter-wavy);
         fill: none;
         stroke: #343434;
         opacity: 0.9;
         stroke-width: 6px;
     }
 
+    .map-paths {
+        //filter: url('#filter-drop-shadow-base');
+    }
     .destination-path-dotted {
-        fill: none;
+        fill: #ffffff;
+
+        //stroke: #fffb47; // yellow
         stroke: #ffffff;
+
+        filter: url(#filter-wavy);
+
         opacity: 0.6;
         stroke-dasharray: 10px 4px;
-        stroke-width: 6px;
+        stroke-width: 7px;
     }
     .destination-path-animated{
         fill: none;
+        filter: url(#filter-wavy);
         stroke: #343434;
-        stroke-width: 8px;
+        stroke-width: 5px;
     }
 }

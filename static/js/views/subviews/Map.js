@@ -77,7 +77,6 @@ define(
                     .attr({
                         d: line, 
                         'class': 'to-remove destination-path-animated',
-                        'filter': 'url(#filter-wavy)'
                     })
                     .call(animatePath);
             });
@@ -331,10 +330,7 @@ define(
 
             // add group for visited paths if it hasn't been added yet
             if(!this.visitedPaths){
-                this.visitedPaths = this.paths.append('g')
-                    .attr({ 
-                        'filter': 'url(#filter-wavy)'
-                    });
+                this.visitedPaths = this.paths.append('g');
             }
 
             // Add a line between the last visited node and the current
@@ -392,7 +388,6 @@ define(
                 .attr({
                     d: line, 
                     'class': 'destination-path destination-path-dotted',
-                    'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
 
@@ -411,10 +406,18 @@ define(
 
                     path.transition().duration(duration).ease("linear")
                         .attr("stroke-dashoffset", -totalLength * i)
-                            .each('end', function(){ d3.select(this).call(animateNextPath); });
+                            .each('end', function(){ 
+                                var self = this;
+                                requestAnimationFrame(function(){
+                                    d3.select(self).call(animateNextPath); 
+                                });
+                            });
                     i += 1;
                 }
-                animateNextPath();
+                
+                // TODO: This is crazy bad performance, slows everything down.
+                //  TODO: add this back, but fix slowness
+                //animateNextPath();
             });
 
             // remove old paths

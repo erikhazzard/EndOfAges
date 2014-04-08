@@ -46,9 +46,12 @@ define(
 
         onShow: function(){
             if(!this.entityModel.get('isAlive')){
-                this.$el.append('<div class="entity-dead"></div>');
+                this.$el.addClass('entity-dead');
             }
 
+            this.$timerInfo = $('<div class="timer-info"></div>');
+            this.$el.append(this.$timerInfo);
+            this.$timerInfo = this.$timerInfo[0];
             return this;
         },
 
@@ -63,6 +66,8 @@ define(
             // timers to do it instead, less DOM updates
             var self = this;
 
+
+            // TODO: update item based on timer
             _.each(this.collection.models, function checkTimerAbilityListLoop(ability){
                 // see if ability is usable. if so, trigger a change event
                 // if necessary (which abilityItem view listens for)
@@ -94,7 +99,7 @@ define(
             logger.log('views/subviews/battle/AbilityList', 
             'entityDied() : bluring abilities');
 
-            this.$el.append('<div class="entity-dead"></div>');
+            this.$el.addClass('entity-dead');
 
             return this;
         }

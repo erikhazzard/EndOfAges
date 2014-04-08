@@ -20,6 +20,8 @@ define([
     // TODO: remove, only for dev
     'views/DevTools'
 
+    ,'collections/Classes'
+
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
@@ -33,6 +35,8 @@ define([
 
         // TODO: remove once out of dev
         DevTools
+
+        ,Classes
     ){
 
     // console color
@@ -215,7 +219,12 @@ define([
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [this.pageCreateCharacter.model];
+                var playerEntityModels = [
+                    this.pageCreateCharacter.model,
+                    new Entity({
+                        class: new Classes().models[0]
+                    })
+                ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;

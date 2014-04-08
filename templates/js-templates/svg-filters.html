@@ -35,5 +35,40 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
         </filter>
 
         <filter id="blur"> <feGaussianBlur stdDeviation="3" /> </filter>
+
+        <filter id="filter-drop-shadow">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.2"/>
+            <feOffset dx="2" dy="2" result="offsetblur"/>
+            <feFlood flood-color="rgba(0,0,0,0.9)"/>
+            <feComposite in2="offsetblur" operator="in"/>
+            <feMerge> <feMergeNode/> <feMergeNode in="SourceGraphic"/> </feMerge>
+        </filter>
+
+        <filter id="filter-outline">
+            <feFlood flood-color="#000000" result="base" />
+            <feMorphology result="bigger" in="SourceGraphic" operator="dilate" radius="1"/>
+            <feColorMatrix result="mask" in="bigger" type="matrix"
+            values="0 0 0 0 0
+            0 0 0 0 0
+            0 0 0 0 0
+            0 0 0 1 0" />
+            <feComposite result="drop" in="base" in2="mask" operator="in" />
+            <feBlend in="SourceGraphic" in2="drop" mode="normal" />
+        </filter>
+
+
+<filter id="filter-outline-blur">
+   <feFlood flood-color="white" result="base" />
+   <feMorphology result="bigger" in="SourceGraphic" operator="dilate" radius="2"/>
+   <feColorMatrix result="mask" in="bigger" type="matrix"
+      values="0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 1 0" />
+   <feComposite result="drop" in="base" in2="mask" operator="in" />
+   <feGaussianBlur result="blur" in="drop" stdDeviation="1" />
+   <feBlend in="SourceGraphic" in2="blur" mode="normal" />
+</filter>
+
     </defs>
 </svg>

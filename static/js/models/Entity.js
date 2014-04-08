@@ -86,7 +86,8 @@ define(
                 //
                 // TODO: AI Should be handled OUTSIDE of this model
                 // ==========================
-                aiDelay: 0,
+                // // TODO: set to null for real game
+                aiDelay: 5,
 
                 // list of enemies and their aggro. Key is entity ID, value is
                 // aggro value
@@ -126,7 +127,9 @@ define(
 
             // TODO: get AIdelay from server
             // TODO: Don't set this for a player
-            this.set({ aiDelay: Math.random() * 3 });
+            if(this.attributes.aiDelay === null){
+                this.set({ aiDelay: Math.random() * 3 });
+            }
 
             // --------------------------
             // SET ABILITIES FROM CLASS
@@ -750,6 +753,10 @@ define(
             // TODO: this is ugly, rework this, updates battle AI, use aggrolist
             // TODO: Inherit AI from classes (healer, warrior, etc)
             // TODO: make AI work for players too
+            //
+            // Params: 
+            //  time: {Number} in seconds
+            //  battle: {Battle Model}
             //
             //
             // called each tick to control AI

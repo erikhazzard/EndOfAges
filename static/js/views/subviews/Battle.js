@@ -1594,20 +1594,20 @@ define(
 
 
             // then, fade in text and float it up and out
-            $damageText.transition().ease('cubic-in').duration(140)
+            $damageText.transition().ease('cubic-in').duration(160)
                     .attr({ 
                         y: -15, 
                         x: textX < 0 ? textX - 20 : textX + 20,
                         opacity: 1
                     })
                     // reached the apex
-                    .transition().ease('cubic-out').duration(400)
+                    .transition().ease('cubic-out').duration(420)
                         .attr({  
                             y: 0, 
                             x: textX < 0 ? textX - 50 : textX + 50,
                             opacity: 1
                         })
-                        .transition().ease('cubic-in').duration(250)
+                        .transition().ease('cubic-in').duration(270)
                             .attr({
                                 y: 40, 
                                 'font-size': 0,

@@ -36,30 +36,38 @@
   fill: #343434;
   stroke: #ffffff;
   stroke-width: 2px;
-  -webkit-transition: all .4s; }
+  stroke-width: 1px;
+  stroke: rgba(20, 20, 20, 0.8);
+  fill: rgba(255, 255, 255, 0.7);
+  /*filter: url(#filter-outline);*/ }
+#map .node-hover .map-node {
+  fill: rgba(0, 0, 0, 0.6);
+  stroke: rgba(255, 255, 255, 0.6); }
 #map .node-visited {
   cursor: no-drop; }
-#map .node-hover .map-node {
-  fill: #f0f0f0; }
 #map .node-current .map-node {
   cursor: default !important; }
 #map .node-visited .map-node.node-visited {
-  fill: #44aa44 !important; }
+  fill: #49B726 !important;
+  filter: none; }
 #map .visited-path-dotted {
+  filter: url(#filter-wavy);
   fill: none;
   stroke: #343434;
   opacity: 0.9;
   stroke-width: 6px; }
 #map .destination-path-dotted {
-  fill: none;
+  fill: #ffffff;
   stroke: #ffffff;
+  filter: url(#filter-wavy);
   opacity: 0.6;
   stroke-dasharray: 10px 4px;
-  stroke-width: 6px; }
+  stroke-width: 7px; }
 #map .destination-path-animated {
   fill: none;
+  filter: url(#filter-wavy);
   stroke: #343434;
-  stroke-width: 8px; }
+  stroke-width: 5px; }
 
 #battle .effect-magicMissle path {
   fill: #ffffff; }
@@ -340,9 +348,14 @@
   font-size: 1.5em;
   font-weight: bold; }
 #battle .entity-group-text.damage.negative {
-  color: #dd0000; }
+  fill: #dd3333;
+  stroke: #990000; }
 #battle .entity-group-text.damage.positive {
-  color: #33dd33; }
+  fill: #33dd33;
+  stroke: #009900; }
+#battle .entity-group-text.damage.neutral {
+  fill: #999999;
+  stroke: #ffffff; }
 #battle .timer-bar-border {
   fill: none;
   stroke: #343434; }
@@ -380,6 +393,7 @@
       top: 0; }
       .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper {
         border: 1px solid #343434;
+        border-radius: 3px;
         cursor: pointer;
         float: left;
         margin: 0 0 0 1%;
@@ -403,6 +417,10 @@
         background-color: #cdcdcd; }
       .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.use {
         background-color: #44dd44; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.enemy .ability-item {
+        background: #dd3333; }
+      .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.player .ability-item {
+        background: #33dd33; }
   .game-battle-wrapper #battle-center-wrapper {
     bottom: 0;
     left: 200px;

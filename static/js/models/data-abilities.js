@@ -89,8 +89,8 @@ define(
         heal: new Ability({
             name: 'Heal',
             effectId: 'minorHealing',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 5.5,
+            timeCost: 5.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',

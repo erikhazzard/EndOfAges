@@ -64,6 +64,17 @@ define(
             return this;
         },
 
+        onShow: function(){
+            // add class based on targets
+            if(this.model.attributes.validTargets.indexOf('enemy') > -1){
+                this.$el.addClass('enemy');
+            }
+            if(this.model.attributes.validTargets.indexOf('player') > -1){
+                this.$el.addClass('player');
+            }
+            return this;
+        },
+
         // ------------------------------
         // timer updates
         // ------------------------------

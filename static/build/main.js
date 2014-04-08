@@ -2247,7 +2247,8 @@ define(
                 //
                 // TODO: AI Should be handled OUTSIDE of this model
                 // ==========================
-                aiDelay: 0,
+                // // TODO: set to null for real game
+                aiDelay: 5,
 
                 // list of enemies and their aggro. Key is entity ID, value is
                 // aggro value
@@ -2287,7 +2288,9 @@ define(
 
             // TODO: get AIdelay from server
             // TODO: Don't set this for a player
-            this.set({ aiDelay: Math.random() * 3 });
+            if(this.attributes.aiDelay === null){
+                this.set({ aiDelay: Math.random() * 3 });
+            }
 
             // --------------------------
             // SET ABILITIES FROM CLASS
@@ -2911,6 +2914,10 @@ define(
             // TODO: this is ugly, rework this, updates battle AI, use aggrolist
             // TODO: Inherit AI from classes (healer, warrior, etc)
             // TODO: make AI work for players too
+            //
+            // Params: 
+            //  time: {Number} in seconds
+            //  battle: {Battle Model}
             //
             //
             // called each tick to control AI
@@ -3737,8 +3744,8 @@ define(
         heal: new Ability({
             name: 'Heal',
             effectId: 'minorHealing',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 5.5,
+            timeCost: 5.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -4481,7 +4488,6 @@ define(
                     .attr({
                         d: line, 
                         'class': 'to-remove destination-path-animated',
-                        'filter': 'url(#filter-wavy)'
                     })
                     .call(animatePath);
             });
@@ -4735,10 +4741,7 @@ define(
 
             // add group for visited paths if it hasn't been added yet
             if(!this.visitedPaths){
-                this.visitedPaths = this.paths.append('g')
-                    .attr({ 
-                        'filter': 'url(#filter-wavy)'
-                    });
+                this.visitedPaths = this.paths.append('g');
             }
 
             // Add a line between the last visited node and the current
@@ -4796,7 +4799,6 @@ define(
                 .attr({
                     d: line, 
                     'class': 'destination-path destination-path-dotted',
-                    'filter': 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
 
@@ -4815,10 +4817,18 @@ define(
 
                     path.transition().duration(duration).ease("linear")
                         .attr("stroke-dashoffset", -totalLength * i)
-                            .each('end', function(){ d3.select(this).call(animateNextPath); });
+                            .each('end', function(){ 
+                                var self = this;
+                                requestAnimationFrame(function(){
+                                    d3.select(self).call(animateNextPath); 
+                                });
+                            });
                     i += 1;
                 }
-                animateNextPath();
+                
+                // TODO: This is crazy bad performance, slows everything down.
+                //  TODO: add this back, but fix slowness
+                //animateNextPath();
             });
 
             // remove old paths
@@ -5128,6 +5138,17 @@ define(
             return this;
         },
 
+        onShow: function(){
+            // add class based on targets
+            if(this.model.attributes.validTargets.indexOf('enemy') > -1){
+                this.$el.addClass('enemy');
+            }
+            if(this.model.attributes.validTargets.indexOf('player') > -1){
+                this.$el.addClass('player');
+            }
+            return this;
+        },
+
         // ------------------------------
         // timer updates
         // ------------------------------
@@ -5236,9 +5257,12 @@ define(
 
         onShow: function(){
             if(!this.entityModel.get('isAlive')){
-                this.$el.append('<div class="entity-dead"></div>');
+                this.$el.addClass('entity-dead');
             }
 
+            this.$timerInfo = $('<div class="timer-info"></div>');
+            this.$el.append(this.$timerInfo);
+            this.$timerInfo = this.$timerInfo[0];
             return this;
         },
 
@@ -5253,6 +5277,8 @@ define(
             // timers to do it instead, less DOM updates
             var self = this;
 
+
+            // TODO: update item based on timer
             _.each(this.collection.models, function checkTimerAbilityListLoop(ability){
                 // see if ability is usable. if so, trigger a change event
                 // if necessary (which abilityItem view listens for)
@@ -5284,7 +5310,7 @@ define(
             logger.log('views/subviews/battle/AbilityList', 
             'entityDied() : bluring abilities');
 
-            this.$el.append('<div class="entity-dead"></div>');
+            this.$el.addClass('entity-dead');
 
             return this;
         }
@@ -7261,20 +7287,20 @@ define(
 
 
             // then, fade in text and float it up and out
-            $damageText.transition().ease('cubic-in').duration(140)
+            $damageText.transition().ease('cubic-in').duration(160)
                     .attr({ 
                         y: -15, 
                         x: textX < 0 ? textX - 20 : textX + 20,
                         opacity: 1
                     })
                     // reached the apex
-                    .transition().ease('cubic-out').duration(400)
+                    .transition().ease('cubic-out').duration(420)
                         .attr({  
                             y: 0, 
                             x: textX < 0 ? textX - 50 : textX + 50,
                             opacity: 1
                         })
-                        .transition().ease('cubic-in').duration(250)
+                        .transition().ease('cubic-in').duration(270)
                             .attr({
                                 y: 40, 
                                 'font-size': 0,
@@ -9128,6 +9154,8 @@ define('Controller',[
     // TODO: remove, only for dev
     'views/DevTools'
 
+    ,'collections/Classes'
+
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
@@ -9141,6 +9169,8 @@ define('Controller',[
 
         // TODO: remove once out of dev
         DevTools
+
+        ,Classes
     ){
 
     // console color
@@ -9323,7 +9353,12 @@ define('Controller',[
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [this.pageCreateCharacter.model];
+                var playerEntityModels = [
+                    this.pageCreateCharacter.model,
+                    new Entity({
+                        class: new Classes().models[0]
+                    })
+                ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;
