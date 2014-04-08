@@ -23,9 +23,17 @@ define(
     function animatePath(path) {
         path.transition()
             .duration(1500)
-            .ease('linear')
+            .ease('cubic-in-out')
             .attrTween("stroke-dasharray", tweenDash)
             .each("end", function() { d3.select(this).call(animatePath); });
+    }
+    function animatePathOnce(path) {
+        path.transition()
+            //.duration(1500)
+            //.ease('linear')
+            .duration(1500)
+            .ease('cubic-in-out')
+            .attrTween("stroke-dasharray", tweenDash);
     }
 
     function tweenDash() {
@@ -63,7 +71,6 @@ define(
             // When the current node changes, update the map
             this.listenTo(this.model, 'change:currentNode', this.updateMap);
 
-
             // TODO: on node mouse over, draw line
             // TODO: NOOOO remove this, this is JUST for demo
             this.listenTo(events, 'nodeHoverOn', function(options){
@@ -76,11 +83,14 @@ define(
                 self.paths.append('path')
                     .attr({
                         d: line, 
-                        'class': 'to-remove destination-path-animated',
+                        'class': 'to-remove destination-path-animated'
                     })
                     .call(animatePath);
             });
             this.listenTo(events, 'nodeHoverOff', function(options){
+                // if we want to ignore hover events
+                if(this._ignoreNodeHoverOff){ return false; }
+
                 self.paths.selectAll('.to-remove').transition()
                     .duration(0);
                 self.paths.selectAll('.to-remove').remove();
@@ -253,8 +263,12 @@ define(
             nodes.enter().append('g')
                 .on('mouseenter', this.nodeHoverStart)
                 .on('mouseleave', this.nodeHoverEnd)
-                .on('touchend', this.nodeClicked)
-                .on('click', this.nodeClicked);
+                .on('touchend', function(d,i){ 
+                    self.nodeClicked.call(self, d,i, this); 
+                })
+                .on('click', function(d,i){ 
+                    self.nodeClicked.call(self, d,i, this); 
+                });
 
             // add class names to the node wrapper
             nodes.attr({ 
@@ -431,9 +445,18 @@ define(
         // Map Node interactions
         //
         // ------------------------------
-        nodeClicked: function nodeClicked(d,i){
+        nodeClicked: function nodeClicked(d,i,context){
+            // Called when a node is clicked.
+            //  Moves entity, draws path, triggers showNode event
+
             // CLICK event
             // callback when a node is interacted with
+            // parameters:
+            //  d: d3 selected datum
+            //  i: index
+            //  context: `this` context of the selection
+            var self = this;
+            //
             // TODO: What should happen?
             logger.log('views/subviews/Map', '%s %O %O', 
                 'nodeClicked:', d, i);
@@ -450,7 +473,39 @@ define(
                 alert('Already visted this location');
             } else {
                 // Can travel to the node
-                events.trigger('map:nodeClicked', {node: d.node});
+                //
+                
+                // pause / force stop the current animation if one exists
+                requestAnimationFrame(function(){
+                    self.nodeHoverEnd.call(context,d,i);
+
+                    // force draw a line afterwards
+                    self._ignoreNodeHoverOff = true;
+                    setTimeout(function(){
+                        self.nodeHoverEnd.call(context,d,i);
+
+                        var line = function(){
+                            return d3.svg.line()([
+                                [self.nodes.current.x, self.nodes.current.y],
+                                [d.x, d.y]
+                            ]);
+                        };
+                        self.paths.append('path')
+                            .attr({
+                                d: line, 
+                                'class': 'to-remove destination-path-animated'
+                            })
+                            .call(animatePathOnce);
+
+                    }, 20);
+
+                    // Move the entity, then trigger the nodeClicked event
+                    // when the entity finishes moving to show the next node
+                    self.moveEntity(d, function(){
+                        events.trigger('map:nodeClicked', {node: d.node});
+                        self._ignoreNodeHoverOff = true;
+                    });
+                });
             }
         },
 
@@ -505,21 +560,33 @@ define(
             this.updateNodes();
             this.updatePaths();
 
+            //// Don't need to move entity anymore, already moved
+            //// transition the entity to the next node
+            //// NOTE: TODO: Only move entity if the player lost, but in that
+            //// case move the entity BACK
+            //this.moveEntity();
+
             // minor delay to delay SVG filter effect
             setTimeout(function(){
-                self.updateVisible.call(self);
+                requestAnimationFrame(function(){
+                    self.updateVisible.call(self);
+                });
             }, 20);
-
-            // transition the entity to the next node
-            this.moveEntity();
 
             return this;
         },
 
-        moveEntity: function moveEntity(){
+        moveEntity: function moveEntity(node, callback){
             // Move the entity sprite to the next node. This is called whenever
             // the node instance successfully is completed
+            //
+            // if node is passed in, will manually move the entity to the
+            // passed in node
             var self = this;
+
+            var currentNode = self.nodes.current;
+            // if a specific node was passed in, use it
+            if(node){ currentNode = node; }
 
             this.entitySprites.transition()
                 .duration(this.CONFIG.updateDuration)
@@ -527,10 +594,13 @@ define(
                 .attr({ 
                     transform: function(){ 
                         return 'translate(' + [
-                            self.nodes.current.x - self.entityWidth/2,
-                            self.nodes.current.y - self.entityHeight/1.2
+                            currentNode.x - self.entityWidth/2,
+                            currentNode.y - self.entityHeight/1.2
                         ] + ')';
                     }
+                })
+                .each('end', function(){
+                    if(callback){ callback(); }
                 });
             
             return this;
@@ -625,31 +695,51 @@ define(
                 filter = 'url(#filter-map)';
             }
 
+            var _duration = 1500;
+            var _delay = 250;
+
+            // For the first rendering, low delay or duration
+            if(!this._updateVisibleCalled){
+                _duration = 800;
+                _delay = 0;
+                this._updateVisibleCalled = true;
+            }
+
+
             // create a masked path to show visible nodes
             var masks = this.maskPath.selectAll('.visibleNode')
                 .data(vertices);
 
-            masks.enter()
+            var newMasks = masks.enter()
                 .append('circle')
                 .style({
-                    fill: '#ffffff'   
+                    fill: '#000000',
+                    opacity: 0
                 });
 
-            masks.attr({
-                'class': 'visibleNode',
-                cx: function(d){ return d.x; },
-                cy: function(d){ return d.y; },
-                filter: filter,
-                r: function(d){ 
-                    var r = 73;
-                    // note: make unvisited nodes have a smaller visible
-                    // radius
-                    if(d.node.attributes.isCurrentNode){ } 
-                    else if(d.node.attributes.visited){ r = 73; } 
-                    else { r = 45; }
-                    return r;
-                }
-            });
+            // update existing masks
+            masks
+                .attr({
+                    'class': 'visibleNode',
+                    cx: function(d){ return d.x; },
+                    cy: function(d){ return d.y; },
+                    filter: filter,
+                    r: function(d){ 
+                        var r = 73;
+                        // note: make unvisited nodes have a smaller visible
+                        // radius
+                        if(d.node.attributes.isCurrentNode){ } 
+                        else if(d.node.attributes.visited){ r = 73; } 
+                        else { r = 45; }
+                        return r;
+                    }
+                });
+                
+            masks.transition().duration(_duration).delay(_delay)
+                .style({ 
+                    fill: '#ffffff',
+                    opacity: 1
+                });
 
             masks.exit().remove();
 

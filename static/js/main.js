@@ -128,7 +128,7 @@ require([
 
         // optional / for dev
         // ------------------------------
-        ,'Controller'
+        //,'Controller'
         //,'views/subviews/Battle'
         //,'views/subviews/Map'
         //,'models/Map'
