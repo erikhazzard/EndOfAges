@@ -100,11 +100,19 @@ define(
         },
 
         onShow: function mapViewOnShow(){
-            // Setup the map svg element and groups
-            this.prepareMap();
+            var self = this;
 
-            // draw / update the map
-            this.updateMap();
+            // Setup the map svg element and groups
+            requestAnimationFrame(function(){
+                self.prepareMap();
+
+                // draw / update the map
+                // update the map *after* it has been prepared so it has time
+                // to draw and render the SVG
+                requestAnimationFrame(function(){
+                    self.updateMap();
+                });
+            });
 
             return this;
         },
@@ -122,11 +130,6 @@ define(
             var svg = d3.select('#map');
             // empty existing map
             svg.select('.svg-wrapper').remove();
-
-            var width = $('#map').width();
-            this.width = width;
-            var height = $('#map').height();
-            this.height = height;
 
             // setup wrapper and elements
             this.wrapper = svg.append('g').attr({ 'class': 'svg-wrapper map' });
@@ -546,6 +549,9 @@ define(
             var self = this;
             logger.log('views/subviews/Map', 
                 '=== 1. updateMap() called');
+
+            this.width = $('#map')[0].getBBox().width;
+            this.height = $('#map')[0].getBBox().height;
 
             // update the store node references
             this.updateNodeReferences();

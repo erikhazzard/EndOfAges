@@ -25,8 +25,37 @@
   right: 0;
   left: 0; }
 
+#map-party-wrapper {
+  background: #808080;
+  border-right: 2px solid #a0a0a0; }
+
 #region-map {
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
   z-index: 100; }
+  #region-map .game-map-wrapper {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0; }
+
+#map-party-wrapper {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 200px; }
+
+#map-wrapper {
+  bottom: 0;
+  left: 200px;
+  position: absolute;
+  right: 0;
+  top: 0; }
 
 #map .map-node {
   -webkit-transition: all 0.4s;
@@ -605,7 +634,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 17px;
   font-family: "Lustria", serif;
-  color: #000; }
+  color: #000;
+  overflow: hidden; }
 
 html, body, #site-container, #region-main {
   bottom: 0;

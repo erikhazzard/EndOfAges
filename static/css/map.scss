@@ -1,7 +1,47 @@
+@import "map-party";
+
+$party-width: 200px;
+
 #region-map {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
     z-index: 100;
+
+    .game-map-wrapper {
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        right: 0;
+        top: 0;
+    }
 }
 
+
+// --------------------------------------
+// Layout (Styles set in sub style files
+// --------------------------------------
+#map-party-wrapper {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: $party-width;
+}
+#map-wrapper {
+    bottom: 0;
+    left: $party-width;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+
+// --------------------------------------
+// Map
+// --------------------------------------
 #map {
     .fog {
     }

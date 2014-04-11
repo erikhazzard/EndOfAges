@@ -34,12 +34,13 @@ $header-font: 'IM Fell English', san-serif;
 //
 // --------------------------------------
 body {
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 
     font-size: 17px;
     font-family: $main-font;
     color: #000;
+    overflow: hidden;
 }
 
 html, body, #site-container, #region-main {
