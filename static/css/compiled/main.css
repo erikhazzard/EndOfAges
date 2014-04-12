@@ -65,10 +65,9 @@
   cursor: pointer;
   fill: #343434;
   stroke: #ffffff;
-  stroke-width: 2px;
   stroke-width: 1px;
-  stroke: rgba(20, 20, 20, 0.8);
-  fill: rgba(255, 255, 255, 0.7);
+  stroke: rgba(255, 255, 255, 0.6);
+  fill: url(#map-node-gradient);
   /*filter: url(#filter-outline);*/ }
 #map .node-hover .map-node {
   fill: rgba(0, 0, 0, 0.6);
@@ -271,7 +270,6 @@
   100% {
     opacity: 1;
     fill-opacity: 1; } }
-
 @-moz-keyframes targetHover {
   0% {
     opacity: 0.5;
@@ -280,7 +278,6 @@
   100% {
     opacity: 1;
     fill-opacity: 1; } }
-
 @-ms-keyframes targetHover {
   0% {
     opacity: 0.5;
@@ -289,7 +286,6 @@
   100% {
     opacity: 1;
     fill-opacity: 1; } }
-
 @keyframes targetHover {
   0% {
     opacity: 0.5;
@@ -298,35 +294,30 @@
   100% {
     opacity: 1;
     fill-opacity: 1; } }
-
 @-webkit-keyframes targetHoverInactive {
   0% {
     opacity: 0.6; }
 
   100% {
     opacity: 0.8; } }
-
 @-moz-keyframes targetHoverInactive {
   0% {
     opacity: 0.6; }
 
   100% {
     opacity: 0.8; } }
-
 @-ms-keyframes targetHoverInactive {
   0% {
     opacity: 0.6; }
 
   100% {
     opacity: 0.8; } }
-
 @keyframes targetHoverInactive {
   0% {
     opacity: 0.6; }
 
   100% {
     opacity: 0.8; } }
-
 #battle .entity-group-wrapper {
   cursor: pointer; }
 #battle .target-indicator {
@@ -559,9 +550,9 @@
   right: 0;
   top: 0; }
   #home .home-bg-gradient {
-    background: -webkit-radial-gradient(top center, ellipse cover, white 25%, rgba(0, 0, 0, 0) 70%);
-    background: -moz-radial-gradient(top center, ellipse cover, white 25%, rgba(0, 0, 0, 0) 70%);
-    background: radial-gradient(top center, ellipse cover, white 25%, rgba(0, 0, 0, 0) 70%);
+    background: -webkit-radial-gradient(top center, ellipse cover, white 25%, transparent 70%);
+    background: -moz-radial-gradient(top center, ellipse cover, white 25%, transparent 70%);
+    background: radial-gradient(top center, ellipse cover, white 25%, transparent 70%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
     opacity: 0.4;
     bottom: 0;
@@ -695,7 +686,6 @@ svg {
     -webkit-transform: scale(1, 1);
     transform: scale(1, 1);
     opacity: 1; } }
-
 .preload-content {
   text-align: center;
   color: #999;

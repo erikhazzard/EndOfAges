@@ -53,16 +53,14 @@ $party-width: 200px;
         cursor: pointer;
         fill: #343434;
         stroke: #ffffff;
-        stroke-width: 2px;
 
-        stroke-width: 1px;
-        //stroke: rgba(20,20,20,0.4);
-        //fill: rgba(255,255,255,0.0);
-        
+        //stroke-width: 2px;
         //stroke: rgba(255,255,255,0.9);
-        stroke: rgba(20,20,20,0.8);
-        fill: rgba(255,255,255,0.7);
-
+        //fill: rgba(255,255,255,0.7);
+        
+        stroke-width: 1px;
+        stroke: rgba(255,255,255,0.6);
+        fill: url(#map-node-gradient);
 
         /*filter: url(#filter-outline);*/
     }

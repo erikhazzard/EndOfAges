@@ -318,7 +318,7 @@ define(
                         },
                         cx: function(d){ return d.x; },
                         cy: function(d){ return d.y; },
-                        r: 10
+                        r: 16
                     });
 
             // Turn the node green after the entity has moved to it
