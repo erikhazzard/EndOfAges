@@ -34,8 +34,6 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
             <feDisplacementMap in2="result91" scale="6.6" xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" id="feDisplacementMap5439" />    
         </filter>
 
-        <filter id="blur"> <feGaussianBlur stdDeviation="3" /> </filter>
-
         <filter id="filter-drop-shadow">
             <feGaussianBlur in="SourceAlpha" stdDeviation="1.2"/>
             <feOffset dx="2" dy="2" result="offsetblur"/>
@@ -69,5 +67,45 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
            <feGaussianBlur result="blur" in="drop" stdDeviation="1" />
            <feBlend in="SourceGraphic" in2="blur" mode="normal" />
         </filter> 
+
+
+
+<filter id="inset-shadow" >
+            <!-- dial up the opacity on the shape fill to "1" to select the full shape-->
+            <feComponentTransfer in="SourceAlpha" result="inset-selection">
+                <feFuncA type="discrete" tableValues="0 1 1 1 1 1"/>
+            </feComponentTransfer>
+
+            <!-- dial down the opacity on the shape fill to "0" to get rid of it -->
+            <feComponentTransfer in="SourceGraphic" result="original-no-fill">
+                <feFuncA type="discrete" tableValues="0 0 1"/>
+            </feComponentTransfer>
+
+            <!-- since you can't use the built in SourceAlpha generate your own -->
+            <feColorMatrix type="matrix" in="original-no-fill" result="new-source-alpha" values="0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 1 0"
+/>            
+
+            <feGaussianBlur in="new-source-alpha" result="blur" stdDeviation="5" />
+            <feGaussianBlur in="new-source-alpha" result="blur2" stdDeviation="10" />
+            <feGaussianBlur in="new-source-alpha" result="blur3" stdDeviation="15" />
+            <feMerge result="blur">
+                <feMergeNode in="blur" mode="normal"/>
+                <feMergeNode in="blur2" mode="normal"/>
+                <feMergeNode in="blur3" mode="normal"/>
+            </feMerge>
+            <!-- select the portion of the blur that overlaps with your shape -->
+            <feComposite operator="in" in="inset-selection" in2="blur" result="inset-blur"/>
+             <!-- composite the blur on top of the original with the fill removed -->
+            <feComposite operator="over" in="original-no-fill" in2="inset-blur"/>            
+        </filter>
+
+
+
+
+
+
     </defs>
 </svg>

@@ -60,12 +60,13 @@ $party-width: 200px;
         
         stroke-width: 1px;
         stroke: rgba(255,255,255,0.6);
-        fill: url(#map-node-gradient);
+        fill: url(#inset-shadow);
+        fill-opacity: 0.2;
 
-        /*filter: url(#filter-outline);*/
+        filter: url(#filter-outline);
     }
     .node-hover .map-node {
-        fill: rgba(0,0,0,0.6);
+        fill-opacity: 0.4;
         stroke: rgba(255,255,255,0.6);
     }
 
@@ -78,9 +79,9 @@ $party-width: 200px;
 
     .node-visited .map-node.node-visited {
         //fill: #44aa44 !important;
-
         //fill: #40C81F !important; // other green
         fill: #49B726 !important;
+        fill-opacity: 0.7;
         filter: none;
     }
 
