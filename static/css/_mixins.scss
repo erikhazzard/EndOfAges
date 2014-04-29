@@ -21,6 +21,12 @@
     transition: unquote($t);
 }
 
+@mixin transform($transformation) {
+    -webkit-transform: $transformation;
+    -moz-transform: $transformation;
+    transform: $transformation;
+}
+
 @mixin blur($r:10px){
     -webkit-filter: blur($r);
     -moz-filter: blur($r);
@@ -32,6 +38,14 @@
     -moz-filter: $f;
     filter: $f;
 }
+
+@mixin forceGpu(){
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    backface-visibility: hidden;
+    perspective: 1000;
+}
+
 
 @mixin keyframes($name) {
   @-webkit-keyframes #{$name} {

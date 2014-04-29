@@ -4495,13 +4495,15 @@ define(
                     .attr({
                         d: line, 
                         'class': 'to-remove destination-path-animated'
-                    })
-                    .call(animatePath);
+                    });
+                    // TODO: This causes drastic hit on performance 
+                    //.call(animatePath);
             });
             this.listenTo(events, 'nodeHoverOff', function(options){
                 // if we want to ignore hover events
                 if(this._ignoreNodeHoverOff){ return false; }
 
+                // TODO: this doesn't remove all paths
                 self.paths.selectAll('.to-remove').transition()
                     .duration(0);
                 self.paths.selectAll('.to-remove').remove();
@@ -8227,9 +8229,10 @@ define(
         onShow: function gameOnShow(){
             logger.log('views/PageGame', 'onShow() called');
             var self = this;
-            // setup the map
 
+            // setup the map
             this.regionMap.show(this.viewMap);
+
             return this;
         },
 
@@ -8253,6 +8256,7 @@ define(
             logger.log('views/PageGame', 
                 '1. mapNodeClicked() called. Options: %O',
                 options);
+            var self = this;
 
             // If the node instance was clicked and an instance is already 
             // active, do nothing
@@ -8264,8 +8268,8 @@ define(
 
             // Hide map
             logger.log('views/PageGame', '2. Hiding map');
-            //this.regionMap.$el.hide();
-            this.regionMap.$el.css({ height: 0 });
+            this.regionMap.$el.addClass('inactive');
+            //this.regionMap.$el.addClass('animated rotateOut');
 
             // Get node type from options
             // TODO: Best place to put a mapping of node types to views?
@@ -8312,7 +8316,11 @@ define(
             logger.log('views/PageGame', '4. Showing node instance: %O',
                 nodeInstance);
             this.regionNodeInstance.show( nodeInstance );
-            this.regionNodeInstance.$el.removeClass('hidden');
+
+            // wrap in raf for slight improvement in performance
+            requestAnimationFrame(function showNodeInstanceWrapper(){
+                self.regionNodeInstance.$el.removeClass('inactive');
+            });
 
             //// ===============================================================
             //// DEV / ADMIN MODE:::
@@ -8335,6 +8343,7 @@ define(
             logger.log('views/PageGame', 
                 '1. nodeInstanceFinished() called. Options: %O',
                 options);
+            var self = this;
 
             // change the currently updated node
             // clear out the active node
@@ -8345,12 +8354,18 @@ define(
             
             // Hide instance
             logger.log('views/PageGame', '3. Hiding node instance');
-            this.regionNodeInstance.$el.addClass('hidden');
+            this.regionNodeInstance.$el.addClass('inactive');
             this.regionNodeInstance.close();
 
             // show map
             logger.log('views/PageGame', '4. Showing map');
-            this.regionMap.$el.css({ height: 100 });
+            // Do this after a small delay to give the instance wrapper time
+            // to fade out
+            setTimeout(function(){
+                requestAnimationFrame(function(){
+                    self.regionMap.$el.removeClass('inactive');
+                });
+            }, 50);
 
             // update the map's current map node
             var map = this.model.get('map');

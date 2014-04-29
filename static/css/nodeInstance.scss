@@ -1,9 +1,17 @@
 #region-node-instance-wrapper {
+    @include transition('all 0.4s');
+    @include forceGpu();
     background: #ffffff;
     bottom: 0;
     left: 0;
-    position: absolute;
+    opacity: 1;
+    position: fixed;
     right: 0;
     top: 0;
     z-index: 1000;
+}
+
+#region-node-instance-wrapper.inactive {
+    opacity: 0;
+    z-index: -1;
 }
