@@ -4523,7 +4523,7 @@ define(
                 // update the map *after* it has been prepared so it has time
                 // to draw and render the SVG
                 requestAnimationFrame(function(){
-                    self.updateMap();
+                    self.updateMap(true);
                 });
             });
 
@@ -4729,6 +4729,7 @@ define(
                             
                             return cssClass;
                         },
+                        filter: 'url(#filter-outline)',
                         cx: function(d){ return d.x; },
                         cy: function(d){ return d.y; },
                         r: 16
@@ -4784,7 +4785,8 @@ define(
                                 [previous.x, previous.y], 
                                 [self.nodes.current.x, self.nodes.current.y]
                             ]);
-                        }
+                        },
+                        filter: 'url(#filter-wavy)'
                     })
                     // transition the line coming in
                     .transition().duration(this.CONFIG.updateDuration)
@@ -4818,6 +4820,7 @@ define(
                 .attr({
                     d: line, 
                     'class': 'destination-path destination-path-dotted',
+                    filter: 'url(#filter-wavy)',
                     'stroke-dashoffset': 0
                 });
 
@@ -4909,7 +4912,8 @@ define(
                         self.paths.append('path')
                             .attr({
                                 d: line, 
-                                'class': 'to-remove destination-path-animated'
+                                'class': 'to-remove destination-path-animated',
+                                filter: 'url(#filter-wavy)'
                             })
                             .call(animatePathOnce);
 
@@ -4957,7 +4961,7 @@ define(
         // Update Map functions
         //
         // =====================================================================
-        updateMap: function mapUpdate(){
+        updateMap: function mapUpdate(isFirstCall){
             // Draws all nodes then updates the visible areas
             var self = this;
             logger.log('views/subviews/Map', 
@@ -4967,30 +4971,34 @@ define(
             this.height = $('#map')[0].getBBox().height;
 
             // update the store node references
-            this.updateNodeReferences();
+            self.updateNodeReferences();
 
-            // setup entity groups if it hasn't been setup
-            if(!this.entitiesSetup){
-                this.prepareEntities();
-                this.entitiesSetup = true;
-            }
+            requestAnimationFrame(function(){
+                // setup entity groups if it hasn't been setup
+                if(!self.entitiesSetup){
+                    self.prepareEntities();
+                    self.entitiesSetup = true;
+                }
 
-            // draw / update nodes
-            this.updateNodes();
-            this.updatePaths();
+                // draw / update nodes
 
-            //// Don't need to move entity anymore, already moved
-            //// transition the entity to the next node
-            //// NOTE: TODO: Only move entity if the player lost, but in that
-            //// case move the entity BACK
-            //this.moveEntity();
+                //// Don't need to move entity anymore, already moved
+                //// transition the entity to the next node
+                //// NOTE: TODO: Only move entity if the player lost, but in that
+                //// case move the entity BACK
+                //this.moveEntity();
 
-            // minor delay to delay SVG filter effect
-            setTimeout(function(){
+                // minor delay to delay SVG filter effect
+                self.updateVisible(isFirstCall);
+                
                 requestAnimationFrame(function(){
-                    self.updateVisible.call(self);
+                    self.updateNodes();
+                    self.updatePaths();
+
+                    d3.select('.map-nodes').style({ opacity: 0 });
+                    d3.select('.map-nodes').transition().duration(1000).style({ opacity: 1 });
                 });
-            }, 20);
+            });
 
             return this;
         },
@@ -5101,7 +5109,7 @@ define(
         // ------------------------------
         // Hide the fog for visible nodes
         // ------------------------------
-        updateVisible: function mapGenerateHull(){
+        updateVisible: function mapGenerateHull(isFirstCall){
             // Updates the the visible area, based on nodes
             logger.log('views/subviews/Map', 
                 'updateVisible() called. Updating fog of war');
@@ -5114,16 +5122,16 @@ define(
                 filter = 'url(#filter-map)';
             }
 
-            var _duration = 1500;
-            var _delay = 250;
+            //var _duration = 1500;
+            //var _delay = 250;
+            var _duration = 500;
+            var _delay = 550;
 
             // For the first rendering, low delay or duration
-            if(!this._updateVisibleCalled){
-                _duration = 800;
+            if(isFirstCall){
+                _duration = 400;
                 _delay = 0;
-                this._updateVisibleCalled = true;
             }
-
 
             // create a masked path to show visible nodes
             var masks = this.maskPath.selectAll('.visibleNode')
@@ -5133,7 +5141,7 @@ define(
                 .append('circle')
                 .style({
                     fill: '#000000',
-                    opacity: 0
+                    opacity: 1
                 });
 
             // update existing masks
@@ -5154,11 +5162,14 @@ define(
                     }
                 });
                 
-            masks.transition().duration(_duration).delay(_delay)
-                .style({ 
-                    fill: '#ffffff',
-                    opacity: 1
-                });
+            var newStyle = { fill: '#ffffff', opacity: 1 };
+
+            if(_duration){
+                masks.transition().duration(_duration).delay(_delay).style(newStyle);
+            } else {
+                masks.transition().duration(_duration).delay(_delay).style(newStyle);
+                //masks.style(newStyle);
+            }
 
             masks.exit().remove();
 

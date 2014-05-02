@@ -41,9 +41,9 @@
 
 @mixin forceGpu(){
     -webkit-backface-visibility: hidden;
-    -webkit-perspective: 1000;
+    -webkit-perspective: 1000px;
     backface-visibility: hidden;
-    perspective: 1000;
+    perspective: 1000px;
 }
 
 

@@ -62,6 +62,8 @@ $party-width: 200px;
 // Map
 // --------------------------------------
 #map {
+    @include forceGpu();
+
     .fog {
     }
     .visibleArea {
@@ -83,7 +85,6 @@ $party-width: 200px;
         
         stroke-width: 1px;
         stroke: rgba(255,255,255,0.6);
-        filter: url(#filter-outline);
 
     }
     .node-hover .map-node {
@@ -109,7 +110,6 @@ $party-width: 200px;
     // Paths
     // ----------------------------------
     .visited-path-dotted {
-        filter: url(#filter-wavy);
         fill: none;
         stroke: #343434;
         opacity: 0.9;
@@ -125,15 +125,12 @@ $party-width: 200px;
         //stroke: #fffb47; // yellow
         stroke: #ffffff;
 
-        filter: url(#filter-wavy);
-
         opacity: 0.6;
         stroke-dasharray: 10px 4px;
         stroke-width: 7px;
     }
     .destination-path-animated{
         fill: none;
-        filter: url(#filter-wavy);
         stroke: #343434;
         stroke-width: 5px;
     }
