@@ -70,7 +70,7 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
 
 
 
-<filter id="inset-shadow" >
+        <filter id="inset-shadow" >
             <!-- dial up the opacity on the shape fill to "1" to select the full shape-->
             <feComponentTransfer in="SourceAlpha" result="inset-selection">
                 <feFuncA type="discrete" tableValues="0 1 1 1 1 1"/>
@@ -101,11 +101,5 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
              <!-- composite the blur on top of the original with the fill removed -->
             <feComposite operator="over" in="original-no-fill" in2="inset-blur"/>            
         </filter>
-
-
-
-
-
-
     </defs>
 </svg>

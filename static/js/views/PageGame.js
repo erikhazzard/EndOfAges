@@ -20,7 +20,7 @@ define(
         'models/Map',
         'models/Battle',
 
-        'views/subViews/Map',
+        'views/map/Map',
         'views/subViews/Battle'
 
     ], function viewPageGame(

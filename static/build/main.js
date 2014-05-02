@@ -4418,7 +4418,7 @@ define(
 //  TODO: listen for node finish event, update current node in map model
 // ===========================================================================
 define(
-    'views/subViews/Map',[ 
+    'views/map/Map',[ 
         'd3', 'backbone', 'marionette',
         'logger', 'events',
         'util/Timer'
@@ -8182,7 +8182,7 @@ define(
         'models/Map',
         'models/Battle',
 
-        'views/subViews/Map',
+        'views/map/Map',
         'views/subViews/Battle'
 
     ], function viewPageGame(
