@@ -4,11 +4,11 @@ $party-width: 200px;
 
 #region-map {
     @include transition('all 0.4s');
-    @include transform(translate(0,0) scale(1,1) rotate(0deg));
     @include forceGpu();
     background: #000000;
     bottom: 0;
     left: 0;
+    opacity: 1;
     position: fixed;
     right: 0;
     top: 0;
@@ -35,7 +35,7 @@ $party-width: 200px;
 }
 
 #region-map.inactive {
-    @include transform(translate(0,0) scale(3,3) rotate(180deg));
+    opacity: 0;
 }
 
 

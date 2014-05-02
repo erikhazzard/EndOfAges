@@ -302,8 +302,11 @@ define(
                     .attr({
                         'class': function(d,i){
                             var cssClass = 'map-node'; 
-                            if(d.node.get('visited')){ cssClass += ' node-visited'; }
+                            var unvisited = true;
+
+                            if(d.node.get('visited')){ cssClass += ' node-visited'; unvisited = false; }
                             if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
+                            if(unvisited){ cssClass += ' node-unvisited'; }
 
                             // TODO: :::::::::::::::::::::::::::
                             // TODO: Don't use id check of 0
@@ -584,8 +587,11 @@ define(
                     self.updateNodes();
                     self.updatePaths();
 
-                    d3.select('.map-nodes').style({ opacity: 0 });
-                    d3.select('.map-nodes').transition().duration(1000).style({ opacity: 1 });
+                    d3.select('.node-unvisited').style({ opacity: 0 });
+                    d3.select('.node-unvisited').transition().duration(500).style({ opacity: 1 });
+
+                    d3.select('.destination-path').style({ opacity: 0 });
+                    d3.select('.destination-path').transition().duration(1500).style({ opacity: 1 });
                 });
             });
 
