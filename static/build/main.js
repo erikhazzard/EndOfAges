@@ -4431,6 +4431,8 @@ define(
     // ----------------------------------
     // Helper functions
     // ----------------------------------
+    var IS_FIREFOX = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
     function animatePath(path) {
         path.transition()
             .duration(1500)
@@ -4716,7 +4718,7 @@ define(
                             var unvisited = true;
 
                             if(d.node.get('visited')){ cssClass += ' node-visited'; unvisited = false; }
-                            if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; }
+                            if(d.node.get('isCurrentNode')){ cssClass += ' node-current'; unvisited = false; }
                             if(unvisited){ cssClass += ' node-unvisited'; }
 
                             // TODO: :::::::::::::::::::::::::::
@@ -5126,6 +5128,12 @@ define(
             // only use filters if lowRes mode is not true
             if(CONFIG && !CONFIG.lowRes){
                 filter = 'url(#filter-map)';
+                // Firefox renders this filter effect in an extremely shitty way
+                // which completely kills the experience, so for FF don't use
+                // a filter
+                if(IS_FIREFOX){
+                    filter = '';
+                }
             }
 
             //var _duration = 1500;
