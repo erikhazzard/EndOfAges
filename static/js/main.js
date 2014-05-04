@@ -120,6 +120,7 @@ require([
         // ------------------------------
         'error',
         ,'warning'
+        ,'views/subviews/Battle'
         //,'views/DevTools'
 
         //,'app'
@@ -137,7 +138,7 @@ require([
     ];
 
     //// log EVERYTHING:
-    logger.options.logLevel = true;
+    //logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

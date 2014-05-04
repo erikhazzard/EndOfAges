@@ -79,11 +79,16 @@ define(
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
-                while(i<3) {
-                    if(Math.random() < (1/(i+3))){
-                        entities.push(this.getRandomEntity()); 
+
+                // Add more enemies
+                // TODO: For dev, only add one for now.
+                if(false){
+                    while(i<3) {
+                        if(Math.random() < (1/(i+3))){
+                            entities.push(this.getRandomEntity()); 
+                        }
+                        i++;
                     }
-                    i++;
                 }
 
                 this.set({
