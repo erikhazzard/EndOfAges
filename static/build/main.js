@@ -5214,10 +5214,21 @@ define(
     var PartyMember = Backbone.Marionette.ItemView.extend({
         tagName: 'div',
         template: '#template-game-map-party-member',
-
+        events: {
+            'click': 'memberClicked'
+        },
         serializeData: function(){
             return _.extend({ self: this.model }, this.model.toJSON());
+        },
+
+        memberClicked: function memberClicked(e){
+            logger.log('views/map/PartyMember',
+                'Party member wrapper clicked : %O | model: %O',
+                this, this.model);
+
+            return this;
         }
+
     });
 
     return PartyMember;
@@ -9414,7 +9425,9 @@ define('Controller',[
     // TODO: remove, only for dev
     'views/DevTools'
 
+    // FOR DEV for manually adding entities
     ,'collections/Classes'
+    ,'collections/Races'
 
     ], function(
         Backbone, Marionette, logger, events,
@@ -9431,6 +9444,7 @@ define('Controller',[
         DevTools
 
         ,Classes
+        ,Races
     ){
 
     // console color
@@ -9615,8 +9629,11 @@ define('Controller',[
                 // NOT from pageCreateCharacter. Get from GAME model
                 var playerEntityModels = [
                     this.pageCreateCharacter.model,
+                    
+                    // FOR DEV - ADD AN ENTITY
                     new Entity({
-                        class: new Classes().models[0]
+                        class: new Classes().models[0],
+                        race: new Races().models[0]
                     })
                 ];
 
@@ -9828,7 +9845,7 @@ require([
     ];
 
     //// log EVERYTHING:
-    //logger.options.logLevel = true;
+    logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

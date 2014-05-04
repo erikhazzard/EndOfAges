@@ -152,3 +152,7 @@ Ability that turns all other abilities into some random element
 
 ------
 Ability that reflects other abilities
+
+===============================
+
+** !!!!! Abilities which give you a boost if you are the killer !!!!! **

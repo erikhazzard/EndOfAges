@@ -20,7 +20,9 @@ define([
     // TODO: remove, only for dev
     'views/DevTools'
 
+    // FOR DEV for manually adding entities
     ,'collections/Classes'
+    ,'collections/Races'
 
     ], function(
         Backbone, Marionette, logger, events,
@@ -37,6 +39,7 @@ define([
         DevTools
 
         ,Classes
+        ,Races
     ){
 
     // console color
@@ -221,8 +224,11 @@ define([
                 // NOT from pageCreateCharacter. Get from GAME model
                 var playerEntityModels = [
                     this.pageCreateCharacter.model,
+                    
+                    // FOR DEV - ADD AN ENTITY
                     new Entity({
-                        class: new Classes().models[0]
+                        class: new Classes().models[0],
+                        race: new Races().models[0]
                     })
                 ];
 
