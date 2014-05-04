@@ -1,6 +1,8 @@
-<script id='template-game-map' type='text/template'>
-    <div id='map-party-wrapper'>
-        <h3>Group Members</h3>
+{{ include map/map.html }}
+{{ include map/party-members.html }}
+
+<script id='template-game-container-map' type='text/template'>
+    <div id='region-map-party-members'>
     </div>
 
 
@@ -14,13 +16,7 @@
     {{// ================================= }}
     {{// Game map }}
     {{// ================================= }}
-    <div id='map-wrapper'>
-        <svg id='map' style='width:100%; height: 100%;'
-            viewBox='0 0 1000 500'
-            preserveAspectRation='xMinYMin'
-            xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
-        >
-        </svg>
+    <div id='region-map-map'>
     </div>
 
     {{// ================================= }}

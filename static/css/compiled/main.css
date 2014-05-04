@@ -25,9 +25,14 @@
   right: 0;
   left: 0; }
 
-#map-party-wrapper {
+#region-map-party-members {
   background: #808080;
-  border-right: 2px solid #a0a0a0; }
+  border-right: 2px solid #a0a0a0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 200px; }
 
 #region-map {
   -webkit-transition: all 0.4s;
@@ -62,13 +67,6 @@
 
 #region-map.inactive {
   opacity: 0; }
-
-#map-party-wrapper {
-  bottom: 0;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 200px; }
 
 #map-wrapper {
   bottom: 0;

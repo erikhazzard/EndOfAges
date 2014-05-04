@@ -15,6 +15,8 @@ define(
     ){
 
     var PartyMember = Backbone.Marionette.ItemView.extend({
+        tagName: 'div',
+        template: '#template-game-map-party-member'
     });
 
     return PartyMember;

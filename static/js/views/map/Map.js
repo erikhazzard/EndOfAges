@@ -59,7 +59,7 @@ define(
 
         events: { },
 
-        'className': 'game-map-wrapper',
+        id: 'map-wrapper',
 
         initialize: function mapViewInitialize(options){
             // initialize:

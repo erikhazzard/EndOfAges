@@ -1,4 +1,12 @@
-#map-party-wrapper {
+// --------------------------------------
+// Layout (Styles set in sub style files
+// --------------------------------------
+#region-map-party-members {
     background: #808080;
     border-right: 2px solid #a0a0a0;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: $party-width;
 }

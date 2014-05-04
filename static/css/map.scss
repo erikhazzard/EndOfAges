@@ -1,6 +1,6 @@
-@import "map-party";
-
 $party-width: 200px;
+
+@import "map-party";
 
 #region-map {
     @include transition('all 0.4s');
@@ -38,17 +38,9 @@ $party-width: 200px;
     opacity: 0;
 }
 
-
 // --------------------------------------
 // Layout (Styles set in sub style files
 // --------------------------------------
-#map-party-wrapper {
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: $party-width;
-}
 #map-wrapper {
     bottom: 0;
     left: $party-width;
@@ -56,7 +48,6 @@ $party-width: 200px;
     right: 0;
     top: 0;
 }
-
 
 // --------------------------------------
 // Map

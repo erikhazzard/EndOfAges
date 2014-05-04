@@ -20,7 +20,7 @@ define(
         'models/Map',
         'models/Battle',
 
-        'views/map/Map',
+        'views/map/ContainerMap',
         'views/subViews/Battle'
 
     ], function viewPageGame(
@@ -28,7 +28,7 @@ define(
         logger, events,
 
         Map, Battle,
-        MapView,
+        MapContainerView,
         BattleView
     ){
 
@@ -72,19 +72,9 @@ define(
             // --------------------------
             // Setup views
             // --------------------------
-            //
-            // MAP
-            // TODO: get model
-            this.mapModel = new Map({});
-            // TODO: Get map model from game.
-            this.mapModel.generateMap();
-
-            this.model.set({ map: this.mapModel });
-
-            this.viewMap = new MapView({
-                model: this.mapModel,
-                gameModel: this.model
-            }); 
+            this.mapContainer = new MapContainerView({
+                model: this.model
+            });
 
             return this;
         },
@@ -94,7 +84,7 @@ define(
             var self = this;
 
             // setup the map
-            this.regionMap.show(this.viewMap);
+            this.regionMap.show(this.mapContainer);
 
             return this;
         },

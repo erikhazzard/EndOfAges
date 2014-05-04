@@ -4470,7 +4470,7 @@ define(
 
         events: { },
 
-        'className': 'game-map-wrapper',
+        id: 'map-wrapper',
 
         initialize: function mapViewInitialize(options){
             // initialize:
@@ -5193,6 +5193,135 @@ define(
     });
 
     return MapView;
+});
+
+// ===========================================================================
+//
+// Party Member item view
+//  
+//  Party memebr item view
+// 
+// ===========================================================================
+define(
+    'views/map/PartyMember',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events'
+    ], function(
+        d3, Backbone, Marionette, 
+        logger, events
+    ){
+
+    var PartyMember = Backbone.Marionette.ItemView.extend({
+        tagName: 'div',
+        template: '#template-game-map-party-member'
+    });
+
+    return PartyMember;
+});
+
+// ===========================================================================
+//
+// Party Member collection view
+// 
+// ===========================================================================
+define(
+    'views/map/PartyMembers',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events',
+        'views/map/PartyMember'
+    ], function(
+        d3, Backbone, Marionette, 
+        logger, events,
+        PartyMember
+    ){
+
+    var PartyMembers = Backbone.Marionette.CompositeView.extend({
+        itemView: PartyMember,
+        itemViewContainer: '.members',
+        template: '#template-game-map-party-members',
+        id: 'map-party-wrapper'
+    });
+
+    return PartyMembers;
+});
+
+// ===========================================================================
+//
+// Page Map
+//
+//      Containing view for the map page
+//
+// ===========================================================================
+define(
+    'views/map/ContainerMap',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events',
+        'models/Map',
+        'views/map/Map',
+        'views/map/PartyMembers'
+    ], function viewMap(
+        d3, backbone, marionette, 
+        logger, events,
+        Map,
+
+        // Views
+        // ------------------------------
+        MapView,
+        PartyMembersView
+    ){
+
+    // ----------------------------------
+    //
+    // Map view
+    //
+    // ----------------------------------
+    var ContainerMap = Backbone.Marionette.Layout.extend({
+        template: '#template-game-container-map',
+        events: { },
+        'className': 'game-map-wrapper',
+        regions: {
+            regionMapView:  '#region-map-map',
+            regionPartyMembers:  '#region-map-party-members'
+        },
+
+        initialize: function mapViewInitialize(options){
+            // initialize:
+            var self = this;
+
+            // MAP - map itself
+            // --------------------------
+            // TODO: get model
+            this.mapModel = new Map({});
+            // TODO: Get map model from game.
+            this.mapModel.generateMap();
+
+            this.model.set({ map: this.mapModel });
+
+            this.viewMap = new MapView({
+                model: this.mapModel,
+                gameModel: this.model
+            }); 
+
+
+            // Party members
+            // --------------------------
+            this.viewPartyMembers = new PartyMembersView({
+                collection: this.model.attributes.playerEntities
+            });
+
+            return this;
+        },
+
+        onShow: function mapViewOnShow(){
+            var self = this;
+
+            this.regionMapView.show(this.viewMap);
+            this.regionPartyMembers.show(this.viewPartyMembers);
+            return this;
+        }
+    });
+
+    return ContainerMap;
 });
 
 // ===========================================================================
@@ -8182,7 +8311,7 @@ define(
         'models/Map',
         'models/Battle',
 
-        'views/map/Map',
+        'views/map/ContainerMap',
         'views/subViews/Battle'
 
     ], function viewPageGame(
@@ -8190,7 +8319,7 @@ define(
         logger, events,
 
         Map, Battle,
-        MapView,
+        MapContainerView,
         BattleView
     ){
 
@@ -8234,19 +8363,9 @@ define(
             // --------------------------
             // Setup views
             // --------------------------
-            //
-            // MAP
-            // TODO: get model
-            this.mapModel = new Map({});
-            // TODO: Get map model from game.
-            this.mapModel.generateMap();
-
-            this.model.set({ map: this.mapModel });
-
-            this.viewMap = new MapView({
-                model: this.mapModel,
-                gameModel: this.model
-            }); 
+            this.mapContainer = new MapContainerView({
+                model: this.model
+            });
 
             return this;
         },
@@ -8256,7 +8375,7 @@ define(
             var self = this;
 
             // setup the map
-            this.regionMap.show(this.viewMap);
+            this.regionMap.show(this.mapContainer);
 
             return this;
         },

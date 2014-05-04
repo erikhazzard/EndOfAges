@@ -15,7 +15,10 @@ define(
     ){
 
     var PartyMembers = Backbone.Marionette.CompositeView.extend({
-        itemView: PartyMember
+        itemView: PartyMember,
+        itemViewContainer: '.members',
+        template: '#template-game-map-party-members',
+        id: 'map-party-wrapper'
     });
 
     return PartyMembers;
