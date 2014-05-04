@@ -5213,7 +5213,11 @@ define(
 
     var PartyMember = Backbone.Marionette.ItemView.extend({
         tagName: 'div',
-        template: '#template-game-map-party-member'
+        template: '#template-game-map-party-member',
+
+        serializeData: function(){
+            return _.extend({ self: this.model }, this.model.toJSON());
+        }
     });
 
     return PartyMember;
@@ -5308,6 +5312,7 @@ define(
             this.viewPartyMembers = new PartyMembersView({
                 collection: this.model.attributes.playerEntities
             });
+            console.log(this.model.attributes.playerEntities);
 
             return this;
         },

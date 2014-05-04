@@ -1,10 +1,14 @@
 <script id='template-game-map-party-members' type='text/template'>
-    <h3>Group Members</h3>
-    <div class='members'>
-        <!-- party members html populate here -->
+    <div class='inner'>
+        <h3>Party</h3>
+        <div class='members'>
+            <!-- party members html populate here -->
+        </div>
     </div>
 </script>
 
 <script id='template-game-map-party-member' type='text/template'>
     <%= name %>
+    (<%= race.attributes.name %> <%= self.attributes['class'].attributes.name %>)
+    <hr />
 </script>

@@ -2,11 +2,36 @@
 // Layout (Styles set in sub style files
 // --------------------------------------
 #region-map-party-members {
-    background: #808080;
-    border-right: 2px solid #a0a0a0;
+    background: #808080 url(../../img/ui/party-member-bg.png);
+    border-right: none;
+    box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
     bottom: 0;
+    color: #ffffff;
     left: 0;
     position: absolute;
     top: 0;
     width: $party-width;
+    z-index: 200;
+
+    .inner {
+        padding-right: 30px;
+        width: 100%;
+    }
+
+    h3 {
+        color: #a69172;
+        font-size: 2.5em;
+        margin-right: 40px;
+        font-variant: small-caps;
+        text-align: center;
+        text-shadow:
+            0 -1px 0 rgba(255,255,255,0.8),
+            0 -1px 0 rgba(0,0,0,1),
+            1px 0 0 #000000,
+            1px 1px 0 #000000,
+            0 1px 0 #000000,
+            0 2px 0 #232323,
+            0 3px 0 rgba(0,0,0,0.3),
+            0px 0px 2px #232323;
+    }
 }

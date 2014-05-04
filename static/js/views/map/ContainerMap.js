@@ -61,6 +61,7 @@ define(
             this.viewPartyMembers = new PartyMembersView({
                 collection: this.model.attributes.playerEntities
             });
+            console.log(this.model.attributes.playerEntities);
 
             return this;
         },
