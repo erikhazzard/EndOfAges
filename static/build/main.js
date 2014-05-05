@@ -7072,6 +7072,13 @@ define(
                 // ----------------------
                 // Whenever interaction happens with it, select or hover the 
                 // entity
+                function entityClickedInteraction(d,i){
+                    d3.select('#battle .entity-selected').classed('entity-selected', false);
+                    d3.select(this).classed('entity-selected', true);
+
+                    return self.selectEntity({index: i, entityGroup: entityGroup});
+                }
+
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
                     entityGroup].selectAll('.entity-group')
                         .data(self.model.get(entityGroup + 'Entities').models)
@@ -7086,12 +7093,8 @@ define(
                                     ] + ")";
                                 }
                             })
-                            .on('click', function entityClicked(d,i){ 
-                                return self.selectEntity({index: i, entityGroup: entityGroup});
-                            })
-                            .on('touchstart', function entityTouchEnd(d,i){ 
-                                return self.selectEntity({index: i, entityGroup: entityGroup});
-                            })
+                            .on('click', entityClickedInteraction)
+                            .on('touchstart', entityClickedInteraction)
                             .on('mouseenter',function entityMouseEnter(d,i){ 
                                 // TODO: fix this when ability changes
                                 d3.select(this).classed('entity-hover', true);
@@ -7354,8 +7357,7 @@ define(
                 "selected first living entity: index: " + i);
 
             // select first living player
-            this.selectPlayerEntity({index:firstAliveEntity});
-
+            this.setSelectedEntity({index: firstAliveEntity});
 
             // --------------------------
             // Event Listeners
@@ -7687,6 +7689,7 @@ define(
             // This is a proxy function that will call the corresponding select
             // entity type function based on the passed in entityGroup
             options = options || {};
+            logger.log("views/subviews/Battle", 'selectEntity called with options : %O', options);
 
             if(options.entityGroup === 'player'){
                 // Select player enemy
@@ -7704,22 +7707,33 @@ define(
             //
             // index: index of selected entity (matches with the order of
             //  playerEntities.models)
+            logger.log("views/subviews/Battle", 
+                'selectPlayerEntity : selecting (or using an ability) on an entity controlled by the player. options : %O',
+                options);
             options = options || {};
             var i = options.index;
             
+            var target = this.selectTarget(i, 
+                this.model.get('playerEntities').models);
+
             // STATE: normal
             var state = this.model.get('state');
             if(state === 'normal' || state === 'pause'){
-                this.selectPlayerEntityStateNormal({index: options.index});
+                logger.log("views/subviews/Battle", '\t setting entity target');
+                if(this.selectedEntity){
+                    this.selectedEntity.set({ desiredTarget: target });
+                }
+
+                // TODO: Handle this differently..don't always set the
+                // selected entity, ONLY do this if they press up / down
+                // or j / k OR double click on an entity
+                // TODO: THIS
+                //this.setSelectedEntity({index: options.index});
 
             } else if(this.model.get('state') === 'ability'){
-                // call the general select entity function to set the ability's
-                // target and use the ability
-                var target = this.selectTarget(i, 
-                    this.model.get('playerEntities').models);
-
                 // then, use the ability
                 // TODO: think of call structure
+                logger.log("views/subviews/Battle", '\t using ability');
                 this.useAbility({
                     target: target, 
                     targetIndex: i, 
@@ -7732,16 +7746,28 @@ define(
 
         // select Enemy entity
         selectEnemyEntity: function selectEnemyEntity(options){
+            // This is called when the user clicks on or otherwise targets an
+            // entity. If the `ability` state is active, use the ability selected
+            // otherwise, set the entity's target
+            //
             options = options || {};
             var i = options.index;
+            logger.log("views/subviews/Battle", 
+                'selectEnemyEntity called with options : %O', options);
+            
+            var target = this.selectTarget(i, 
+                this.model.get('enemyEntities').models);
             
             if(this.model.get('state') === 'normal'){
                 // TODO: show more info on enemy?
+                logger.log("views/subviews/Battle", 'setting entity target');
+                this.selectedEntity.set({ desiredTarget: target });
+
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
                 // target and use the ability
-                var target = this.selectTarget(i, 
-                    this.model.get('enemyEntities').models);
+                logger.log("views/subviews/Battle", 
+                    'using ability on target %O', target);
 
                 // then, use the ability
                 this.useAbility({
@@ -7773,7 +7799,7 @@ define(
             return this.selectedTarget;
         },
 
-        selectPlayerEntityStateNormal: function selectPlayerStateNormal(options){
+        setSelectedEntity: function setSelectedEntity(options){
             // Select an entity at passed in index in the normal state
             // --------------------------
             // overview:
@@ -7783,19 +7809,20 @@ define(
             //  -Move the entity forward
             //
             options = options || {};
+            logger.log("views/subviews/Battle", 'setSelectedEntity() called');
             var i = options.index;
 
             // if the user selected the currently active entity, do nothing
             if(i === this.previouslySelectedEntityIndex){ 
                 logger.log("views/subviews/Battle", 
-                    '0. entity selected: same entity selected, exiting : i : %O', i);
+                    '\t 0. entity selected: same entity selected, exiting : i : %O', i);
                 return false; 
             } 
 
             //1. get model based on selected element
             var model = this.model.get('playerEntities').models[i];
             logger.log("views/subviews/Battle", 
-                "1. entity selected: %O \n model: %O", i, model);
+                "\t 1. entity selected: %O \n model: %O", i, model);
 
             // update the selected entity
             this.selectedEntityIndex = i;
@@ -7804,7 +7831,7 @@ define(
 
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
-            logger.log("views/subviews/Battle", "2. showing ability view");
+            logger.log("views/subviews/Battle", "\t 2. showing ability view");
             var abilityListView = new AbilityListView({
                 collection: model.get('abilities'),
                 entityModel: model
@@ -7814,12 +7841,12 @@ define(
             this.regionAbility.show(abilityListView);
 
             // show entity info
-            logger.log("views/subviews/Battle", "3. showing entity info");
+            logger.log("views/subviews/Battle", "\t 3. showing entity info");
             this.entityInfoView = new SelectedEntityInfoView({ model: model });
             this.regionSelectedEntity.show(this.entityInfoView);
 
             // move entity group forward
-            logger.log("views/subviews/Battle", "4. moving entity");
+            logger.log("views/subviews/Battle", "\t 4. moving entity");
             var d3selection = d3.select(this.playerEntityGroups[0][i]);
             d3selection
                 .transition()
@@ -7874,6 +7901,8 @@ define(
 
             var model = this.model.get(options.entityGroup + 'Entities')
                 .models[options.index];
+
+            // TODO: don't create new views, use a single view and just rerender
             var infoView = new IntendedTargetInfoView({ model: model });
             this.regionIntendedTarget.show(infoView);
 
@@ -7889,6 +7918,12 @@ define(
             this.regionIntendedTarget.close();
             this.intendedTarget = null;
 
+            if(this.selectedEntity && this.selectedEntity.attributes.desiredTarget){
+                var infoView = new IntendedTargetInfoView({ 
+                    model: this.selectedEntity.attributes.desiredTarget
+                });
+                this.regionIntendedTarget.show(infoView);
+            }   
             return this;
         },
 
