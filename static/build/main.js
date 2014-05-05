@@ -6714,6 +6714,8 @@ define(
             // if same ability was used, do nothing
             if(this.model.get('selectedAbility') === options.ability){
                 // remove the ability
+                logger.log('views/subviews/Battle', 
+                    'same ability selected, cancelling');
                 this.cancelTarget();
                 return false;
             }
@@ -6722,10 +6724,25 @@ define(
             // --------------------------
             this.cancelTarget();
 
+            // store desired target
+            var desiredTarget = this.selectedEntity.attributes.desiredTarget;
+
             // Use ability if it can be used
             // --------------------------
-            if(canBeUsed){
+            if(canBeUsed && desiredTarget && desiredTarget.model){
+                logger.log('views/subviews/Battle', 
+                    '\t ability CAN be used and DOES have a target');
+                this.model.set({selectedAbility: ability},{silent:false});
+                this.useAbility({
+                    target: desiredTarget.model,
+                    targetIndex: desiredTarget.index, 
+                    entityGroup: desiredTarget.group
+                });
+
+            } else if (canBeUsed) {
                 // The ability CAN be used
+                logger.log('views/subviews/Battle', 
+                    '\t ability CAN be used, setting selected ability. NO target');
 
                 // Set the selected ability
                 this.model.set({selectedAbility: ability},{silent:false});
@@ -6737,7 +6754,10 @@ define(
                 // highlight the possible targets (whatever group)
                 // TODO: Highlight group of possible targets based on ability
                 // options.ability.get('validTargets') bla bla bla
-            } 
+            } else {
+                logger.log('views/subviews/Battle', 
+                    '\t ability can NOT be used');
+            }
 
             // call the useCallback
             if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
@@ -6924,7 +6944,7 @@ define(
         // ------------------------------
         cancelTarget: function cancelTarget(){
             // return to default state
-            logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
+            logger.log('views/subviews/Battle', 'cancelTarget() called, changing state');
 
             this.model.set({selectedAbility: null}, {silent:false});
 
@@ -7073,6 +7093,7 @@ define(
                 // Whenever interaction happens with it, select or hover the 
                 // entity
                 function entityClickedInteraction(d,i){
+                    // if the 
                     d3.select('#battle .entity-selected').classed('entity-selected', false);
                     d3.select(this).classed('entity-selected', true);
 
@@ -7721,7 +7742,13 @@ define(
             if(state === 'normal' || state === 'pause'){
                 logger.log("views/subviews/Battle", '\t setting entity target');
                 if(this.selectedEntity){
-                    this.selectedEntity.set({ desiredTarget: target });
+                    this.selectedEntity.set({ 
+                        desiredTarget: {
+                            model: target,
+                            index: i,
+                            group: 'player'
+                        }
+                    });
                 }
 
                 // TODO: Handle this differently..don't always set the
@@ -7761,7 +7788,18 @@ define(
             if(this.model.get('state') === 'normal'){
                 // TODO: show more info on enemy?
                 logger.log("views/subviews/Battle", 'setting entity target');
-                this.selectedEntity.set({ desiredTarget: target });
+                // set desired target info
+                //
+                // TODO: index and group should NOT be stored in here,
+                // should have a util function to get index and group FROM
+                // a target
+                this.selectedEntity.set({ 
+                    desiredTarget: {
+                        model: target,
+                        index: i,
+                        group: 'enemy'
+                    }
+                });
 
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
@@ -7793,7 +7831,8 @@ define(
 
             // TODO: update svg elements
             //
-            //
+            // TODO: Update selectTarget when selectedEntity changes
+            //  (in setSelectedEntity)
             this.selectedTarget = model;
 
             return this.selectedTarget;
@@ -7920,7 +7959,7 @@ define(
 
             if(this.selectedEntity && this.selectedEntity.attributes.desiredTarget){
                 var infoView = new IntendedTargetInfoView({ 
-                    model: this.selectedEntity.attributes.desiredTarget
+                    model: this.selectedEntity.attributes.desiredTarget.model
                 });
                 this.regionIntendedTarget.show(infoView);
             }   
@@ -8018,7 +8057,8 @@ define(
                 // Cannot use because the entity group of the intended target 
                 // is not valid
                 logger.log("views/subviews/Battle", 
-                    "x. useAbility(): CANNOT use, invalid target");
+                    "x. useAbility(): CANNOT use, invalid target | target %O",
+                    target);
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
                 events.trigger('battle:useAbility:invalidTarget', {
