@@ -1128,9 +1128,6 @@ define(
                 // entity
                 function entityClickedInteraction(d,i){
                     // if the 
-                    d3.select('#battle .entity-selected').classed('entity-selected', false);
-                    d3.select(this).classed('entity-selected', true);
-
                     return self.selectEntity({index: i, entityGroup: entityGroup});
                 }
 
@@ -1745,6 +1742,16 @@ define(
             // entity type function based on the passed in entityGroup
             options = options || {};
             logger.log("views/subviews/Battle", 'selectEntity called with options : %O', options);
+
+            //d3.select(this).classed('entity-selected', true);
+
+            // turn off all selected entities
+            d3.select('#battle .entity-selected')
+                .classed('entity-selected', false);
+
+            // target the entity
+            d3.select(this[options.entityGroup + 'EntityGroupsWrapper'][0][options.index])
+                .classed('entity-selected', true);
 
             if(options.entityGroup === 'player'){
                 // Select player enemy

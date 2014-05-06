@@ -80,6 +80,9 @@ define(
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
 
+                // DEV : Manually add a number of entities
+                entities.push(this.getRandomEntity());
+
                 // Add more enemies
                 // TODO: For dev, only add one for now.
                 if(false){
