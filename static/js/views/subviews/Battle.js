@@ -175,9 +175,11 @@ define(
             // TODO: this?
             this.listenTo(events, 'keyPress:left', function(options){
                 options.e.preventDefault();
+                return self.handleKeyUpdateSelection.call(self, options);
             });
             this.listenTo(events, 'keyPress:right', function(options){
                 options.e.preventDefault();
+                return self.handleKeyUpdateSelection.call(self, options);
             });
 
             this.keyupFuncs = {};
@@ -820,6 +822,8 @@ define(
             // To select an enemy : use keys 1 - n
             // To select a player entity : use keys shift + 1 - n
             var self = this;
+            logger.log('views/subviews/Battle', 
+                'handleKeyUpdateSelection() called : %O', options);
 
             // disable page scrolling with up / down arrow key
             if(options.e){
@@ -833,7 +837,7 @@ define(
             if(this.model.get('state') === 'ability' &&
                 key.match(/[0-9]+/) === null){
                 logger.log('views/subviews/Battle', 
-                    '[x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
+                    '\t [x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
                 return false;
             }
 
@@ -890,7 +894,7 @@ define(
                     // when the user is not in ability mode, do nothing when
                     // 1 - n key is pressed
                     logger.log('views/subviews/Battle', 
-                        '[x] 1-n key pressed not in ability mode, returning');
+                        '\t [x] 1-n key pressed not in ability mode, returning');
                     return false;
                 }
             } 
@@ -910,6 +914,7 @@ define(
                 //  select the last entity
                 entities = this.model.get('enemyEntities');
                 modelsLength = entities.models.length;
+
                 if(targetIndex >= modelsLength){
                     targetIndex = modelsLength-1;
                 }
@@ -919,7 +924,7 @@ define(
             // 2. Got target entity, select it
             // --------------------------
             logger.log('views/subviews/Battle', 
-                '1. got key press : ' + key + 
+                ' got key press : ' + key + 
                 ' : entityGroup: ' + entityGroup +
                 ' : Selecting entity: ' + targetIndex);
 
@@ -1741,7 +1746,7 @@ define(
             // This is a proxy function that will call the corresponding select
             // entity type function based on the passed in entityGroup
             options = options || {};
-            logger.log("views/subviews/Battle", 'selectEntity called with options : %O', options);
+            logger.log("views/subviews/Battle", 'selectEntity() called with options : %O', options);
 
             //d3.select(this).classed('entity-selected', true);
 
