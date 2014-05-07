@@ -6790,6 +6790,10 @@ define(
             //
             // To select an enemy : use keys 1 - n
             // To select a player entity : use keys shift + 1 - n
+            //
+            // Updates the target for the selected (active) entity
+            //
+            // TODO: Handle changing the selected entity
             var self = this;
             logger.log('views/subviews/Battle', 
                 'handleKeyUpdateSelection() called : %O', options);
@@ -6811,12 +6815,24 @@ define(
             }
 
             // set default group
-            var entityGroup = 'player';
             var entities, modelsLength;
 
-            // TODO: Handle different functions based on state
-            var targetIndex = this.selectedEntityIndex;
-            if(targetIndex === undefined){ targetIndex = -1; }
+            // TODO: If NOT in `targetting` state, pressing up or down should
+            // change the selected entity
+            // get index for selected entity
+            var targetIndex = 0;
+            var targetGroup = 'player';
+
+            if(this.selectedEntity.attributes.desiredTarget){
+                targetIndex = this.selectedEntity.attributes.desiredTarget.index;
+                targetGroup = this.selectedEntity.attributes.desiredTarget.group;
+            }
+
+            logger.log('views/subviews/Battle', 
+                '\t selectedEntity : %O ( %O ) | targetIndex : %O | targetGroup : %O', 
+                this.selectedEntity,
+                this.selectedEntity.attributes.desiredTarget,
+                targetIndex, targetGroup);
 
             // store reference to the valid targets of the selectedAbility
             var abilityTargets = [];
@@ -6839,7 +6855,7 @@ define(
                 // TODO: Have shift + n target alternate (i.e., whatever
                 // the secondary target is)
                 if(abilityTargets && abilityTargets[1] === 'enemy'){
-                    entityGroup = 'enemy';
+                    targetGroup = 'enemy';
                 }
             }
             else if(key.match(/[0-9]+/)){
@@ -6857,7 +6873,7 @@ define(
                     // the 1-n keys target the enemy. Otherwise, it will target
                     // the player entities
                     if(abilityTargets && abilityTargets[0] === 'enemy'){
-                        entityGroup = 'enemy';
+                        targetGroup = 'enemy';
                     } 
                 } else { 
                     // when the user is not in ability mode, do nothing when
@@ -6866,9 +6882,15 @@ define(
                         '\t [x] 1-n key pressed not in ability mode, returning');
                     return false;
                 }
-            } 
+            } else if (key.match(/left/)){
+                // For left / right keys, switch groups
+                targetGroup = 'player';
+            } else if (key.match(/right/)){
+                targetGroup = 'enemy';
+            }
 
-            if(entityGroup === 'player'){
+            // ensure target index stays inside of the bounds
+            if(targetGroup === 'player'){
                 entities = this.model.get('playerEntities');
                 modelsLength = entities.models.length;
                 // loop around if the end is reached
@@ -6877,7 +6899,7 @@ define(
                 } else if( targetIndex < 0) {
                     targetIndex = modelsLength - 1;
                 }
-            } else if (entityGroup === 'enemy'){
+            } else if (targetGroup === 'enemy'){
                 // If the player tries to select an entity outside of range
                 //  e.g., selects entity 4 but there's only 3 entities, then
                 //  select the last entity
@@ -6886,6 +6908,8 @@ define(
 
                 if(targetIndex >= modelsLength){
                     targetIndex = modelsLength-1;
+                } else if ( targetIndex < 0){
+                    targetIndex = 0;
                 }
             }
 
@@ -6894,12 +6918,12 @@ define(
             // --------------------------
             logger.log('views/subviews/Battle', 
                 ' got key press : ' + key + 
-                ' : entityGroup: ' + entityGroup +
+                ' : entityGroup: ' + targetGroup +
                 ' : Selecting entity: ' + targetIndex);
 
             // select the entity
             this.selectEntity({
-                entityGroup: entityGroup,
+                entityGroup: targetGroup,
                 index: targetIndex
             });
 
@@ -7752,6 +7776,11 @@ define(
             var target = this.selectTarget(i, 
                 this.model.get('playerEntities').models);
 
+            if(!target){
+                logger.warn("views/subviews/Battle : selectPlayerEntity() : no target entity %O", target);
+                return false;
+            }
+
             // STATE: normal
             var state = this.model.get('state');
             if(state === 'normal' || state === 'pause'){
@@ -7799,6 +7828,11 @@ define(
             
             var target = this.selectTarget(i, 
                 this.model.get('enemyEntities').models);
+
+            if(!target){
+                logger.warn("views/subviews/Battle : selectEnemyEntity() : no target entity %O", target);
+                return false;
+            }
             
             if(this.model.get('state') === 'normal'){
                 // TODO: show more info on enemy?
@@ -9922,7 +9956,7 @@ require([
         // should always include these
         // ------------------------------
         'error',
-        ,'warning'
+        ,'warn'
         ,'views/subviews/Battle'
         //,'views/DevTools'
 
