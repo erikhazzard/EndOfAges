@@ -120,7 +120,7 @@ require([
         // ------------------------------
         'error',
         ,'warn'
-        ,'views/subviews/Battle'
+        //,'views/subviews/Battle'
         //,'views/DevTools'
 
         //,'app'
