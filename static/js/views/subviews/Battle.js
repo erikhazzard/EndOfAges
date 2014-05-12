@@ -167,42 +167,32 @@ define(
             // ==========================
             // Handle user input - shortcut keys
             // ==========================
-            // Pressing up or down will cycle through the entities
-            this.listenTo(events, 'keyPress:up', this.handleKeyUpdateSelection);
-            this.listenTo(events, 'keyPress:k', this.handleKeyUpdateSelection);
-            this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
-            this.listenTo(events, 'keyPress:j', this.handleKeyUpdateSelection);
+            // Handle keys for changing target
+            // --------------------------
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpdateTarget);
+            this.listenTo(events, 'keyPress:k', this.handleKeyUpdateTarget);
+            this.listenTo(events, 'keyPress:down', this.handleKeyUpdateTarget);
+            this.listenTo(events, 'keyPress:j', this.handleKeyUpdateTarget);
 
             // do something on left / right key ?
             // TODO: this?
             this.listenTo(events, 'keyPress:left', function(options){
                 options.e.preventDefault();
-                return self.handleKeyUpdateSelection.call(self, options);
+                return self.handleKeyUpdateTarget.call(self, options);
             });
             this.listenTo(events, 'keyPress:right', function(options){
                 options.e.preventDefault();
-                return self.handleKeyUpdateSelection.call(self, options);
+                return self.handleKeyUpdateTarget.call(self, options);
             });
 
-            this.keyupFuncs = {};
-
-            // Handle keys for selecting entities
+            // Handle keys for changing active entity
+            // --------------------------
+            this.listenTo(events, 'keyPress:tab', this.handleKeyChangeSelectedEntity);
+            this.listenTo(events, 'keyPress:shift+tab', this.handleKeyChangeSelectedEntity);
             _.each([1,2,3,4,6,7,8,9], function eachKey(key){
-                // handle key press
                 // NOTE: these also set the active key pressed button
-                self.listenTo(events, 'keyPress:' + key, self.handleKeyUpdateSelection);
-                self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyUpdateSelection);
-                
-                // TODO: think of better way to do this
-                //  keep track of functions so we can unbind when battle closes
-                //  NOTE: this will be unbound when the view closes
-                self.keyupFuncs[key] = jwerty.event(key, function(){
-                    logger.log('views/subviews/Battle', 'keyUp presesd for key : %O, setting _numberKeyPressed to null', key);
-                    self._numberKeyPressed = null;
-                });
-
-                // keep track of currently active key
-                $(document).on('keyup', self.keyupFuncs[key]);
+                self.listenTo(events, 'keyPress:' + key, self.handleKeyChangeSelectedEntity);
+                self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyChangeSelectedEntity);
             });
 
             // escape pressed
@@ -258,12 +248,6 @@ define(
 
             // remove mouse wheel listener
             $(window).off('mousewheel', this.handleMouseWheelProxy);
-
-            // keep track of currently active key
-            _.each(this.keyupFuncs, function(func){
-                $(document).off('keyup', func);
-            });
-
             this.isTimerActive = false;
             return this;
         },
@@ -785,14 +769,6 @@ define(
             // call the useCallback
             if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
 
-            // Auto key press usage
-            // --------------------------
-            // If a key is being pressed, handle it (which will trigger
-            // the ability usage)
-            if(this._numberKeyPressed){
-                this.handleKeyUpdateSelection({ key: this._numberKeyPressed });
-            }
-
             return this;
         },
 
@@ -801,7 +777,7 @@ define(
         // User input - Shortcut keys
         //
         // ==============================
-        handleKeyUpdateSelection: function handleKeyUpdateSelection(options){
+        handleKeyUpdateTarget: function handleKeyUpdateTarget(options){
             // This function selects an entity based on a keypress. 
             // j / k and up / down select next or previous entity the
             // player controls, as does the 1 - 4 keys
@@ -814,7 +790,7 @@ define(
             // TODO: Handle changing the selected entity
             var self = this;
             logger.log('views/subviews/Battle', 
-                'handleKeyUpdateSelection() called : %O', options);
+                'handleKeyUpdateTarget() called : %O', options);
 
             // disable page scrolling with up / down arrow key
             if(options.e){
@@ -865,7 +841,6 @@ define(
                 // Key shift + 1 -n
                 // ----------------------
                 // set the key being pressed to the number
-                this._numberKeyPressed = key;
                 targetIndex = +(key.replace('shift+', '')) - 1;
 
                 // If the keys are number keys, select the specific entity 
@@ -880,7 +855,6 @@ define(
                 // Key 1 - n 
                 // ----------------------
                 // set the key being pressed to the number
-                this._numberKeyPressed = key;
 
                 if(this.model.get('state') === 'ability'){
                     // When in ability mode, using the 1 - n keys will select
@@ -958,6 +932,19 @@ define(
             return this;
         },
 
+        handleKeyChangeSelectedEntity: function handleKeyChangeSelectedEntity(options){
+            // Changes the currently selected entity. Can either tab (or shift
+            // tab) to cycle through entities, or press the number keys
+            logger.log('views/subviews/Battle',
+                'handleKeyChangeSelectedEntity(): called with %O', options);
+
+            // prevent default key behavior 
+            if(options.e){ options.e.preventDefault(); }
+
+            
+            return this;
+        },
+
         handleKeyEscape: function handleKeyEscape(options){
             // When escape is pressed, it should return to the
             // normal battle state
@@ -995,7 +982,7 @@ define(
                 direction = 'down';
             }
 
-            this.handleKeyUpdateSelection({key: direction});
+            this.handleKeyUpdateTarget({key: direction});
             return this;
         },
 
