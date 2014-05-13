@@ -148,8 +148,6 @@ define(
 
             // set references for entities
             this.playerEntityModels = this.model.get('playerEntities').models;
-            this.listenTo(this.model.get('playerEntities'), 
-                'change:desiredTarget', this.selectedEntityTargetChanged);
 
             // target should reset whenever entity changes
             //  should be able to select own entities with 1 - n keys,
@@ -940,8 +938,53 @@ define(
 
             // prevent default key behavior 
             if(options.e){ options.e.preventDefault(); }
+            var key = options.key;
 
-            
+            var numPlayerEntities = this.model.get('playerEntities').models.length;
+            var curIndex = this.selectedEntityIndex;
+            var newIndex = 0;
+
+            // update the currently selected entity
+            if(key === 'tab'){
+                // tab goes down the list
+                newIndex = curIndex + 1;
+
+                // loop around
+                if(newIndex >= numPlayerEntities){ 
+                    newIndex = 0;
+                }
+            } else if(key === 'shift+tab'){
+                // tab goes down the list
+                newIndex = curIndex - 1;
+
+                // loop around
+                if(newIndex < 0){
+                    newIndex = numPlayerEntities - 1;
+                }
+            }
+
+            // Update selected entity by index
+            // --------------------------
+            this.setSelectedEntity({index: newIndex});
+
+            // update the target based on the selected entity's target
+            var entityDesiredTarget = this.selectedEntity.get('desiredTarget');
+
+            logger.log('views/subviews/Battle', 
+                'updated selected entity: %O | desiredTarget for new entity : %O',
+                this.selectedEntity, entityDesiredTarget);
+
+            // update the currently selected target based on the selected entity
+            if(entityDesiredTarget){
+                this.selectTarget(
+                    entityDesiredTarget.group, 
+                    entityDesiredTarget.index
+                );
+            } else {
+                // no valid target
+                this.selectTarget(null, null);
+            }
+
             return this;
         },
 
@@ -1763,20 +1806,20 @@ define(
         // Select Entity
         //
         // =====================================================================
-        selectedEntityTargetChanged: function selectedEntityTargetChange(model, desiredTarget){
+        updateSVGTargetDisplayd: function updateSVGTargetDisplay(group, index){
             // Called whenever the selectedEntity's desired target changes, will
             // update the target ring
             //
             logger.log("views/subviews/Battle", 
-                'selectedEntityTargetChanged() called : %O', arguments);
+                'updateSVGTargetDisplayd() called : %O', arguments);
 
             // turn off all selected entities
             d3.select('#battle .entity-selected')
                 .classed('entity-selected', false);
 
-            // target the entity
-            if(desiredTarget){
-                d3.select(this[desiredTarget.group + 'EntityGroupsWrapper'][0][desiredTarget.index])
+            if(group){
+                // target the entity, if group was passed in
+                d3.select(this[group + 'EntityGroupsWrapper'][0][index])
                     .classed('entity-selected', true);
             }
 
@@ -1811,8 +1854,7 @@ define(
             options = options || {};
             var i = options.index;
             
-            var target = this.selectTarget(i, 
-                this.model.get('playerEntities').models);
+            var target = this.selectTarget('player', i);
 
             if(!target){
                 logger.warn("views/subviews/Battle : selectPlayerEntity() : no target entity %O", target);
@@ -1873,8 +1915,7 @@ define(
             logger.log("views/subviews/Battle", 
                 'selectEnemyEntity called with options : %O', options);
             
-            var target = this.selectTarget(i, 
-                this.model.get('enemyEntities').models);
+            var target = this.selectTarget('enemy', i);
 
             if(!target){
                 logger.warn("views/subviews/Battle : selectEnemyEntity() : no target entity %O", target);
@@ -1924,17 +1965,22 @@ define(
         // Select entity by state 
         //
         // ------------------------------
-        selectTarget: function selectTarget(i, models){
+        selectTarget: function selectTarget(group, i){
             // Sets the target based on the selected index in the model
             logger.log("views/subviews/Battle", 
-                '1. selectTarget : i: %O : model : %O', i, models[i]);
-            var model = models[i];
+                '1. selectTarget : group %O | i %O', group, i);
 
-            // TODO: update svg elements
-            //
+            var model = null;
+            if(group){
+                model = this.model.get(group + 'Entities').models[i];
+            }
+
             // TODO: Update selectTarget when selectedEntity changes
             //  (in setSelectedEntity)
             this.selectedTarget = model;
+
+            // update svg elements
+            this.updateSVGTargetDisplayd(group, i);
 
             return this.selectedTarget;
         },
@@ -2002,6 +2048,9 @@ define(
 
             // update the previously selected entity
             this.previouslySelectedEntityIndex = i;
+
+            // Update the visible target
+            // --------------------------
 
             return this;
         },
