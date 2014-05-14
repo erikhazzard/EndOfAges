@@ -165,40 +165,32 @@ define(
             // ==========================
             // Handle user input - shortcut keys
             // ==========================
-            // Pressing up or down will cycle through the entities
-            this.listenTo(events, 'keyPress:up', this.handleKeyUpdateSelection);
-            this.listenTo(events, 'keyPress:k', this.handleKeyUpdateSelection);
-            this.listenTo(events, 'keyPress:down', this.handleKeyUpdateSelection);
-            this.listenTo(events, 'keyPress:j', this.handleKeyUpdateSelection);
+            // Handle keys for changing target
+            // --------------------------
+            this.listenTo(events, 'keyPress:up', this.handleKeyUpdateTarget);
+            this.listenTo(events, 'keyPress:k', this.handleKeyUpdateTarget);
+            this.listenTo(events, 'keyPress:down', this.handleKeyUpdateTarget);
+            this.listenTo(events, 'keyPress:j', this.handleKeyUpdateTarget);
 
             // do something on left / right key ?
             // TODO: this?
             this.listenTo(events, 'keyPress:left', function(options){
                 options.e.preventDefault();
+                return self.handleKeyUpdateTarget.call(self, options);
             });
             this.listenTo(events, 'keyPress:right', function(options){
                 options.e.preventDefault();
+                return self.handleKeyUpdateTarget.call(self, options);
             });
 
-            this.keyupFuncs = {};
-
-            // Handle keys for selecting entities
+            // Handle keys for changing active entity
+            // --------------------------
+            this.listenTo(events, 'keyPress:tab', this.handleKeyChangeSelectedEntity);
+            this.listenTo(events, 'keyPress:shift+tab', this.handleKeyChangeSelectedEntity);
             _.each([1,2,3,4,6,7,8,9], function eachKey(key){
-                // handle key press
                 // NOTE: these also set the active key pressed button
-                self.listenTo(events, 'keyPress:' + key, self.handleKeyUpdateSelection);
-                self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyUpdateSelection);
-                
-                // TODO: think of better way to do this
-                //  keep track of functions so we can unbind when battle closes
-                //  NOTE: this will be unbound when the view closes
-                self.keyupFuncs[key] = jwerty.event(key, function(){
-                    logger.log('views/subviews/Battle', 'keyUp presesd for key : %O, setting _numberKeyPressed to null', key);
-                    self._numberKeyPressed = null;
-                });
-
-                // keep track of currently active key
-                $(document).on('keyup', self.keyupFuncs[key]);
+                self.listenTo(events, 'keyPress:' + key, self.handleKeyChangeSelectedEntity);
+                self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyChangeSelectedEntity);
             });
 
             // escape pressed
@@ -254,12 +246,6 @@ define(
 
             // remove mouse wheel listener
             $(window).off('mousewheel', this.handleMouseWheelProxy);
-
-            // keep track of currently active key
-            _.each(this.keyupFuncs, function(func){
-                $(document).off('keyup', func);
-            });
-
             this.isTimerActive = false;
             return this;
         },
@@ -726,7 +712,15 @@ define(
 
             // Do nothing if game is paused
             if(this.model.get('state') === 'pause'){
-                logger.log('views/subviews/Battle', '2. game paused, returning');
+                logger.log('views/subviews/Battle', 
+                    '[x] game paused, returning');
+                return false;
+            }
+
+            // If there is no selected target, cannot use the ability
+            if(!this.selectedTarget){
+                logger.log('views/subviews/Battle', 
+                    '[x] cannot use ability, no selected target');
                 return false;
             }
             
@@ -743,23 +737,25 @@ define(
                     'handleAbilityActivated  : CANNOT be used');
             }
 
-            // Toggle ability on / off
-            // --------------------------
-            // if same ability was used, do nothing
-            if(this.model.get('selectedAbility') === options.ability){
-                // remove the ability
-                this.cancelTarget();
-                return false;
-            }
-
-            // Remove existing target
-            // --------------------------
-            this.cancelTarget();
+            // store desired target
+            var desiredTarget = this.selectedEntity.attributes.desiredTarget;
 
             // Use ability if it can be used
             // --------------------------
-            if(canBeUsed){
+            if(canBeUsed && desiredTarget && desiredTarget.model){
+                logger.log('views/subviews/Battle', 
+                    '\t ability CAN be used and DOES have a target');
+                this.model.set({selectedAbility: ability},{silent:false});
+                this.useAbility({
+                    target: desiredTarget.model,
+                    targetIndex: desiredTarget.index, 
+                    entityGroup: desiredTarget.group
+                });
+
+            } else if (canBeUsed) {
                 // The ability CAN be used
+                logger.log('views/subviews/Battle', 
+                    '\t ability CAN be used, setting selected ability. NO target');
 
                 // Set the selected ability
                 this.model.set({selectedAbility: ability},{silent:false});
@@ -771,18 +767,13 @@ define(
                 // highlight the possible targets (whatever group)
                 // TODO: Highlight group of possible targets based on ability
                 // options.ability.get('validTargets') bla bla bla
-            } 
+            } else {
+                logger.log('views/subviews/Battle', 
+                    '\t ability can NOT be used');
+            }
 
             // call the useCallback
             if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
-
-            // Auto key press usage
-            // --------------------------
-            // If a key is being pressed, handle it (which will trigger
-            // the ability usage)
-            if(this._numberKeyPressed){
-                this.handleKeyUpdateSelection({ key: this._numberKeyPressed });
-            }
 
             return this;
         },
@@ -792,14 +783,20 @@ define(
         // User input - Shortcut keys
         //
         // ==============================
-        handleKeyUpdateSelection: function handleKeyUpdateSelection(options){
+        handleKeyUpdateTarget: function handleKeyUpdateTarget(options){
             // This function selects an entity based on a keypress. 
             // j / k and up / down select next or previous entity the
             // player controls, as does the 1 - 4 keys
             //
             // To select an enemy : use keys 1 - n
             // To select a player entity : use keys shift + 1 - n
+            //
+            // Updates the target for the selected (active) entity
+            //
+            // TODO: Handle changing the selected entity
             var self = this;
+            logger.log('views/subviews/Battle', 
+                'handleKeyUpdateTarget() called : %O', options);
 
             // disable page scrolling with up / down arrow key
             if(options.e){
@@ -813,17 +810,29 @@ define(
             if(this.model.get('state') === 'ability' &&
                 key.match(/[0-9]+/) === null){
                 logger.log('views/subviews/Battle', 
-                    '[x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
+                    '\t [x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
                 return false;
             }
 
             // set default group
-            var entityGroup = 'player';
             var entities, modelsLength;
 
-            // TODO: Handle different functions based on state
-            var targetIndex = this.selectedEntityIndex;
-            if(targetIndex === undefined){ targetIndex = -1; }
+            // TODO: If NOT in `targetting` state, pressing up or down should
+            // change the selected entity
+            // get index for selected entity
+            var targetIndex = -1;
+            var targetGroup = 'player';
+
+            if(this.selectedEntity.attributes.desiredTarget){
+                targetIndex = this.selectedEntity.attributes.desiredTarget.index;
+                targetGroup = this.selectedEntity.attributes.desiredTarget.group;
+            }
+
+            logger.log('views/subviews/Battle', 
+                '\t selectedEntity : %O ( %O ) | targetIndex : %O | targetGroup : %O', 
+                this.selectedEntity,
+                this.selectedEntity.attributes.desiredTarget,
+                targetIndex, targetGroup);
 
             // store reference to the valid targets of the selectedAbility
             var abilityTargets = [];
@@ -838,7 +847,6 @@ define(
                 // Key shift + 1 -n
                 // ----------------------
                 // set the key being pressed to the number
-                this._numberKeyPressed = key;
                 targetIndex = +(key.replace('shift+', '')) - 1;
 
                 // If the keys are number keys, select the specific entity 
@@ -846,14 +854,13 @@ define(
                 // TODO: Have shift + n target alternate (i.e., whatever
                 // the secondary target is)
                 if(abilityTargets && abilityTargets[1] === 'enemy'){
-                    entityGroup = 'enemy';
+                    targetGroup = 'enemy';
                 }
             }
             else if(key.match(/[0-9]+/)){
                 // Key 1 - n 
                 // ----------------------
                 // set the key being pressed to the number
-                this._numberKeyPressed = key;
 
                 if(this.model.get('state') === 'ability'){
                     // When in ability mode, using the 1 - n keys will select
@@ -864,34 +871,53 @@ define(
                     // the 1-n keys target the enemy. Otherwise, it will target
                     // the player entities
                     if(abilityTargets && abilityTargets[0] === 'enemy'){
-                        entityGroup = 'enemy';
+                        targetGroup = 'enemy';
                     } 
                 } else { 
                     // when the user is not in ability mode, do nothing when
                     // 1 - n key is pressed
                     logger.log('views/subviews/Battle', 
-                        '[x] 1-n key pressed not in ability mode, returning');
+                        '\t [x] 1-n key pressed not in ability mode, returning');
                     return false;
                 }
-            } 
+            } else if (key.match(/left/)){
+                // For left / right keys, switch groups
+                targetGroup = 'player';
+            } else if (key.match(/right/)){
+                targetGroup = 'enemy';
+            }
 
-            if(entityGroup === 'player'){
+            // ensure target index stays inside of the bounds
+            if(targetGroup === 'player'){
                 entities = this.model.get('playerEntities');
                 modelsLength = entities.models.length;
-                // loop around if the end is reached
+
+                //// loop around if the end is reached
+                //if(targetIndex >= modelsLength){
+                    //targetIndex = 0;
+                //} else if( targetIndex < 0) {
+                    //targetIndex = 0;
+                //}
+                
+                // do not loop around
                 if(targetIndex >= modelsLength){
+                    targetIndex = modelsLength-1;
+                } else if ( targetIndex < 0){
                     targetIndex = 0;
-                } else if( targetIndex < 0) {
-                    targetIndex = modelsLength - 1;
                 }
-            } else if (entityGroup === 'enemy'){
+
+            } else if (targetGroup === 'enemy'){
                 // If the player tries to select an entity outside of range
                 //  e.g., selects entity 4 but there's only 3 entities, then
                 //  select the last entity
                 entities = this.model.get('enemyEntities');
                 modelsLength = entities.models.length;
+
+                // don't loop around
                 if(targetIndex >= modelsLength){
                     targetIndex = modelsLength-1;
+                } else if ( targetIndex < 0){
+                    targetIndex = 0;
                 }
             }
 
@@ -899,15 +925,85 @@ define(
             // 2. Got target entity, select it
             // --------------------------
             logger.log('views/subviews/Battle', 
-                '1. got key press : ' + key + 
-                ' : entityGroup: ' + entityGroup +
+                ' got key press : ' + key + 
+                ' : entityGroup: ' + targetGroup +
                 ' : Selecting entity: ' + targetIndex);
 
             // select the entity
             this.selectEntity({
-                entityGroup: entityGroup,
+                entityGroup: targetGroup,
                 index: targetIndex
             });
+
+            return this;
+        },
+
+        handleKeyChangeSelectedEntity: function handleKeyChangeSelectedEntity(options){
+            // Changes the currently selected entity. Can either tab (or shift
+            // tab) to cycle through entities, or press the number keys
+            logger.log('views/subviews/Battle',
+                'handleKeyChangeSelectedEntity(): called with %O', options);
+
+            // prevent default key behavior 
+            if(options.e){ options.e.preventDefault(); }
+            var key = options.key;
+
+            var numPlayerEntities = this.model.get('playerEntities').models.length;
+            var curIndex = this.selectedEntityIndex;
+            var newIndex = 0;
+
+            // update the currently selected entity
+            if(key === 'tab'){
+                // tab goes down the list
+                newIndex = curIndex + 1;
+
+                // loop around
+                if(newIndex >= numPlayerEntities){ 
+                    newIndex = 0;
+                }
+            } else if(key === 'shift+tab'){
+                // tab goes down the list
+                newIndex = curIndex - 1;
+
+                // loop around
+                if(newIndex < 0){
+                    newIndex = numPlayerEntities - 1;
+                }
+            } else if(key.match(/[0123456789]/)){
+                // get index from key, start at 1 (not 0), so subtract 1 to
+                // the new index
+                newIndex = parseInt(key,10) - 1;
+
+                if(newIndex < 0){
+                    newIndex = 0;
+                } else if(newIndex >= numPlayerEntities){
+                    // outside of bounds, get last entity
+                    newIndex = numPlayerEntities - 1;
+                }
+
+            }
+
+            // Update selected entity by index
+            // --------------------------
+            this.setSelectedEntity({index: newIndex});
+
+            // update the target based on the selected entity's target
+            var entityDesiredTarget = this.selectedEntity.get('desiredTarget');
+
+            logger.log('views/subviews/Battle', 
+                'updated selected entity: %O | desiredTarget for new entity : %O',
+                this.selectedEntity, entityDesiredTarget);
+
+            // update the currently selected target based on the selected entity
+            if(entityDesiredTarget){
+                this.selectTarget(
+                    entityDesiredTarget.group, 
+                    entityDesiredTarget.index
+                );
+            } else {
+                // no valid target
+                this.selectTarget(null, null);
+            }
 
             return this;
         },
@@ -949,7 +1045,7 @@ define(
                 direction = 'down';
             }
 
-            this.handleKeyUpdateSelection({key: direction});
+            this.handleKeyUpdateTarget({key: direction});
             return this;
         },
 
@@ -957,12 +1053,28 @@ define(
         // Cancel target
         // ------------------------------
         cancelTarget: function cancelTarget(){
-            // return to default state
-            logger.log('views/subviews/Battle', '1. cancelTarget, changing state');
+            // removes any selected targets, return to default state
+            logger.log('views/subviews/Battle', 
+                'cancelTarget() called, changing state');
 
+            // clear out selected ability
             this.model.set({selectedAbility: null}, {silent:false});
 
+            // cancel ability usage
             events.trigger('ability:cancel');
+
+            if(this.selectedEntity && 
+            this.selectedEntity.attributes.desiredTarget){
+                // update the selected entity's target
+                this.selectedEntity.set({ desiredTarget: null }, {silent: true});
+                this.selectedEntity.trigger('change:desiredTarget', 
+                    this.selectedEntity, null);
+            }
+
+            // clear the selected target
+            this.selectTarget(null);
+
+            // set the battle state to normal
             this.model.set({
                 state: 'normal'
             });
@@ -1106,6 +1218,11 @@ define(
                 // ----------------------
                 // Whenever interaction happens with it, select or hover the 
                 // entity
+                function entityClickedInteraction(d,i){
+                    // if the 
+                    return self.selectEntity({index: i, entityGroup: entityGroup});
+                }
+
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
                     entityGroup].selectAll('.entity-group')
                         .data(self.model.get(entityGroup + 'Entities').models)
@@ -1120,12 +1237,8 @@ define(
                                     ] + ")";
                                 }
                             })
-                            .on('click', function entityClicked(d,i){ 
-                                return self.selectEntity({index: i, entityGroup: entityGroup});
-                            })
-                            .on('touchstart', function entityTouchEnd(d,i){ 
-                                return self.selectEntity({index: i, entityGroup: entityGroup});
-                            })
+                            .on('click', entityClickedInteraction)
+                            .on('touchstart', entityClickedInteraction)
                             .on('mouseenter',function entityMouseEnter(d,i){ 
                                 // TODO: fix this when ability changes
                                 d3.select(this).classed('entity-hover', true);
@@ -1388,8 +1501,7 @@ define(
                 "selected first living entity: index: " + i);
 
             // select first living player
-            this.selectPlayerEntity({index:firstAliveEntity});
-
+            this.setSelectedEntity({index: firstAliveEntity});
 
             // --------------------------
             // Event Listeners
@@ -1717,10 +1829,31 @@ define(
         // Select Entity
         //
         // =====================================================================
+        updateSVGTargetDisplayd: function updateSVGTargetDisplay(group, index){
+            // Called whenever the selectedEntity's desired target changes, will
+            // update the target ring
+            //
+            logger.log("views/subviews/Battle", 
+                'updateSVGTargetDisplayd() called : %O', arguments);
+
+            // turn off all selected entities
+            d3.select('#battle .entity-selected')
+                .classed('entity-selected', false);
+
+            if(group){
+                // target the entity, if group was passed in
+                d3.select(this[group + 'EntityGroupsWrapper'][0][index])
+                    .classed('entity-selected', true);
+            }
+
+            return this;
+        },
+
         selectEntity: function selectEntity(options){
             // This is a proxy function that will call the corresponding select
             // entity type function based on the passed in entityGroup
             options = options || {};
+            logger.log("views/subviews/Battle", 'selectEntity() called with options : %O', options);
 
             if(options.entityGroup === 'player'){
                 // Select player enemy
@@ -1738,22 +1871,52 @@ define(
             //
             // index: index of selected entity (matches with the order of
             //  playerEntities.models)
+            logger.log("views/subviews/Battle", 
+                'selectPlayerEntity : selecting (or using an ability) on an entity controlled by the player. options : %O',
+                options);
             options = options || {};
             var i = options.index;
             
+            var target = this.selectTarget('player', i);
+
+            if(!target){
+                logger.warn("views/subviews/Battle : selectPlayerEntity() : no target entity %O", target);
+                return false;
+            }
+
             // STATE: normal
             var state = this.model.get('state');
+            var desiredTarget = {
+                model: target,
+                index: i,
+                group: 'player'
+            };
+
             if(state === 'normal' || state === 'pause'){
-                this.selectPlayerEntityStateNormal({index: options.index});
+                logger.log("views/subviews/Battle", '\t setting entity target');
+
+                if(this.selectedEntity){
+                    // if there's a selected entity, update the desired target
+                    // update the selected entity's target
+                    this.selectedEntity.set({ 
+                        desiredTarget: desiredTarget
+                    }, { silent: true });
+
+                    // manually trigger the change since we're updating a model
+                    this.selectedEntity.trigger('change:desiredTarget', 
+                        this.selectedEntity, desiredTarget);
+                }
+
+                // TODO: Handle this differently..don't always set the
+                // selected entity, ONLY do this if they press up / down
+                // or j / k OR double click on an entity
+                // TODO: THIS
+                //this.setSelectedEntity({index: options.index});
 
             } else if(this.model.get('state') === 'ability'){
-                // call the general select entity function to set the ability's
-                // target and use the ability
-                var target = this.selectTarget(i, 
-                    this.model.get('playerEntities').models);
-
                 // then, use the ability
                 // TODO: think of call structure
+                logger.log("views/subviews/Battle", '\t using ability');
                 this.useAbility({
                     target: target, 
                     targetIndex: i, 
@@ -1766,16 +1929,48 @@ define(
 
         // select Enemy entity
         selectEnemyEntity: function selectEnemyEntity(options){
+            // This is called when the user clicks on or otherwise targets an
+            // entity. If the `ability` state is active, use the ability selected
+            // otherwise, set the entity's target
+            //
             options = options || {};
             var i = options.index;
+            logger.log("views/subviews/Battle", 
+                'selectEnemyEntity called with options : %O', options);
+            
+            var target = this.selectTarget('enemy', i);
+
+            if(!target){
+                logger.warn("views/subviews/Battle : selectEnemyEntity() : no target entity %O", target);
+                return false;
+            }
+
+            // store desiredTarget info
+            var desiredTarget = {
+                model: target, index: i, group: 'enemy'
+            };
             
             if(this.model.get('state') === 'normal'){
                 // TODO: show more info on enemy?
+                logger.log("views/subviews/Battle", 'setting entity target');
+                // set desired target info
+                //
+                // TODO: index and group should NOT be stored in here,
+                // should have a util function to get index and group FROM
+                // a target
+                this.selectedEntity.set({ 
+                    desiredTarget: desiredTarget
+                }, { silent: true });
+
+                // manually trigger the change event
+                this.selectedEntity.trigger('change:desiredTarget',
+                    this.selectedEntity, desiredTarget);
+
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
                 // target and use the ability
-                var target = this.selectTarget(i, 
-                    this.model.get('enemyEntities').models);
+                logger.log("views/subviews/Battle", 
+                    'using ability on target %O', target);
 
                 // then, use the ability
                 this.useAbility({
@@ -1793,21 +1988,27 @@ define(
         // Select entity by state 
         //
         // ------------------------------
-        selectTarget: function selectTarget(i, models){
+        selectTarget: function selectTarget(group, i){
             // Sets the target based on the selected index in the model
             logger.log("views/subviews/Battle", 
-                '1. selectTarget : i: %O : model : %O', i, models[i]);
-            var model = models[i];
+                '1. selectTarget : group %O | i %O', group, i);
 
-            // TODO: update svg elements
-            //
-            //
+            var model = null;
+            if(group){
+                model = this.model.get(group + 'Entities').models[i];
+            }
+
+            // TODO: Update selectTarget when selectedEntity changes
+            //  (in setSelectedEntity)
             this.selectedTarget = model;
+
+            // update svg elements
+            this.updateSVGTargetDisplayd(group, i);
 
             return this.selectedTarget;
         },
 
-        selectPlayerEntityStateNormal: function selectPlayerStateNormal(options){
+        setSelectedEntity: function setSelectedEntity(options){
             // Select an entity at passed in index in the normal state
             // --------------------------
             // overview:
@@ -1817,19 +2018,20 @@ define(
             //  -Move the entity forward
             //
             options = options || {};
+            logger.log("views/subviews/Battle", 'setSelectedEntity() called');
             var i = options.index;
 
             // if the user selected the currently active entity, do nothing
             if(i === this.previouslySelectedEntityIndex){ 
                 logger.log("views/subviews/Battle", 
-                    '0. entity selected: same entity selected, exiting : i : %O', i);
+                    '\t 0. entity selected: same entity selected, exiting : i : %O', i);
                 return false; 
             } 
 
             //1. get model based on selected element
             var model = this.model.get('playerEntities').models[i];
             logger.log("views/subviews/Battle", 
-                "1. entity selected: %O \n model: %O", i, model);
+                "\t 1. entity selected: %O \n model: %O", i, model);
 
             // update the selected entity
             this.selectedEntityIndex = i;
@@ -1838,7 +2040,7 @@ define(
 
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
-            logger.log("views/subviews/Battle", "2. showing ability view");
+            logger.log("views/subviews/Battle", "\t 2. showing ability view");
             var abilityListView = new AbilityListView({
                 collection: model.get('abilities'),
                 entityModel: model
@@ -1848,12 +2050,12 @@ define(
             this.regionAbility.show(abilityListView);
 
             // show entity info
-            logger.log("views/subviews/Battle", "3. showing entity info");
+            logger.log("views/subviews/Battle", "\t 3. showing entity info");
             this.entityInfoView = new SelectedEntityInfoView({ model: model });
             this.regionSelectedEntity.show(this.entityInfoView);
 
             // move entity group forward
-            logger.log("views/subviews/Battle", "4. moving entity");
+            logger.log("views/subviews/Battle", "\t 4. moving entity");
             var d3selection = d3.select(this.playerEntityGroups[0][i]);
             d3selection
                 .transition()
@@ -1869,6 +2071,9 @@ define(
 
             // update the previously selected entity
             this.previouslySelectedEntityIndex = i;
+
+            // Update the visible target
+            // --------------------------
 
             return this;
         },
@@ -1908,6 +2113,8 @@ define(
 
             var model = this.model.get(options.entityGroup + 'Entities')
                 .models[options.index];
+
+            // TODO: don't create new views, use a single view and just rerender
             var infoView = new IntendedTargetInfoView({ model: model });
             this.regionIntendedTarget.show(infoView);
 
@@ -1923,6 +2130,12 @@ define(
             this.regionIntendedTarget.close();
             this.intendedTarget = null;
 
+            if(this.selectedEntity && this.selectedEntity.attributes.desiredTarget){
+                var infoView = new IntendedTargetInfoView({ 
+                    model: this.selectedEntity.attributes.desiredTarget.model
+                });
+                this.regionIntendedTarget.show(infoView);
+            }   
             return this;
         },
 
@@ -2017,7 +2230,8 @@ define(
                 // Cannot use because the entity group of the intended target 
                 // is not valid
                 logger.log("views/subviews/Battle", 
-                    "x. useAbility(): CANNOT use, invalid target");
+                    "x. useAbility(): CANNOT use, invalid target | target %O",
+                    target);
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
                 events.trigger('battle:useAbility:invalidTarget', {
@@ -2026,7 +2240,6 @@ define(
 
                 return false; 
             }
-
 
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
@@ -2076,12 +2289,13 @@ define(
                     source: sourceEntity
                 });
 
-                // --------------------------
-                // Reset back to normal state
-                // --------------------------
-                if(playerUsedAbility){
-                    this.cancelTarget();
-                }
+                //// --------------------------
+                //// Reset back to normal state
+                //// --------------------------
+                //// NOTE: need this if we don't have target first usage
+                //if(playerUsedAbility){
+                    //this.cancelTarget();
+                //}
 
                 // TODO: do a spell effect (always do it, even if entity is
                 // dead)

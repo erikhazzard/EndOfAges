@@ -119,7 +119,7 @@ require([
         // should always include these
         // ------------------------------
         'error',
-        ,'warning'
+        ,'warn'
         ,'views/subviews/Battle'
         //,'views/DevTools'
 
