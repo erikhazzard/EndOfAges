@@ -6685,7 +6685,15 @@ define(
 
             // Do nothing if game is paused
             if(this.model.get('state') === 'pause'){
-                logger.log('views/subviews/Battle', '2. game paused, returning');
+                logger.log('views/subviews/Battle', 
+                    '[x] game paused, returning');
+                return false;
+            }
+
+            // If there is no selected target, cannot use the ability
+            if(!this.selectedTarget){
+                logger.log('views/subviews/Battle', 
+                    '[x] cannot use ability, no selected target');
                 return false;
             }
             
@@ -6934,6 +6942,18 @@ define(
                 if(newIndex < 0){
                     newIndex = numPlayerEntities - 1;
                 }
+            } else if(key.match(/[0123456789]/)){
+                // get index from key, start at 1 (not 0), so subtract 1 to
+                // the new index
+                newIndex = parseInt(key,10) - 1;
+
+                if(newIndex < 0){
+                    newIndex = 0;
+                } else if(newIndex >= numPlayerEntities){
+                    // outside of bounds, get last entity
+                    newIndex = numPlayerEntities - 1;
+                }
+
             }
 
             // Update selected entity by index
@@ -7023,6 +7043,9 @@ define(
                 this.selectedEntity.trigger('change:desiredTarget', 
                     this.selectedEntity, null);
             }
+
+            // clear the selected target
+            this.selectTarget(null);
 
             // set the battle state to normal
             this.model.set({
@@ -8190,7 +8213,6 @@ define(
 
                 return false; 
             }
-
 
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
