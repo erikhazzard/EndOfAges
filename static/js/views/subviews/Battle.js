@@ -67,14 +67,14 @@ define(
         'd3', 'backbone', 'marionette', 'logger', 'events',
         'util/Timer',
         'views/subviews/battle/AbilityList',
-        'views/subviews/battle/SelectedEntityInfo',
+        'views/subviews/battle/EntityInfoCollection',
         'views/subviews/battle/IntendedTargetInfo',
         'views/subviews/battle/BattleLog'
     ], function viewBattle(
         d3, backbone, marionette, logger, events,
         Timer,
         AbilityListView,
-        SelectedEntityInfoView,
+        EntityInfoCollectionView,
         IntendedTargetInfoView,
         BattleLogView
     ){
@@ -125,7 +125,7 @@ define(
         },
 
         regions: {
-            'regionSelectedEntity': '#region-battle-selected-entity-wrapper',
+            'regionPlayerEntities': '#region-battle-player-entities-info',
             'regionIntendedTarget': '#region-battle-intended-target-wrapper',
             'regionAbility': '#region-battle-ability-wrapper',
             'regionBattleLog': '#region-battle-log-wrapper'
@@ -161,6 +161,12 @@ define(
             // --------------------------
             // TODO: Better way to handle this? Have in own controller
             this.listenTo(events, 'useAbility', this.useAbility);
+
+            // ==========================
+            // entity player info views (left sidebar) clicked
+            // ==========================
+            this.listenTo(events, 'playerEntityInfo:clicked', this.setSelectedEntity);
+
 
             // ==========================
             // Handle user input - shortcut keys
@@ -236,6 +242,7 @@ define(
             this.battleLogView = new BattleLogView({
                 model: this.model
             });
+
             return this;
         },
 
@@ -450,12 +457,6 @@ define(
                     }
                 });
             });
-
-            //// 3. Update info views
-            //// TODO: update each ability's timer
-            //this.entityInfoView.updateTimer(
-                //this.playerEntityTimers[this.selectedEntityIndex]
-            //);
 
             return this;
         },
@@ -1115,6 +1116,13 @@ define(
             // update models
             // --------------------------
             this.playerEntityModels = this.model.get('playerEntities').models;
+
+            // Show player entities info
+            logger.log("views/subviews/Battle", "\t showing player entity info");
+            this.entityInfoCollectionView = new EntityInfoCollectionView({
+                collection: this.model.get('playerEntities')
+            });
+            this.regionPlayerEntities.show(this.entityInfoCollectionView);
 
             // --------------------------
             // Handle entity death
@@ -1910,7 +1918,7 @@ define(
                 // TODO: Handle this differently..don't always set the
                 // selected entity, ONLY do this if they press up / down
                 // or j / k OR double click on an entity
-                // TODO: THIS
+                // TODO: THIS ? REMOVE?
                 //this.setSelectedEntity({index: options.index});
 
             } else if(this.model.get('state') === 'ability'){
@@ -2038,6 +2046,9 @@ define(
             this.selectedEntityGroup = 'player';
             this.selectedEntity = model;
 
+            // upet the active player entity view
+            this.entityInfoCollectionView.setSelectedEntityView(model);
+
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
             logger.log("views/subviews/Battle", "\t 2. showing ability view");
@@ -2049,13 +2060,8 @@ define(
             this.currentAbilityListView = abilityListView;
             this.regionAbility.show(abilityListView);
 
-            // show entity info
-            logger.log("views/subviews/Battle", "\t 3. showing entity info");
-            this.entityInfoView = new SelectedEntityInfoView({ model: model });
-            this.regionSelectedEntity.show(this.entityInfoView);
-
             // move entity group forward
-            logger.log("views/subviews/Battle", "\t 4. moving entity");
+            logger.log("views/subviews/Battle", "\t 3. moving entity");
             var d3selection = d3.select(this.playerEntityGroups[0][i]);
             d3selection
                 .transition()
@@ -2115,6 +2121,7 @@ define(
                 .models[options.index];
 
             // TODO: don't create new views, use a single view and just rerender
+            // TODO: don't create new views, reuse them(?)
             var infoView = new IntendedTargetInfoView({ model: model });
             this.regionIntendedTarget.show(infoView);
 

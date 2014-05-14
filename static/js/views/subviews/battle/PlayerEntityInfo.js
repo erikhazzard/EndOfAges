@@ -11,9 +11,13 @@ define(
         d3, backbone, marionette, logger, events
     ){
 
-    var Entity = Backbone.Marionette.Layout.extend({
+    var EntityInfo = Backbone.Marionette.Layout.extend({
         template: '#template-game-battle-selected-entity-info',
         'className': 'selectedEntityInfoWrapper',
+
+        events: {
+            'click': 'selfViewClicked' 
+        },
 
         initialize: function(){
             logger.log('views/subviews/battle/SelectedEntityInfo', 
@@ -32,9 +36,12 @@ define(
 
             return this;
         },
+
         onBeforeClose: function(){
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 '[x] closing');
+
+            return this;
         },
 
         onShow: function infoOnShow(){
@@ -72,6 +79,7 @@ define(
                     opacity: 0
                 }, duration, 'easeInSine');
             });
+
             return this;
         },
 
@@ -83,15 +91,39 @@ define(
 
         rerenderHealth: function healthRerender(){
             // Update the health
-            $('.health-wrapper', this.$el).html(
+            if(!this.$health){ this.$health = $('.health-wrapper', this.$el); }
+
+            this.$health.html(
                 Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
                     this.model.toJSON()    
                 )
             );
 
             return this;
+        },
+
+        // ------------------------------
+        //
+        // user interaction
+        //
+        // ------------------------------
+        selfViewClicked: function selfViewClicked(){
+            // Called when this view is clicked. Will trigger an event,
+            // which the battle view listens to to update the currently
+            // selected entity
+            //
+            logger.log('views/subviews/battle/SelectedEntityInfo', 
+                'selfViewClicked() called');
+
+            events.trigger('playerEntityInfo:clicked', {
+                model: this.model,
+                index: this.model.collection.models.indexOf(this.model)
+            });
+
+            return this;
         }
+
     });
 
-    return Entity;
+    return EntityInfo;
 });

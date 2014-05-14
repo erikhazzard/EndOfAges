@@ -19,7 +19,17 @@ define(
             logger.log('views/subviews/battle/IntendedTaretInfo', 
                 'initialize called');
 
-            this.listenTo(this.model.get('attributes'), 'change', this.render);
+            this.listenTo(this.model.get('attributes'), 'change:health', this.rerender);
+            return this;
+        },
+
+        onShow: function(){
+            return this;
+        },
+
+        rerender: function(){
+            this.render();
+            this.onShow();
             return this;
         }
     });

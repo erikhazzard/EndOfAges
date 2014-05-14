@@ -587,6 +587,10 @@
   .game-battle-wrapper .pause-blocker.active {
     fill: #ababab !important;
     opacity: 0.6 !important; }
+  .game-battle-wrapper #region-battle-player-entities-info .entity-selected {
+    border: 4px solid #242424;
+    box-shadow: inset 0 0 2px #343434;
+    padding: 0 0 0 10px; }
 
 #region-node-instance-wrapper {
   -webkit-transition: all 0.4s;
