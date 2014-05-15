@@ -120,8 +120,8 @@ require([
         // ------------------------------
         'error',
         ,'warn'
-        //,'views/subviews/Battle'
-        ,'views/subviews/battle/EntityInfoCollection'
+        ,'views/subviews/Battle'
+        //,'views/subviews/battle/EntityInfoCollection'
         //,'views/DevTools'
 
         //,'app'

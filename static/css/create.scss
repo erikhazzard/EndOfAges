@@ -35,7 +35,7 @@ $create-race-title-height: 50px;
     }
 
     #create-races, #create-classes {
-        @include no-touch();
+        @include noSelect();
         @include transition("left 0.4s");
         bottom: 0;
         border: 2px solid #343434;

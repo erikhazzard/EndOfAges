@@ -7898,12 +7898,12 @@ define(
         // Select Entity
         //
         // =====================================================================
-        updateSVGTargetDisplayd: function updateSVGTargetDisplay(group, index){
+        updateSVGTargetDisplay: function updateSVGTargetDisplay(group, index){
             // Called whenever the selectedEntity's desired target changes, will
             // update the target ring
             //
             logger.log("views/subviews/Battle", 
-                'updateSVGTargetDisplayd() called : %O', arguments);
+                'updateSVGTargetDisplay() called : %O', arguments);
 
             // turn off all selected entities
             d3.select('#battle .entity-selected')
@@ -8070,17 +8070,19 @@ define(
             // TODO: Update selectTarget when selectedEntity changes
             //  (in setSelectedEntity)
             this.selectedTarget = model;
+            logger.log("views/subviews/Battle", '\t selected target: %O', this.selectedTarget);
 
             // update svg elements
-            this.updateSVGTargetDisplayd(group, i);
+            this.updateSVGTargetDisplay(group, i);
 
             // TODO: restructure, prettify
             // update the target window
-            if(this.selectedTarget && this.selectedTarget.attributes.desiredTarget){
-                logger.log("views/subviews/Battle", '\t updating current target view');
+            if(group && (i !== undefined)){
+                logger.log("views/subviews/Battle", 
+                    '\t updating current target view : %O | %O', i, group);
                 this.setIntendedTarget({
-                    index: this.selectedTarget.attributes.desiredTarget.index,
-                    entityGroup: this.selectedTarget.attributes.desiredTarget.group
+                    index: i,
+                    entityGroup: group
                 });
             } else {
                 logger.log("views/subviews/Battle", '\t clearing current target view');
@@ -8154,6 +8156,13 @@ define(
 
             // Update the visible target
             // --------------------------
+            if(model.attributes.desiredTarget){
+                logger.log("views/subviews/Battle", "\t updated selected target");
+                this.selectTarget(
+                    model.attributes.desiredTarget.group,
+                    model.attributes.desiredTarget.index
+                );
+            }
 
             return this;
         },
@@ -10162,8 +10171,8 @@ require([
         // ------------------------------
         'error',
         ,'warn'
-        //,'views/subviews/Battle'
-        ,'views/subviews/battle/EntityInfoCollection'
+        ,'views/subviews/Battle'
+        //,'views/subviews/battle/EntityInfoCollection'
         //,'views/DevTools'
 
         //,'app'

@@ -26,3 +26,9 @@ A class is little more than a collection of abilities.
 
 AoE DoT
 AoE DD
+
+--------------------------
+Vampire like class
+
+-Gambler class
+    -does damage based on randomness
