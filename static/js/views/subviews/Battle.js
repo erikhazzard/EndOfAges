@@ -2013,6 +2013,19 @@ define(
             // update svg elements
             this.updateSVGTargetDisplayd(group, i);
 
+            // TODO: restructure, prettify
+            // update the target window
+            if(this.selectedTarget && this.selectedTarget.attributes.desiredTarget){
+                logger.log("views/subviews/Battle", '\t updating current target view');
+                this.setIntendedTarget({
+                    index: this.selectedTarget.attributes.desiredTarget.index,
+                    entityGroup: this.selectedTarget.attributes.desiredTarget.group
+                });
+            } else {
+                logger.log("views/subviews/Battle", '\t clearing current target view');
+                this.clearIntendedTarget();
+            }
+
             return this.selectedTarget;
         },
 

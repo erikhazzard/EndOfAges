@@ -1,0 +1,11 @@
+Fast vs Control
+-Win early or win late
+    Can there be two "broad" strategies which exist? Winning quickly or 
+    winning slowly?
+        -e.g., quickly would be a bunch of dps like characters. If you don't
+        win fast, however, you'll probably lose.
+
+    -Classes with fast casting spells and classes with slow casting spells
+        -Some are a mix
+
+    -In general, like in M:TG, you either try to win fast or slow
