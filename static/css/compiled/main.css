@@ -1,3 +1,11 @@
+.golden-text {
+  color: #a69172;
+  font-size: 2.5em;
+  margin-right: 40px;
+  font-variant: small-caps;
+  text-align: center;
+  text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 black, 1px 1px 0 black, 0 1px 0 black, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
+
 #region-dev-tools .dev-tools-wrapper {
   -webkit-transition: all 0.4s;
   -moz-transition: all 0.4s;
@@ -447,12 +455,16 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  background: #ffffff;
+  background: gray url(../../img/ui/party-member-bg.png);
   bottom: 0;
+  border-right: none;
+  box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
+  color: #ffffff;
   left: 0;
   position: absolute;
   top: 0;
-  width: 200px; }
+  width: 200px;
+  z-index: 200; }
 .game-battle-wrapper .health-bar-wrapper {
   background: url(../../img/ui/health-bar-bg.png) no-repeat;
   height: 30px;
@@ -468,7 +480,7 @@
 .game-battle-wrapper #region-battle-player-entities-info {
   cursor: pointer; }
   .game-battle-wrapper #region-battle-player-entities-info .entity-selected {
-    border: 4px solid #242424;
+    border: 4px solid #ffffff;
     box-shadow: inset 0 0 2px #343434;
     padding: 0 0 0 10px; }
   .game-battle-wrapper #region-battle-player-entities-info .selectedEntityInfoWrapper {
