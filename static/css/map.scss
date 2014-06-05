@@ -1,6 +1,8 @@
 $party-width: 200px;
+$map-entity-info-width: 500px;
 
 @import "map-party";
+@import "map-entity-info";
 
 #region-map {
     @include transition('all 0.4s');

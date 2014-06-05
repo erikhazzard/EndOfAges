@@ -1,0 +1,17 @@
+<script id='template-game-map-entity-info' type='text/template'>
+    <div class='member-inner'>
+        <%= model.attributes.name %> 
+        <br />
+        <%= model.attributes.race.attributes.name %>
+        <%= model.attributes.class.attributes.name %>
+        <br />
+        Kills : <%= model.attributes.kills %>
+        <br />
+        <br />
+
+        <% for(attr in model.attributes.attributes.attributes){ %>
+            <%= attr %> : <%= model.attributes.attributes.attributes[attr] %>
+            <br />
+        <% } %>
+    </div>
+</script>

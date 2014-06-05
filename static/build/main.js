@@ -5226,6 +5226,7 @@ define(
     var PartyMember = Backbone.Marionette.ItemView.extend({
         tagName: 'div',
         template: '#template-game-map-party-member',
+        'className': 'member',
         events: {
             'click': 'memberClicked'
         },
@@ -5237,6 +5238,11 @@ define(
             logger.log('views/map/PartyMember',
                 'Party member wrapper clicked : %O | model: %O',
                 this, this.model);
+
+            // map will listen for this event and show the entity info
+            events.trigger('map:showEntityInfo', {
+                entity: this.model
+            });
 
             return this;
         }
@@ -5274,6 +5280,49 @@ define(
 
 // ===========================================================================
 //
+// Entity Info
+//
+//  View for Entity Info      
+//
+// ===========================================================================
+define(
+    'views/map/EntityInfo',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events'
+    ], function viewMap(
+        d3, backbone, marionette, 
+        logger, events
+    ){
+
+    var EntityInfo = Backbone.Marionette.Layout.extend({
+        template: '#template-game-map-entity-info',
+        events: { },
+        id: 'map-entity-info',
+
+        serializeData: function(){
+            return { model: this.model };
+
+            return _.extend({
+                model: this.model
+            }, this.model.toJSON());
+        },
+
+        initialize: function entityInfoInit(options){
+            logger.log('views/map/EntityInfo', 'initialize() called');
+            return this;
+        },
+
+        onShow: function entityInfoShow(options){
+            logger.log('views/map/EntityInfo', 'onShow() called');
+            return this;
+        }
+    });
+
+    return EntityInfo;
+});
+
+// ===========================================================================
+//
 // Page Map
 //
 //      Containing view for the map page
@@ -5285,7 +5334,8 @@ define(
         'logger', 'events',
         'models/Map',
         'views/map/Map',
-        'views/map/PartyMembers'
+        'views/map/PartyMembers',
+        'views/map/EntityInfo'
     ], function viewMap(
         d3, backbone, marionette, 
         logger, events,
@@ -5294,7 +5344,8 @@ define(
         // Views
         // ------------------------------
         MapView,
-        PartyMembersView
+        PartyMembersView,
+        EntityInfoView
     ){
 
     // ----------------------------------
@@ -5304,11 +5355,15 @@ define(
     // ----------------------------------
     var ContainerMap = Backbone.Marionette.Layout.extend({
         template: '#template-game-container-map',
-        events: { },
+        events: { 
+            'click #map-wrapper': 'mapWrapperClick'
+        },
+
         'className': 'game-map-wrapper',
         regions: {
             regionMapView:  '#region-map-map',
-            regionPartyMembers:  '#region-map-party-members'
+            regionPartyMembers:  '#region-map-party-members',
+            regionEntityInfo: '#region-map-entity-info'
         },
 
         initialize: function mapViewInitialize(options){
@@ -5329,14 +5384,21 @@ define(
                 gameModel: this.model
             }); 
 
+            // Map interaction events
+            this.listenTo(events, 'map:showEntityInfo', this.showEntityInfo);
 
             // Party members
             // --------------------------
             this.viewPartyMembers = new PartyMembersView({
                 collection: this.model.attributes.playerEntities
             });
+
+            this.entityInfoView = new EntityInfoView({});
             console.log(this.model.attributes.playerEntities);
 
+            // Handle escape key to close entity info
+            // --------------------------
+            this.listenTo(events, 'keyPress:escape', this.keyEscapePressed);
             return this;
         },
 
@@ -5346,7 +5408,75 @@ define(
             this.regionMapView.show(this.viewMap);
             this.regionPartyMembers.show(this.viewPartyMembers);
             return this;
+        },
+
+        // ==============================
+        // Interaction callbacks
+        // ==============================
+        showEntityInfo: function mapShowEntityInfo(options){
+            // Called when an entity from the player list on the left side is 
+            // clicked
+            logger.log('views/map/ContainerMap',
+                'showEntityInfo() called : %O', options);
+            var self = this;
+
+            // If the same entity was selected, do nothing
+            if(this.entityInfoView.model && this.entityInfoView.model === options.entity){
+
+            } else {
+                // Different entity was selected
+                this.entityInfoView.model = options.entity;
+
+                self.regionEntityInfo.show(self.entityInfoView);
+                $('.member-inner', this.regionEntityInfo.$el).addClass('hidden');
+
+                setTimeout(function(){
+                    $('.member-inner', self.regionEntityInfo.$el).removeClass('hidden');
+                }, 150);
+            }
+
+            // Show the entity info div
+            if(this.regionEntityInfo.$el){
+                this.regionEntityInfo.$el.removeClass('off-screen');
+
+                // add the box shadow after the shown animation
+                setTimeout(function(){
+                    self.regionEntityInfo.$el.addClass('box-shadow');
+                    // duration matches css time
+                }, 300);
+            }
+
+            return this;
+        },
+
+        hideEntityInfo: function hideEntityInfo(){
+            $('#map-wrapper').off('click', this.hideEntityInfo);
+            this.regionEntityInfo.$el.removeClass('box-shadow');
+            this.regionEntityInfo.$el.addClass('off-screen');
+            return this;
+        },
+
+        // Map wrapper interaction
+        mapWrapperClick: function mapWrapperClick(){
+            // if the map wrapper was clicked and the entity info window is
+            // open, close the entity info
+            if(!this.regionEntityInfo.$el.hasClass('off-screen')){
+                return this.hideEntityInfo();
+            } else {
+                return this;
+            }
+        },
+
+        // ------------------------------
+        // Keyboard shortcuts
+        // ------------------------------
+        keyEscapePressed: function(options){
+            if(!this.regionEntityInfo.$el.hasClass('off-screen')){
+                if(options.e){ options.e.preventDefault(); }
+                return this.hideEntityInfo();
+            }
         }
+
     });
 
     return ContainerMap;
@@ -10172,6 +10302,7 @@ require([
         'error',
         ,'warn'
         ,'views/subviews/Battle'
+        ,'views/map/PartyMember'
         //,'views/subviews/battle/EntityInfoCollection'
         //,'views/DevTools'
 

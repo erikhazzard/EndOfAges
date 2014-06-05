@@ -121,6 +121,7 @@ require([
         'error',
         ,'warn'
         ,'views/subviews/Battle'
+        ,'views/map/PartyMember'
         //,'views/subviews/battle/EntityInfoCollection'
         //,'views/DevTools'
 

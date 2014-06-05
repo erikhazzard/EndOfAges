@@ -43,9 +43,9 @@
   position: absolute;
   top: 0;
   width: 200px;
-  z-index: 200; }
+  z-index: 1000; }
   #region-map-party-members .inner {
-    padding-right: 30px;
+    padding-right: 25px;
     width: 100%; }
   #region-map-party-members h3 {
     color: #a69172;
@@ -54,6 +54,55 @@
     font-variant: small-caps;
     text-align: center;
     text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 black, 1px 1px 0 black, 0 1px 0 black, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
+  #region-map-party-members .member {
+    cursor: pointer; }
+  #region-map-party-members .member:hover {
+    background: rgba(255, 255, 255, 0.4); }
+
+#region-map-entity-info.off-screen {
+  -webkit-transform: translate(-300px, 0);
+  -moz-transform: translate(-300px, 0);
+  transform: translate(-300px, 0); }
+
+#region-map-entity-info {
+  -webkit-transition: transform 0.3s linear;
+  -moz-transition: transform 0.3s linear;
+  -o-transition: transform 0.3s linear;
+  transition: transform 0.3s linear;
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-transform: translate(200px, 0);
+  -moz-transform: translate(200px, 0);
+  transform: translate(200px, 0);
+  background: #78482B;
+  border-right: 1px solid #343434;
+  bottom: 0;
+  color: #ffffff;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 500px;
+  z-index: 500; }
+  #region-map-entity-info .member-inner {
+    -webkit-transition: all 0.15s linear;
+    -moz-transition: all 0.15s linear;
+    -o-transition: all 0.15s linear;
+    transition: all 0.15s linear;
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    backface-visibility: hidden;
+    perspective: 1000px;
+    opacity: 1;
+    padding: 1em; }
+  #region-map-entity-info .member-inner.hidden {
+    display: block !important;
+    opacity: 0;
+    visibility: visible; }
+
+#region-map-entity-info.box-shadow {
+  box-shadow: 1px 0 0 #070707, 4px 0 12px #101010; }
 
 #region-map {
   -webkit-transition: all 0.4s;
