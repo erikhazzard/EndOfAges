@@ -1218,10 +1218,7 @@ define(
                 // The main difference between the two functions is the 
                 // placement and model setup of the entities in each group
 
-                // if enemy entities, place near edge of map
-                // TODO: get map width
-                var entityGroupX = (entityGroup === 'player' ? 40 : 740);
-
+                
                 // Setup the wrapper group
                 // ----------------------
                 // Whenever interaction happens with it, select or hover the 
@@ -1231,17 +1228,44 @@ define(
                     return self.selectEntity({index: i, entityGroup: entityGroup});
                 }
 
+                // configure num of entities per row
+                var numEntitiesPerRow = 4;
+
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
                     entityGroup].selectAll('.entity-group')
                         .data(self.model.get(entityGroup + 'Entities').models)
                         .enter().append('g')
                             .attr({ 
                                 'class': 'entity-group-wrapper ' + entityGroup,
+
                                 // transform the entire group to set the entity position
                                 transform: function groupsWrapperTransform(d,i){
+
+                                    // position entiy wrapper
+                                    // TODO: place near edge of map, don't
+                                    // hardcode 740 
+                                    // if enemy entities, place near edge of map
+                                    var entityGroupX = (entityGroup === 'player' ? 40 : 740);
+                                    var entityGroupY = 40 + 
+                                        (i * (entityHeight + entityHeight ));
+
+                                    // Give it a little randomness
+                                    if(entityGroup === 'enemy'){
+                                        entityGroupX += (20 - Math.random() * 40);
+                                    }
+
+                                    // wrap enemies around
+                                    if(entityGroup === 'enemy' && i >= numEntitiesPerRow){
+                                        entityGroupX -= ( 100 * Math.floor(((i+1)-0.001)/numEntitiesPerRow));
+
+                                        entityGroupY = 40 + 
+                                            ( i % numEntitiesPerRow ) *
+                                            (entityHeight + entityHeight );
+                                    }
+                                    
                                     return "translate(" + [
                                         entityGroupX, 
-                                        40 + (i * (entityHeight + entityHeight ))
+                                        entityGroupY
                                     ] + ")";
                                 }
                             })

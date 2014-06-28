@@ -65,10 +65,10 @@
   transform: translate(-300px, 0); }
 
 #region-map-entity-info {
-  -webkit-transition: transform 0.3s linear;
-  -moz-transition: transform 0.3s linear;
-  -o-transition: transform 0.3s linear;
-  transition: transform 0.3s linear;
+  -webkit-transition: transform 0.1s linear;
+  -moz-transition: transform 0.1s linear;
+  -o-transition: transform 0.1s linear;
+  transition: transform 0.1s linear;
   -webkit-backface-visibility: hidden;
   -webkit-perspective: 1000px;
   backface-visibility: hidden;
