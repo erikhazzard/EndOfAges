@@ -1,0 +1,16 @@
+.golden-text {
+    color: #a69172;
+    font-size: 2.5em;
+    margin-right: 40px;
+    font-variant: small-caps;
+    text-align: center;
+    text-shadow:
+        0 -1px 0 rgba(255,255,255,0.8),
+        0 -1px 0 rgba(0,0,0,1),
+        1px 0 0 #000000,
+        1px 1px 0 #000000,
+        0 1px 0 #000000,
+        0 2px 0 #232323,
+        0 3px 0 rgba(0,0,0,0.3),
+        0px 0px 2px #232323;
+}

@@ -5,13 +5,13 @@
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#45616a', endColorstr='#0f3545',GradientType=1 );
 }
 
-@mixin no-touch(){
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+@mixin noSelect() {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 @mixin transition($t){

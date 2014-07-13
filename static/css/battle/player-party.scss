@@ -1,0 +1,58 @@
+.game-battle-wrapper {
+    // --------------------------------------
+    //
+    // left side
+    //
+    // --------------------------------------
+    #battle-left-wrapper {
+        @include noSelect();
+
+        background: #808080 url(../../img/ui/party-member-bg.png);
+        bottom: 0;
+        border-right: none;
+        box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
+        color: #ffffff;
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: $ui-left-side-width;
+        z-index: 200;
+
+    }
+
+    .health-bar-wrapper {
+        background: url(../../img/ui/health-bar-bg.png) no-repeat;
+        height: 30px;
+        position: relative;
+        width: 171px;
+
+        .health-fill {
+            background: rgba(255,50,50, 0.5);
+            bottom: 8px;
+            left: 12px;
+            position: absolute;
+            top: 8px;
+            right: 12px;
+        }
+    }
+
+    // --------------------------------------
+    //
+    // Player Entity Members
+    //
+    // --------------------------------------
+    #region-battle-player-entities-info {
+        cursor: pointer;
+        
+        .entity-selected {
+            border: 4px solid #ffffff;
+            box-shadow: inset 0 0 2px #343434;
+            padding: 0 0 0 10px;
+        }
+
+        // Individual entity item
+        .selectedEntityInfoWrapper {
+            cursor: pointer;
+        }
+    }
+}

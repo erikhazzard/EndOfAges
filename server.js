@@ -9,6 +9,8 @@
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 
+numCPUs = 1;
+
 // Listen for dying workers
 cluster.on('exit', function (worker) {
     // Replace the dead worker,

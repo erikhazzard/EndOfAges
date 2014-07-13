@@ -13,6 +13,12 @@
     </div>
 
     Health: <div class='health-wrapper'></div>
+
+    <div class='health-bar-wrapper'>
+        <div class='health-amount'>80 / 100</div>
+        <div class='health-fill'></div>
+    </div>
+
     <br />
     Attack: <%= attributes.get('attack') %> 
     <br />
@@ -26,4 +32,9 @@
 
 <script id='template-game-battle-selected-entity-health' type='text/template'>
     <%= attributes.get('health') %> / <%= attributes.get('maxHealth') %>
+</script>
+
+<script id='template-game-battle-player-entities' type='text/template'>
+    <div class='members'>
+    </div>
 </script>

@@ -222,15 +222,7 @@ define([
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [
-                    this.pageCreateCharacter.model,
-                    
-                    // FOR DEV - ADD AN ENTITY
-                    new Entity({
-                        class: new Classes().models[0],
-                        race: new Races().models[0]
-                    })
-                ];
+                var playerEntityModels = [ this.pageCreateCharacter.model ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;

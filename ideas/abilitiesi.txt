@@ -156,3 +156,7 @@ Ability that reflects other abilities
 ===============================
 
 ** !!!!! Abilities which give you a boost if you are the killer !!!!! **
+
+
+========================
+Charms - switch targetting group

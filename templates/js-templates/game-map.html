@@ -1,7 +1,11 @@
 {{ include map/map.html }}
 {{ include map/party-members.html }}
+{{ include map/entity-info.html }}
 
 <script id='template-game-container-map' type='text/template'>
+    {{// ================================= }}
+    {{// Party Members }}
+    {{// ================================= }}
     <div id='region-map-party-members'>
     </div>
 
@@ -17,6 +21,12 @@
     {{// Game map }}
     {{// ================================= }}
     <div id='region-map-map'>
+    </div>
+
+    {{// ================================= }}
+    {{// Entity Info }}
+    {{// ================================= }}
+    <div id='region-map-entity-info' class='off-screen'>
     </div>
 
     {{// ================================= }}

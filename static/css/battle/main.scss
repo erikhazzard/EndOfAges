@@ -1,0 +1,209 @@
+// --------------------------------------
+//
+// Game battle
+//
+// --------------------------------------
+// battle node
+.game-battle-wrapper {
+    background: #343434 url('../../img/ui/combat-ui.png'); 
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    overflow: hidden;
+    right: 0;
+    top: 0;
+
+    // --------------------------------------
+    //
+    // Ability
+    //
+    // --------------------------------------
+    #region-battle-ability-wrapper {
+        left: 0;
+        position: absolute;
+        bottom: $ui-log-height + 20;
+        height: 80px;
+        right: 0;
+        z-index: 100;
+
+        .ability-list-wrapper {
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+
+            .ability-item-wrapper {
+                border: 1px solid #343434;
+                border-radius: 3px;
+                cursor: pointer;
+                float: left;
+                margin: 0 0 0 1%;
+                width: 23.5%;
+              
+                background-color: #ffffff;
+                -moz-transition:background-color 0.1s;
+                -webkit-transition:background-color 0.1s;
+                transition:background-color 0.1s;
+            }
+
+            // Blocker when entity is dead
+            .entity-dead {
+                background: #343434;
+                bottom: 0;
+                left: 0;
+                opacity: 0.7;
+                position: absolute;
+                right: 0;
+                top: 0;
+                z-index: 999;
+            }
+
+            .ability-item-wrapper.inactive {
+                background: #a0a0a0;
+            }
+            .ability-item-wrapper.use-invalid {
+                background-color: #cdcdcd;
+            }
+            .ability-item-wrapper.use {
+                background-color: #44dd44;
+            }
+
+            .ability-item-wrapper.enemy .ability-item {
+                background: #dd3333;
+            }
+            .ability-item-wrapper.player .ability-item {
+                background: #33dd33;
+            }
+
+        }
+    }
+
+
+
+    // --------------------------------------
+    // middle area - battle, chat log
+    // --------------------------------------
+    #battle-center-wrapper {
+        bottom: 0;
+        left: $ui-left-side-width;
+        position: absolute;
+        right: $ui-right-side-width;
+        top: 0;
+    }
+
+        // SVG wrapper and SVG
+        #battle-wrapper {
+            bottom: $ui-log-height + 80;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            z-index: 80;
+
+            #battle {
+                // this is the actual SVG element. it should take up 100% width
+                // and height so it scales to fit the parent
+                height: 100%;
+                left: 0;
+                position: absolute;
+                top: 0;
+                width:100%; 
+            }
+        }
+
+        #region-battle-log-wrapper {
+            background: #ffffff;
+            bottom: 0;
+            height: $ui-log-height;
+            left: 0;
+            position: absolute;
+            right: 0;
+
+            .battle-log-container {
+                bottom: 0;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+            }
+        }
+            #battle-log {
+                bottom: 0;
+                left: 0;
+                font-family: "Averia";
+                overflow-x: hidden;
+                overflow-y: scroll;
+                position: absolute;
+                right: 0;
+                height: $ui-log-height;
+
+                .log {
+                    position: relative;
+                }
+
+
+                .entity-name,
+                .ability,
+                .zero,
+                .damage,
+                .heal {
+                    font-weight: bold;
+                    margin: 0 4px;
+                    text-shadow: 0px 1px 0 #121212;
+                }
+                .heal { color: #1CB51C; }
+                .ability { color: #c5a92f; }
+
+                .enemy { color: #987256; }
+                .player { color: #336699; }
+
+                .zero { color: #888888; }
+                .damage { color: #dd2222; }
+
+                .critical { 
+                    font-size: 1.1em; 
+                }
+                .critical:after {
+                    content: '!';
+                }
+
+                .date {
+                    color: #707070;
+                    font-size: .9em;
+                    position: absolute; 
+                    right: 0;
+                    top: 0;
+                }
+            }
+
+    // --------------------------------------
+    // right side
+    // --------------------------------------
+    #battle-right-wrapper {
+        bottom: 0;
+        background: #ffffff;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: $ui-right-side-width;
+
+        #battle-meta-options { 
+            bottom: 0;
+            left: 0;
+            height: 300px;
+            position: absolute;
+            right: 0;
+        }
+    }
+    // --------------------------------------
+    //
+    // pause
+    //
+    // --------------------------------------
+    .pause-blocker.active {
+        fill: #ababab !important;
+        opacity: 0.6 !important;
+    }
+
+}

@@ -1,3 +1,11 @@
+.golden-text {
+  color: #a69172;
+  font-size: 2.5em;
+  margin-right: 40px;
+  font-variant: small-caps;
+  text-align: center;
+  text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 black, 1px 1px 0 black, 0 1px 0 black, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
+
 #region-dev-tools .dev-tools-wrapper {
   -webkit-transition: all 0.4s;
   -moz-transition: all 0.4s;
@@ -35,9 +43,9 @@
   position: absolute;
   top: 0;
   width: 200px;
-  z-index: 200; }
+  z-index: 1000; }
   #region-map-party-members .inner {
-    padding-right: 30px;
+    padding-right: 25px;
     width: 100%; }
   #region-map-party-members h3 {
     color: #a69172;
@@ -46,6 +54,55 @@
     font-variant: small-caps;
     text-align: center;
     text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 black, 1px 1px 0 black, 0 1px 0 black, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
+  #region-map-party-members .member {
+    cursor: pointer; }
+  #region-map-party-members .member:hover {
+    background: rgba(255, 255, 255, 0.4); }
+
+#region-map-entity-info.off-screen {
+  -webkit-transform: translate(-300px, 0);
+  -moz-transform: translate(-300px, 0);
+  transform: translate(-300px, 0); }
+
+#region-map-entity-info {
+  -webkit-transition: transform 0.1s linear;
+  -moz-transition: transform 0.1s linear;
+  -o-transition: transform 0.1s linear;
+  transition: transform 0.1s linear;
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-transform: translate(200px, 0);
+  -moz-transform: translate(200px, 0);
+  transform: translate(200px, 0);
+  background: #78482B;
+  border-right: 1px solid #343434;
+  bottom: 0;
+  color: #ffffff;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 500px;
+  z-index: 500; }
+  #region-map-entity-info .member-inner {
+    -webkit-transition: all 0.15s linear;
+    -moz-transition: all 0.15s linear;
+    -o-transition: all 0.15s linear;
+    transition: all 0.15s linear;
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    backface-visibility: hidden;
+    perspective: 1000px;
+    opacity: 1;
+    padding: 1em; }
+  #region-map-entity-info .member-inner.hidden {
+    display: block !important;
+    opacity: 0;
+    visibility: visible; }
+
+#region-map-entity-info.box-shadow {
+  box-shadow: 1px 0 0 #070707, 4px 0 12px #101010; }
 
 #region-map {
   -webkit-transition: all 0.4s;
@@ -440,6 +497,44 @@
   fill: #ffffff;
   stroke: none; }
 
+.game-battle-wrapper #battle-left-wrapper {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background: gray url(../../img/ui/party-member-bg.png);
+  bottom: 0;
+  border-right: none;
+  box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
+  color: #ffffff;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 200px;
+  z-index: 200; }
+.game-battle-wrapper .health-bar-wrapper {
+  background: url(../../img/ui/health-bar-bg.png) no-repeat;
+  height: 30px;
+  position: relative;
+  width: 171px; }
+  .game-battle-wrapper .health-bar-wrapper .health-fill {
+    background: rgba(255, 50, 50, 0.5);
+    bottom: 8px;
+    left: 12px;
+    position: absolute;
+    top: 8px;
+    right: 12px; }
+.game-battle-wrapper #region-battle-player-entities-info {
+  cursor: pointer; }
+  .game-battle-wrapper #region-battle-player-entities-info .entity-selected {
+    border: 4px solid #ffffff;
+    box-shadow: inset 0 0 2px #343434;
+    padding: 0 0 0 10px; }
+  .game-battle-wrapper #region-battle-player-entities-info .selectedEntityInfoWrapper {
+    cursor: pointer; }
+
 .game-battle-wrapper {
   background: #343434 url("../../img/ui/combat-ui.png");
   bottom: 0;
@@ -448,13 +543,6 @@
   overflow: hidden;
   right: 0;
   top: 0; }
-  .game-battle-wrapper #battle-left-wrapper {
-    background: #ffffff;
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 200px; }
   .game-battle-wrapper #region-battle-ability-wrapper {
     left: 0;
     position: absolute;
@@ -505,7 +593,7 @@
     right: 200px;
     top: 0; }
   .game-battle-wrapper #battle-wrapper {
-    bottom: 100px;
+    bottom: 180px;
     left: 0;
     position: absolute;
     right: 0;

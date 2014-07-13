@@ -10,3 +10,5 @@ static/build/*
 npm-debug.log
 secrets.json
 log/log.log
+
+*.psd

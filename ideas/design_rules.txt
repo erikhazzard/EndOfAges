@@ -3,3 +3,6 @@ Guideline For Design
 Strict Color Language
     -e.g., Blue / White means interactive
     -colors for elements? UI elements?
+
+
+-Unique zones, unique elements (e.g., ice world, unicorn world, etc)

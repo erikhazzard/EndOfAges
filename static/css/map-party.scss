@@ -1,5 +1,5 @@
 // --------------------------------------
-// Layout (Styles set in sub style files
+// Left side entity window
 // --------------------------------------
 #region-map-party-members {
     background: #808080 url(../../img/ui/party-member-bg.png);
@@ -11,10 +11,10 @@
     position: absolute;
     top: 0;
     width: $party-width;
-    z-index: 200;
+    z-index: 1000;
 
     .inner {
-        padding-right: 30px;
+        padding-right: 25px;
         width: 100%;
     }
 
@@ -33,5 +33,13 @@
             0 2px 0 #232323,
             0 3px 0 rgba(0,0,0,0.3),
             0px 0px 2px #232323;
+    }
+
+    // Members
+    .member {
+        cursor: pointer;
+    }
+    .member:hover {
+        background: rgba(255,255,255,0.4);
     }
 }

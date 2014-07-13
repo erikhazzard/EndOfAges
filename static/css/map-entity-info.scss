@@ -1,0 +1,39 @@
+// --------------------------------------
+// Entity window 
+// --------------------------------------
+#region-map-entity-info.off-screen {
+    @include transform(translate(-$map-entity-info-width + $party-width, 0));
+    //@include transform(translate(-100%, 0));
+}
+
+#region-map-entity-info {
+    @include transition('transform 0.1s linear');
+    @include forceGpu();
+    @include transform(translate($party-width, 0));
+
+    background: #78482B;
+    border-right: 1px solid #343434;
+    bottom: 0;
+    color: #ffffff;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: $map-entity-info-width;
+    z-index: 500;
+
+    .member-inner {
+        @include transition('all 0.15s linear');
+        @include forceGpu();
+        opacity: 1;
+        padding: 1em;
+    }
+
+    .member-inner.hidden {
+        display: block !important;
+        opacity: 0;
+        visibility: visible;
+    }
+}
+#region-map-entity-info.box-shadow {
+    box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
+}

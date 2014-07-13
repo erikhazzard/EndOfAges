@@ -67,14 +67,14 @@ define(
         'd3', 'backbone', 'marionette', 'logger', 'events',
         'util/Timer',
         'views/subviews/battle/AbilityList',
-        'views/subviews/battle/SelectedEntityInfo',
+        'views/subviews/battle/EntityInfoCollection',
         'views/subviews/battle/IntendedTargetInfo',
         'views/subviews/battle/BattleLog'
     ], function viewBattle(
         d3, backbone, marionette, logger, events,
         Timer,
         AbilityListView,
-        SelectedEntityInfoView,
+        EntityInfoCollectionView,
         IntendedTargetInfoView,
         BattleLogView
     ){
@@ -125,7 +125,7 @@ define(
         },
 
         regions: {
-            'regionSelectedEntity': '#region-battle-selected-entity-wrapper',
+            'regionPlayerEntities': '#region-battle-player-entities-info',
             'regionIntendedTarget': '#region-battle-intended-target-wrapper',
             'regionAbility': '#region-battle-ability-wrapper',
             'regionBattleLog': '#region-battle-log-wrapper'
@@ -161,6 +161,12 @@ define(
             // --------------------------
             // TODO: Better way to handle this? Have in own controller
             this.listenTo(events, 'useAbility', this.useAbility);
+
+            // ==========================
+            // entity player info views (left sidebar) clicked
+            // ==========================
+            this.listenTo(events, 'playerEntityInfo:clicked', this.setSelectedEntity);
+
 
             // ==========================
             // Handle user input - shortcut keys
@@ -236,6 +242,7 @@ define(
             this.battleLogView = new BattleLogView({
                 model: this.model
             });
+
             return this;
         },
 
@@ -450,12 +457,6 @@ define(
                     }
                 });
             });
-
-            //// 3. Update info views
-            //// TODO: update each ability's timer
-            //this.entityInfoView.updateTimer(
-                //this.playerEntityTimers[this.selectedEntityIndex]
-            //);
 
             return this;
         },
@@ -1116,6 +1117,13 @@ define(
             // --------------------------
             this.playerEntityModels = this.model.get('playerEntities').models;
 
+            // Show player entities info
+            logger.log("views/subviews/Battle", "\t showing player entity info");
+            this.entityInfoCollectionView = new EntityInfoCollectionView({
+                collection: this.model.get('playerEntities')
+            });
+            this.regionPlayerEntities.show(this.entityInfoCollectionView);
+
             // --------------------------
             // Handle entity death
             // --------------------------
@@ -1210,10 +1218,7 @@ define(
                 // The main difference between the two functions is the 
                 // placement and model setup of the entities in each group
 
-                // if enemy entities, place near edge of map
-                // TODO: get map width
-                var entityGroupX = (entityGroup === 'player' ? 40 : 740);
-
+                
                 // Setup the wrapper group
                 // ----------------------
                 // Whenever interaction happens with it, select or hover the 
@@ -1223,17 +1228,44 @@ define(
                     return self.selectEntity({index: i, entityGroup: entityGroup});
                 }
 
+                // configure num of entities per row
+                var numEntitiesPerRow = 4;
+
                 var groupsWrapper = self[entityGroup + 'EntityGroupsWrapper'] = entityGroups[
                     entityGroup].selectAll('.entity-group')
                         .data(self.model.get(entityGroup + 'Entities').models)
                         .enter().append('g')
                             .attr({ 
                                 'class': 'entity-group-wrapper ' + entityGroup,
+
                                 // transform the entire group to set the entity position
                                 transform: function groupsWrapperTransform(d,i){
+
+                                    // position entiy wrapper
+                                    // TODO: place near edge of map, don't
+                                    // hardcode 740 
+                                    // if enemy entities, place near edge of map
+                                    var entityGroupX = (entityGroup === 'player' ? 40 : 740);
+                                    var entityGroupY = 40 + 
+                                        (i * (entityHeight + entityHeight ));
+
+                                    // Give it a little randomness
+                                    if(entityGroup === 'enemy'){
+                                        entityGroupX += (20 - Math.random() * 40);
+                                    }
+
+                                    // wrap enemies around
+                                    if(entityGroup === 'enemy' && i >= numEntitiesPerRow){
+                                        entityGroupX -= ( 100 * Math.floor(((i+1)-0.001)/numEntitiesPerRow));
+
+                                        entityGroupY = 40 + 
+                                            ( i % numEntitiesPerRow ) *
+                                            (entityHeight + entityHeight );
+                                    }
+                                    
                                     return "translate(" + [
                                         entityGroupX, 
-                                        40 + (i * (entityHeight + entityHeight ))
+                                        entityGroupY
                                     ] + ")";
                                 }
                             })
@@ -1829,12 +1861,12 @@ define(
         // Select Entity
         //
         // =====================================================================
-        updateSVGTargetDisplayd: function updateSVGTargetDisplay(group, index){
+        updateSVGTargetDisplay: function updateSVGTargetDisplay(group, index){
             // Called whenever the selectedEntity's desired target changes, will
             // update the target ring
             //
             logger.log("views/subviews/Battle", 
-                'updateSVGTargetDisplayd() called : %O', arguments);
+                'updateSVGTargetDisplay() called : %O', arguments);
 
             // turn off all selected entities
             d3.select('#battle .entity-selected')
@@ -1910,7 +1942,7 @@ define(
                 // TODO: Handle this differently..don't always set the
                 // selected entity, ONLY do this if they press up / down
                 // or j / k OR double click on an entity
-                // TODO: THIS
+                // TODO: THIS ? REMOVE?
                 //this.setSelectedEntity({index: options.index});
 
             } else if(this.model.get('state') === 'ability'){
@@ -2001,9 +2033,24 @@ define(
             // TODO: Update selectTarget when selectedEntity changes
             //  (in setSelectedEntity)
             this.selectedTarget = model;
+            logger.log("views/subviews/Battle", '\t selected target: %O', this.selectedTarget);
 
             // update svg elements
-            this.updateSVGTargetDisplayd(group, i);
+            this.updateSVGTargetDisplay(group, i);
+
+            // TODO: restructure, prettify
+            // update the target window
+            if(group && (i !== undefined)){
+                logger.log("views/subviews/Battle", 
+                    '\t updating current target view : %O | %O', i, group);
+                this.setIntendedTarget({
+                    index: i,
+                    entityGroup: group
+                });
+            } else {
+                logger.log("views/subviews/Battle", '\t clearing current target view');
+                this.clearIntendedTarget();
+            }
 
             return this.selectedTarget;
         },
@@ -2038,6 +2085,9 @@ define(
             this.selectedEntityGroup = 'player';
             this.selectedEntity = model;
 
+            // upet the active player entity view
+            this.entityInfoCollectionView.setSelectedEntityView(model);
+
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
             logger.log("views/subviews/Battle", "\t 2. showing ability view");
@@ -2049,13 +2099,8 @@ define(
             this.currentAbilityListView = abilityListView;
             this.regionAbility.show(abilityListView);
 
-            // show entity info
-            logger.log("views/subviews/Battle", "\t 3. showing entity info");
-            this.entityInfoView = new SelectedEntityInfoView({ model: model });
-            this.regionSelectedEntity.show(this.entityInfoView);
-
             // move entity group forward
-            logger.log("views/subviews/Battle", "\t 4. moving entity");
+            logger.log("views/subviews/Battle", "\t 3. moving entity");
             var d3selection = d3.select(this.playerEntityGroups[0][i]);
             d3selection
                 .transition()
@@ -2074,6 +2119,13 @@ define(
 
             // Update the visible target
             // --------------------------
+            if(model.attributes.desiredTarget){
+                logger.log("views/subviews/Battle", "\t updated selected target");
+                this.selectTarget(
+                    model.attributes.desiredTarget.group,
+                    model.attributes.desiredTarget.index
+                );
+            }
 
             return this;
         },
@@ -2115,6 +2167,7 @@ define(
                 .models[options.index];
 
             // TODO: don't create new views, use a single view and just rerender
+            // TODO: don't create new views, reuse them(?)
             var infoView = new IntendedTargetInfoView({ model: model });
             this.regionIntendedTarget.show(infoView);
 
