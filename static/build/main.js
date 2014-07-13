@@ -4368,12 +4368,6 @@ define(
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
 
                 // DEV : Manually add a number of entities
                 entities.push(this.getRandomEntity());
@@ -10130,15 +10124,7 @@ define('Controller',[
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [
-                    this.pageCreateCharacter.model,
-                    
-                    // FOR DEV - ADD AN ENTITY
-                    new Entity({
-                        class: new Classes().models[0],
-                        race: new Races().models[0]
-                    })
-                ];
+                var playerEntityModels = [ this.pageCreateCharacter.model ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;

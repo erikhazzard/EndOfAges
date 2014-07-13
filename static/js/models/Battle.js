@@ -79,12 +79,6 @@ define(
             if(!options.enemyEntities){
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
-                entities.push(this.getRandomEntity());
 
                 // DEV : Manually add a number of entities
                 entities.push(this.getRandomEntity());
