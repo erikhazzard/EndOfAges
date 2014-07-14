@@ -11,16 +11,16 @@ define(
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
         'models/Entity',
-        'collections/Abilities'
+        'collections/Abilities',
+        'data/abilities'
         // TODO : remove this, get from server
-        ,'models/data-entity-classes'
         ,'models/data-races'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
         Abilities,
-        CLASSES,
+        dataAbilities,
         RACES
     ){
 
@@ -113,9 +113,9 @@ define(
             // generate new entity
             entity = new Entity({
                 //// FOR ALL : 
-                // 'class': CLASSES[Math.random() * CLASSES.length | 0],
-                'class': CLASSES[2],
-                'race': RACES[Math.random() * RACES.length | 0]
+                //TODO: set abilities
+                abilities: [], 
+                race: RACES[Math.random() * RACES.length | 0]
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({

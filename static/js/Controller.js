@@ -20,10 +20,6 @@ define([
     // TODO: remove, only for dev
     'views/DevTools'
 
-    // FOR DEV for manually adding entities
-    ,'collections/Classes'
-    ,'collections/Races'
-
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
@@ -37,9 +33,6 @@ define([
 
         // TODO: remove once out of dev
         DevTools
-
-        ,Classes
-        ,Races
     ){
 
     // console color

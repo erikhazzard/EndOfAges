@@ -16,10 +16,13 @@ define(
         'views/create/RaceList',
         'collections/Races',
 
-        'views/create/ClassList',
-        'collections/Classes',
+        'models/Ability',
+        'collections/Abilities',
 
-        'views/create/AbilityList'
+        'views/create/AllAbilitiesList',
+        'views/create/AbilityList',
+
+        'data/abilities'
 
     ], function viewPageCreateCharacter(
         d3, Backbone, Marionette, 
@@ -31,10 +34,13 @@ define(
         RaceList,
         Races,
 
-        ClassList,
-        Classes,
+        Ability,
+        Abilities,
 
-        AbilityList
+        AllAbilitiesList,
+        AbilityList,
+
+        dataAbilities
     ){
 
     var PageCreateCharacter = EoALayoutView.extend({
@@ -42,7 +48,7 @@ define(
         'className': 'page-create-character-wrapper',
         regions: {
             'regionRaceList': '#region-create-races',
-            'regionClassList': '#region-create-classes',
+            'regionAllAbilitiesList': '#region-create-classes',
             'regionAbilityList': '#region-create-abilities'
         },
 
@@ -71,7 +77,6 @@ define(
             // initialize:
             logger.log('views/PageCreateCharacter', 'initialize() called');
             this.races = new Races();
-            this.classes = new Classes();
 
             // state for the create process - race or class
             // NOTE: could use a FSM here, but this is simple enough - just two
@@ -134,12 +139,23 @@ define(
             this.raceListView = new RaceList({
                 collection: this.races
             });
-            this.classListView = new ClassList({
-                collection: this.classes
+
+            // Create ability objects for each ability item
+            var allAbilities = new Abilities();
+
+            _.each(dataAbilities, function createAbility (ability){
+                allAbilities.add(new Ability(ability));
+            });
+
+            logger.log('views/PageCreateCharacter', 
+                'abilities : %O', allAbilities);
+
+            this.classListView = new AllAbilitiesList({
+                collection: allAbilities
             });
 
             this.regionRaceList.show(this.raceListView);
-            this.regionClassList.show(this.classListView);
+            this.regionAllAbilitiesList.show(this.classListView);
 
             return this;
         },

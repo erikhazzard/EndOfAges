@@ -122,6 +122,7 @@ require([
         ,'warn'
         ,'views/subviews/Battle'
         ,'views/map/PartyMember'
+        ,'views/PageCreateCharacter'
         //,'views/subviews/battle/EntityInfoCollection'
         //,'views/DevTools'
 

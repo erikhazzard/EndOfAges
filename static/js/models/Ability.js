@@ -147,7 +147,12 @@ define(
 
                 // Meta
                 // --------------------------
-                _lastUseTime: null  // keep track of last cast time (for cooldown)
+                // meta is an arbitrary object containing various properties,
+                // e.g., used for sorting abilities in character create
+                meta: {},
+
+                // keep track of last cast time (for cooldown)
+                _lastUseTime: null
             };
         },
         

@@ -1476,7 +1476,12 @@ define(
 
                 // Meta
                 // --------------------------
-                _lastUseTime: null  // keep track of last cast time (for cooldown)
+                // meta is an arbitrary object containing various properties,
+                // e.g., used for sorting abilities in character create
+                meta: {},
+
+                // keep track of last cast time (for cooldown)
+                _lastUseTime: null
             };
         },
         
@@ -2296,9 +2301,12 @@ define(
                 this.set({ aiDelay: Math.random() * 3 });
             }
 
-            // --------------------------
-            // SET ABILITIES FROM CLASS
-            // --------------------------
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            // // SET ABILITIES FROM CLASS
+            // TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TODO: Don't use class - it doesn't exist anymore. Get abilities
+            // from a list of IDs or something
+            //
             if(this.get('class')){
                 this.set({ abilities: this.get('class').get('abilities') }, { silent: true });
             } else {
@@ -2308,6 +2316,7 @@ define(
                     self.set({ abilities: self.get('class').get('abilities') });
                 });
             }
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
             // --------------------------
             // Set stats from race
@@ -3657,31 +3666,19 @@ define(
     return PageHome;
 });
 
-// ===========================================================================
-//
-// data-abilities
-//
-//      TODO: should be loaded from server and abilities should load on a per
-//      entity level
-//
-// ===========================================================================
+/* =========================================================================
+ *
+ * abilities
+ *  data file containing all abilities
+ *
+ *  ======================================================================== */
 define(
-    'models/data-abilities',[ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
-        events, logger, Ability, Timer
-    ){
-    // TODO: think of structure.
-    // Maybe instead of damage and heal, `amount` is used, and a separate
-    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
-    // DoT, buff, etc. type spell
-    logger.log('models/data-abilities', 'Creating abilities');
-
+'data/abilities',[ 'logger', 'util/Timer' ], function( logger, Timer){
     // Here be abilities. This would be loaded in a DB and entities would
     // get abilities from server
     var abilities = {
-        // ------------------------------
-        // Damage - Arcane
-        // ------------------------------
-        'magicmissle': new Ability({
+
+        'magic-missile': {
             name: 'Magic Missle',
             effectId: 'magicMissle',
             castTime: 2,
@@ -3690,536 +3687,12 @@ define(
             type: 'magic',
             element: {light: 0.7, fire: 0.3},
             damage: 15
-        }),
+        }
 
-        // ------------------------------
-        // Damage - Fire
-        // ------------------------------
-        'flamelick': new Ability({
-            name: 'Flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 10
-        }),
-        'fireball': new Ability({
-            name: 'Fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 40
-        }),
-
-        // ------------------------------
-        // Healing - Light
-        // ------------------------------
-        'trivialhealing': new Ability({
-            name: 'Trivial Healing',
-            effectId: 'trivialHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 5
-        }),
-        'minorhealing': new Ability({
-            name: 'Minor Healing',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 15
-        }),
-
-        // ==============================
-        // 
-        // Cleric
-        //
-        // ==============================
-        heal: new Ability({
-            name: 'Heal',
-            effectId: 'minorHealing',
-            castTime: 5.5,
-            timeCost: 5.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 20
-        }),
-        smite: new Ability({
-            name: 'Smite',
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: 10,
-            heal: 5,
-            healTarget: 'source'
-        }),
-        virtue: new Ability({
-            name: 'Virtue',
-            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            heal: 10,
-
-            buffDuration: 8,
-            buffEffects: { 
-                armor: 10,
-                magicResist: 10,
-                maxHealth: 10,
-
-                abilities: {
-                    //// 20% faster, so decrease time by 20%
-                    //coolDown: -0.5,
-                    //castDuration: -0.5,
-                    //castTime: -0.5,
-                    //timeCost: -0.5
-                }
-            }
-        }),
-
-        // TODO:  Have truedamage be a side effect in the default damage func
-        judgement: new Ability({
-            name: 'Judgement',
-            effectId: 'placeHolder',
-            castTime: 5,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: '10%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        }),
-
-        // ==============================
-        // 
-        // Shadowknight
-        //
-        // ==============================
-        darkblade: new Ability({
-            name: 'Dark Blade',
-            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'placeHolder',
-            castTime: 3,
-            timeCost: 3,
-            castDuration: 0.3,
-            validTargets: ['enemy'],
-            type: {'magic': 0.3, 'physical': 0.7},
-            element: 'dark',
-            damage: 9,
-            heal: 5,
-            healTarget: 'source'
-        }),
-
-        // TODO: Have true damage be a part of the damage func
-        deathtouch: new Ability({
-            name: 'Death Touch',
-            description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 1.5,
-            validTargets: ['enemy'],
-            type: {'magic': 0.5, 'physical': 0.5},
-            element: 'dark',
-            damage: '25%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.25 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        }),
-
-        // ==============================
-        // 
-        // Assassin
-        //
-        // ==============================
-        stab: new Ability({
-            name: 'Stab',
-            description: 'A quick stabbing attack which deals a small amount of damage',
-            effectId: 'placeHolder',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 0.2,
-            validTargets: ['enemy'],
-            type: {'physical': 1},
-            element: 'air',
-            damage: 3,
-            attackBonusPercent: 0.1
-        }),
-        backstab: new Ability({
-            name: 'Backstab',
-            description: 'A powerful attack which will do additional damage if the enemy has recently been stabbed',
-            effectId: 'placeHolder',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 1,
-            validTargets: ['enemy'],
-            type: {'physical': 1},
-            element: 'air',
-            damage: 7,
-            attackBonusPercent: 0.2,
-            effect: function effect(options){
-                var self = this;
-                var delay = this.getCastDuration(options);
-                var amount = this.get('damage');
-                var intendedTarget = options[this.get('damageTarget')];
-                // TODO: make sure castDuration is always the current castDuration
-                var castDuration = self.attributes.castDuration * 1000;
-
-                new Timer(function effectDamageDelay(){
-                    var healthHistory = intendedTarget.get('healthHistory');
-                    var i,len;
-                    var now = new Date();
-                    if(healthHistory){
-                        for(i=0,len=healthHistory.length;i<len;i++){
-                            // only check for effects that have happened since this was cast
-                            if((now - healthHistory[i].date) <= castDuration){
-                                // TODO: check for a single ability
-                                // TODO: scale based on entity's attack bonus
-                                amount += 10;
-                            } else {
-                                // otherwise, break
-                                break;
-                            }
-                        }
-                    }
-                    amount = intendedTarget.takeDamage({
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount,
-                        sourceAbility: self,
-                        target: options.target,
-                        source: options.source
-                    });
-                    if(options.callback){ options.callback(); }
-                }, delay);
-
-            }
-        }),
-
-        cripple: new Ability({
-            name: 'Cripple',
-            description: "Cripple weakens an enemy, lowering their attack and defense",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            damage: 0,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'air',
-
-            buffDuration: 8,
-            // TODO : scale effect
-            buffEffects: { 
-                armor: -10,
-                attack: -10
-            }
-        }),
-
-        assassinate: new Ability({
-            name: 'Assassinate',
-            description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
-            effectId: 'placeHolder',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 1,
-            validTargets: ['enemy'],
-            type: {'physical': 1},
-            element: 'air',
-            damage: 10,
-            attackBonusPercent: 0.6,
-            effect: function effect(options){
-                var self = this;
-                var delay = this.getCastDuration(options);
-                var amount = this.get('damage');
-                var intendedTarget = options[this.get('damageTarget')];
-                // TODO: make sure castDuration is always the current castDuration
-                var castDuration = self.attributes.castDuration * 1000;
-
-                // Add the entity's health to the effect.
-                // TODO: calculate entity difficultly and scale damage based on
-                // it
-                amount += (
-                    intendedTarget.get('attributes').get('health') / (Math.random() * 4 | 0)
-                );
-
-                new Timer(function effectDamageDelay(){
-                    amount = intendedTarget.takeDamage({
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount,
-                        sourceAbility: self,
-                        target: options.target,
-                        source: options.source
-                    });
-                    if(options.callback){ options.callback(); }
-                }, delay);
-
-            }
-        }),
-
-        // ------------------------------
-        // Other effects
-        // ------------------------------
-        freezeTime: new Ability({
-            name: 'Freeze Time',
-            description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: -1.0,
-
-                abilities: {
-                }
-            }
-        }),
-        stun: new Ability({
-            name: 'Stun',
-            description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            // to prevent ability usage, set the time to be greater than the
-            // entitiy's max timer value. Setting to something ridiculously high
-            // also accomplishes this
-            buffEffects: { 
-                abilities: {
-                    castTime: 9999999
-                }
-            }
-        }),
-        comatose: new Ability({
-            name: 'Comatose',
-            description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-
-            damage: 1,
-            // TODO: Deal damage based on entity's timer value
-
-            buffDuration: 8,
-            // to prevent ability usage, set the time to be greater than the
-            // entitiy's max timer value. Setting to something ridiculously high
-            // also accomplishes this
-            buffEffects: { 
-                timerFactor: -1.0,
-                abilities: {
-                    castTime: 9999999
-                }
-            }
-        }),
-        haste: new Ability({
-            name: 'Haste',
-            description: "Increases your timer speed by 50%",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: 0.5
-            }
-        })
 
     };
 
-
     return abilities;
-});
-
-// ===========================================================================
-//
-// data-classes
-//
-//      TODO: should be loaded from server and abilities should load 
-//      TODO: Think of group of classes (DPS / Tank / Healer?)
-//
-//      -- Classes can be generally divided into types:
-//          Type: Physical and Magical
-//          Elements: Earth, Wind, Water, Fire, Light, Dark
-//          
-//          Class could be parts of any type / element
-//
-//
-// ===========================================================================
-define(
-    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass',
-        'collections/Abilities', 'models/data-abilities'], function(
-        events, logger, EntityClass,
-        Abilities, ABILITIES
-    ){
-
-    var ENTITY_CLASSES = [
-        new EntityClass({
-            name: 'Cleric',
-            description: 'Clerics uselight magic to aid their allies and disable their foes',
-            sprite: 'cleric',
-            abilities: new Abilities([
-                // Basic heal
-                ABILITIES.heal,
-                // damage target and heal self
-                ABILITIES.smite,
-                // health and armor buff
-                ABILITIES.virtue
-                ,ABILITIES.judgement
-                //// res
-                //ABILITIES.resurrect
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Shadowknight',
-            description: 'A veteran dabbling in dark magic',
-            sprite: 'shadowknight',
-            abilities: new Abilities([
-                // basic physical attack
-                ABILITIES.darkblade
-                //// attack + dot
-                //ABILITIES.darkblade,
-                //// siphon abilities
-                //ABILITIES.siphonstrength,
-                ,ABILITIES.deathtouch
-
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Inferno Sage',
-            description: 'A weilder of flame',
-            sprite: 'wizard',
-            abilities: new Abilities([
-                ABILITIES.flamelick
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Time Mage',
-            description: 'Bla',
-            sprite: 'timemage',
-            abilities: new Abilities([
-                ABILITIES.freezeTime,
-                ABILITIES.stun,
-                ABILITIES.comatose,
-                ABILITIES.haste
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Ranger',
-            description: 'An archer',
-            sprite: 'ranger',
-            abilities: new Abilities([
-                ABILITIES.magicmissle
-                //// single target
-                //ABILITIES.headshot,
-                //// dot + damage
-                //ABILITIES.poisonedarrow,
-                //// increases damage of next spell
-                //ABILITIES.aim,
-                //// aoe (will increase aggro - could be bad)
-                //ABILITIES.barrage
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Assassin',
-            description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
-            sprite: 'assassin',
-            abilities: new Abilities([
-                //// Basic damage attack
-                ABILITIES.stab,
-                
-                //// if an ability was recently used, deal extra damage
-                ABILITIES.backstab,
-
-                //// significantly reduces enemy's armor for a short period
-                ABILITIES.cripple,
-
-                //// some sort of ult
-                ////  Chance to instantly kill mob. Chance scales based on 
-                ////  enemy's health
-                ABILITIES.assassinate
-            ])
-        })
-
-
-    ];
-
-
-    return ENTITY_CLASSES;
 });
 
 // ===========================================================================
@@ -4300,16 +3773,16 @@ define(
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
         'models/Entity',
-        'collections/Abilities'
+        'collections/Abilities',
+        'data/abilities'
         // TODO : remove this, get from server
-        ,'models/data-entity-classes'
         ,'models/data-races'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
         Abilities,
-        CLASSES,
+        dataAbilities,
         RACES
     ){
 
@@ -4402,9 +3875,9 @@ define(
             // generate new entity
             entity = new Entity({
                 //// FOR ALL : 
-                // 'class': CLASSES[Math.random() * CLASSES.length | 0],
-                'class': CLASSES[2],
-                'race': RACES[Math.random() * RACES.length | 0]
+                //TODO: set abilities
+                abilities: [], 
+                race: RACES[Math.random() * RACES.length | 0]
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
@@ -9219,7 +8692,7 @@ define(
 //
 // ===========================================================================
 define(
-    'views/create/ClassListItem',[ 
+    'views/create/AllAbilitiesListItem',[ 
         'd3', 'logger', 'events'
     ], function viewClassListItem(
         d3, logger, events
@@ -9260,9 +8733,9 @@ define(
 //
 // ===========================================================================
 define(
-    'views/create/ClassList',[ 
+    'views/create/AllAbilitiesList',[ 
         'd3', 'logger', 'events', 
-        'views/create/ClassListItem'
+        'views/create/AllAbilitiesListItem'
     ], function viewClassListCollection(
         d3, logger, events,
         ClassListItem
@@ -9283,45 +8756,6 @@ define(
     });
 
     return ClassListCollection;
-});
-
-// ===========================================================================
-//
-//  Classes Collection
-//
-//      This collection contains a collection of races for the create screen,
-//      the list of available races for the player
-// ===========================================================================
-define(
-    'collections/Classes',[ 'backbone', 'marionette', 'logger', 'events', 
-        'models/EntityClass',
-        'models/data-entity-classes'
-    ], function EntityClassCollection(
-        Backbone, Marionette, logger, events,
-        EntityClass,
-        ENTITY_CLASSES
-    ){
-
-    var Classes = Backbone.Collection.extend({
-        model: EntityClass,
-
-        initialize: function(models, options){
-            var self = this;
-            logger.log('collections/Classes', 'initialize() called');
-
-            // TODO: don't do this, get from server
-            this.add(ENTITY_CLASSES);
-
-            return this;
-        },
-
-        comparator: function(model){
-            return model.get('name');
-        }
-
-    });
-
-    return Classes;
 });
 
 // ===========================================================================
@@ -9412,10 +8846,13 @@ define(
         'views/create/RaceList',
         'collections/Races',
 
-        'views/create/ClassList',
-        'collections/Classes',
+        'models/Ability',
+        'collections/Abilities',
 
-        'views/create/AbilityList'
+        'views/create/AllAbilitiesList',
+        'views/create/AbilityList',
+
+        'data/abilities'
 
     ], function viewPageCreateCharacter(
         d3, Backbone, Marionette, 
@@ -9427,10 +8864,13 @@ define(
         RaceList,
         Races,
 
-        ClassList,
-        Classes,
+        Ability,
+        Abilities,
 
-        AbilityList
+        AllAbilitiesList,
+        AbilityList,
+
+        dataAbilities
     ){
 
     var PageCreateCharacter = EoALayoutView.extend({
@@ -9438,7 +8878,7 @@ define(
         'className': 'page-create-character-wrapper',
         regions: {
             'regionRaceList': '#region-create-races',
-            'regionClassList': '#region-create-classes',
+            'regionAllAbilitiesList': '#region-create-classes',
             'regionAbilityList': '#region-create-abilities'
         },
 
@@ -9467,7 +8907,6 @@ define(
             // initialize:
             logger.log('views/PageCreateCharacter', 'initialize() called');
             this.races = new Races();
-            this.classes = new Classes();
 
             // state for the create process - race or class
             // NOTE: could use a FSM here, but this is simple enough - just two
@@ -9530,12 +8969,23 @@ define(
             this.raceListView = new RaceList({
                 collection: this.races
             });
-            this.classListView = new ClassList({
-                collection: this.classes
+
+            // Create ability objects for each ability item
+            var allAbilities = new Abilities();
+
+            _.each(dataAbilities, function createAbility (ability){
+                allAbilities.add(new Ability(ability));
+            });
+
+            logger.log('views/PageCreateCharacter', 
+                'abilities : %O', allAbilities);
+
+            this.classListView = new AllAbilitiesList({
+                collection: allAbilities
             });
 
             this.regionRaceList.show(this.raceListView);
-            this.regionClassList.show(this.classListView);
+            this.regionAllAbilitiesList.show(this.classListView);
 
             return this;
         },
@@ -9922,10 +9372,6 @@ define('Controller',[
     // TODO: remove, only for dev
     'views/DevTools'
 
-    // FOR DEV for manually adding entities
-    ,'collections/Classes'
-    ,'collections/Races'
-
     ], function(
         Backbone, Marionette, logger, events,
         appUser,
@@ -9939,9 +9385,6 @@ define('Controller',[
 
         // TODO: remove once out of dev
         DevTools
-
-        ,Classes
-        ,Races
     ){
 
     // console color
@@ -10319,6 +9762,7 @@ require([
         ,'warn'
         ,'views/subviews/Battle'
         ,'views/map/PartyMember'
+        ,'views/PageCreateCharacter'
         //,'views/subviews/battle/EntityInfoCollection'
         //,'views/DevTools'
 
