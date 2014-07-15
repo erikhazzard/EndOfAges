@@ -735,7 +735,8 @@ define(
                 canBeUsed = true;
             } else {
                 logger.log('views/subviews/Battle', 
-                    'handleAbilityActivated  : CANNOT be used');
+                    'handleAbilityActivated  : CANNOT be used : %O : %O',
+                    entityTime, ability.get('castTime'));
             }
 
             // store desired target

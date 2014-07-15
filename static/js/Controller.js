@@ -212,10 +212,12 @@ define([
                 logger.log('Controller', 'creating new pageGame view');
             }
 
+            var playerEntityModels = [];
+
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [ this.pageCreateCharacter.model ];
+                playerEntityModels = [ this.pageCreateCharacter.model ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;
@@ -229,6 +231,10 @@ define([
             this.pageGame = new PageGame({
                 model: this.modelGame
             });
+
+            logger.log('Controller', 'showing game : %O, %O',
+                playerEntityModels,
+                this.modelGame);
 
             this.currentRegion = this.pageGame;
             this.regionMain.show(this.currentRegion);

@@ -271,7 +271,7 @@
   width: 350px; }
   .page-create-character-wrapper #create-races .race-title, .page-create-character-wrapper #create-classes .race-title {
     height: 50px; }
-  .page-create-character-wrapper #create-races #region-create-races, .page-create-character-wrapper #create-races #region-create-classes, .page-create-character-wrapper #create-classes #region-create-races, .page-create-character-wrapper #create-classes #region-create-classes {
+  .page-create-character-wrapper #create-races #region-create-races, .page-create-character-wrapper #create-races #region-create-all-abilities, .page-create-character-wrapper #create-classes #region-create-races, .page-create-character-wrapper #create-classes #region-create-all-abilities {
     -webkit-overflow-scrolling: touch;
     bottom: 0;
     left: 0;
@@ -279,11 +279,11 @@
     position: absolute;
     right: 0;
     top: 50px; }
-    .page-create-character-wrapper #create-races #region-create-races .item, .page-create-character-wrapper #create-races #region-create-classes .item, .page-create-character-wrapper #create-classes #region-create-races .item, .page-create-character-wrapper #create-classes #region-create-classes .item {
+    .page-create-character-wrapper #create-races #region-create-races .item, .page-create-character-wrapper #create-races #region-create-all-abilities .item, .page-create-character-wrapper #create-classes #region-create-races .item, .page-create-character-wrapper #create-classes #region-create-all-abilities .item {
       border: 1px solid #a0a0a0;
       cursor: pointer;
       padding: 8px 0; }
-    .page-create-character-wrapper #create-races #region-create-races .item.active, .page-create-character-wrapper #create-races #region-create-classes .item.active, .page-create-character-wrapper #create-classes #region-create-races .item.active, .page-create-character-wrapper #create-classes #region-create-classes .item.active {
+    .page-create-character-wrapper #create-races #region-create-races .item.active, .page-create-character-wrapper #create-races #region-create-all-abilities .item.active, .page-create-character-wrapper #create-classes #region-create-races .item.active, .page-create-character-wrapper #create-classes #region-create-all-abilities .item.active {
       background: #336699;
       color: #ffffff; }
 .page-create-character-wrapper #create-races.list-hidden {

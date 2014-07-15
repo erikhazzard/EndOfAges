@@ -48,7 +48,7 @@ define(
         'className': 'page-create-character-wrapper',
         regions: {
             'regionRaceList': '#region-create-races',
-            'regionAllAbilitiesList': '#region-create-classes',
+            'regionAllAbilitiesList': '#region-create-all-abilities',
             'regionAbilityList': '#region-create-abilities'
         },
 
@@ -57,8 +57,8 @@ define(
             'click .race-list-item .item': 'raceClicked',
             'touchend .race-list-item .item': 'raceClicked',
 
-            'click .class-list-item .item': 'classClicked',
-            'touchend .class-list-item .item': 'classClicked',
+            'click .class-list-item .item': 'abilityListItemClicked',
+            'touchend .class-list-item .item': 'abilityListItemClicked',
 
             'click .btn-previous': 'previousClicked',
             'touchend .btn-previous': 'previousClicked',
@@ -143,19 +143,22 @@ define(
             // Create ability objects for each ability item
             var allAbilities = new Abilities();
 
-            _.each(dataAbilities, function createAbility (ability){
+            _.each(dataAbilities, function createAbility (ability, key){
                 allAbilities.add(new Ability(ability));
             });
+
+            // keep a reference to the collection
+            this.allAbilities = allAbilities;
 
             logger.log('views/PageCreateCharacter', 
                 'abilities : %O', allAbilities);
 
-            this.classListView = new AllAbilitiesList({
+            this.allAbilitiesListView = new AllAbilitiesList({
                 collection: allAbilities
             });
 
             this.regionRaceList.show(this.raceListView);
-            this.regionAllAbilitiesList.show(this.classListView);
+            this.regionAllAbilitiesList.show(this.allAbilitiesListView);
 
             return this;
         },
@@ -189,8 +192,8 @@ define(
                 }
 
                 // ensure a class was picked
-                if(this.createState === 1 && !this.model.get('class')){
-                    alert('pick a class');
+                if(this.createState === 1 && !this.model.get('abilities')){
+                    alert('pick abilities');
                     return false;
                 }
             }
@@ -363,28 +366,28 @@ define(
 
         // ==============================
         //
-        // Update Class 
+        // Update Abilities
         //
         // ==============================
-        classClicked: function classClicked(e){
+        abilityListItemClicked: function abilityListItemClicked(e){
             // Similar to race clicked, but fires when a class item is clicked
-            logger.log('views/PageCreateCharacter', 'classClicked() called');
+            logger.log('views/PageCreateCharacter', 'abilityListItemClicked() called');
             e.preventDefault(); e.stopPropagation();
             // get race from clicked element
-            var cid = $(e.target).attr('data-class-cid');
+            var cid = $(e.target).attr('data-ability-cid');
 
-            // TODO just set model's race and have event listener for change
-
-            return this.setClass(cid);
+            return this.abilityClickedFromList(cid);
         },
 
-        setClass: function(cid){
-            // if raceCid was passed in, allow it to override the one from the
-            // click event
-            var classModel = this.classes.get(cid); 
+        abilityClickedFromList: function(cid){
+            // Called when an ability from the ability list was clicked
+            //  When clicked, add the ability to the entity's ability collection
+            //  if it doesn't exist already
+            //
+            var abilityModel = this.allAbilities.get(cid); 
 
-            logger.log('views/PageCreateCharacter', 'classModel: %O, cid: %O',
-                classModel, cid);
+            logger.log('views/PageCreateCharacter', 'abilityModel: %O, cid: %O',
+                abilityModel, cid);
 
             // --------------------------
             // Update DOM elements
@@ -396,18 +399,13 @@ define(
             // add active class to the class
             $(".item[data-class-cid='" + cid + "']").addClass('active');
 
-            // Update abilities based on class
-            // TODO: hide abilities that haven't been unlocked? 
-            // ... game design task
-            var abilities = classModel.get('abilities');
-
-            // update class html elements (TODO: View?)
-            this.getSelector('.class-info-wrapper').removeClass('hidden');
-            this.getSelector('.class-info-wrapper').empty().append(
-                Backbone.Marionette.TemplateCache.get('#template-create-class-info')({
-                    classModel: classModel
-                })
-            );
+            // Create new abilities collection and add selected ability
+            // TODO: store this - don't recreate every time
+            if(!this.entityAbilities){  
+                this.entityAbilities = new Abilities();
+            }
+            var abilities = this.entityAbilities;
+            abilities.add(abilityModel);
 
             // update the ability list
             // --------------------------
@@ -425,8 +423,10 @@ define(
             // TODO: TODO: !!!!!!!!!!! Think about this : should entity
             // get a class passed in, or just the abilities? here, class
             // is passed in, and entity model gets abilities from it
-            this.model.set({ 'class' : classModel }, { silent: true });
-            this.model.trigger('change:class');
+            this.model.set({ 'abilities' : abilities }, { silent: true });
+            this.model.trigger('change:abilities');
+            logger.log('views/PageCreateCharacter', 'model updated : %O',
+                this.model);
 
             return this;
         },
@@ -443,6 +443,8 @@ define(
             this.model.set({ 
                 name: this.getSelector('.input-character-name').val() || this.getSelector('.input-character-name').attr('placeholder')
             });
+            logger.log('views/PageCreateCharacter', 'Finished! : %O',
+                this.model);
 
             // TODO: only trigger if prompt is true
             // If done, show the game and pass in the entities

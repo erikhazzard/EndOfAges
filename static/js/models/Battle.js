@@ -11,7 +11,9 @@ define(
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
         'models/Entity',
+
         'collections/Abilities',
+        'models/Ability',
         'data/abilities'
         // TODO : remove this, get from server
         ,'models/data-races'
@@ -19,7 +21,9 @@ define(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
+
         Abilities,
+        Ability,
         dataAbilities,
         RACES
     ){
@@ -107,14 +111,15 @@ define(
         getRandomEntity: function getRandomEntity(){
             // Returns a randomly generate enemy entity
             // TODO: make this more smarter, depending on player levels, etc.
-            var abilities = [];
             var entity;
+            var abilities = new Abilities();
+            abilities.add([new Ability(dataAbilities.fireball)]);
 
             // generate new entity
             entity = new Entity({
                 //// FOR ALL : 
                 //TODO: set abilities
-                abilities: [], 
+                abilities: abilities,
                 race: RACES[Math.random() * RACES.length | 0]
             });
             // gimp stats. TODO: Scale based on encounter

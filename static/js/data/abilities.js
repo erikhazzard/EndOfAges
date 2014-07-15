@@ -19,8 +19,18 @@ define(
             type: 'magic',
             element: {light: 0.7, fire: 0.3},
             damage: 15
-        }
+        },
 
+        'fireball': {
+            name: 'Fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 40
+        }
 
     };
 

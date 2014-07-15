@@ -71,7 +71,9 @@ define(
             });
 
             this.entityInfoView = new EntityInfoView({});
-            console.log(this.model.attributes.playerEntities);
+            logger.log('views/map/ContainerMap',
+                'Player entities: %O', 
+                this.model.attributes.playerEntities);
 
             // Handle escape key to close entity info
             // --------------------------
