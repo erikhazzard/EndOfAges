@@ -11,16 +11,20 @@ requirejs.config({
 
         d3: 'lib/d3',
         async: 'lib/async.min',
+
+        velocity: 'lib/jquery.velocity',
     
         // We're using lodash in place of underscore
         lodash: 'lib/lodash.min',
         
         jwerty: 'lib/jwerty.min',
 
+        localForage: 'lib/localForage.min',
+
         backbone: 'lib/backbone',
         localstorage: 'lib/backbone.localstorage',
         marionette: 'lib/marionette',
-        bootstrap: 'lib/bootstrap',
+        bootstrap: 'lib/bootstrap'
     },
     shim: {
         'jquery-ui': {
@@ -69,6 +73,8 @@ requirejs.config({
 require([
     //libs
     'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
+    'velocity',
+    'localForage',
     'backbone', 'marionette', 'bootstrap',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
@@ -87,6 +93,8 @@ require([
     ],
     function main(
         $, $transit, $visibility,
+        $velocity,
+        localForage,
         Backbone, marionette, bootstrap,
         d3plugins,
 
@@ -141,7 +149,7 @@ require([
     ];
 
     //// log EVERYTHING:
-    //logger.options.logLevel = true;
+    logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

@@ -1,13 +1,46 @@
-{{/* Game Menu - Will be either new game or continue, depending if the user 
-    has an active game */ }}
 <div id='home'>
-    <div class='home-bg-gradient'></div>
 
-    <div class='home-callout-wrapper'>
-        <div class='logo-text'>
-            <h1 class='copy'>End of Ages</h1>
-            <h1>End of Ages</h1>
+    <div id='book-wrapper'>
+
+        <!-- Page wrappers for flip library -->
+        <div id='page-wrappers'>
+            <!-- empty cover page (used as an empty page for flip library) -->
+            <div class='page-cover'></div>
+
+            <!-- Title page -->
+            <div id='page-left' class='page-left'>
+                <div class='inner'>
+                    <h2>
+                        Scars
+                        <br />
+                        <div class='ofthe'>
+                            of the
+                        </div>
+                        Untrodden
+                    </h2>
+                    <hr />
+                </div>
+            </div>
+
+            <!-- Race page -->
+            <div id='page-right' class='page-right'>
+
+                <h2>Race</h2>
+
+                <div class='races'>
+                    <div class='race'>
+                        <image src="/static/img/characters/elf.gif" width="50" height="50" />
+                        Elf
+                    </div>
+
+                </div>
+
+            </div>
         </div>
-        <a href='' class='btn-play-game btn btn-primary btn-lg'>Play Game</a>
+        
+        <!-- Arrows -->
+        <div id='arrow-right'>
+            <div class='arrow animated pulse'></div>
+        </div>
     </div>
 </div>
