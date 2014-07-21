@@ -3,12 +3,12 @@
     <div id='book-wrapper'>
 
         <!-- Page wrappers for flip library -->
-        <div id='page-wrappers'>
+        <div id='book-pages'>
             <!-- empty cover page (used as an empty page for flip library) -->
             <div class='page-cover'></div>
 
             <!-- Title page -->
-            <div id='page-left' class='page-left'>
+            <div id='book-page-title' class='page-left'>
                 <div class='inner'>
                     <h2>
                         Scars
@@ -19,28 +19,62 @@
                         Untrodden
                     </h2>
                     <hr />
+
+                    <div class='page-title-description'>
+                        <p class='p1 opacity-zero'>
+                        I am an old man now, but then I was already past my prime when the siege of Felithport began. The years since then seem to me now more dim and faded than the earlier years, as if my life were a growing tree which burst to flower and leaf with him, and now has nothing more to do than yellow to the grave.
+                        </p>
+
+                        <p class='p2 opacity-zero'>
+                        I was known as
+                        <input id='create-name' 
+                            class='opacity-zero'
+                            maxlength=16
+                            placeholder='Name'
+                            type='text' 
+                            />
+                        </p>
+
+                    </div>
                 </div>
             </div>
 
             <!-- Race page -->
-            <div id='page-right' class='page-right'>
+            <div id='book-page-race' class='page-right'>
+                <div class='inner'>
 
-                <h2>Race</h2>
+                    <div class='opacity-zero'>
+                        <h2>Race</h2>
+                    </div>
 
-                <div class='races'>
-                    <div class='race'>
-                        <image src="/static/img/characters/elf.gif" width="50" height="50" />
-                        Elf
+                    <div class='opacity-zero'>
+                        <div class='races'>
+                            <div class='race'>
+                                <img src="/static/img/characters/elf.gif" width="50" height="50" />
+                                Elf
+                            </div>
+                        </div>
                     </div>
 
                 </div>
-
             </div>
-        </div>
+
+
+            <div id='book-page-templates' class='page-left hidden'>
+                <h2>Templates</h2>
+            </div>
+
+
+            <div id='book-page-abilities' class='page-right hidden'>
+                <h2>Abilities</h2>
+            </div>
+
+
+        </div> <!-- close book wrapper -->
         
         <!-- Arrows -->
         <div id='arrow-right'>
-            <div class='arrow animated pulse'></div>
+            <div class='arrow animated'></div>
         </div>
     </div>
 </div>

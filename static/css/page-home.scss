@@ -9,7 +9,9 @@
     right: 0;
     top: 0;
 
+    
 
+    // Book styles
     #book-wrapper {
         background: url(../../img/ui/create/book-bg-low.jpg) no-repeat;
         box-shadow: 0 0 3px #343434;
@@ -22,7 +24,7 @@
         width: 872px;
     }
 
-    #page-wrappers {
+    #book-pages {
         position: absolute;
         bottom: 14px;
         left: 40px;
@@ -34,66 +36,56 @@
     .page-left {
         background: url(../../img/ui/create/page-left.jpg) no-repeat;
         height: 658px;
+        left: 0;
+        top: 0;
         width: 397px;
     }
     .page-right {
         background: url(../../img/ui/create/page-right.jpg) no-repeat;
         height: 658px;
-        width: 397px;
-    }
-
-    #page-left {
-        color: rgba(20,20,20,0.9);
-        left: 0;
-        position: absolute;
-        top: 0;
-    }
-        #page-left .inner {
-            padding: 10px;
-        }
-        #page-left h2 { 
-            font-size: 3.6em;
-            font-variant: small-caps;
-            text-align: center;
-        }
-        .ofthe {
-            font-size: 0.5em;
-        }
-
-        #page-right {
-        }
-
-    #page-right {
         left: 395px;
         position: absolute;
         top: 0;
+        width: 397px;
     }
 
-        #arrow-right {
-            cursor: pointer;
-            height: 142px;
-            padding: 30px 10px 10px 30px;
-            position: absolute;
-            right: -70px;
-            top: 230px;
-            width: 73px;
-        }
+    .inner {
+        padding: 10px 30px;
+    }
 
-        #arrow-right .arrow {
-            background-repeat: no-repeat;
-            background-image: url(/static/img/ui/create/sprite-arrow-right.png);
-            background-position: -2px -76px;
-            height: 72px;
-            width: 43px;
-        }
-        #arrow-right .arrow.disabled {background-position: -2px -2px}
-        #arrow-right:hover .arrow {
-            background-position: -2px -150px !important;
-        }
+    .page-left, .page-right {
+        color: rgba(20,20,20,0.9);
+    }
 
-        hr {
-            border-top: 1px solid rgba(0,0,0,0.8);
-        }
+    @import "create/page-title";
+
+
+    // Arrows
+    #arrow-right {
+        cursor: pointer;
+        height: 142px;
+        padding: 30px 10px 10px 30px;
+        position: absolute;
+        right: -8px;
+        top: 230px;
+        width: 73px;
+    }
+
+    #arrow-right .arrow {
+        background-repeat: no-repeat;
+        background-image: url(/static/img/ui/create/sprite-arrow-right.png);
+        background-position: -2px -76px;
+        height: 72px;
+        width: 43px;
+    }
+    #arrow-right .arrow.disabled {background-position: -2px -2px}
+    #arrow-right:hover .arrow {
+        background-position: -2px -150px !important;
+    }
+
+    hr {
+        border-top: 1px solid rgba(0,0,0,0.8);
+    }
 
     .race {
         font-size: 1.3em;

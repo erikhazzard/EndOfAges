@@ -1,0 +1,32 @@
+#book-page-title {
+
+    p {
+        margin: 1em 0 1.5em;
+    }
+    h2 { 
+        font-size: 3.6em;
+        font-variant: small-caps;
+        text-align: center;
+    }
+    .ofthe {
+        font-size: 0.5em;
+    }
+
+    input {
+        background: none;
+        border: none;
+        border-bottom: 2px solid RGBA(23, 118, 16, 0.6);
+        font-family: $header-font;
+        font-size: 1.2em;
+        font-variant: small-caps;
+        letter-spacing: 2.2px;
+        text-align: center;
+    }
+    input:focus {
+        outline:none;
+    }
+    ::-webkit-input-placeholder { color: rgba(50,50,50,0.5); }
+    :-moz-placeholder { color: rgba(50,50,50,0.5); }
+    ::-moz-placeholder { color: rgba(50,50,50,0.5); }
+    :-ms-input-placeholder { color: #a0a0a0; }
+}

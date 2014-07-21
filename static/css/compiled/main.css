@@ -716,7 +716,7 @@
     position: absolute;
     top: 20px;
     width: 872px; }
-  #home #page-wrappers {
+  #home #book-pages {
     position: absolute;
     bottom: 14px;
     left: 40px;
@@ -725,34 +725,53 @@
   #home .page-left {
     background: url(../../img/ui/create/page-left.jpg) no-repeat;
     height: 658px;
+    left: 0;
+    top: 0;
     width: 397px; }
   #home .page-right {
     background: url(../../img/ui/create/page-right.jpg) no-repeat;
     height: 658px;
-    width: 397px; }
-  #home #page-left {
-    color: rgba(20, 20, 20, 0.9);
-    left: 0;
+    left: 395px;
     position: absolute;
-    top: 0; }
-  #home #page-left .inner {
-    padding: 10px; }
-  #home #page-left h2 {
+    top: 0;
+    width: 397px; }
+  #home .inner {
+    padding: 10px 30px; }
+  #home .page-left, #home .page-right {
+    color: rgba(20, 20, 20, 0.9); }
+  #home #book-page-title p {
+    margin: 1em 0 1.5em; }
+  #home #book-page-title h2 {
     font-size: 3.6em;
     font-variant: small-caps;
     text-align: center; }
-  #home .ofthe {
+  #home #book-page-title .ofthe {
     font-size: 0.5em; }
-  #home #page-right {
-    left: 395px;
-    position: absolute;
-    top: 0; }
+  #home #book-page-title input {
+    background: none;
+    border: none;
+    border-bottom: 2px solid RGBA(23, 118, 16, 0.6);
+    font-family: "IM Fell English", san-serif;
+    font-size: 1.2em;
+    font-variant: small-caps;
+    letter-spacing: 2.2px;
+    text-align: center; }
+  #home #book-page-title input:focus {
+    outline: none; }
+  #home #book-page-title ::-webkit-input-placeholder {
+    color: rgba(50, 50, 50, 0.5); }
+  #home #book-page-title :-moz-placeholder {
+    color: rgba(50, 50, 50, 0.5); }
+  #home #book-page-title ::-moz-placeholder {
+    color: rgba(50, 50, 50, 0.5); }
+  #home #book-page-title :-ms-input-placeholder {
+    color: #a0a0a0; }
   #home #arrow-right {
     cursor: pointer;
     height: 142px;
     padding: 30px 10px 10px 30px;
     position: absolute;
-    right: -70px;
+    right: -8px;
     top: 230px;
     width: 73px; }
   #home #arrow-right .arrow {
@@ -810,6 +829,9 @@ svg {
 
 .hidden {
   display: none; }
+
+.opacity-zero {
+  opacity: 0; }
 
 .clear {
   clear: both; }

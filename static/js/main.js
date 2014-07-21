@@ -11,15 +11,15 @@ requirejs.config({
 
         d3: 'lib/d3',
         async: 'lib/async.min',
-
-        velocity: 'lib/jquery.velocity',
-    
         // We're using lodash in place of underscore
         lodash: 'lib/lodash.min',
         
         jwerty: 'lib/jwerty.min',
 
         localForage: 'lib/localForage.min',
+
+        velocity: 'lib/jquery.velocity',
+        pageTurn: 'lib/turn',
 
         backbone: 'lib/backbone',
         localstorage: 'lib/backbone.localstorage',
@@ -73,7 +73,7 @@ requirejs.config({
 require([
     //libs
     'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
-    'velocity',
+    'velocity', 'pageTurn', 
     'localForage',
     'backbone', 'marionette', 'bootstrap',
     'util/d3plugins', // always load d3 plugins, extends d3 object
@@ -93,7 +93,7 @@ require([
     ],
     function main(
         $, $transit, $visibility,
-        $velocity,
+        $velocity, $turn,
         localForage,
         Backbone, marionette, bootstrap,
         d3plugins,
