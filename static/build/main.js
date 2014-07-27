@@ -3678,198 +3678,72 @@ define(
 
 // ===========================================================================
 //
-// PageTitleScreen
-// 
+// Race List Item
+//
+// ItemView for race item
+//
 // ===========================================================================
 define(
-    'views/PageHome',[ 
-        'd3', 'backbone', 'marionette',
-        'logger', 'events',
-        'models/Entity'
-    ], function viewPageHome(
-        d3, backbone, marionette, 
-        logger, events,
-        Entity
+    'views/create/RaceListItem',[ 
+        'd3', 'logger', 'events'
+    ], function viewRaceListItem(
+        d3, logger, events
     ){
 
-    var PageHome = Backbone.Marionette.Layout.extend({
-        template: '#template-page-home',
-        'className': 'page-home-wrapper',
+    var RaceListItem = Backbone.Marionette.ItemView.extend({
+        'className': 'race-list-item',
+        template: '#template-create-race-list-item',
 
-        events: {
+        serializeData: function(){
+            return _.extend({ cid: this.model.cid }, this.model.toJSON());
         },
 
-        initialize: function initialize(options){
-            // initialize:
-            logger.log('views/PageHome', 'initialize() called');
-
-            // Create a new entity model for character create
-            this.model = new Entity({});
-
+        initialize: function(){
+            logger.log('views/create/RaceListItem', 'initialize : model %O',
+                this.model);
             return this;
         },
 
-        onShow: function homeOnShow(){
-            // When the view is rendered, set everything up
-            
-            var self = this;
-            logger.log('views/PageHome', 'onShow called');
-
-            // keep reference to pages
-            this.$pages = $('#book-pages', this.$el);
-
-            // remove 'hidden' pages
-            $('.hidden', this.$pages).removeClass('hidden');
-
-            // Setup pageturn
-            this.setupPageturn();
-
-            // Setup title page stuff
-            this.setupPage1();
-
+        onShow: function(){
             return this;
-        },
-
-        // ------------------------------
-        // Pageturn util
-        // ------------------------------
-        setupPageturn: function setupPageturn(){
-            // Initializes the pageTurn animation library
-            //
-            var self = this;
-            var curPage = 1;
-            self.$pages.turn({
-                display: 'double',
-                acceleration: true,
-                page: 2,
-                gradients: !$.isTouch,
-                duration: 1300,
-                elevation: 250,
-                when: {
-                    turned: function(e, page) {
-                        console.log('Current view: ', $(this).turn('view'));
-                    }
-                }
-            });
-            
-            $(window).bind('keydown', function(e){
-                // Don't let pages go below 2 (we don't have a cover page) and
-                // don't let it go above the number of pages we have
-                if (e.keyCode==37) {
-                    if(curPage > 1){
-                        e.preventDefault();
-                        self.$pages.turn('previous');
-                        curPage--;
-                    }
-                } else if (e.keyCode==39) {
-                    if(curPage < 2){
-                        e.preventDefault();
-                        curPage++;
-                        self.$pages.turn('next');
-                    }
-                }
-            });
-        },
-
-        // ==============================
-        //
-        // Page 1  - Title
-        // 
-        // ==============================
-        setupPage1: function setupStep1(){
-            // Sets up flow for the title page
-            var self = this;
-            var $p = $('#book-page-title p', this.$el);
-            var animation = 'fadeInDown';
-            var $name = $('#create-name', this.$el);
-            var enteredText = false;
-
-            $($p[0]).velocity({ opacity: 1 });
-            $($p[0]).addClass('animated ' + animation);
-
-            setTimeout(function (){
-
-                $($p[1]).velocity({ opacity: 1 });
-                $($p[1]).addClass('animated fadeInUp');
-
-                setTimeout(function (){
-                    $name.velocity({ opacity: 1 });
-
-                    setTimeout(function(){
-                        if(!enteredText){
-                            $name.addClass('animated pulse infinite');
-                        }
-                    }, 1000);
-
-                    // Remove the pulsating effect when user clicks input
-                    $name.focus(function (){ 
-                        enteredText = true;
-                        $name.removeClass('pulse infinite'); 
-
-                        setTimeout(function (){
-                            self.setupPage2();
-                        }, 1000);
-                    });
-                }, 1000);
-
-            }, 1500);
-            return this;
-        },
-
-
-        // ==============================
-        //
-        // Page 2 - Race
-        // 
-        // ==============================
-        setupPage2: function setupPage2 (){
-            var $els = $('#book-page-race .opacity-zero', this.$el);
-            var animation = 'fadeInDown';
-            $els.velocity({ opacity: 1 });
         }
 
     });
 
-    return PageHome;
+    return RaceListItem;
 });
 
-/* =========================================================================
- *
- * abilities
- *  data file containing all abilities
- *
- *  ======================================================================== */
+// ===========================================================================
+//
+// Races List
+//
+// Collection for races in the create screen
+//
+// ===========================================================================
 define(
-'data/abilities',[ 'logger', 'util/Timer' ], function( logger, Timer){
-    // Here be abilities. This would be loaded in a DB and entities would
-    // get abilities from server
-    var abilities = {
+    'views/create/RaceList',[ 
+        'd3', 'logger', 'events', 
+        'views/create/RaceListItem'
+    ], function viewRaceListCollection(
+        d3, logger, events,
+        RaceListItem
+    ){
 
-        'magic-missile': {
-            name: 'Magic Missle',
-            effectId: 'magicMissle',
-            castTime: 2,
-            timeCost: 2,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: {light: 0.7, fire: 0.3},
-            damage: 15
-        },
+    var RaceListCollection = Backbone.Marionette.CollectionView.extend({
+        'className': 'races-list',
 
-        'fireball': {
-            name: 'Fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 40
+        itemView: RaceListItem,
+
+        initialize: function(options){
+            logger.log(
+                'views/create/RaceList.js', 
+                'collectionView initialized : %O', options);
+            this.itemView = RaceListItem;
+            return this;
         }
+    });
 
-    };
-
-    return abilities;
+    return RaceListCollection;
 });
 
 // ===========================================================================
@@ -3935,6 +3809,275 @@ define(
     ];
 
     return RACES;
+});
+
+// ===========================================================================
+//
+//  Races Collection
+//
+//      This collection contains a collection of races for the create screen,
+//      the list of available races for the player
+// ===========================================================================
+define(
+    'collections/Races',[ 'backbone', 'marionette', 'logger', 'events', 
+        'models/Race',
+        'models/data-races'
+    ], function RaceCollection(
+        Backbone, Marionette, logger, events,
+        Race,
+        RACES
+    ){
+
+    var Races = Backbone.Collection.extend({
+        model: Race,
+
+        initialize: function(models, options){
+            var self = this;
+            logger.log('collections/Races', 'initialize() called');
+
+            // TODO: don't do this, get from server
+            this.add(RACES);
+
+            return this;
+        },
+        comparator: function(model){
+            return model.get('name');
+        }
+
+    });
+
+    return Races;
+});
+
+// ===========================================================================
+//
+// PageTitleScreen
+// 
+// ===========================================================================
+define(
+    'views/PageHome',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events',
+        'models/Entity',
+        'views/create/RaceList',
+        'collections/Races'
+    ], function viewPageHome(
+        d3, backbone, marionette, 
+        logger, events,
+        Entity,
+        RaceList,
+        Races
+    ){
+
+    // CONFIG
+    // ----------------------------------
+    var baseDelay = 1000;
+
+    // View 
+    // ----------------------------------
+    var PageHome = Backbone.Marionette.Layout.extend({
+        template: '#template-page-home',
+        'className': 'page-home-wrapper',
+
+        'regions': {
+            'regionRaceList': '#region-create-races'
+        },
+
+        events: {
+        },
+
+        initialize: function initialize(options){
+            // initialize:
+            logger.log('views/PageHome', 'initialize() called');
+
+            // Create a new entity model for character create
+            this.model = new Entity({});
+
+            this.races = new Races();
+
+            return this;
+        },
+
+        onShow: function homeOnShow(){
+            // When the view is rendered, set everything up
+            
+            var self = this;
+            logger.log('views/PageHome', 'onShow called');
+
+            // setup races
+            this.raceListView = new RaceList({
+                collection: this.races
+            });
+            this.regionRaceList.show(this.raceListView)
+
+            // keep reference to pages
+            this.$pages = $('#book-pages', this.$el);
+
+            // remove 'hidden' pages
+            $('.hidden', this.$pages).removeClass('hidden');
+
+            // Setup pageturn
+            this.setupPageturn();
+
+            // Setup title page stuff
+            this.setupPage1();
+
+            return this;
+        },
+
+        // ------------------------------
+        // Pageturn util
+        // ------------------------------
+        setupPageturn: function setupPageturn(){
+            // Initializes the pageTurn animation library
+            //
+            var self = this;
+            var curPage = 1;
+            self.$pages.turn({
+                display: 'double',
+                acceleration: true,
+                page: 2,
+                gradients: !$.isTouch,
+                duration: 1300,
+                elevation: 250,
+                when: {
+                    turned: function(e, page) {
+                        console.log('Current view: ', $(this).turn('view'));
+                    }
+                }
+            });
+            
+            $(window).bind('keydown', function(e){
+                // Don't let pages go below 2 (we don't have a cover page) and
+                // don't let it go above the number of pages we have
+                if (e.keyCode==37) {
+                    if(curPage > 1){
+                        e.preventDefault();
+                        self.$pages.turn('previous');
+                        curPage--;
+                    }
+                } else if (e.keyCode==39) {
+                    if(curPage < 2){
+                        e.preventDefault();
+                        curPage++;
+                        self.$pages.turn('next');
+                    }
+                }
+            });
+        },
+
+        // ==============================
+        //
+        // Page 1  - Title
+        // 
+        // ==============================
+        setupPage1: function setupStep1(){
+            // Sets up flow for the title page
+            //
+            // TODO: Think of best on board flow. Fade in word by word?
+            // TODO: When mouse over bottom left, should the name text
+            // fade in automatically instead of waiting for the user to read
+            // the text?
+            //
+            var self = this;
+            var $p = $('#book-page-title p', this.$el);
+            var animation = 'fadeInDown';
+            var $name = $('#create-name', this.$el);
+            var enteredText = false;
+
+            $($p[0]).velocity({ opacity: 1 });
+            $($p[0]).addClass('animated ' + animation);
+
+            setTimeout(function (){
+
+                $($p[1]).velocity({ opacity: 1 });
+                $($p[1]).addClass('animated fadeInUp');
+
+                setTimeout(function (){
+                    $name.velocity({ opacity: 1 });
+
+                    setTimeout(function(){
+                        if(!enteredText){
+                            $name.addClass('animated pulse infinite');
+                        }
+                    }, baseDelay);
+
+                    // Remove the pulsating effect when user clicks input
+                    $name.focus(function (){ 
+                        enteredText = true;
+                        $name.removeClass('pulse infinite'); 
+
+                        setTimeout(function (){
+                            self.setupPage2();
+                        }, baseDelay);
+                    });
+                }, baseDelay);
+
+            }, baseDelay * 1.5);
+            return this;
+        },
+
+
+        // ==============================
+        //
+        // Page 2 - Race
+        // 
+        // ==============================
+        setupPage2: function setupPage2 (){
+            var animation = 'fadeInDown';
+            $('#race-header').velocity({ opacity: 1 });
+            $('#race-header').addClass('animated fadeInDown');
+
+
+            // then show the seletion
+            setTimeout(function(){
+                $('#create-race-wrapper').velocity({ opacity: 1 });
+                $('#create-race-wrapper').addClass('animated fadeInUp');
+            }, baseDelay * 1.2);
+        }
+
+    });
+
+    return PageHome;
+});
+
+/* =========================================================================
+ *
+ * abilities
+ *  data file containing all abilities
+ *
+ *  ======================================================================== */
+define(
+'data/abilities',[ 'logger', 'util/Timer' ], function( logger, Timer){
+    // Here be abilities. This would be loaded in a DB and entities would
+    // get abilities from server
+    var abilities = {
+
+        'magic-missile': {
+            name: 'Magic Missle',
+            effectId: 'magicMissle',
+            castTime: 2,
+            timeCost: 2,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: {light: 0.7, fire: 0.3},
+            damage: 15
+        },
+
+        'fireball': {
+            name: 'Fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 40
+        }
+
+    };
+
+    return abilities;
 });
 
 // ===========================================================================
@@ -8739,134 +8882,6 @@ define('views/EoALayoutView',[ 'backbone', 'marionette'], function(
         };
 
         return EoALayoutView;
-});
-
-// ===========================================================================
-//
-// Race List Item
-//
-// ItemView for race item
-//
-// ===========================================================================
-define(
-    'views/create/RaceListItem',[ 
-        'd3', 'logger', 'events'
-    ], function viewRaceListItem(
-        d3, logger, events
-    ){
-
-    var RaceListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'race-list-item',
-        template: '#template-create-race-list-item',
-
-        serializeData: function(){
-            return _.extend({ cid: this.model.cid }, this.model.toJSON());
-        },
-
-        initialize: function(){
-            logger.log('views/create/RaceListItem', 'initialize : model %O',
-                this.model);
-            return this;
-        },
-
-        onShow: function(){
-            var sprite = this.model.get('sprite');
-
-            var sel = d3.select($('.race-sprite', this.$el)[0]);
-            sel = sel.append('image')
-                .attr({
-                    'xlink:href': function(d, i){
-                        return "/static/img/characters/" + 
-                            sprite + '.gif';
-                    },
-                    width: 50,
-                    height: 50
-                });
-
-
-            //// TODO: handle sprite loading 
-            //// NOTE: to use sticker...
-            //var sel = d3.select($('.race-sprite', this.$el)[0]);
-            //var $character = d3.sticker('#race-' + this.model.get('sprite'));
-            //$character = $character(sel);
-
-            return this;
-        }
-
-    });
-
-    return RaceListItem;
-});
-
-// ===========================================================================
-//
-// Races List
-//
-// Collection for races in the create screen
-//
-// ===========================================================================
-define(
-    'views/create/RaceList',[ 
-        'd3', 'logger', 'events', 
-        'views/create/RaceListItem'
-    ], function viewRaceListCollection(
-        d3, logger, events,
-        RaceListItem
-    ){
-
-    var RaceListCollection = Backbone.Marionette.CollectionView.extend({
-        'className': 'races-list',
-
-        itemView: RaceListItem,
-
-        initialize: function(options){
-            logger.log(
-                'views/create/RaceList.js', 
-                'collectionView initialized : %O', options);
-            this.itemView = RaceListItem;
-            return this;
-        }
-    });
-
-    return RaceListCollection;
-});
-
-// ===========================================================================
-//
-//  Races Collection
-//
-//      This collection contains a collection of races for the create screen,
-//      the list of available races for the player
-// ===========================================================================
-define(
-    'collections/Races',[ 'backbone', 'marionette', 'logger', 'events', 
-        'models/Race',
-        'models/data-races'
-    ], function RaceCollection(
-        Backbone, Marionette, logger, events,
-        Race,
-        RACES
-    ){
-
-    var Races = Backbone.Collection.extend({
-        model: Race,
-
-        initialize: function(models, options){
-            var self = this;
-            logger.log('collections/Races', 'initialize() called');
-
-            // TODO: don't do this, get from server
-            this.add(RACES);
-
-            return this;
-        },
-        comparator: function(model){
-            return model.get('name');
-        }
-
-    });
-
-    return Races;
 });
 
 // ===========================================================================

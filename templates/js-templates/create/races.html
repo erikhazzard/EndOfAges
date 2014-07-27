@@ -1,9 +1,7 @@
 {{// Race list and race items }}
 <script id='template-create-race-list-item' type='text/template'>
     <div class='item' data-race-cid='<%= cid %>'>
-        <svg 
-            xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
-            class='race-sprite' height=50 width=50 ></svg>
+        <img src='/static/img/characters/<%= sprite %>.gif' height='50' width='50' />
         <%= name %>
     </div>
 </script>

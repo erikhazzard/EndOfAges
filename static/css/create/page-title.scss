@@ -13,9 +13,10 @@
     }
 
     input {
-        background: none;
+        background: $BACKGROUND-INTERACTION;
         border: none;
-        border-bottom: 2px solid RGBA(23, 118, 16, 0.6);
+        border-bottom: 2px solid $COLOR-INTERACTION;
+        color: #ffffff;
         font-family: $header-font;
         font-size: 1.2em;
         font-variant: small-caps;
@@ -25,8 +26,16 @@
     input:focus {
         outline:none;
     }
-    ::-webkit-input-placeholder { color: rgba(50,50,50,0.5); }
-    :-moz-placeholder { color: rgba(50,50,50,0.5); }
-    ::-moz-placeholder { color: rgba(50,50,50,0.5); }
+    ::-webkit-input-placeholder { color: rgba(200,200,200,0.5); }
+    :-moz-placeholder { color: rgba(200,200,200,0.5); }
+    ::-moz-placeholder { color: rgba(200,200,200,0.5); }
     :-ms-input-placeholder { color: #a0a0a0; }
+
+    #name-input-wrapper {
+        bottom: 70px;
+        left: 30px;
+        margin: 3em 0 0 0;
+        position: absolute;
+        right: 24px;
+    }
 }

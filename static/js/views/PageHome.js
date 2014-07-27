@@ -7,16 +7,30 @@ define(
     [ 
         'd3', 'backbone', 'marionette',
         'logger', 'events',
-        'models/Entity'
+        'models/Entity',
+        'views/create/RaceList',
+        'collections/Races'
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
-        Entity
+        Entity,
+        RaceList,
+        Races
     ){
 
+    // CONFIG
+    // ----------------------------------
+    var baseDelay = 1000;
+
+    // View 
+    // ----------------------------------
     var PageHome = Backbone.Marionette.Layout.extend({
         template: '#template-page-home',
         'className': 'page-home-wrapper',
+
+        'regions': {
+            'regionRaceList': '#region-create-races'
+        },
 
         events: {
         },
@@ -28,6 +42,8 @@ define(
             // Create a new entity model for character create
             this.model = new Entity({});
 
+            this.races = new Races();
+
             return this;
         },
 
@@ -36,6 +52,12 @@ define(
             
             var self = this;
             logger.log('views/PageHome', 'onShow called');
+
+            // setup races
+            this.raceListView = new RaceList({
+                collection: this.races
+            });
+            this.regionRaceList.show(this.raceListView)
 
             // keep reference to pages
             this.$pages = $('#book-pages', this.$el);
@@ -100,6 +122,12 @@ define(
         // ==============================
         setupPage1: function setupStep1(){
             // Sets up flow for the title page
+            //
+            // TODO: Think of best on board flow. Fade in word by word?
+            // TODO: When mouse over bottom left, should the name text
+            // fade in automatically instead of waiting for the user to read
+            // the text?
+            //
             var self = this;
             var $p = $('#book-page-title p', this.$el);
             var animation = 'fadeInDown';
@@ -121,7 +149,7 @@ define(
                         if(!enteredText){
                             $name.addClass('animated pulse infinite');
                         }
-                    }, 1000);
+                    }, baseDelay);
 
                     // Remove the pulsating effect when user clicks input
                     $name.focus(function (){ 
@@ -130,11 +158,11 @@ define(
 
                         setTimeout(function (){
                             self.setupPage2();
-                        }, 1000);
+                        }, baseDelay);
                     });
-                }, 1000);
+                }, baseDelay);
 
-            }, 1500);
+            }, baseDelay * 1.5);
             return this;
         },
 
@@ -145,9 +173,16 @@ define(
         // 
         // ==============================
         setupPage2: function setupPage2 (){
-            var $els = $('#book-page-race .opacity-zero', this.$el);
             var animation = 'fadeInDown';
-            $els.velocity({ opacity: 1 });
+            $('#race-header').velocity({ opacity: 1 });
+            $('#race-header').addClass('animated fadeInDown');
+
+
+            // then show the seletion
+            setTimeout(function(){
+                $('#create-race-wrapper').velocity({ opacity: 1 });
+                $('#create-race-wrapper').addClass('animated fadeInUp');
+            }, baseDelay * 1.2);
         }
 
     });
