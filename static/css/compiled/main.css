@@ -788,6 +788,8 @@
       border-bottom: 1px solid rgba(23, 118, 16, 0.6);
       border-top: 1px solid rgba(23, 118, 16, 0.6);
       color: #ffffff;
+      cursor: pointer;
+      font-weight: bold;
       height: 210px;
       position: relative;
       overflow-y: scroll; }

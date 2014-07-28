@@ -16,6 +16,10 @@ define(
         'className': 'race-list-item',
         template: '#template-create-race-list-item',
 
+        events: {
+            'click': 'raceClicked'
+        },
+
         serializeData: function(){
             return _.extend({ cid: this.model.cid }, this.model.toJSON());
         },
@@ -27,6 +31,20 @@ define(
         },
 
         onShow: function(){
+            var self = this;
+            logger.log('views/create/RaceListItem', '\t onShow() called');
+
+            setTimeout(function(){
+                self._delegateDOMEvents();
+            }, 200);
+            return this;
+        },
+
+        raceClicked: function raceClicked (){
+            logger.log('views/create/RaceListItem', 'race clicked: %O', 
+                this.model);
+
+            events.trigger('create:page2:raceClicked', { model: this.model });
             return this;
         }
 

@@ -3694,6 +3694,10 @@ define(
         'className': 'race-list-item',
         template: '#template-create-race-list-item',
 
+        events: {
+            'click': 'raceClicked'
+        },
+
         serializeData: function(){
             return _.extend({ cid: this.model.cid }, this.model.toJSON());
         },
@@ -3705,6 +3709,20 @@ define(
         },
 
         onShow: function(){
+            var self = this;
+            logger.log('views/create/RaceListItem', '\t onShow() called');
+
+            setTimeout(function(){
+                self._delegateDOMEvents();
+            }, 200);
+            return this;
+        },
+
+        raceClicked: function raceClicked (){
+            logger.log('views/create/RaceListItem', 'race clicked: %O', 
+                this.model);
+
+            events.trigger('create:page2:raceClicked', { model: this.model });
             return this;
         }
 
@@ -3739,6 +3757,7 @@ define(
                 'views/create/RaceList.js', 
                 'collectionView initialized : %O', options);
             this.itemView = RaceListItem;
+
             return this;
         }
     });
@@ -3872,6 +3891,7 @@ define(
     // CONFIG
     // ----------------------------------
     var baseDelay = 1000;
+    var baseDelay = 10;
 
     // View 
     // ----------------------------------
@@ -3893,7 +3913,14 @@ define(
             // Create a new entity model for character create
             this.model = new Entity({});
 
+            // Setup races and collection
             this.races = new Races();
+            this.raceListView = new RaceList({
+                collection: this.races
+            });
+
+            // When race is clicked, continue on to the next step
+            this.listenTo(events, 'create:page2:raceClicked', this.raceClicked);
 
             return this;
         },
@@ -3905,10 +3932,7 @@ define(
             logger.log('views/PageHome', 'onShow called');
 
             // setup races
-            this.raceListView = new RaceList({
-                collection: this.races
-            });
-            this.regionRaceList.show(this.raceListView)
+            this.regionRaceList.show(this.raceListView);
 
             // keep reference to pages
             this.$pages = $('#book-pages', this.$el);
@@ -3942,7 +3966,8 @@ define(
                 elevation: 250,
                 when: {
                     turned: function(e, page) {
-                        console.log('Current view: ', $(this).turn('view'));
+                        //// Do effect on turn
+                        // log : $(this).turn('view'));
                     }
                 }
             });
@@ -3978,7 +4003,8 @@ define(
             // TODO: When mouse over bottom left, should the name text
             // fade in automatically instead of waiting for the user to read
             // the text?
-            //
+            logger.log('views/PageHome', 'setupPage1() called');
+
             var self = this;
             var $p = $('#book-page-title p', this.$el);
             var animation = 'fadeInDown';
@@ -3994,6 +4020,7 @@ define(
                 $($p[1]).addClass('animated fadeInUp');
 
                 setTimeout(function (){
+
                     $name.velocity({ opacity: 1 });
 
                     setTimeout(function(){
@@ -4007,8 +4034,12 @@ define(
                         enteredText = true;
                         $name.removeClass('pulse infinite'); 
 
-                        setTimeout(function (){
+                        setTimeout(function showPage2(){
+                            // DONE, Show page 2
+                            logger.log('views/PageHome', 
+                                '\t setupPage1: calling setupPage2...');
                             self.setupPage2();
+
                         }, baseDelay);
                     });
                 }, baseDelay);
@@ -4024,6 +4055,9 @@ define(
         // 
         // ==============================
         setupPage2: function setupPage2 (){
+            var self = this;
+            logger.log('views/PageHome', 'setupPage2() called');
+
             var animation = 'fadeInDown';
             $('#race-header').velocity({ opacity: 1 });
             $('#race-header').addClass('animated fadeInDown');
@@ -4034,8 +4068,20 @@ define(
                 $('#create-race-wrapper').velocity({ opacity: 1 });
                 $('#create-race-wrapper').addClass('animated fadeInUp');
             }, baseDelay * 1.2);
-        }
 
+            return this;
+        },
+
+        // ------------------------------
+        // race clicked
+        // ------------------------------
+        raceClicked: function raceClicked (options){
+            logger.log('views/PageHome', 'raceClicked() passed options: %O',
+                options);
+
+            return this;
+        }
+        
     });
 
     return PageHome;
