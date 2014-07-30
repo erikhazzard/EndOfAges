@@ -780,6 +780,7 @@
     position: absolute;
     right: 24px; }
   #home #book-page-race #create-race-wrapper {
+    margin-bottom: 1em;
     position: relative; }
     #home #book-page-race #create-race-wrapper .fade-out-top {
       background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0), white); }
@@ -802,6 +803,17 @@
         -webkit-filter: grayscale(100%);
         -moz-filter: grayscale(100%);
         filter: grayscale(100%); }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item {
+        transition: all 0.3s;
+        color: #b0b0b0;
+        padding-left: 0; }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item:hover {
+        color: #ffffff;
+        padding-left: 20px; }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.selected {
+        background: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+        padding-left: 40px; }
   #home #arrow-right {
     cursor: pointer;
     height: 142px;

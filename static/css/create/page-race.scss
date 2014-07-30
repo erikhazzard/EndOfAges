@@ -1,6 +1,7 @@
 #book-page-race {
 
     #create-race-wrapper {
+        margin-bottom: 1em;
         position: relative;
 
         .fade-out-top {
@@ -30,6 +31,21 @@
                 -webkit-filter: grayscale(100%);
                 -moz-filter: grayscale(100%);
                 filter: grayscale(100%);
+            }
+
+            .race-list-item {
+                transition: all 0.3s;
+                color: #b0b0b0;
+                padding-left: 0;
+            }
+            .race-list-item:hover {
+                color: #ffffff;
+                padding-left: 20px;
+            }
+            .race-list-item.selected {
+                background: rgba(255,255,255,0.4);
+                color: #ffffff;
+                padding-left: 40px;
             }
         }
     }

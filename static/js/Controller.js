@@ -15,7 +15,6 @@ define([
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
-    'views/PageCreateCharacter',
 
     // TODO: remove, only for dev
     'views/DevTools'
@@ -29,7 +28,6 @@ define([
         // include views here
         PageHome,
         PageGame,
-        PageCreateCharacter,
 
         // TODO: remove once out of dev
         DevTools

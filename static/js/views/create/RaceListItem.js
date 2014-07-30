@@ -34,9 +34,12 @@ define(
             var self = this;
             logger.log('views/create/RaceListItem', '\t onShow() called');
 
+            // Redelegate events on a timeout. 
+            // TODO : Why doesn't this work without the timeout? It seems
+            // that maybe the elements haven't been rendered to the DOM yet
             setTimeout(function(){
                 self._delegateDOMEvents();
-            }, 200);
+            }, 1000);
             return this;
         },
 
@@ -44,7 +47,10 @@ define(
             logger.log('views/create/RaceListItem', 'race clicked: %O', 
                 this.model);
 
-            events.trigger('create:page2:raceClicked', { model: this.model });
+            events.trigger('create:page2:raceClicked', { 
+                $el: this.$el,
+                model: this.model
+            });
             return this;
         }
 

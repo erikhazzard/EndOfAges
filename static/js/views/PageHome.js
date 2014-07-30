@@ -70,6 +70,9 @@ define(
             // remove 'hidden' pages
             $('.hidden', this.$pages).removeClass('hidden');
 
+            // Setup templates
+            this.templateRaceDescription = _.template($('#template-create-race-description'));
+
             // Setup pageturn
             this.setupPageturn();
 
@@ -208,6 +211,35 @@ define(
         raceClicked: function raceClicked (options){
             logger.log('views/PageHome', 'raceClicked() passed options: %O',
                 options);
+
+            // remove selected class from other entity selections
+            $('#region-create-races .race-list-item.selected')
+                .removeClass('selected');
+
+            // add selected class to selected entity
+            options.$el.addClass('selected');
+
+            this.$raceDescription = this.$raceDescription || $('#race-description');
+            if(!this.$raceDescription){ 
+                logger.log('warn', 'this.$raceDescription does not exist');
+                return false;
+            }
+
+            logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
+
+            // update the race description div with the template
+            this.$raceDescription.html(
+                this.templateRaceDescription({ model: options.model })
+            );
+
+            // Show race description
+            this.$raceDescription.velocity({ opacity: 0 });
+
+            setTimeout(function(){
+                this.$raceDescription.velocity({ opacity: 1 });
+                this.$raceDescription.addClass('animated fadeInDown');
+            }, baseDelay);
+        
 
             return this;
         }
