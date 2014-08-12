@@ -32,3 +32,13 @@
         </div>
     <% }); %>
 </script>
+
+
+<!-- TEMPLATE for race info -->
+<script id='template-create-race-description' type='text/template'>
+    <%= model.attributes.name %>
+
+    <div id='race-visualizations'>
+        <%= model.attributes.description %>
+    </div>
+</script>

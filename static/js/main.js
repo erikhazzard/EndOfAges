@@ -73,6 +73,7 @@ requirejs.config({
 require([
     //libs
     'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
+    'lib/jquery.wordwriter',
     'velocity', 'pageTurn', 
     'localForage',
     'backbone', 'marionette', 'bootstrap',
@@ -93,6 +94,7 @@ require([
     ],
     function main(
         $, $transit, $visibility,
+        $wordWriter,
         $velocity, $turn,
         localForage,
         Backbone, marionette, bootstrap,

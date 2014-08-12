@@ -21,7 +21,6 @@ define(
     // CONFIG
     // ----------------------------------
     var baseDelay = 1000;
-    var baseDelay = 10;
 
     // View 
     // ----------------------------------
@@ -71,7 +70,7 @@ define(
             $('.hidden', this.$pages).removeClass('hidden');
 
             // Setup templates
-            this.templateRaceDescription = _.template($('#template-create-race-description'));
+            this.templateRaceDescription = _.template($('#template-create-race-description').html());
 
             // Setup pageturn
             this.setupPageturn();
@@ -147,37 +146,44 @@ define(
             $($p[0]).velocity({ opacity: 1 });
             $($p[0]).addClass('animated ' + animation);
 
-            setTimeout(function (){
+            // Fade in text
+            $('#create-title-intro-text').wordWriter({
+                finalCss: { opacity: 0.8 },
 
-                $($p[1]).velocity({ opacity: 1 });
-                $($p[1]).addClass('animated fadeInUp');
+                callback: function writerCallback(){
 
-                setTimeout(function (){
+                    $($p[1]).velocity({ opacity: 1 });
+                    $($p[1]).addClass('animated fadeInUp');
 
-                    $name.velocity({ opacity: 1 });
+                    setTimeout(function (){
+                        $name.velocity({ opacity: 1 });
 
-                    setTimeout(function(){
-                        if(!enteredText){
-                            $name.addClass('animated pulse infinite');
-                        }
+                        setTimeout(function(){
+                            if(!enteredText){
+                                $name.addClass('animated pulse infinite');
+                            }
+                        }, baseDelay * 3);
+
                     }, baseDelay);
+                }
+            });
 
-                    // Remove the pulsating effect when user clicks input
-                    $name.focus(function (){ 
-                        enteredText = true;
-                        $name.removeClass('pulse infinite'); 
 
-                        setTimeout(function showPage2(){
-                            // DONE, Show page 2
-                            logger.log('views/PageHome', 
-                                '\t setupPage1: calling setupPage2...');
-                            self.setupPage2();
+            // Remove the pulsating effect when user clicks input
+            $name.focus(function (){ 
+                enteredText = true;
+                $name.removeClass('pulse infinite'); 
 
-                        }, baseDelay);
-                    });
+                setTimeout(function showPage2(){
+                    // DONE, Show page 2
+                    $name.removeClass('pulse infinite'); 
+                    logger.log('views/PageHome', 
+                        '\t setupPage1: calling setupPage2...');
+                    self.setupPage2();
+
                 }, baseDelay);
+            });
 
-            }, baseDelay * 1.5);
             return this;
         },
 
@@ -209,8 +215,17 @@ define(
         // race clicked
         // ------------------------------
         raceClicked: function raceClicked (options){
+            // Called when a race is clicked
+            // TODO: This, show viz?
+
+            //if(!$('#book-page-race').is('visible')){
+                //// If it's not visible, don't trigger events
+                //return false;
+            //}
+            
             logger.log('views/PageHome', 'raceClicked() passed options: %O',
                 options);
+            var self = this;
 
             // remove selected class from other entity selections
             $('#region-create-races .race-list-item.selected')
@@ -228,6 +243,7 @@ define(
             logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
 
             // update the race description div with the template
+            // TODO: Why doesn't this work?
             this.$raceDescription.html(
                 this.templateRaceDescription({ model: options.model })
             );
@@ -236,9 +252,9 @@ define(
             this.$raceDescription.velocity({ opacity: 0 });
 
             setTimeout(function(){
-                this.$raceDescription.velocity({ opacity: 1 });
-                this.$raceDescription.addClass('animated fadeInDown');
-            }, baseDelay);
+                self.$raceDescription.velocity({ opacity: 1 });
+                self.$raceDescription.addClass('animated fadeInDown');
+            }, baseDelay / 2);
         
 
             return this;

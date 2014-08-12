@@ -1,3 +1,11 @@
+.writer-wrapper {
+  position: relative;
+  width: 100%; }
+
+.writer-word {
+  display: inline-block;
+  margin: 0 0.25em 0 0; }
+
 .golden-text {
   color: #a69172;
   font-size: 2.5em;
@@ -819,6 +827,7 @@
     height: 142px;
     padding: 30px 10px 10px 30px;
     position: absolute;
+    opacity: 0;
     right: -8px;
     top: 230px;
     width: 73px; }
