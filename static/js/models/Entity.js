@@ -107,6 +107,11 @@ define(
             return url;
         },
 
+        generateName: function(){
+            // simply returns a new name (does not set it)
+            return generateName();
+        }, 
+
         initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
             options = options || {};

@@ -11,8 +11,6 @@ define("lib/jquery.visibility", function(){});
  *      Library for taking in an element and making words and letters appear as
  *      if by writing them
  *
- * author: Erik Hazzard
- *
  * ========================================================================= */
 (function wordWriter ( $ ){
 
@@ -23,7 +21,7 @@ define("lib/jquery.visibility", function(){});
         options = options || {};
 
         // Config based on options
-        var callback = options.callback || function callback(err, res){ console.log('Done'); };
+        var callback = options.callback || function callback(didFinish){ console.log('Done'); };
         var speedFactor = options.speedFactor || 0.8;
         var fadeInCss = options.fadeInCss || { opacity: 1 };
         var finalCss = options.finalCss || { opacity: 0.5 };
@@ -33,6 +31,7 @@ define("lib/jquery.visibility", function(){});
         var text = element.html();
         
         var _timeouts = [];
+        var _finalCallbackTimeout;
 
         // First, clean up the text a lil bit
         text = text.trim();
@@ -56,7 +55,6 @@ define("lib/jquery.visibility", function(){});
         var velocityOptionsFinal = { delay: 2000 * speedFactor, duration: 5000 * speedFactor};
 
         var timeoutDelay = 0;
-
         var _stopAnimations = false;
 
         var curWord;
@@ -100,14 +98,17 @@ define("lib/jquery.visibility", function(){});
             }
 
             if(i >= len-1){
-                setTimeout(callback, timeoutDelay);
+                _finalCallbackTimeout = setTimeout(function(){
+                    // finished naturally, did not cancel
+                    return callback(false);
+                }, timeoutDelay);
             }
         }
 
         // then append all the content
         element.append($writerWrapper);
 
-        // Instant show
+        // Instantly show everything and call the callback
         // ------------------------------
         if(!options.disableInstant){
             // instantly animate everything
@@ -118,14 +119,19 @@ define("lib/jquery.visibility", function(){});
                 for(var i=0,len=_timeouts.length; i<len; i++){
                     clearTimeout(_timeouts[i]);
                 }
+                clearTimeout(_finalCallbackTimeout);
 
                 // add callback 
-                velocityOptionsFadeIn.complete = callback;
+                velocityOptionsFadeIn.complete = function (){
+                    // cancelled, did not finish naturally
+                    return callback(true);
+                };
 
                 $('.writer-word')
                     .velocity('stop')
                     .velocity('stop')
-                    .velocity(fadeInCss, velocityOptionsFadeIn);
+                    .velocity(fadeInCss, velocityOptionsFadeIn)
+                    .velocity(finalCss, velocityOptionsFinal);
             });
         }
     };
@@ -441,228 +447,431 @@ define('util/d3plugins',['d3'], function d3Plugins(d3){
     return d3;
 });
 
-//----------------------------------------------------------------------------
-//Logger library
-//    author: Erik Hazzard
-//
-//Provides a LOGGER object which can be used to perform client side logging
-//    Maintains a list of of all messages by log type. To log:
-//            LOGGER.log('type', 'message', param1, param2, etc...);
-//
-//    e.g.,
-//            LOGGER.log('error', 'Woops', { some: data });
-//
-//    To change logger options:
-//            LOGGER.options.logLevel = 'all' // ( or true ) - Shows ALL messages
-//            LOGGER.options.logLevel = ['error', 'debug'] // only shows the types 
-//              passed in
-//
-//            LOGGER.options.storeHistory = true | false
-//    To access history:
-//            LOGGER.history[type] to access messages by type
-//----------------------------------------------------------------------------
-define('logger',['d3'], function(d3) {
-    var LOGGER;
+/* =========================================================================
+ * Bragi (Javascript Logger)
+ * ----------------------------------
+ * v1.0.0
+ * Distributed under MIT license
+ * Author : Erik Hazzard ( http://vasir.net )
+ *
+ * Provides a LOGGER object which can be used to perform logging
+ * Maintains a list of of all messages by log type. To log:
+ *      LOGGER.log('type', 'message', param1, param2, etc...);
+ *      
+ *  e.g.,
+ *      LOGGER.log('error', 'Woops', { some: data });
+ *
+ * To change logger options:
+ *      LOGGER.options.logLevel = true; // Shows ALL messages (false to show none)
+ *      LOGGER.options.logLevel = ['error', 'debug']; // only shows passed in types 
+ *
+ *   LOGGER.options.storeHistory = true or false
+ *      NOTE: By default, history will be stored only for logged messages.
+ *
+ *      Set LOGGER.options.storeAllHistory = true; to enable storing history 
+ *      for unlogged messages
+ *
+ *      To access history:
+ *          LOGGER.history[type] to access messages by `type`
+ *
+ *
+ * What this library does currently not support:
+ *      Automatically sending the history / log messages to some server. 
+ *      Currently, you'll need to take the LOGGER.history object and pipe it
+ *      somwhere if you want to access the stored messages
+ *
+ *      TODO: For node, expose a `useEvents` option that would emit an event
+ *      on true, which would allow other libraries to do stuff with the log 
+ *      messages??
+ * ========================================================================= */
+(function(root, factory) {
+    // Setup logger for the environment
+    if(typeof define === 'function' && define.amd) {
+        // RequireJS / AMD
+        define('logger',['exports'], function(exports) {
+            root = factory(root, exports);
+            return root;
+        });
+    } else if (typeof exports !== 'undefined') {
+        // CommonJS
+        factory(root, exports); 
+        module.exports = factory();
+    } else {
+        // browser global if neither are supported
+        root.logger = factory(root, {});
+    }
+}(this, function(root, logger) {
 
-    // generate some color scales, give a wide range of unique colors
-    var colorScales = [
-        d3.scale.category20c(),
-        d3.scale.category20b(),
-        d3.scale.category20(),
-        d3.scale.category10()
-    ];
+    // This is a bit hacky, but we need to check if this is called from a
+    // command line or browser. Cheapest + fastest is to check if a global
+    // window object exists
+    var _isBrowser = typeof window === 'undefined' ? false : true;
 
-    // remember lastGroup
-    var LAST_GROUP = null;
+    // Some nice color variations
+    var COLORS, STYLES;
+    var COLOR_RESET = '\033[0m';
 
-    // values of found colors, to check for same colors
-    var foundColors = ['#dd4444'];
+    if(_isBrowser){
+        COLORS = [
+            '#3182bd',
+            '#dfc27d',
+            '#35978f',
+            '#543005',
+            '#c51b7d',
+            '#c6dbef',
+            '#af8dc3',
+            '#7fbf7b',
+            '#8c510a',
+            '#f5f5f5',
+            '#e9a3c9',
+            '#543005',
+            '#66c2a5',
+            '#f6e8c3',
+            '#80cdc1',
+            '#878787',
+            '#8c510a',
+            '#80cdc1',
+            '#542788',
+            '#003c30',
+            '#e6f598',
+            '#c7eae5'
+        ];
+    } else {
+        STYLES = {
+            colors: {
+                'white': '\x1B[37m',
+                'grey': '\x1B[90m',
+                'black': '\x1B[30m',
+                'blue': '\x1B[34m',
+                'cyan': '\x1B[36m',
+                'green': '\x1B[32m',
+                'magenta': '\x1B[35m',
+                'red': '\x1B[31m',
+                'yellow': '\x1B[33m'
+            },
+            styles: {
+                'blink': '\x1B[49;5;8m',
+                'underline': '\x1B[4m', 
+                'bold': '\x1B[1m'
+            },
+            backgrounds: {
+                'white': '\x1B[47m',
+                'black': '\x1B[40m',
+                'blue': '\x1B[44m',
+                'cyan': '\x1B[46m',
+                'green': '\x1B[42m',
+                'magenta': '\x1B[45m',
+                'red': '\x1B[41m',
+                'yellow': '\x1B[43m'
+            }
+        };
 
-    // key : value of colors so we don't generate new colors
-    // for each key
-    // set some default colors
-    var colorDict = {error: '#dd4444'};
+        COLORS = [
+            STYLES.colors.blue,
+            STYLES.colors.green,
+            STYLES.colors.magenta,
+            STYLES.colors.yellow,
+            STYLES.colors.cyan,
+            STYLES.colors.red,
 
-    var getColor = function loggerGetColor(target){
-        // generates or returns a color used by a target key
-        var i=0;
-        var color = '';
-        if(colorDict[target]){ return colorDict[target]; }
+            STYLES.backgrounds.blue + STYLES.colors.black,
+            STYLES.backgrounds.blue + STYLES.colors.white,
+            STYLES.backgrounds.blue + STYLES.colors.magenta,
 
-        while(i<colorScales.length){
-            color = colorScales[i](target);
+            STYLES.backgrounds.yellow + STYLES.colors.red,
+            STYLES.backgrounds.yellow + STYLES.colors.black,
+            STYLES.backgrounds.yellow + STYLES.colors.magenta,
 
-            // did NOT find the color, update the objects and break loop
-            if(foundColors.indexOf(color) === -1){
-                foundColors.push(color);
-                colorDict[target] = color;
-                break;
-            } 
+            STYLES.backgrounds.white + STYLES.colors.red,
+            STYLES.backgrounds.white + STYLES.colors.blue,
+            STYLES.backgrounds.white + STYLES.colors.black,
+            STYLES.backgrounds.white + STYLES.colors.magenta,
+            STYLES.backgrounds.white + STYLES.colors.yellow,
+            STYLES.backgrounds.white + STYLES.colors.cyan,
 
-            i += 1;
+            STYLES.backgrounds.magenta+ STYLES.colors.white,
+            STYLES.backgrounds.magenta + STYLES.colors.black,
+            STYLES.backgrounds.magenta + STYLES.colors.blue,
+            STYLES.backgrounds.magenta + STYLES.colors.green,
+            STYLES.backgrounds.magenta + STYLES.colors.yellow
+        ];
+    }
+
+    // Setup the logger
+    var LOGGER = {};
+
+    LOGGER.options = {
+        // default options
+        // Primary configuration options
+        // --------------------------
+        // logLevel: specifies what logs to display. Can be either:
+        //      1. an {array} of log levels 
+        //          e.g,. ['error', 'myLog1', 'myLog2']
+        //    or 
+        //
+        //      2. a {Boolean} : true to see *all* log messages, false to 
+        //          see *no* messages
+        logLevel: true,
+
+        // storeHistory: {Boolean} specifies wheter to save all log message 
+        //      objects.  This is required to send messages to a server, 
+        //      but can incur a small performance (memory) hit, depending 
+        //      on the number of logs. NOTE: This will, by default, only
+        //      store history for messages found in logLevel. 
+        //      Set `storeAllHistory` to store *all* messages
+        storeHistory: true,
+
+        // storeAllHistory: {Boolean} specifies wheter to store history for
+        // all log messages, regardless if they are logged
+        storeAllHistory: false,
+
+        // Secondary (display related) configuration options
+        // --------------------------
+        // showCaller: {Boolean} will automatically include the calling 
+        //      function's name. Useful for tracing execution of flow
+        showCaller: true,
+
+        // showTime: {Boolean} specifies wheter to include timestamp
+        showTime: true
+    };
+
+    LOGGER.history = {
+        // stored log messages by log type
+        // e.g.,:
+        // 'logType': [ { ... message 1 ...}, { ... message 2 ... }, ... ]
+    };
+
+    LOGGER.canLog = function canLog(type){ 
+        // Check the logLevels and passed in type. If the message cannot be
+        // logged, return false - otherwise, return true
+        var logLevel = LOGGER.options.logLevel;
+        // by default, allow logging
+        var canLogIt = true;
+
+        // Don't ever log if logging is disabled
+        if(logLevel === false || logLevel === null){
+            canLogIt = false;
+        } else if(logLevel instanceof Array){
+            // if an array of log levels is set, check it
+            if(logLevel.indexOf(type) > -1){
+                canLogIt = true;
+            }
+        } else if(typeof logLevel === 'string'){
+            // If a single log level is set (as a string), only allow logging
+            // if the type matches the set logLevel
+            if(logLevel === type){ canLogIt = true; }
+            else { canLogIt = false; }
         }
+
+        return canLogIt;
+    };
+    // UTIL functions
+    // ----------------------------------
+    LOGGER.util = {};
+    LOGGER.util.darken = function darken(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // darkened value
+        color = color.replace(/#/g,'');
+        color = parseInt(color, 16);
+        color = color - 90000;
+        if(color < 0){ color = 0; }
+        color = color.toString(16);
+        return '#' + color;
+    };
+    LOGGER.util.lighten = function darken(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // lightened value
+        // TODO: combine this and darken
+        color = color.replace(/#/g,'');
+        color = parseInt(color, 16);
+        color = color + 90000;
+        if(color > 16777215){
+            color = 16777215;
+        }
+        color = color.toString(16);
+        return '#' + color;
+    };
+
+    LOGGER.util.getForegroundColor = function getForegroundColor(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // darkened value
+        var colors = /(\w\w)(\w\w)(\w\w)/.exec(color);
+        if(!colors){ return '#000000'; }
+
+        var red = parseInt(colors[1], 16);
+        var green = parseInt(colors[2], 16);
+        var blue = parseInt(colors[3], 16);
+
+        // based on YIQ (http://en.wikipedia.org/wiki/YIQ)
+        var brightness = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
+
+        if (brightness >= 128 || isNaN(brightness)) {
+            return '#000000';
+        } else {
+            return '#ffffff';
+        }
+    };
+
+    // backgroundColor
+    // ----------------------------------
+    // keeps track of colors being used. Uses a redundent array for quicker
+    // lookup
+    var _foundColors = [];
+    // and which logType goes to which color
+    var _colorDict = _isBrowser ? {error: '#dd4444'} : { error:  STYLES.styles.blink + STYLES.backgrounds.red + STYLES.colors.white };
+
+    function getBackgroundColor(type){
+        // Returns the background color for a passed in log type
+        // TODO: if more found colors exist than the original length of the
+        // COLOR array, cycle back and modify the original color
+        //
+        var color = '';
+
+        // For color, get the first group
+        type = type.split(':')[0];
+
+        // if a color exists for the passed in log group, use it
+        if(_colorDict[type]){ 
+            return _colorDict[type];
+        }
+
+        if(_foundColors.length >= COLORS.length){
+            // is the index too high? loop around if so
+            color = COLORS[Math.random() * COLORS.length | 0];
+            if(!_isBrowser){
+                color = STYLES.styles.underline + color;
+            } else {
+                for(var i=0;i<Math.random() * 10 | 0;i++){
+                    if(Math.random() < 0.5){
+                        color = LOGGER.util.darken(color);
+                    } else {
+                        color = LOGGER.util.lighten(color);
+                    }
+                }
+            }
+        } else {
+            // The length of the colors array is >= to the index of the color
+            color = COLORS[_foundColors.length];
+        }
+
+        // update the stored color info
+        _foundColors.push(color);
+        _colorDict[type] = color;
 
         return color;
-    };
-
-    LOGGER = {};
-    LOGGER.options = {
-        logLevel: 'all',
-        storeHistory: false
-    };
-    LOGGER.history = {};
-    LOGGER.can_log = function(type) {
-        var logLevel, return_value;
-
-        return_value = false;
-        logLevel = LOGGER.options.logLevel;
-        if (logLevel === 'all' || logLevel === true) {
-            return_value = true;
-        } else if (logLevel instanceof Array) {
-            if (logLevel.indexOf(type) > -1) {
-                return_value = true;
-            }
-        } else if (logLevel === null || logLevel === void 0 || logLevel === 'none' || logLevel === false) {
-            return_value = false;
-        } else {
-            if (logLevel === type) {
-                return_value = true;
-            }
-        }
-        return return_value;
-    };
-    LOGGER.log = function(type) {
-        var args, cur_date, logHistory;
-
-        args = Array.prototype.slice.call(arguments);
-        if ((type == null) || arguments.length === 1) {
-            type = 'debug';
-            args.splice(0, 0, 'debug');
-        }
-        if (!LOGGER.can_log(type)) {
-            return false;
-        }
-        cur_date = new Date();
-        args.push({
-            'Date': cur_date,
-            'Milliseconds': cur_date.getMilliseconds(),
-            'Time': cur_date.getTime()
-        });
-
-        if(LOGGER.options.storeHistory){
-                logHistory = LOGGER.history;
-                logHistory[type] = logHistory[type] || [];
-                logHistory[type].push(args);
-        }
-        if (window && window.console) {
-            //console.log(Array.prototype.slice.call(args));
-            // add a spacer between each arg
-            var len = args.length;
-            var newArgs = Array.prototype.slice.call(args);
-
-            // close group if the groups aren't the same
-            if(type !== LAST_GROUP){
-                console.groupEnd();
-                // start a group
-                console.group(type);
-                LAST_GROUP = type;
-            }
-
-
-            // NOTE: this will only add color to %c specified strings
-
-            // Add color to everything
-            if(newArgs[1] && typeof newArgs[1] === 'string'){
-                var shifted = newArgs.shift();
-
-                // if the string is a formatted string, add in the
-                // log type, the message, then the time
-                newArgs[0] = '%c' + 
-                    shifted + '\t:\t' + 
-                    newArgs[0].replace('%c', '') + 
-                    ' <time:%O>';
-
-                // If the second argument is a string and it is 
-                // NOT a color format string, the create one
-                if(typeof newArgs[1] !== 'string' || (typeof newArgs[1] === 'string' && newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null)){
-                    var background = getColor(shifted);
-                    var color = d3.rgb(background);
-                    var border = color.darker();
-
-                    // make the text bright or light depending on how
-                    // dark or light it already is
-                    if(color.r + color.g + color.b < 378){
-                        color = color.brighter().brighter().brighter().brighter().brighter();
-                    } else { 
-                        color = color.darker().darker().darker().darker().darker();
-                    }
-
-                    // format string
-                    var formatString = "background: " + background + ';' + 
-                        'color:' + color + ';' + 
-                        'border: 2px solid ' + border + ';';
-
-                    newArgs.splice(1, 0, formatString);
-                    console.log.apply(console, newArgs);
-                }
-            } else {
-                // no special formatting, just call it normally
-                console.log(args);
-            }
-        }
-        return true;
-    };
-    LOGGER.options.log_types = ['debug', 'error', 'info', 'warn'];
-    LOGGER.options.setup_log_types = function() {
-        var log_type, _i, _len, _ref, _results;
-
-        LOGGER.log('logger', 'setup_log_types()', 'Called setup log types!');
-        _ref = LOGGER.options.log_types;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            log_type = _ref[_i];
-            _results.push((function(log_type) {
-                LOGGER[log_type] = function() {
-                    var args;
-
-                    args = Array.prototype.slice.call(arguments);
-                    args.splice(0, 0, log_type);
-                    return LOGGER.log.apply(null, args);
-                };
-                return LOGGER[log_type];
-            })(log_type));
-        }
-        return _results;
-    };
-    LOGGER.options.setup_log_types();
-    if (window) {
-        if (window.console && LOGGER.options) {
-            if (LOGGER.options.logLevel === 'none' || LOGGER.options.logLevel === null) {
-                console.log = function() {
-                    return {};
-                };
-            }
-        }
-        if (!window.console) {
-            window.console = {
-                log: function consoleLog() {
-                    return {};
-                }
-            };
-        }
-        if (!window.console.group) {
-            window.console.group = function consoleGroup() {};
-        }
-        if (!window.console.error) {
-            window.console.error = function consoleError() {};
-        }
-        window.onerror = function(msg, url, line) {
-            LOGGER.error(msg, url, line);
-            return false;
-        };
     }
+
+    LOGGER.getFormatString = function getFormatString (type){
+        var background = getBackgroundColor(type);
+        var color = LOGGER.util.getForegroundColor(background);
+
+        // Generate some formatted CSS
+        var formatString = "background: " + background + ';' + 
+            'color:' + color + ';' + 
+            'line-height: 1.8em;' +
+            'margin: 2px;' +
+            'padding: 2px;' +
+            'border: 2px solid rgba(0,0,0,0.5);';
+
+        return formatString;
+    };
+
+    // LOG function
+    // ----------------------------------
+    LOGGER.log = function loggerLog(type, message){
+        // Main logging function. Takes in two (plus n) parameters:
+        //   type: {String} specifies the log level, or log type
+        //
+        //   message: {String} the message to log. The message must be a single
+        //      string, but can have multiple objects inside using `%O`. e.g.,
+        //          logger.log('test', 'some object: %O', {answer: 42});
+        //
+        //   all other parameters are objects or strings that will be formatted
+        //   into the message
+        
+        // can this message be logged? If not, do nothing
+        if( !LOGGER.canLog(type) ){ 
+            // Can NOT be logged. If the storeAllHistory is set, we'll want
+            // to save the history
+            if(!LOGGER.options.storeAllHistory){
+                return false;
+            }
+        }
+        
+        // get all arguments
+        var extraArgs = Array.prototype.slice.call(arguments, 2);
+        // remove the type from the args array, so the new args array will
+        // just be an array of the message string and any formatted objects
+        // to pass into it
+
+        // Setup the log
+        // ------------------------------
+        var formatString = LOGGER.getFormatString(type);
+
+        // TODO: determine if a wrong number of args was passed in, concat 
+        //  string instead if so
+
+        // Format the message
+        // the final log array should look like:
+        //  [ "%c `type` : `message` ", `formatString`, formatting objects ... ]
+        //
+        var finalLog = [];
+
+        // Logger
+        // ------------------------------
+        // Include some meta info (time, function that called, etc.)
+        message += '\t\t';
+        if(loggerLog.caller && loggerLog.caller.name && LOGGER.options.showCaller){
+            message += ' | <caller: ' + loggerLog.caller.name + '()>';
+        } 
+        if(LOGGER.options.showTime){
+            // JSON timestamp
+            message += ' | <time: ' + new Date().toJSON() + '>';
+        }
+
+        if(!_isBrowser){
+            // For node, log line number and filename
+        }
+
+
+        // Setup final log message format, depending on if it's a browser or not
+        // ------------------------------
+        if(_isBrowser){
+            finalLog.push(
+                "%c [ " + type + " ]\t:\t" + message
+            );
+            finalLog.push(formatString);
+
+        } else {
+            finalLog.push(
+                COLOR_RESET + "[ " + 
+                (getBackgroundColor(type) + type + COLOR_RESET) + 
+                " ]\t:\t" + message + 
+                COLOR_RESET
+            );
+        }
+
+        finalLog.push(extraArgs);
+
+        // Finally, check if it should be added to the history
+        // ------------------------------
+        if(LOGGER.options.storeHistory || LOGGER.options.storeAllHistory){
+            // show the history be stored? if so, store it
+            LOGGER.history[type] = LOGGER.history[type] || []; //ensure existence
+            LOGGER.history[type].push(finalLog);
+        }
+
+        // Log it
+        // ------------------------------
+        if( LOGGER.canLog(type) ){ 
+            // Only output if it was specified in the log level
+            console.log.apply( console, finalLog );
+        }
+
+    };
+
     return LOGGER;
-});
+}));
 
 // ===========================================================================
 //
@@ -902,7 +1111,6 @@ define(
     'models/AppUser',[ 'events', 'logger', 'util/API_URL' ], function AppUserModel(
         events, logger, API_URL
     ){
-
         // UTIL
         // ------------------------------
         var unsetCookie = function(){
@@ -2465,6 +2673,11 @@ define(
             return url;
         },
 
+        generateName: function(){
+            // simply returns a new name (does not set it)
+            return generateName();
+        }, 
+
         initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
             options = options || {};
@@ -3918,7 +4131,7 @@ define(
     var RACES = [
         new Race({
             name: 'Elf',
-            description: 'An elf',
+            description: 'The long-lived elves are children of the natural world, mortals who are in tune with the natural world around them.',
             sprite: 'elf',
             baseStats: {
                 attack: 4,
@@ -4012,12 +4225,14 @@ define(
     'views/PageHome',[ 
         'd3', 'backbone', 'marionette',
         'logger', 'events',
+        'async',
         'models/Entity',
         'views/create/RaceList',
         'collections/Races'
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
+        async,
         Entity,
         RaceList,
         Races
@@ -4077,6 +4292,22 @@ define(
             // Setup templates
             this.templateRaceDescription = _.template($('#template-create-race-description').html());
 
+            // Seutp global "skip" behavior to allow skipping all the fade ins
+            // TODO: 
+            this.pagesCompleted = {
+                1: false, // title page
+                2: false, // race page
+                3: false, // templates
+                4: false, // abilities
+                5: false, // overview of character
+                6: false // final page - play
+            };
+
+            // Setup cached els
+            this.$cachedEls = {
+                page5name: $('#create-final-name')
+            };
+
             // Setup pageturn
             this.setupPageturn();
 
@@ -4093,7 +4324,8 @@ define(
             // Initializes the pageTurn animation library
             //
             var self = this;
-            var curPage = 1;
+            this.curStep = 1;
+
             self.$pages.turn({
                 display: 'double',
                 acceleration: true,
@@ -4108,24 +4340,50 @@ define(
                     }
                 }
             });
+
+            function pageNext(e){
+                // Called to show the next page. This is state based, as
+                // the user cannot see 
+                logger.log('views/PageHome', 'pageNext() called');
+                if(self.curStep < 3){
+                    logger.log('views/PageHome', '\t showing next page');
+                    e.preventDefault();
+                    self.curStep++;
+                    self.$pages.turn('next');
+                }
+            }
+            function pagePrevious(e){
+                logger.log('views/PageHome', 'pagePrevious() called');
+                if(self.curStep > 1){
+                    logger.log('views/PageHome', '\t showing previous page');
+                    e.preventDefault();
+                    self.$pages.turn('previous');
+                    self.curStep--;
+                }
+            }
+
+            // store functions for page turning
+            this.pageNext = pageNext;
+            this.pagePrevious = pagePrevious;
             
+            // Turn pages on events
+            // --------------------------
             $(window).bind('keydown', function(e){
                 // Don't let pages go below 2 (we don't have a cover page) and
                 // don't let it go above the number of pages we have
                 if (e.keyCode==37) {
-                    if(curPage > 1){
-                        e.preventDefault();
-                        self.$pages.turn('previous');
-                        curPage--;
-                    }
+                    pagePrevious(e);
                 } else if (e.keyCode==39) {
-                    if(curPage < 2){
-                        e.preventDefault();
-                        curPage++;
-                        self.$pages.turn('next');
-                    }
+                    pageNext(e);
                 }
             });
+
+            // arrows
+            $('#arrow-right').click(function(e){
+                logger.log('views/PageHome', 'arrow-right clicked');
+                return pageNext(e);
+            });
+            $('#arrow-left').click(pagePrevious);
         },
 
         // ==============================
@@ -4143,39 +4401,70 @@ define(
             logger.log('views/PageHome', 'setupPage1() called');
 
             var self = this;
-            var $p = $('#book-page-title p', this.$el);
+            var $paragraph = $('#book-page-title p', this.$el);
+            var $paragraphName = $($paragraph[1]);
+
             var animation = 'fadeInDown';
-            var $name = $('#create-name', this.$el);
+            var $name = $('#create-name');
             var enteredText = false;
 
-            $($p[0]).velocity({ opacity: 1 });
-            $($p[0]).addClass('animated ' + animation);
+            $($paragraph[0]).velocity({ opacity: 1 });
+            $($paragraph[0]).addClass('animated ' + animation);
 
+            // --------------------------
             // Fade in text
+            // --------------------------
             $('#create-title-intro-text').wordWriter({
                 finalCss: { opacity: 0.8 },
 
-                callback: function writerCallback(){
+                callback: function writerCallback(wasCancelled){
+                    // Called when all words have been faded, or when the
+                    // user clicks on text
+                    logger.log('views/PageHome', 
+                        '\t finished showing words, was cancelled? : %O',
+                        wasCancelled);
 
-                    $($p[1]).velocity({ opacity: 1 });
-                    $($p[1]).addClass('animated fadeInUp');
+                    $paragraphName.velocity({ opacity: 1 });
+                    $paragraphName.addClass('animated fadeInUp');
 
-                    setTimeout(function (){
+                    // Show the name input box
+                    setTimeout(function showName(){
+                        $name.addClass('animated fadeInLeft');
                         $name.velocity({ opacity: 1 });
 
-                        setTimeout(function(){
-                            if(!enteredText){
-                                $name.addClass('animated pulse infinite');
-                            }
-                        }, baseDelay * 3);
+                        // Fade in "name text"
+                        async.eachSeries(['N','a','m','e'], 
+                        function(i, cb){
+                            $name.attr(
+                                'placeholder', 
+                                $name.attr('placeholder') + i
+                            );
 
-                    }, baseDelay);
+                            setTimeout(function(){
+                                cb();
+                            }, baseDelay * 0.8);
+                        }, function allDone (){ 
+                            logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
+                                enteredText);
+
+                            if(!enteredText){
+                                $name.removeClass();
+                                setTimeout(function(){
+                                    logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                    $name.addClass('animated pulse infinite');
+                                }, 500);
+                            }
+                        });
+
+                    }, baseDelay / 2);
                 }
             });
 
 
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
+                logger.log('views/PageHome', '\t name focused');
+
                 enteredText = true;
                 $name.removeClass('pulse infinite'); 
 
@@ -4187,6 +4476,17 @@ define(
                     self.setupPage2();
 
                 }, baseDelay);
+            });
+
+            $name.on('input change', function(e){
+                // After input has been changed, user can continue to the
+                // second page (race selection)
+                var name = $(this).val();
+                if(!name || name.length < 1){
+                    name = self.model.generateName();
+                }
+                self.model.set({ name: name });
+                self.$cachedEls.page5name.html(name);
             });
 
             return this;
@@ -4202,16 +4502,27 @@ define(
             var self = this;
             logger.log('views/PageHome', 'setupPage2() called');
 
-            var animation = 'fadeInDown';
-            $('#race-header').velocity({ opacity: 1 });
-            $('#race-header').addClass('animated fadeInDown');
+            this.pagesCompleted[1] = true;
 
+            var animation = 'fadeInDown';
+            var $raceHeader = $('#race-header');
+            var $raceWrapper = $('#create-race-wrapper');
+
+            $raceHeader.velocity({ opacity: 1 });
+            $raceHeader.addClass('animated fadeInDown');
 
             // then show the seletion
             setTimeout(function(){
-                $('#create-race-wrapper').velocity({ opacity: 1 });
-                $('#create-race-wrapper').addClass('animated fadeInUp');
+                $raceWrapper.velocity({ opacity: 1 });
+                $raceWrapper.addClass('animated fadeInUp');
             }, baseDelay * 1.2);
+
+            // remove the animated classes so page switches don't re-trigger
+            // transitions
+            setTimeout(function removeAnimatedClasses(){
+                $raceWrapper.removeClass();
+                $raceHeader.removeClass();
+            }, baseDelay * 5);
 
             return this;
         },
@@ -4222,15 +4533,23 @@ define(
         raceClicked: function raceClicked (options){
             // Called when a race is clicked
             // TODO: This, show viz?
-
-            //if(!$('#book-page-race').is('visible')){
-                //// If it's not visible, don't trigger events
-                //return false;
-            //}
-            
             logger.log('views/PageHome', 'raceClicked() passed options: %O',
                 options);
             var self = this;
+
+            if(this.pagesCompleted[1] !== true){
+                logger.log('views/PageHome', '[x] first page incomplete, must enter name');
+                return false;
+            }
+            
+            // If the same race was clicked, do nothing
+            if(this._previousRaceSelected === options.model.attributes.name){
+                logger.log('views/PageHome', '[x] same race selected, doing nothing');
+                return false;
+            }
+
+            // store state
+            this._previousRaceSelected = options.model.attributes.name;
 
             // remove selected class from other entity selections
             $('#region-create-races .race-list-item.selected')
@@ -4248,16 +4567,19 @@ define(
             logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
 
             // update the race description div with the template
-            // TODO: Why doesn't this work?
-            this.$raceDescription.html(
-                this.templateRaceDescription({ model: options.model })
-            );
-
+            // --------------------------
             // Show race description
             this.$raceDescription.velocity({ opacity: 0 });
+            self.$raceDescription.addClass('fadeOutDown');
 
             setTimeout(function(){
+                // update html
+                self.$raceDescription.html(
+                    self.templateRaceDescription({ model: options.model })
+                );
+
                 self.$raceDescription.velocity({ opacity: 1 });
+                self.$raceDescription.removeClass('fadeOutDown');
                 self.$raceDescription.addClass('animated fadeInDown');
             }, baseDelay / 2);
         

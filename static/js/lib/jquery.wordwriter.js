@@ -4,8 +4,6 @@
  *      Library for taking in an element and making words and letters appear as
  *      if by writing them
  *
- * author: Erik Hazzard
- *
  * ========================================================================= */
 (function wordWriter ( $ ){
 
@@ -16,7 +14,7 @@
         options = options || {};
 
         // Config based on options
-        var callback = options.callback || function callback(err, res){ console.log('Done'); };
+        var callback = options.callback || function callback(didFinish){ console.log('Done'); };
         var speedFactor = options.speedFactor || 0.8;
         var fadeInCss = options.fadeInCss || { opacity: 1 };
         var finalCss = options.finalCss || { opacity: 0.5 };
@@ -26,6 +24,7 @@
         var text = element.html();
         
         var _timeouts = [];
+        var _finalCallbackTimeout;
 
         // First, clean up the text a lil bit
         text = text.trim();
@@ -49,7 +48,6 @@
         var velocityOptionsFinal = { delay: 2000 * speedFactor, duration: 5000 * speedFactor};
 
         var timeoutDelay = 0;
-
         var _stopAnimations = false;
 
         var curWord;
@@ -93,14 +91,17 @@
             }
 
             if(i >= len-1){
-                setTimeout(callback, timeoutDelay);
+                _finalCallbackTimeout = setTimeout(function(){
+                    // finished naturally, did not cancel
+                    return callback(false);
+                }, timeoutDelay);
             }
         }
 
         // then append all the content
         element.append($writerWrapper);
 
-        // Instant show
+        // Instantly show everything and call the callback
         // ------------------------------
         if(!options.disableInstant){
             // instantly animate everything
@@ -111,14 +112,19 @@
                 for(var i=0,len=_timeouts.length; i<len; i++){
                     clearTimeout(_timeouts[i]);
                 }
+                clearTimeout(_finalCallbackTimeout);
 
                 // add callback 
-                velocityOptionsFadeIn.complete = callback;
+                velocityOptionsFadeIn.complete = function (){
+                    // cancelled, did not finish naturally
+                    return callback(true);
+                };
 
                 $('.writer-word')
                     .velocity('stop')
                     .velocity('stop')
-                    .velocity(fadeInCss, velocityOptionsFadeIn);
+                    .velocity(fadeInCss, velocityOptionsFadeIn)
+                    .velocity(finalCss, velocityOptionsFinal);
             });
         }
     };

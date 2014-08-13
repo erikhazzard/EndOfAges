@@ -7,12 +7,14 @@ define(
     [ 
         'd3', 'backbone', 'marionette',
         'logger', 'events',
+        'async',
         'models/Entity',
         'views/create/RaceList',
         'collections/Races'
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
+        async,
         Entity,
         RaceList,
         Races
@@ -72,6 +74,22 @@ define(
             // Setup templates
             this.templateRaceDescription = _.template($('#template-create-race-description').html());
 
+            // Seutp global "skip" behavior to allow skipping all the fade ins
+            // TODO: 
+            this.pagesCompleted = {
+                1: false, // title page
+                2: false, // race page
+                3: false, // templates
+                4: false, // abilities
+                5: false, // overview of character
+                6: false // final page - play
+            };
+
+            // Setup cached els
+            this.$cachedEls = {
+                page5name: $('#create-final-name')
+            };
+
             // Setup pageturn
             this.setupPageturn();
 
@@ -88,7 +106,8 @@ define(
             // Initializes the pageTurn animation library
             //
             var self = this;
-            var curPage = 1;
+            this.curStep = 1;
+
             self.$pages.turn({
                 display: 'double',
                 acceleration: true,
@@ -103,24 +122,50 @@ define(
                     }
                 }
             });
+
+            function pageNext(e){
+                // Called to show the next page. This is state based, as
+                // the user cannot see 
+                logger.log('views/PageHome', 'pageNext() called');
+                if(self.curStep < 3){
+                    logger.log('views/PageHome', '\t showing next page');
+                    e.preventDefault();
+                    self.curStep++;
+                    self.$pages.turn('next');
+                }
+            }
+            function pagePrevious(e){
+                logger.log('views/PageHome', 'pagePrevious() called');
+                if(self.curStep > 1){
+                    logger.log('views/PageHome', '\t showing previous page');
+                    e.preventDefault();
+                    self.$pages.turn('previous');
+                    self.curStep--;
+                }
+            }
+
+            // store functions for page turning
+            this.pageNext = pageNext;
+            this.pagePrevious = pagePrevious;
             
+            // Turn pages on events
+            // --------------------------
             $(window).bind('keydown', function(e){
                 // Don't let pages go below 2 (we don't have a cover page) and
                 // don't let it go above the number of pages we have
                 if (e.keyCode==37) {
-                    if(curPage > 1){
-                        e.preventDefault();
-                        self.$pages.turn('previous');
-                        curPage--;
-                    }
+                    pagePrevious(e);
                 } else if (e.keyCode==39) {
-                    if(curPage < 2){
-                        e.preventDefault();
-                        curPage++;
-                        self.$pages.turn('next');
-                    }
+                    pageNext(e);
                 }
             });
+
+            // arrows
+            $('#arrow-right').click(function(e){
+                logger.log('views/PageHome', 'arrow-right clicked');
+                return pageNext(e);
+            });
+            $('#arrow-left').click(pagePrevious);
         },
 
         // ==============================
@@ -138,39 +183,70 @@ define(
             logger.log('views/PageHome', 'setupPage1() called');
 
             var self = this;
-            var $p = $('#book-page-title p', this.$el);
+            var $paragraph = $('#book-page-title p', this.$el);
+            var $paragraphName = $($paragraph[1]);
+
             var animation = 'fadeInDown';
-            var $name = $('#create-name', this.$el);
+            var $name = $('#create-name');
             var enteredText = false;
 
-            $($p[0]).velocity({ opacity: 1 });
-            $($p[0]).addClass('animated ' + animation);
+            $($paragraph[0]).velocity({ opacity: 1 });
+            $($paragraph[0]).addClass('animated ' + animation);
 
+            // --------------------------
             // Fade in text
+            // --------------------------
             $('#create-title-intro-text').wordWriter({
                 finalCss: { opacity: 0.8 },
 
-                callback: function writerCallback(){
+                callback: function writerCallback(wasCancelled){
+                    // Called when all words have been faded, or when the
+                    // user clicks on text
+                    logger.log('views/PageHome', 
+                        '\t finished showing words, was cancelled? : %O',
+                        wasCancelled);
 
-                    $($p[1]).velocity({ opacity: 1 });
-                    $($p[1]).addClass('animated fadeInUp');
+                    $paragraphName.velocity({ opacity: 1 });
+                    $paragraphName.addClass('animated fadeInUp');
 
-                    setTimeout(function (){
+                    // Show the name input box
+                    setTimeout(function showName(){
+                        $name.addClass('animated fadeInLeft');
                         $name.velocity({ opacity: 1 });
 
-                        setTimeout(function(){
-                            if(!enteredText){
-                                $name.addClass('animated pulse infinite');
-                            }
-                        }, baseDelay * 3);
+                        // Fade in "name text"
+                        async.eachSeries(['N','a','m','e'], 
+                        function(i, cb){
+                            $name.attr(
+                                'placeholder', 
+                                $name.attr('placeholder') + i
+                            );
 
-                    }, baseDelay);
+                            setTimeout(function(){
+                                cb();
+                            }, baseDelay * 0.8);
+                        }, function allDone (){ 
+                            logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
+                                enteredText);
+
+                            if(!enteredText){
+                                $name.removeClass();
+                                setTimeout(function(){
+                                    logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                    $name.addClass('animated pulse infinite');
+                                }, 500);
+                            }
+                        });
+
+                    }, baseDelay / 2);
                 }
             });
 
 
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
+                logger.log('views/PageHome', '\t name focused');
+
                 enteredText = true;
                 $name.removeClass('pulse infinite'); 
 
@@ -182,6 +258,17 @@ define(
                     self.setupPage2();
 
                 }, baseDelay);
+            });
+
+            $name.on('input change', function(e){
+                // After input has been changed, user can continue to the
+                // second page (race selection)
+                var name = $(this).val();
+                if(!name || name.length < 1){
+                    name = self.model.generateName();
+                }
+                self.model.set({ name: name });
+                self.$cachedEls.page5name.html(name);
             });
 
             return this;
@@ -197,16 +284,27 @@ define(
             var self = this;
             logger.log('views/PageHome', 'setupPage2() called');
 
-            var animation = 'fadeInDown';
-            $('#race-header').velocity({ opacity: 1 });
-            $('#race-header').addClass('animated fadeInDown');
+            this.pagesCompleted[1] = true;
 
+            var animation = 'fadeInDown';
+            var $raceHeader = $('#race-header');
+            var $raceWrapper = $('#create-race-wrapper');
+
+            $raceHeader.velocity({ opacity: 1 });
+            $raceHeader.addClass('animated fadeInDown');
 
             // then show the seletion
             setTimeout(function(){
-                $('#create-race-wrapper').velocity({ opacity: 1 });
-                $('#create-race-wrapper').addClass('animated fadeInUp');
+                $raceWrapper.velocity({ opacity: 1 });
+                $raceWrapper.addClass('animated fadeInUp');
             }, baseDelay * 1.2);
+
+            // remove the animated classes so page switches don't re-trigger
+            // transitions
+            setTimeout(function removeAnimatedClasses(){
+                $raceWrapper.removeClass();
+                $raceHeader.removeClass();
+            }, baseDelay * 5);
 
             return this;
         },
@@ -217,15 +315,23 @@ define(
         raceClicked: function raceClicked (options){
             // Called when a race is clicked
             // TODO: This, show viz?
-
-            //if(!$('#book-page-race').is('visible')){
-                //// If it's not visible, don't trigger events
-                //return false;
-            //}
-            
             logger.log('views/PageHome', 'raceClicked() passed options: %O',
                 options);
             var self = this;
+
+            if(this.pagesCompleted[1] !== true){
+                logger.log('views/PageHome', '[x] first page incomplete, must enter name');
+                return false;
+            }
+            
+            // If the same race was clicked, do nothing
+            if(this._previousRaceSelected === options.model.attributes.name){
+                logger.log('views/PageHome', '[x] same race selected, doing nothing');
+                return false;
+            }
+
+            // store state
+            this._previousRaceSelected = options.model.attributes.name;
 
             // remove selected class from other entity selections
             $('#region-create-races .race-list-item.selected')
@@ -243,16 +349,19 @@ define(
             logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
 
             // update the race description div with the template
-            // TODO: Why doesn't this work?
-            this.$raceDescription.html(
-                this.templateRaceDescription({ model: options.model })
-            );
-
+            // --------------------------
             // Show race description
             this.$raceDescription.velocity({ opacity: 0 });
+            self.$raceDescription.addClass('fadeOutDown');
 
             setTimeout(function(){
+                // update html
+                self.$raceDescription.html(
+                    self.templateRaceDescription({ model: options.model })
+                );
+
                 self.$raceDescription.velocity({ opacity: 1 });
+                self.$raceDescription.removeClass('fadeOutDown');
                 self.$raceDescription.addClass('animated fadeInDown');
             }, baseDelay / 2);
         

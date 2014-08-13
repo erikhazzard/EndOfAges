@@ -6,24 +6,6 @@
     </div>
 </script>
 
-{{ // race info templates }}
-<script id='template-create-race-info' type='text/template'>
-    <h1 class='race-name'><%= race.get('name') %></h1>
-    <div class='race-description'>
-        {{// TODO: handle sprite differently - change the src - generate sprite, use base64 string(?) }}
-        <!-- sprite goes here -->
-        <div class='character-display'>
-            <image src='/static/img/characters/<%= race.get('sprite') %>.gif' />
-        </div>
-
-        <!-- description here -->
-        <p>
-            <%= race.get('description') %>
-        </p>
-        <div class='clear'></div>
-    </div>
-</script>
-
 {{ // viz templates }}
 <script id='template-create-race-viz' type='text/template'>
     <% _.each(stats, function(value, key){ %>
@@ -36,7 +18,9 @@
 
 <!-- TEMPLATE for race info -->
 <script id='template-create-race-description' type='text/template'>
-    <%= model.attributes.name %>
+    <h3>
+        <%= model.attributes.name %>
+    </h3>
 
     <div id='race-visualizations'>
         <%= model.attributes.description %>

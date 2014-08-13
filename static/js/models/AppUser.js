@@ -9,7 +9,6 @@ define(
     [ 'events', 'logger', 'util/API_URL' ], function AppUserModel(
         events, logger, API_URL
     ){
-
         // UTIL
         // ------------------------------
         var unsetCookie = function(){
