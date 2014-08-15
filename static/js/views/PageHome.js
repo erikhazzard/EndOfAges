@@ -195,10 +195,25 @@ define(
             $(window).bind('keydown', function(e){
                 // Don't let pages go below 2 (we don't have a cover page) and
                 // don't let it go above the number of pages we have
+                logger.log('views/PageHome:pageTurn:keyPress', 
+                    'key pressed : ' + e.keyCode);
+
                 if (e.keyCode==37) {
+                    logger.log('views/PageHome:pageTurn:keyPress', 'going back');
                     pagePrevious(e);
+
                 } else if (e.keyCode==39) {
-                    pageNext(e);
+                    // can we go forward?
+                    if(
+                        (this.curStep === 1 && this.pagesCompleted[2]) || 
+                        (this.curStep === 2 && this.pagesCompleted[4])
+                    ){
+                        logger.log('views/PageHome:pageTurn:keyPress', 'going forward');
+                        pageNext(e);
+
+                    } else {
+                        logger.log('views/PageHome:pageTurn:keyPress', '[x] cannot go forward');
+                    }
                 }
             });
 
@@ -442,7 +457,7 @@ define(
             self.$cachedEls.nextStepArrow.addClass('fadeIn');
 
             self.$cachedEls.previousStepArrow.removeClass('fadeIn');
-            self.$cachedEls.previousStepArrow.addClass('fadeOut');
+            self.$cachedEls.previousStepArrow.addClass('animated fadeOut');
             return this;
         },
 

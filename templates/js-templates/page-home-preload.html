@@ -25,32 +25,40 @@
 
 
             <div id='book-page-templates' class='page-left hidden'>
-                <h2>Templates</h2>
+                <div class='inner'>
+                    {{ include create/page-templates.html }}
+                </div>
             </div>
 
 
             <div id='book-page-abilities' class='page-right hidden'>
-                <h2>Abilities</h2>
+                <div class='inner'>
+                    {{ include create/page-abilities.html }}
+                </div>
             </div>
 
 
             <div id='book-page-templates' class='page-left hidden'>
-                <h2 id='create-final-name'>Finalize - Name here</h2>
+                <div class='inner'>
+                    <h2 id='create-final-name'>Finalize - Name here</h2>
+                </div>
             </div>
 
 
             <div id='book-page-abilities' class='page-right hidden'>
-                <h2>Begin Journey</h2>
+                <div class='inner'>
+                    <h2>Begin Journey</h2>
+                </div>
             </div>
 
 
         </div> <!-- close book wrapper -->
         
         <!-- Arrows -->
-        <div id='arrow-right' class='interaction'>
+        <div id='arrow-right' class='interaction animated'>
             <div class='arrow animated'></div>
         </div>
-        <div id='arrow-left' class='interaction'>
+        <div id='arrow-left' class='interaction animated'>
             <div class='arrow animated'></div>
         </div>
     </div>
