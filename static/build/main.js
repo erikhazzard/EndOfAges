@@ -4434,7 +4434,8 @@ define(
                 // Don't let pages go below 2 (we don't have a cover page) and
                 // don't let it go above the number of pages we have
                 logger.log('views/PageHome:pageTurn:keyPress', 
-                    'key pressed : ' + e.keyCode);
+                    'key pressed : ' + e.keyCode + ' | curStep : ' + 
+                    self.curStep);
 
                 if (e.keyCode==37) {
                     logger.log('views/PageHome:pageTurn:keyPress', 'going back');
@@ -4443,8 +4444,8 @@ define(
                 } else if (e.keyCode==39) {
                     // can we go forward?
                     if(
-                        (this.curStep === 1 && this.pagesCompleted[2]) || 
-                        (this.curStep === 2 && this.pagesCompleted[4])
+                        (self.curStep === 1 && self.pagesCompleted[2]) || 
+                        (self.curStep === 2 && self.pagesCompleted[4])
                     ){
                         logger.log('views/PageHome:pageTurn:keyPress', 'going forward');
                         pageNext(e);
@@ -4457,10 +4458,18 @@ define(
 
             // arrows
             $('#arrow-right').click(function(e){
-                logger.log('views/PageHome', 'arrow-right clicked');
-                return pageNext(e);
+                logger.log('views/PageHome:arrowClick', 'arrow-right clicked');
+                if(
+                    (self.curStep === 1 && self.pagesCompleted[2]) || 
+                    (self.curStep === 2 && self.pagesCompleted[4])
+                ){
+                    return pageNext(e);
+                }
             });
-            $('#arrow-left').click(pagePrevious);
+            $('#arrow-left').click(function(e){
+                logger.log('views/PageHome:arrowClick', 'arrow-left clicked');
+                return pagePrevious(e);
+            });
         },
 
         // ==============================
@@ -4585,6 +4594,8 @@ define(
             var animation = 'fadeInDown';
             var $raceHeader = $('#race-header');
             var $raceWrapper = $('#create-race-wrapper');
+            self.$raceHeader = $raceHeader;
+            self.$raceWrapper = $raceWrapper;
 
             $raceHeader.velocity({ opacity: 1 });
             $raceHeader.addClass('animated fadeInDown');
@@ -4671,6 +4682,12 @@ define(
                 //self.$raceDescription.removeClass('fadeOutDown');
                 self.$raceDescription.removeClass('fadeOut');
                 self.$raceDescription.addClass('animated fadeIn');
+
+                // clear out fadeIn class so page turn doesn't trigger redraw
+                setTimeout(function(){
+                    self.$raceDescription.removeClass('fadeIn');
+                }, baseDelay / 2);
+
             }, baseDelay / 2);
 
             // Pulsate arrow
