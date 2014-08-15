@@ -195,27 +195,47 @@
     LOGGER.canLog = function canLog(type){ 
         // Check the logLevels and passed in type. If the message cannot be
         // logged, return false - otherwise, return true
+        //
+        // Note - this should not be accessed by the user
         var logLevel = LOGGER.options.logLevel;
         // by default, allow logging
         var canLogIt = true;
 
-        // Don't ever log if logging is disabled
-        if(logLevel === false || logLevel === null){
+        if(logLevel === true){
+            canLogIt = true;
+
+        } else if(logLevel === false || logLevel === null){
+            // Don't ever log if logging is disabled
             canLogIt = false;
+
         } else if(logLevel instanceof Array){
             // if an array of log levels is set, check it
-            if(logLevel.indexOf(type) > -1){
-                canLogIt = true;
+            canLogIt = false;
+
+            for(var i=0, len=logLevel.length; i<len; i++){
+                // the current logLevel will be a string we check type against;
+                // for instance,
+                //      if type is "group1:group2", and if the current log level
+                //      is "group1:group3", it will NOT match; but, "group1:group2" 
+                //      would match.
+                //          Likewise, "group1:group2:group3" WOULD match
+
+                // If the current item is a regular expression, run the regex
+                if(logLevel[i] instanceof RegExp){
+                    if(logLevel[i].test(type)){
+                        canLogIt = true;
+                        break;
+                    }
+                } else if(type.indexOf(logLevel[i]) === 0){
+                    canLogIt = true;
+                    break;
+                }
             }
-        } else if(typeof logLevel === 'string'){
-            // If a single log level is set (as a string), only allow logging
-            // if the type matches the set logLevel
-            if(logLevel === type){ canLogIt = true; }
-            else { canLogIt = false; }
-        }
+        } 
 
         return canLogIt;
     };
+
     // UTIL functions
     // ----------------------------------
     LOGGER.util = {};

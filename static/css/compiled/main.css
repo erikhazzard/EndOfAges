@@ -707,13 +707,24 @@
   z-index: -1; }
 
 #home {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   background: #686c49 url(../../img/home.jpg);
   background-size: cover;
   bottom: 0;
+  cursor: normal;
   left: 0;
   position: fixed;
   right: 0;
   top: 0; }
+  #home * {
+    cursor: default; }
+  #home .interaction, #home #create-name, #home .item {
+    cursor: pointer; }
   #home #book-wrapper {
     background: url(../../img/ui/create/book-bg-low.jpg) no-repeat;
     box-shadow: 0 0 3px #343434;
@@ -750,7 +761,8 @@
     padding: 30px 30px;
     position: absolute;
     right: 0;
-    top: 0; }
+    top: 0;
+    z-index: 1000; }
   #home .page-left, #home .page-right {
     color: rgba(20, 20, 20, 0.9); }
   #home #book-page-title p {
@@ -766,11 +778,13 @@
     border: none;
     border-bottom: 2px solid rgba(23, 118, 16, 0.6);
     color: #ffffff;
-    font-family: "IM Fell English", san-serif;
+    font-family: "Nothing You Could Do", cursive;
     font-size: 1.2em;
     font-variant: small-caps;
     letter-spacing: 2.2px;
-    text-align: center; }
+    font-weight: normal;
+    text-align: center;
+    max-width: 220px; }
   #home #book-page-title input:focus {
     outline: none; }
   #home #book-page-title ::-webkit-input-placeholder {
@@ -801,7 +815,7 @@
       font-weight: bold;
       height: 210px;
       position: relative;
-      overflow-y: scroll; }
+      overflow: hidden; }
       #home #book-page-race #create-race-wrapper #region-create-races .race {
         height: 50px;
         font-size: 1.3em;
@@ -821,25 +835,46 @@
       #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.selected {
         background: rgba(255, 255, 255, 0.4);
         color: #ffffff;
-        padding-left: 40px; }
-  #home #arrow-right {
-    cursor: pointer;
+        padding-left: 40px;
+        font-family: "Nothing You Could Do", cursive;
+        font-size: 1.2em;
+        font-variant: small-caps; }
+  #home #arrow-right, #home #arrow-left {
+    cursor: pointer !important;
     height: 142px;
     padding: 30px 10px 10px 30px;
     position: absolute;
     opacity: 0;
     right: -8px;
     top: 230px;
-    width: 73px; }
+    width: 73px;
+    z-index: 100; }
+  #home #arrow-left {
+    left: -38px;
+    right: auto; }
   #home #arrow-right .arrow {
     background-repeat: no-repeat;
     background-image: url(/static/img/ui/create/sprite-arrow-right.png);
     background-position: -2px -76px;
+    cursor: pointer !important;
     height: 72px;
     width: 43px; }
-  #home #arrow-right .arrow.disabled {
-    background-position: -2px -2px; }
   #home #arrow-right:hover .arrow {
+    background-position: -2px -150px !important; }
+  #home #arrow-right .arrow.disabled, #home #arrow-right:hover .arrow-disabled {
+    background-position: -2px -2px;
+    cursor: disabled; }
+  #home #arrow-left .arrow {
+    background-repeat: no-repeat;
+    background-image: url(/static/img/ui/create/sprite-arrow-left.png);
+    background-position: -2px -76px;
+    cursor: pointer !important;
+    height: 72px;
+    width: 43px; }
+  #home #arrow-left .arrow.disabled, #home #arrow-left:hover .arrow-disabled {
+    background-position: -2px -2px;
+    cursor: disabled; }
+  #home #arrow-left:hover .arrow {
     background-position: -2px -150px !important; }
   #home hr {
     border-top: 1px solid rgba(0, 0, 0, 0.8); }

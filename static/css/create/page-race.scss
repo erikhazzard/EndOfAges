@@ -19,7 +19,7 @@
             font-weight: bold;
             height: $race-height * 4 + 10;
             position: relative;
-            overflow-y: scroll;
+            overflow: hidden;
 
             .race {
                 height: $race-height;
@@ -46,6 +46,9 @@
                 background: rgba(255,255,255,0.4);
                 color: #ffffff;
                 padding-left: 40px;
+                font-family: $input-font;
+                font-size: 1.2em;
+                font-variant: small-caps;
             }
         }
     }

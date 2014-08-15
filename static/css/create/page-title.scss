@@ -17,11 +17,13 @@
         border: none;
         border-bottom: 2px solid $COLOR-INTERACTION;
         color: #ffffff;
-        font-family: $header-font;
+        font-family: $input-font;
         font-size: 1.2em;
         font-variant: small-caps;
         letter-spacing: 2.2px;
+        font-weight: normal;
         text-align: center;
+        max-width: 220px;
     }
     input:focus {
         outline:none;

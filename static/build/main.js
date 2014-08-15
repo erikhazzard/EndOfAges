@@ -644,27 +644,47 @@ define('util/d3plugins',['d3'], function d3Plugins(d3){
     LOGGER.canLog = function canLog(type){ 
         // Check the logLevels and passed in type. If the message cannot be
         // logged, return false - otherwise, return true
+        //
+        // Note - this should not be accessed by the user
         var logLevel = LOGGER.options.logLevel;
         // by default, allow logging
         var canLogIt = true;
 
-        // Don't ever log if logging is disabled
-        if(logLevel === false || logLevel === null){
+        if(logLevel === true){
+            canLogIt = true;
+
+        } else if(logLevel === false || logLevel === null){
+            // Don't ever log if logging is disabled
             canLogIt = false;
+
         } else if(logLevel instanceof Array){
             // if an array of log levels is set, check it
-            if(logLevel.indexOf(type) > -1){
-                canLogIt = true;
+            canLogIt = false;
+
+            for(var i=0, len=logLevel.length; i<len; i++){
+                // the current logLevel will be a string we check type against;
+                // for instance,
+                //      if type is "group1:group2", and if the current log level
+                //      is "group1:group3", it will NOT match; but, "group1:group2" 
+                //      would match.
+                //          Likewise, "group1:group2:group3" WOULD match
+
+                // If the current item is a regular expression, run the regex
+                if(logLevel[i] instanceof RegExp){
+                    if(logLevel[i].test(type)){
+                        canLogIt = true;
+                        break;
+                    }
+                } else if(type.indexOf(logLevel[i]) === 0){
+                    canLogIt = true;
+                    break;
+                }
             }
-        } else if(typeof logLevel === 'string'){
-            // If a single log level is set (as a string), only allow logging
-            // if the type matches the set logLevel
-            if(logLevel === type){ canLogIt = true; }
-            else { canLogIt = false; }
-        }
+        } 
 
         return canLogIt;
     };
+
     // UTIL functions
     // ----------------------------------
     LOGGER.util = {};
@@ -4305,6 +4325,8 @@ define(
 
             // Setup cached els
             this.$cachedEls = {
+                nextStepArrow: $('#arrow-right'),
+                previousStepArrow: $('#arrow-left'),
                 page5name: $('#create-final-name')
             };
 
@@ -4318,7 +4340,9 @@ define(
         },
 
         // ------------------------------
+        //
         // Pageturn util
+        //
         // ------------------------------
         setupPageturn: function setupPageturn(){
             // Initializes the pageTurn animation library
@@ -4334,9 +4358,15 @@ define(
                 duration: 1300,
                 elevation: 250,
                 when: {
+                    // ------------------
+                    //
+                    // CALLBACK When page is turned
+                    //
+                    // ------------------
                     turned: function(e, page) {
-                        //// Do effect on turn
-                        // log : $(this).turn('view'));
+                        logger.log('views/PageHome:pageTurn', 
+                            'finished turning page : %O : %O', 
+                            e, page);
                     }
                 }
             });
@@ -4344,21 +4374,53 @@ define(
             function pageNext(e){
                 // Called to show the next page. This is state based, as
                 // the user cannot see 
-                logger.log('views/PageHome', 'pageNext() called');
+                // NOTE: Here, "step" means the set of of pages (step 1 is
+                //      title / race, step 2 is templates / abilities, step 3
+                //      is final)
+                logger.log('views/PageHome:pageNext', 'curStep ' + self.curStep);
+
                 if(self.curStep < 3){
                     logger.log('views/PageHome', '\t showing next page');
                     e.preventDefault();
                     self.curStep++;
                     self.$pages.turn('next');
+
+                    // Templates / abilities
+                    if(self.curStep === 2){
+                        logger.log('views/PageHome:pageNext', 
+                            'showing page 3...');
+
+                        // initial setup or show of page 3 (step 4 - templates)
+                        if(self.pagesCompleted[3] !== true){
+                            logger.log('views/PageHome:pageNext', 'setting up page 3...');
+                            self.setupPage3(); 
+
+                        } else {
+                            logger.log('views/PageHome:pageNext', 'showing page 3');
+                            // Show it (don't setup)
+                            self.showPage3(); 
+                        }
+                    }
+
                 }
             }
             function pagePrevious(e){
-                logger.log('views/PageHome', 'pagePrevious() called');
+                // Called to show the previous page
+                logger.log('views/PageHome:pagePrevious', 'curStep ' + self.curStep);
+
                 if(self.curStep > 1){
                     logger.log('views/PageHome', '\t showing previous page');
                     e.preventDefault();
                     self.$pages.turn('previous');
                     self.curStep--;
+
+                    // Step 1 is the first set of pages (title and race)
+                    if(self.curStep === 1){
+                        logger.log('views/PageHome:pagePrevious', 
+                            'showing page 2...');
+
+                        self.showPage2();
+                    }
                 }
             }
 
@@ -4431,6 +4493,7 @@ define(
                     setTimeout(function showName(){
                         $name.addClass('animated fadeInLeft');
                         $name.velocity({ opacity: 1 });
+                        $name.attr('placeholder', '');
 
                         // Fade in "name text"
                         async.eachSeries(['N','a','m','e'], 
@@ -4475,7 +4538,7 @@ define(
                         '\t setupPage1: calling setupPage2...');
                     self.setupPage2();
 
-                }, baseDelay);
+                }, baseDelay * 0.7);
             });
 
             $name.on('input change', function(e){
@@ -4493,11 +4556,11 @@ define(
         },
 
 
-        // ==============================
+        // ===================================================================
         //
         // Page 2 - Race
         // 
-        // ==============================
+        // ===================================================================
         setupPage2: function setupPage2 (){
             var self = this;
             logger.log('views/PageHome', 'setupPage2() called');
@@ -4528,11 +4591,14 @@ define(
         },
 
         // ------------------------------
+        //
         // race clicked
+        //
         // ------------------------------
         raceClicked: function raceClicked (options){
-            // Called when a race is clicked
-            // TODO: This, show viz?
+            // Called when a race is clicked. Show the race description,
+            // and allow user to progress to next step
+            //
             logger.log('views/PageHome', 'raceClicked() passed options: %O',
                 options);
             var self = this;
@@ -4541,6 +4607,13 @@ define(
                 logger.log('views/PageHome', '[x] first page incomplete, must enter name');
                 return false;
             }
+
+            // done with race page
+            this.pagesCompleted[2] = true;
+
+            // Show the right arrow
+            this.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
+            this.$cachedEls.nextStepArrow.addClass('animated fadeIn');
             
             // If the same race was clicked, do nothing
             if(this._previousRaceSelected === options.model.attributes.name){
@@ -4560,7 +4633,7 @@ define(
 
             this.$raceDescription = this.$raceDescription || $('#race-description');
             if(!this.$raceDescription){ 
-                logger.log('warn', 'this.$raceDescription does not exist');
+                logger.log('error', 'this.$raceDescription does not exist');
                 return false;
             }
 
@@ -4570,23 +4643,107 @@ define(
             // --------------------------
             // Show race description
             this.$raceDescription.velocity({ opacity: 0 });
-            self.$raceDescription.addClass('fadeOutDown');
+            //self.$raceDescription.addClass('fadeOutDown');
+            self.$raceDescription.addClass('fadeOut');
 
+            // update the HTML below the race info
             setTimeout(function(){
-                // update html
                 self.$raceDescription.html(
                     self.templateRaceDescription({ model: options.model })
                 );
 
                 self.$raceDescription.velocity({ opacity: 1 });
-                self.$raceDescription.removeClass('fadeOutDown');
-                self.$raceDescription.addClass('animated fadeInDown');
+                //self.$raceDescription.removeClass('fadeOutDown');
+                self.$raceDescription.removeClass('fadeOut');
+                self.$raceDescription.addClass('animated fadeIn');
             }, baseDelay / 2);
-        
+
+            // Pulsate arrow
+            // --------------------------
+            // clear existing timeout
+            clearTimeout(this.page2arrowPulseTimeout);
+
+            this.page2arrowPulseTimeout = setTimeout(function() {
+                $('.arrow', self.$cachedEls.nextStepArrow).addClass('pulse infinite');
+            }, baseDelay * 3); 
 
             return this;
+        },
+
+        // ------------------------------
+        // SHOW Page 2 
+        //      Called when page turns to page 2
+        // ------------------------------
+        showPage2: function showPage2(){
+            var self = this;
+            self.$cachedEls.nextStepArrow.removeClass('fadeOut');
+            self.$cachedEls.nextStepArrow.addClass('fadeIn');
+
+            self.$cachedEls.previousStepArrow.removeClass('fadeIn');
+            self.$cachedEls.previousStepArrow.addClass('fadeOut');
+            return this;
+        },
+
+        // ===================================================================
+        //
+        // Page 3 - Templates
+        // 
+        // ===================================================================
+        setupPage3: function setupPage3 (){
+            // This is called *initially* to set up the third page. Once setup
+            // it is not called again
+            var self = this;
+            logger.log('views/PageHome:setupPage3', 'setupPage3() (templates) called');
+
+            if(this.pagesCompleted[3]){ 
+                logger.log('views/PageHome:setupPage3', 
+                    '[x] third page complete already, returning');
+                return this;
+            }
+
+            this.pagesCompleted[3] = true;
+
+            // remove existing arrow pulsate
+            clearTimeout(this.page2arrowPulseTimeout);
+            clearTimeout(this.page3arrowPulseTimeout);
+            $('.arrow', self.$cachedEls.nextStepArrow).removeClass('pulse infinite');
+
+            // hide the right arrow
+            self.$cachedEls.nextStepArrow.addClass('fadeOut');
+            
+            // show the previous arrow after a delay
+            setTimeout(function(){
+                logger.log('views/PageHome:setupPage3', 'showing previous step arrow');
+                self.$cachedEls.previousStepArrow.velocity({ opacity: 1 });
+                self.$cachedEls.previousStepArrow.removeClass('fadeOut');
+                self.$cachedEls.previousStepArrow.addClass('fadeIn');
+            }, baseDelay * 2);
+
+            return this;
+        },
+
+
+        showPage3: function showPage3 (){
+            // This is called whenever player goes from page 3 back to page 2
+            var self = this;
+            logger.log('views/PageHome:setupPage3', 'showPage3() (race) called');
+
+            clearTimeout(this.page2arrowPulseTimeout);
+            clearTimeout(this.page3arrowPulseTimeout);
+
+            // hide the right arrow ONLY if the player hasn't selected their
+            // abilities
+            if(this.pagesCompleted[4] !== 4){ 
+                self.$cachedEls.nextStepArrow.addClass('fadeOut');
+            }
+
+            // show the previous arrow 
+            self.$cachedEls.previousStepArrow.velocity({ opacity: 1 });
+            self.$cachedEls.previousStepArrow.removeClass('fadeOut fadeOutRight');
+            self.$cachedEls.previousStepArrow.addClass('fadeIn');
+            return this;
         }
-        
+
     });
 
     return PageHome;

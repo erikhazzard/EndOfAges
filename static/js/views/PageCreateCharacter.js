@@ -3,6 +3,7 @@
 // Page Create Character
 //  
 //  TODO: Whenever sprite changes, update the element
+//  DEPRECATED XXXXXXXXXXXXXXXXXXXXXX
 // 
 // ===========================================================================
 define(
