@@ -1,222 +1,445 @@
-//----------------------------------------------------------------------------
-//Logger library
-//    author: Erik Hazzard
-//
-//Provides a LOGGER object which can be used to perform client side logging
-//    Maintains a list of of all messages by log type. To log:
-//            LOGGER.log('type', 'message', param1, param2, etc...);
-//
-//    e.g.,
-//            LOGGER.log('error', 'Woops', { some: data });
-//
-//    To change logger options:
-//            LOGGER.options.logLevel = 'all' // ( or true ) - Shows ALL messages
-//            LOGGER.options.logLevel = ['error', 'debug'] // only shows the types 
-//              passed in
-//
-//            LOGGER.options.storeHistory = true | false
-//    To access history:
-//            LOGGER.history[type] to access messages by type
-//----------------------------------------------------------------------------
-define(['d3'], function(d3) {
-    var LOGGER;
+/* =========================================================================
+ * Bragi (Javascript Logger)
+ * ----------------------------------
+ * v1.0.0
+ * Distributed under MIT license
+ * Author : Erik Hazzard ( http://vasir.net )
+ *
+ * Provides a LOGGER object which can be used to perform logging
+ * Maintains a list of of all messages by log type. To log:
+ *      LOGGER.log('type', 'message', param1, param2, etc...);
+ *      
+ *  e.g.,
+ *      LOGGER.log('error', 'Woops', { some: data });
+ *
+ * To change logger options:
+ *      LOGGER.options.logLevel = true; // Shows ALL messages (false to show none)
+ *      LOGGER.options.logLevel = ['error', 'debug']; // only shows passed in types 
+ *
+ *   LOGGER.options.storeHistory = true or false
+ *      NOTE: By default, history will be stored only for logged messages.
+ *
+ *      Set LOGGER.options.storeAllHistory = true; to enable storing history 
+ *      for unlogged messages
+ *
+ *      To access history:
+ *          LOGGER.history[type] to access messages by `type`
+ *
+ *
+ * What this library does currently not support:
+ *      Automatically sending the history / log messages to some server. 
+ *      Currently, you'll need to take the LOGGER.history object and pipe it
+ *      somwhere if you want to access the stored messages
+ *
+ *      TODO: For node, expose a `useEvents` option that would emit an event
+ *      on true, which would allow other libraries to do stuff with the log 
+ *      messages??
+ * ========================================================================= */
+(function(root, factory) {
+    // Setup logger for the environment
+    if(typeof define === 'function' && define.amd) {
+        // RequireJS / AMD
+        define(['exports'], function(exports) {
+            root = factory(root, exports);
+            return root;
+        });
+    } else if (typeof exports !== 'undefined') {
+        // CommonJS
+        factory(root, exports); 
+        module.exports = factory();
+    } else {
+        // browser global if neither are supported
+        root.logger = factory(root, {});
+    }
+}(this, function(root, logger) {
 
-    // generate some color scales, give a wide range of unique colors
-    var colorScales = [
-        d3.scale.category20c(),
-        d3.scale.category20b(),
-        d3.scale.category20(),
-        d3.scale.category10()
-    ];
+    // This is a bit hacky, but we need to check if this is called from a
+    // command line or browser. Cheapest + fastest is to check if a global
+    // window object exists
+    var _isBrowser = typeof window === 'undefined' ? false : true;
 
-    // remember lastGroup
-    var LAST_GROUP = null;
+    // Some nice color variations
+    var COLORS, STYLES;
+    var COLOR_RESET = '\033[0m';
 
-    // values of found colors, to check for same colors
-    var foundColors = ['#dd4444'];
+    if(_isBrowser){
+        COLORS = [
+            '#3182bd',
+            '#dfc27d',
+            '#35978f',
+            '#543005',
+            '#c51b7d',
+            '#c6dbef',
+            '#af8dc3',
+            '#7fbf7b',
+            '#8c510a',
+            '#f5f5f5',
+            '#e9a3c9',
+            '#543005',
+            '#66c2a5',
+            '#f6e8c3',
+            '#80cdc1',
+            '#878787',
+            '#8c510a',
+            '#80cdc1',
+            '#542788',
+            '#003c30',
+            '#e6f598',
+            '#c7eae5'
+        ];
+    } else {
+        STYLES = {
+            colors: {
+                'white': '\x1B[37m',
+                'grey': '\x1B[90m',
+                'black': '\x1B[30m',
+                'blue': '\x1B[34m',
+                'cyan': '\x1B[36m',
+                'green': '\x1B[32m',
+                'magenta': '\x1B[35m',
+                'red': '\x1B[31m',
+                'yellow': '\x1B[33m'
+            },
+            styles: {
+                'blink': '\x1B[49;5;8m',
+                'underline': '\x1B[4m', 
+                'bold': '\x1B[1m'
+            },
+            backgrounds: {
+                'white': '\x1B[47m',
+                'black': '\x1B[40m',
+                'blue': '\x1B[44m',
+                'cyan': '\x1B[46m',
+                'green': '\x1B[42m',
+                'magenta': '\x1B[45m',
+                'red': '\x1B[41m',
+                'yellow': '\x1B[43m'
+            }
+        };
 
-    // key : value of colors so we don't generate new colors
-    // for each key
-    // set some default colors
-    var colorDict = {error: '#dd4444'};
+        COLORS = [
+            STYLES.colors.blue,
+            STYLES.colors.green,
+            STYLES.colors.magenta,
+            STYLES.colors.yellow,
+            STYLES.colors.cyan,
+            STYLES.colors.red,
 
-    var getColor = function loggerGetColor(target){
-        // generates or returns a color used by a target key
-        var i=0;
-        var color = '';
-        if(colorDict[target]){ return colorDict[target]; }
+            STYLES.backgrounds.blue + STYLES.colors.black,
+            STYLES.backgrounds.blue + STYLES.colors.white,
+            STYLES.backgrounds.blue + STYLES.colors.magenta,
 
-        while(i<colorScales.length){
-            color = colorScales[i](target);
+            STYLES.backgrounds.yellow + STYLES.colors.red,
+            STYLES.backgrounds.yellow + STYLES.colors.black,
+            STYLES.backgrounds.yellow + STYLES.colors.magenta,
 
-            // did NOT find the color, update the objects and break loop
-            if(foundColors.indexOf(color) === -1){
-                foundColors.push(color);
-                colorDict[target] = color;
-                break;
-            } 
+            STYLES.backgrounds.white + STYLES.colors.red,
+            STYLES.backgrounds.white + STYLES.colors.blue,
+            STYLES.backgrounds.white + STYLES.colors.black,
+            STYLES.backgrounds.white + STYLES.colors.magenta,
+            STYLES.backgrounds.white + STYLES.colors.yellow,
+            STYLES.backgrounds.white + STYLES.colors.cyan,
 
-            i += 1;
+            STYLES.backgrounds.magenta+ STYLES.colors.white,
+            STYLES.backgrounds.magenta + STYLES.colors.black,
+            STYLES.backgrounds.magenta + STYLES.colors.blue,
+            STYLES.backgrounds.magenta + STYLES.colors.green,
+            STYLES.backgrounds.magenta + STYLES.colors.yellow
+        ];
+    }
+
+    // Setup the logger
+    var LOGGER = {};
+
+    LOGGER.options = {
+        // default options
+        // Primary configuration options
+        // --------------------------
+        // logLevel: specifies what logs to display. Can be either:
+        //      1. an {array} of log levels 
+        //          e.g,. ['error', 'myLog1', 'myLog2']
+        //    or 
+        //
+        //      2. a {Boolean} : true to see *all* log messages, false to 
+        //          see *no* messages
+        logLevel: true,
+
+        // storeHistory: {Boolean} specifies wheter to save all log message 
+        //      objects.  This is required to send messages to a server, 
+        //      but can incur a small performance (memory) hit, depending 
+        //      on the number of logs. NOTE: This will, by default, only
+        //      store history for messages found in logLevel. 
+        //      Set `storeAllHistory` to store *all* messages
+        storeHistory: true,
+
+        // storeAllHistory: {Boolean} specifies wheter to store history for
+        // all log messages, regardless if they are logged
+        storeAllHistory: false,
+
+        // Secondary (display related) configuration options
+        // --------------------------
+        // showCaller: {Boolean} will automatically include the calling 
+        //      function's name. Useful for tracing execution of flow
+        showCaller: true,
+
+        // showTime: {Boolean} specifies wheter to include timestamp
+        showTime: true
+    };
+
+    LOGGER.history = {
+        // stored log messages by log type
+        // e.g.,:
+        // 'logType': [ { ... message 1 ...}, { ... message 2 ... }, ... ]
+    };
+
+    LOGGER.canLog = function canLog(type){ 
+        // Check the logLevels and passed in type. If the message cannot be
+        // logged, return false - otherwise, return true
+        //
+        // Note - this should not be accessed by the user
+        var logLevel = LOGGER.options.logLevel;
+        // by default, allow logging
+        var canLogIt = true;
+
+        if(logLevel === true){
+            canLogIt = true;
+
+        } else if(logLevel === false || logLevel === null){
+            // Don't ever log if logging is disabled
+            canLogIt = false;
+
+        } else if(logLevel instanceof Array){
+            // if an array of log levels is set, check it
+            canLogIt = false;
+
+            for(var i=0, len=logLevel.length; i<len; i++){
+                // the current logLevel will be a string we check type against;
+                // for instance,
+                //      if type is "group1:group2", and if the current log level
+                //      is "group1:group3", it will NOT match; but, "group1:group2" 
+                //      would match.
+                //          Likewise, "group1:group2:group3" WOULD match
+
+                // If the current item is a regular expression, run the regex
+                if(logLevel[i] instanceof RegExp){
+                    if(logLevel[i].test(type)){
+                        canLogIt = true;
+                        break;
+                    }
+                } else if(type.indexOf(logLevel[i]) === 0){
+                    canLogIt = true;
+                    break;
+                }
+            }
+        } 
+
+        return canLogIt;
+    };
+
+    // UTIL functions
+    // ----------------------------------
+    LOGGER.util = {};
+    LOGGER.util.darken = function darken(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // darkened value
+        color = color.replace(/#/g,'');
+        color = parseInt(color, 16);
+        color = color - 90000;
+        if(color < 0){ color = 0; }
+        color = color.toString(16);
+        return '#' + color;
+    };
+    LOGGER.util.lighten = function darken(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // lightened value
+        // TODO: combine this and darken
+        color = color.replace(/#/g,'');
+        color = parseInt(color, 16);
+        color = color + 90000;
+        if(color > 16777215){
+            color = 16777215;
         }
+        color = color.toString(16);
+        return '#' + color;
+    };
+
+    LOGGER.util.getForegroundColor = function getForegroundColor(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // darkened value
+        var colors = /(\w\w)(\w\w)(\w\w)/.exec(color);
+        if(!colors){ return '#000000'; }
+
+        var red = parseInt(colors[1], 16);
+        var green = parseInt(colors[2], 16);
+        var blue = parseInt(colors[3], 16);
+
+        // based on YIQ (http://en.wikipedia.org/wiki/YIQ)
+        var brightness = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
+
+        if (brightness >= 128 || isNaN(brightness)) {
+            return '#000000';
+        } else {
+            return '#ffffff';
+        }
+    };
+
+    // backgroundColor
+    // ----------------------------------
+    // keeps track of colors being used. Uses a redundent array for quicker
+    // lookup
+    var _foundColors = [];
+    // and which logType goes to which color
+    var _colorDict = _isBrowser ? {error: '#dd4444'} : { error:  STYLES.styles.blink + STYLES.backgrounds.red + STYLES.colors.white };
+
+    function getBackgroundColor(type){
+        // Returns the background color for a passed in log type
+        // TODO: if more found colors exist than the original length of the
+        // COLOR array, cycle back and modify the original color
+        //
+        var color = '';
+
+        // For color, get the first group
+        type = type.split(':')[0];
+
+        // if a color exists for the passed in log group, use it
+        if(_colorDict[type]){ 
+            return _colorDict[type];
+        }
+
+        if(_foundColors.length >= COLORS.length){
+            // is the index too high? loop around if so
+            color = COLORS[Math.random() * COLORS.length | 0];
+            if(!_isBrowser){
+                color = STYLES.styles.underline + color;
+            } else {
+                for(var i=0;i<Math.random() * 10 | 0;i++){
+                    if(Math.random() < 0.5){
+                        color = LOGGER.util.darken(color);
+                    } else {
+                        color = LOGGER.util.lighten(color);
+                    }
+                }
+            }
+        } else {
+            // The length of the colors array is >= to the index of the color
+            color = COLORS[_foundColors.length];
+        }
+
+        // update the stored color info
+        _foundColors.push(color);
+        _colorDict[type] = color;
 
         return color;
-    };
-
-    LOGGER = {};
-    LOGGER.options = {
-        logLevel: 'all',
-        storeHistory: false
-    };
-    LOGGER.history = {};
-    LOGGER.can_log = function(type) {
-        var logLevel, return_value;
-
-        return_value = false;
-        logLevel = LOGGER.options.logLevel;
-        if (logLevel === 'all' || logLevel === true) {
-            return_value = true;
-        } else if (logLevel instanceof Array) {
-            if (logLevel.indexOf(type) > -1) {
-                return_value = true;
-            }
-        } else if (logLevel === null || logLevel === void 0 || logLevel === 'none' || logLevel === false) {
-            return_value = false;
-        } else {
-            if (logLevel === type) {
-                return_value = true;
-            }
-        }
-        return return_value;
-    };
-    LOGGER.log = function(type) {
-        var args, cur_date, logHistory;
-
-        args = Array.prototype.slice.call(arguments);
-        if ((type == null) || arguments.length === 1) {
-            type = 'debug';
-            args.splice(0, 0, 'debug');
-        }
-        if (!LOGGER.can_log(type)) {
-            return false;
-        }
-        cur_date = new Date();
-        args.push({
-            'Date': cur_date,
-            'Milliseconds': cur_date.getMilliseconds(),
-            'Time': cur_date.getTime()
-        });
-
-        if(LOGGER.options.storeHistory){
-                logHistory = LOGGER.history;
-                logHistory[type] = logHistory[type] || [];
-                logHistory[type].push(args);
-        }
-        if (window && window.console) {
-            //console.log(Array.prototype.slice.call(args));
-            // add a spacer between each arg
-            var len = args.length;
-            var newArgs = Array.prototype.slice.call(args);
-
-            // close group if the groups aren't the same
-            if(type !== LAST_GROUP){
-                console.groupEnd();
-                // start a group
-                console.group(type);
-                LAST_GROUP = type;
-            }
-
-
-            // NOTE: this will only add color to %c specified strings
-
-            // Add color to everything
-            if(newArgs[1] && typeof newArgs[1] === 'string'){
-                var shifted = newArgs.shift();
-
-                // if the string is a formatted string, add in the
-                // log type, the message, then the time
-                newArgs[0] = '%c' + 
-                    shifted + '\t:\t' + 
-                    newArgs[0].replace('%c', '') + 
-                    ' <time:%O>';
-
-                // If the second argument is a string and it is 
-                // NOT a color format string, the create one
-                if(typeof newArgs[1] !== 'string' || (typeof newArgs[1] === 'string' && newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null)){
-                    var background = getColor(shifted);
-                    var color = d3.rgb(background);
-                    var border = color.darker();
-
-                    // make the text bright or light depending on how
-                    // dark or light it already is
-                    if(color.r + color.g + color.b < 378){
-                        color = color.brighter().brighter().brighter().brighter().brighter();
-                    } else { 
-                        color = color.darker().darker().darker().darker().darker();
-                    }
-
-                    // format string
-                    var formatString = "background: " + background + ';' + 
-                        'color:' + color + ';' + 
-                        'border: 2px solid ' + border + ';';
-
-                    newArgs.splice(1, 0, formatString);
-                    console.log.apply(console, newArgs);
-                }
-            } else {
-                // no special formatting, just call it normally
-                console.log(args);
-            }
-        }
-        return true;
-    };
-    LOGGER.options.log_types = ['debug', 'error', 'info', 'warn'];
-    LOGGER.options.setup_log_types = function() {
-        var log_type, _i, _len, _ref, _results;
-
-        LOGGER.log('logger', 'setup_log_types()', 'Called setup log types!');
-        _ref = LOGGER.options.log_types;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            log_type = _ref[_i];
-            _results.push((function(log_type) {
-                LOGGER[log_type] = function() {
-                    var args;
-
-                    args = Array.prototype.slice.call(arguments);
-                    args.splice(0, 0, log_type);
-                    return LOGGER.log.apply(null, args);
-                };
-                return LOGGER[log_type];
-            })(log_type));
-        }
-        return _results;
-    };
-    LOGGER.options.setup_log_types();
-    if (window) {
-        if (window.console && LOGGER.options) {
-            if (LOGGER.options.logLevel === 'none' || LOGGER.options.logLevel === null) {
-                console.log = function() {
-                    return {};
-                };
-            }
-        }
-        if (!window.console) {
-            window.console = {
-                log: function consoleLog() {
-                    return {};
-                }
-            };
-        }
-        if (!window.console.group) {
-            window.console.group = function consoleGroup() {};
-        }
-        if (!window.console.error) {
-            window.console.error = function consoleError() {};
-        }
-        window.onerror = function(msg, url, line) {
-            LOGGER.error(msg, url, line);
-            return false;
-        };
     }
+
+    LOGGER.getFormatString = function getFormatString (type){
+        var background = getBackgroundColor(type);
+        var color = LOGGER.util.getForegroundColor(background);
+
+        // Generate some formatted CSS
+        var formatString = "background: " + background + ';' + 
+            'color:' + color + ';' + 
+            'line-height: 1.8em;' +
+            'margin: 2px;' +
+            'padding: 2px;' +
+            'border: 2px solid rgba(0,0,0,0.5);';
+
+        return formatString;
+    };
+
+    // LOG function
+    // ----------------------------------
+    LOGGER.log = function loggerLog(type, message){
+        // Main logging function. Takes in two (plus n) parameters:
+        //   type: {String} specifies the log level, or log type
+        //
+        //   message: {String} the message to log. The message must be a single
+        //      string, but can have multiple objects inside using `%O`. e.g.,
+        //          logger.log('test', 'some object: %O', {answer: 42});
+        //
+        //   all other parameters are objects or strings that will be formatted
+        //   into the message
+        
+        // can this message be logged? If not, do nothing
+        if( !LOGGER.canLog(type) ){ 
+            // Can NOT be logged. If the storeAllHistory is set, we'll want
+            // to save the history
+            if(!LOGGER.options.storeAllHistory){
+                return false;
+            }
+        }
+        
+        // get all arguments
+        var extraArgs = Array.prototype.slice.call(arguments, 2);
+        // remove the type from the args array, so the new args array will
+        // just be an array of the message string and any formatted objects
+        // to pass into it
+
+        // Setup the log
+        // ------------------------------
+        var formatString = LOGGER.getFormatString(type);
+
+        // TODO: determine if a wrong number of args was passed in, concat 
+        //  string instead if so
+
+        // Format the message
+        // the final log array should look like:
+        //  [ "%c `type` : `message` ", `formatString`, formatting objects ... ]
+        //
+        var finalLog = [];
+
+        // Logger
+        // ------------------------------
+        // Include some meta info (time, function that called, etc.)
+        message += '\t\t';
+        if(loggerLog.caller && loggerLog.caller.name && LOGGER.options.showCaller){
+            message += ' | <caller: ' + loggerLog.caller.name + '()>';
+        } 
+        if(LOGGER.options.showTime){
+            // JSON timestamp
+            message += ' | <time: ' + new Date().toJSON() + '>';
+        }
+
+        if(!_isBrowser){
+            // For node, log line number and filename
+        }
+
+
+        // Setup final log message format, depending on if it's a browser or not
+        // ------------------------------
+        if(_isBrowser){
+            finalLog.push(
+                "%c [ " + type + " ]\t:\t" + message
+            );
+            finalLog.push(formatString);
+
+        } else {
+            finalLog.push(
+                COLOR_RESET + "[ " + 
+                (getBackgroundColor(type) + type + COLOR_RESET) + 
+                " ]\t:\t" + message + 
+                COLOR_RESET
+            );
+        }
+
+        finalLog.push(extraArgs);
+
+        // Finally, check if it should be added to the history
+        // ------------------------------
+        if(LOGGER.options.storeHistory || LOGGER.options.storeAllHistory){
+            // show the history be stored? if so, store it
+            LOGGER.history[type] = LOGGER.history[type] || []; //ensure existence
+            LOGGER.history[type].push(finalLog);
+        }
+
+        // Log it
+        // ------------------------------
+        if( LOGGER.canLog(type) ){ 
+            // Only output if it was specified in the log level
+            console.log.apply( console, finalLog );
+        }
+
+    };
+
     return LOGGER;
-});
+}));

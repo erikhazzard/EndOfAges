@@ -5,6 +5,200 @@ define("lib/jquery.transit.min", function(){});
 (function(window,document,$,undefined){var prefix;var property;var eventName="onfocusin"in document&&"hasFocus"in document?"focusin focusout":"focus blur";var prefixes=["webkit","o","ms","moz",""];var $support=$.support;var $event=$.event;while((prefix=prefixes.pop())!=undefined){property=(prefix?prefix+"H":"h")+"idden";if($support.pageVisibility=typeof document[property]=="boolean"){eventName=prefix+"visibilitychange";break}}$(/blur$/.test(eventName)?window:document).on(eventName,function(event){var type=event.type;var originalEvent=event.originalEvent;if(!originalEvent){return}var toElement=originalEvent.toElement;if(!/^focus./.test(type)||toElement==undefined&&originalEvent.fromElement==undefined&&originalEvent.relatedTarget==undefined){$event.trigger((property&&document[property]||/^(?:blur|focusout)$/.test(type)?"hide":"show")+".visibility")}})})(this,document,jQuery);
 define("lib/jquery.visibility", function(){});
 
+/* =========================================================================
+ *
+ * word-writer
+ *      Library for taking in an element and making words and letters appear as
+ *      if by writing them
+ *
+ * ========================================================================= */
+(function wordWriter ( $ ){
+
+    $.fn.wordWriter = function ( options ){
+        // This function takes in an `element` object and configuration `options`.
+        // It turns all the text inside of an element to span elements and then 
+        // fades them in word by word or letter by letter
+        options = options || {};
+
+        // Config based on options
+        var callback = options.callback || function callback(didFinish){ console.log('Done'); };
+        var speedFactor = options.speedFactor || 0.8;
+        var fadeInCss = options.fadeInCss || { opacity: 1 };
+        var finalCss = options.finalCss || { opacity: 0.5 };
+
+        var element = this;
+
+        var text = element.html();
+        
+        var _timeouts = [];
+        var _finalCallbackTimeout;
+
+        // First, clean up the text a lil bit
+        text = text.trim();
+        text = text
+            .replace(/\n/g, '')
+            .replace(/  +/g, ' ');
+        
+        // then split on words
+        var words = text.split(' ');
+
+        // empty the passed element's content
+        element.empty();
+
+        // setup a document fragment to append nodes to
+        var $writerWrapper = $('<div class="writer-wrapper"></div>');
+        var $wordEl;
+        var startCssProps = { opacity: 0 };
+
+        var velocityOptionsFadeIn = { duration: 800 * speedFactor }; 
+
+        var velocityOptionsFinal = { delay: 2000 * speedFactor, duration: 5000 * speedFactor};
+
+        var timeoutDelay = 0;
+        var _stopAnimations = false;
+
+        var curWord;
+        var punctuationRegexLongDelay = new RegExp('[.!?]', 'i');
+        var punctuationRegexShortDelay = new RegExp('[-,;:"]', 'i');
+
+        // Fade in individual word
+        function fadeInWord ( el ){
+            if(_stopAnimations){ return false; }
+
+            el.velocity(fadeInCss, velocityOptionsFadeIn)
+                .velocity(finalCss, velocityOptionsFinal);
+        }
+
+        // Add a span class to wrap each word
+        for(var i=0, len=words.length; i<len; i++){
+            curWord = words[i];
+
+            $wordEl = $('<span class="writer-word"></span>')
+                .css(startCssProps)
+                .html(curWord);
+
+            // append the el
+            $writerWrapper.append( $wordEl );
+
+            // fade in the text
+            // ------------------------------
+            _timeouts.push(
+                setTimeout(fadeInWord.bind(this, $wordEl), timeoutDelay)
+            );
+
+            // increment the timeout delay porportionally to the word length
+            // ------------------------------
+            timeoutDelay = timeoutDelay + (((curWord.length * 7) * 6) * speedFactor);
+
+            // test for punctuation (make the *next* word slower)
+            if(punctuationRegexLongDelay.test(curWord)){
+                timeoutDelay += (550 * speedFactor);
+            } else if(punctuationRegexShortDelay.test(curWord)){
+                timeoutDelay += (250 * speedFactor);
+            }
+
+            if(i >= len-1){
+                _finalCallbackTimeout = setTimeout(function(){
+                    // finished naturally, did not cancel
+                    return callback(false);
+                }, timeoutDelay);
+            }
+        }
+
+        // then append all the content
+        element.append($writerWrapper);
+
+        // Instantly show everything and call the callback
+        // ------------------------------
+        if(!options.disableInstant){
+            // instantly animate everything
+            element.click(function (){
+                _stopAnimations = true;
+
+                // clear all timeouts
+                for(var i=0,len=_timeouts.length; i<len; i++){
+                    clearTimeout(_timeouts[i]);
+                }
+                clearTimeout(_finalCallbackTimeout);
+
+                // add callback 
+                velocityOptionsFadeIn.complete = function (){
+                    // cancelled, did not finish naturally
+                    return callback(true);
+                };
+
+                $('.writer-word')
+                    .velocity('stop')
+                    .velocity('stop')
+                    .velocity(fadeInCss, velocityOptionsFadeIn)
+                    .velocity(finalCss, velocityOptionsFinal);
+            });
+        }
+    };
+
+}( $ ));
+
+define("lib/jquery.wordwriter", function(){});
+
+/*!
+* Velocity.js: Accelerated JavaScript animation.
+* @version 0.8.0
+* @docs http://velocityjs.org
+* @license Copyright 2014 Julian Shapiro. MIT License: http://en.wikipedia.org/wiki/MIT_License
+*/
+!function(a,b,c,d){function e(a){for(var b=-1,c=a?a.length:0,d=[];++b<c;){var e=a[b];e&&d.push(e)}return d}function f(a){var b=r.data(a,k);return null===b?d:b}function g(a){return function(b){return Math.round(b*a)*(1/a)}}function h(a,b){var c=a;return q.isString(a)?s.Easings[a]||(c=!1):c=q.isArray(a)&&1===a.length?g.apply(null,a):q.isArray(a)&&2===a.length?u.apply(null,a.concat([b])):q.isArray(a)&&4===a.length?t.apply(null,a):!1,c===!1&&(c=s.Easings[s.defaults.easing]?s.defaults.easing:m),c}function i(a){if(a)for(var b=(new Date).getTime(),c=0,e=s.State.calls.length;e>c;c++)if(s.State.calls[c]){var g=s.State.calls[c],h=g[0],k=g[2],l=g[3];l||(l=s.State.calls[c][3]=b-16);for(var m=Math.min((b-l)/k.duration,1),n=0,o=h.length;o>n;n++){var r=h[n],t=r.element;if(f(t)){var u=!1;k.display&&"none"!==k.display&&v.setPropertyValue(t,"display",k.display),k.visibility&&"hidden"!==k.visibility&&v.setPropertyValue(t,"visibility",k.visibility);for(var w in r)if("element"!==w){var x,y=r[w],z=q.isString(y.easing)?s.Easings[y.easing]:y.easing;if(x=1===m?y.endValue:y.startValue+(y.endValue-y.startValue)*z(m),y.currentValue=x,v.Hooks.registered[w]){var A=v.Hooks.getRoot(w),B=f(t).rootPropertyValueCache[A];B&&(y.rootPropertyValue=B)}var C=v.setPropertyValue(t,w,y.currentValue+(0===parseFloat(x)?"":y.unitType),y.rootPropertyValue,y.scrollData);v.Hooks.registered[w]&&(f(t).rootPropertyValueCache[A]=v.Normalizations.registered[A]?v.Normalizations.registered[A]("extract",null,C[1]):C[1]),"transform"===C[0]&&(u=!0)}k.mobileHA&&f(t).transformCache.translate3d===d&&(f(t).transformCache.translate3d="(0px, 0px, 0px)",u=!0),u&&v.flushTransformCache(t)}}k.display&&"none"!==k.display&&(s.State.calls[c][2].display=!1),k.visibility&&"hidden"!==k.visibility&&(s.State.calls[c][2].visibility=!1),k.progress&&k.progress.call(g[1],g[1],m,Math.max(0,l+k.duration-b),l),1===m&&j(c)}s.State.isTicking&&p(i)}function j(a,b){if(!s.State.calls[a])return!1;for(var c=s.State.calls[a][0],e=s.State.calls[a][1],g=s.State.calls[a][2],h=s.State.calls[a][4],i=!1,j=0,k=c.length;k>j;j++){var l=c[j].element;if(b||g.loop||("none"===g.display&&v.setPropertyValue(l,"display",g.display),"hidden"===g.visibility&&v.setPropertyValue(l,"visibility",g.visibility)),(r.queue(l)[1]===d||!/\.velocityQueueEntryFlag/i.test(r.queue(l)[1]))&&f(l)){f(l).isAnimating=!1,f(l).rootPropertyValueCache={};var m=!1;r.each(f(l).transformCache,function(a,b){var c=/^scale/.test(a)?1:0;new RegExp("^\\("+c+"[^.]").test(b)&&(m=!0,delete f(l).transformCache[a])}),g.mobileHA&&(m=!0,delete f(l).transformCache.translate3d),m&&v.flushTransformCache(l),v.Values.removeClass(l,"animating")}if(!b&&g.complete&&!g.loop&&j===k-1)try{g.complete.call(e,e)}catch(n){setTimeout(function(){throw n},1)}h&&h(e),g.queue!==!1&&r.dequeue(l,g.queue)}s.State.calls[a]=!1;for(var o=0,p=s.State.calls.length;p>o;o++)if(s.State.calls[o]!==!1){i=!0;break}i===!1&&(s.State.isTicking=!1,delete s.State.calls,s.State.calls=[])}var k="velocity",l=400,m="swing",n=function(){if(c.documentMode)return c.documentMode;for(var a=7;a>4;a--){var b=c.createElement("div");if(b.innerHTML="<!--[if IE "+a+"]><span></span><![endif]-->",b.getElementsByTagName("span").length)return b=null,a}return d}(),o=function(){var a=0;return b.webkitRequestAnimationFrame||b.mozRequestAnimationFrame||function(b){var c,d=(new Date).getTime();return c=Math.max(0,16-(d-a)),a=d+c,setTimeout(function(){b(d+c)},c)}}(),p=b.requestAnimationFrame||o,q={isString:function(a){return"string"==typeof a},isArray:Array.isArray||function(a){return"[object Array]"===Object.prototype.toString.call(a)},isFunction:function(a){return"[object Function]"===Object.prototype.toString.call(a)},isNode:function(a){return a&&a.nodeType},isNodeList:function(a){return"object"==typeof a&&/^\[object (HTMLCollection|NodeList|Object)\]$/.test(Object.prototype.toString.call(a))&&a.length!==d&&(0===a.length||"object"==typeof a[0]&&a[0].nodeType>0)},isWrapped:function(a){return a&&(a.jquery||b.Zepto&&b.Zepto.zepto.isZ(a))},isSVG:function(a){return b.SVGElement&&a instanceof SVGElement}},r=b.jQuery||a.Velocity&&a.Velocity.Utilities;if(!r)throw new Error("Velocity: Either jQuery or Velocity's jQuery shim must first be loaded.");if(a.Velocity!==d&&!a.Velocity.Utilities)throw new Error("Velocity: Namespace is occupied.");if(7>=n){if(b.jQuery)return void(b.jQuery.fn.velocity=b.jQuery.fn.animate);throw new Error("Velocity: For IE<=7, Velocity falls back to jQuery, which must first be loaded.")}if(8===n&&!b.jQuery)throw new Error("Velocity: For IE8, Velocity requires jQuery to be loaded. (Velocity's jQuery shim does not work with IE8.)");var s=a.Velocity=a.velocity={State:{isMobile:/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),isAndroid:/Android/i.test(navigator.userAgent),isGingerbread:/Android 2\.3\.[3-7]/i.test(navigator.userAgent),isChrome:b.chrome,prefixElement:c.createElement("div"),prefixMatches:{},scrollAnchor:null,scrollPropertyLeft:null,scrollPropertyTop:null,isTicking:!1,calls:[]},CSS:{},Utilities:b.jQuery,Sequences:{},Easings:{},Promise:b.Promise,defaults:{queue:"",duration:l,easing:m,begin:null,complete:null,progress:null,display:null,loop:!1,delay:!1,mobileHA:!0,_cacheValues:!0},animate:function(){},mock:!1,version:{major:0,minor:8,patch:0},debug:!1};b.pageYOffset!==d?(s.State.scrollAnchor=b,s.State.scrollPropertyLeft="pageXOffset",s.State.scrollPropertyTop="pageYOffset"):(s.State.scrollAnchor=c.documentElement||c.body.parentNode||c.body,s.State.scrollPropertyLeft="scrollLeft",s.State.scrollPropertyTop="scrollTop"),s.State.isMobile||c.hidden===d||c.addEventListener("visibilitychange",function(){c.hidden?(p=function(a){return setTimeout(function(){a(!0)},16)},i()):p=b.requestAnimationFrame||o});var t=function(){function a(a,b){return 1-3*b+3*a}function b(a,b){return 3*b-6*a}function c(a){return 3*a}function d(d,e,f){return((a(e,f)*d+b(e,f))*d+c(e))*d}function e(d,e,f){return 3*a(e,f)*d*d+2*b(e,f)*d+c(e)}return function(a,b,c,f){function g(b){for(var f=b,g=0;8>g;++g){var h=e(f,a,c);if(0===h)return f;var i=d(f,a,c)-b;f-=i/h}return f}if(4!==arguments.length)return!1;for(var h=0;4>h;++h)if("number"!=typeof arguments[h]||isNaN(arguments[h])||!isFinite(arguments[h]))return!1;return a=Math.min(a,1),c=Math.min(c,1),a=Math.max(a,0),c=Math.max(c,0),function(e){return a===b&&c===f?e:d(g(e),b,f)}}}(),u=function(){function a(a){return-a.tension*a.x-a.friction*a.v}function b(b,c,d){var e={x:b.x+d.dx*c,v:b.v+d.dv*c,tension:b.tension,friction:b.friction};return{dx:e.v,dv:a(e)}}function c(c,d){var e={dx:c.v,dv:a(c)},f=b(c,.5*d,e),g=b(c,.5*d,f),h=b(c,d,g),i=1/6*(e.dx+2*(f.dx+g.dx)+h.dx),j=1/6*(e.dv+2*(f.dv+g.dv)+h.dv);return c.x=c.x+i*d,c.v=c.v+j*d,c}return function d(a,b,e){var f,g,h,i={x:-1,v:0,tension:null,friction:null},j=[0],k=0,l=1e-4,m=.016;for(a=parseFloat(a)||500,b=parseFloat(b)||20,e=e||null,i.tension=a,i.friction=b,f=null!==e,f?(k=d(a,b),g=k/e*m):g=m;;)if(h=c(h||i,g),j.push(1+h.x),k+=16,!(Math.abs(h.x)>l&&Math.abs(h.v)>l))break;return f?function(a){return j[a*(j.length-1)|0]}:k}}();!function(){s.Easings.linear=function(a){return a},s.Easings.swing=function(a){return.5-Math.cos(a*Math.PI)/2},s.Easings.spring=function(a){return 1-Math.cos(4.5*a*Math.PI)*Math.exp(6*-a)},s.Easings.ease=t(.25,.1,.25,1),s.Easings["ease-in"]=t(.42,0,1,1),s.Easings["ease-out"]=t(0,0,.58,1),s.Easings["ease-in-out"]=t(.42,0,.58,1);var a={};r.each(["Quad","Cubic","Quart","Quint","Expo"],function(b,c){a[c]=function(a){return Math.pow(a,b+2)}}),r.extend(a,{Sine:function(a){return 1-Math.cos(a*Math.PI/2)},Circ:function(a){return 1-Math.sqrt(1-a*a)},Elastic:function(a){return 0===a||1===a?a:-Math.pow(2,8*(a-1))*Math.sin((80*(a-1)-7.5)*Math.PI/15)},Back:function(a){return a*a*(3*a-2)},Bounce:function(a){for(var b,c=4;a<((b=Math.pow(2,--c))-1)/11;);return 1/Math.pow(4,3-c)-7.5625*Math.pow((3*b-2)/22-a,2)}}),r.each(a,function(a,b){s.Easings["easeIn"+a]=b,s.Easings["easeOut"+a]=function(a){return 1-b(1-a)},s.Easings["easeInOut"+a]=function(a){return.5>a?b(2*a)/2:1-b(-2*a+2)/2}})}();var v=s.CSS={RegEx:{valueUnwrap:/^[A-z]+\((.*)\)$/i,wrappedValueAlreadyExtracted:/[0-9.]+ [0-9.]+ [0-9.]+( [0-9.]+)?/,valueSplit:/([A-z]+\(.+\))|(([A-z0-9#-.]+?)(?=\s|$))/gi},Hooks:{templates:{color:["Red Green Blue Alpha","255 255 255 1"],backgroundColor:["Red Green Blue Alpha","255 255 255 1"],borderColor:["Red Green Blue Alpha","255 255 255 1"],borderTopColor:["Red Green Blue Alpha","255 255 255 1"],borderRightColor:["Red Green Blue Alpha","255 255 255 1"],borderBottomColor:["Red Green Blue Alpha","255 255 255 1"],borderLeftColor:["Red Green Blue Alpha","255 255 255 1"],outlineColor:["Red Green Blue Alpha","255 255 255 1"],fill:["Red Green Blue Alpha","255 255 255 1"],stroke:["Red Green Blue Alpha","255 255 255 1"],stopColor:["Red Green Blue Alpha","255 255 255 1"],textShadow:["Color X Y Blur","black 0px 0px 0px"],boxShadow:["Color X Y Blur Spread","black 0px 0px 0px 0px"],clip:["Top Right Bottom Left","0px 0px 0px 0px"],backgroundPosition:["X Y","0% 0%"],transformOrigin:["X Y Z","50% 50% 0px"],perspectiveOrigin:["X Y","50% 50%"]},registered:{},register:function(){var a,b,c;if(n)for(a in v.Hooks.templates){b=v.Hooks.templates[a],c=b[0].split(" ");var d=b[1].match(v.RegEx.valueSplit);"Color"===c[0]&&(c.push(c.shift()),d.push(d.shift()),v.Hooks.templates[a]=[c.join(" "),d.join(" ")])}for(a in v.Hooks.templates){b=v.Hooks.templates[a],c=b[0].split(" ");for(var e in c){var f=a+c[e],g=e;v.Hooks.registered[f]=[a,g]}}},getRoot:function(a){var b=v.Hooks.registered[a];return b?b[0]:a},cleanRootPropertyValue:function(a,b){return v.RegEx.valueUnwrap.test(b)&&(b=b.match(v.Hooks.RegEx.valueUnwrap)[1]),v.Values.isCSSNullValue(b)&&(b=v.Hooks.templates[a][1]),b},extractValue:function(a,b){var c=v.Hooks.registered[a];if(c){var d=c[0],e=c[1];return b=v.Hooks.cleanRootPropertyValue(d,b),b.toString().match(v.RegEx.valueSplit)[e]}return b},injectValue:function(a,b,c){var d=v.Hooks.registered[a];if(d){var e,f,g=d[0],h=d[1];return c=v.Hooks.cleanRootPropertyValue(g,c),e=c.toString().match(v.RegEx.valueSplit),e[h]=b,f=e.join(" ")}return c}},Normalizations:{registered:{clip:function(a,b,c){switch(a){case"name":return"clip";case"extract":var d;return v.RegEx.wrappedValueAlreadyExtracted.test(c)?d=c:(d=c.toString().match(v.RegEx.valueUnwrap),d=d?d[1].replace(/,(\s+)?/g," "):c),d;case"inject":return"rect("+c+")"}},opacity:function(a,b,c){if(8>=n)switch(a){case"name":return"filter";case"extract":var d=c.toString().match(/alpha\(opacity=(.*)\)/i);return c=d?d[1]/100:1;case"inject":return b.style.zoom=1,parseFloat(c)>=1?"":"alpha(opacity="+parseInt(100*parseFloat(c),10)+")"}else switch(a){case"name":return"opacity";case"extract":return c;case"inject":return c}}},register:function(){function a(a){var b,c=/^#?([a-f\d])([a-f\d])([a-f\d])$/i,d=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;return a=a.replace(c,function(a,b,c,d){return b+b+c+c+d+d}),b=d.exec(a),b?"rgb("+(parseInt(b[1],16)+" "+parseInt(b[2],16)+" "+parseInt(b[3],16))+")":"rgb(0 0 0)"}var b=["translateX","translateY","scale","scaleX","scaleY","skewX","skewY","rotateZ"];9>=n||s.State.isGingerbread||(b=b.concat(["transformPerspective","translateZ","scaleZ","rotateX","rotateY"]));for(var c=0,e=b.length;e>c;c++)!function(){var a=b[c];v.Normalizations.registered[a]=function(b,c,e){switch(b){case"name":return"transform";case"extract":return f(c).transformCache[a]===d?/^scale/i.test(a)?1:0:f(c).transformCache[a].replace(/[()]/g,"");case"inject":var g=!1;switch(a.substr(0,a.length-1)){case"translate":g=!/(%|px|em|rem|\d)$/i.test(e);break;case"scal":case"scale":s.State.isAndroid&&f(c).transformCache[a]===d&&1>e&&(e=1),g=!/(\d)$/i.test(e);break;case"skew":g=!/(deg|\d)$/i.test(e);break;case"rotate":g=!/(deg|\d)$/i.test(e)}return g||(f(c).transformCache[a]="("+e+")"),f(c).transformCache[a]}}}();for(var g=["fill","stroke","stopColor","color","backgroundColor","borderColor","borderTopColor","borderRightColor","borderBottomColor","borderLeftColor","outlineColor"],c=0,h=g.length;h>c;c++)!function(){var b=g[c];v.Normalizations.registered[b]=function(c,e,f){switch(c){case"name":return b;case"extract":var g;if(v.RegEx.wrappedValueAlreadyExtracted.test(f))g=f;else{var h,i={aqua:"rgb(0, 255, 255);",black:"rgb(0, 0, 0)",blue:"rgb(0, 0, 255)",fuchsia:"rgb(255, 0, 255)",gray:"rgb(128, 128, 128)",green:"rgb(0, 128, 0)",lime:"rgb(0, 255, 0)",maroon:"rgb(128, 0, 0)",navy:"rgb(0, 0, 128)",olive:"rgb(128, 128, 0)",purple:"rgb(128, 0, 128)",red:"rgb(255, 0, 0)",silver:"rgb(192, 192, 192)",teal:"rgb(0, 128, 128)",white:"rgb(255, 255, 255)",yellow:"rgb(255, 255, 0)"};/^[A-z]+$/i.test(f)?h=i[f]!==d?i[f]:i.black:/^#([A-f\d]{3}){1,2}$/i.test(f)?h=a(f):/^rgba?\(/i.test(f)||(h=i.black),g=(h||f).toString().match(v.RegEx.valueUnwrap)[1].replace(/,(\s+)?/g," ")}return 8>=n||3!==g.split(" ").length||(g+=" 1"),g;case"inject":return 8>=n?4===f.split(" ").length&&(f=f.split(/\s+/).slice(0,3).join(" ")):3===f.split(" ").length&&(f+=" 1"),(8>=n?"rgb":"rgba")+"("+f.replace(/\s+/g,",").replace(/\.(\d)+(?=,)/g,"")+")"}}}()}},Names:{camelCase:function(a){return a.replace(/-(\w)/g,function(a,b){return b.toUpperCase()})},SVGAttribute:function(a){var b="width|height|x|y|cx|cy|r|rx|ry|x1|x2|y1|y1";return(n||s.State.isAndroid&&!s.State.isChrome)&&(b+="|transform"),new RegExp("^("+b+")$","i").test(a)},prefixCheck:function(a){if(s.State.prefixMatches[a])return[s.State.prefixMatches[a],!0];for(var b=["","Webkit","Moz","ms","O"],c=0,d=b.length;d>c;c++){var e;if(e=0===c?a:b[c]+a.replace(/^\w/,function(a){return a.toUpperCase()}),q.isString(s.State.prefixElement.style[e]))return s.State.prefixMatches[a]=e,[e,!0]}return[a,!1]}},Values:{isCSSNullValue:function(a){return 0==a||/^(none|auto|transparent|(rgba\(0, ?0, ?0, ?0\)))$/i.test(a)},getUnitType:function(a){return/^(rotate|skew)/i.test(a)?"deg":/(^(scale|scaleX|scaleY|scaleZ|alpha|flexGrow|flexHeight|zIndex|fontWeight)$)|((opacity|red|green|blue|alpha)$)/i.test(a)?"":"px"},getDisplayType:function(a){var b=a.tagName.toString().toLowerCase();return/^(b|big|i|small|tt|abbr|acronym|cite|code|dfn|em|kbd|strong|samp|var|a|bdo|br|img|map|object|q|script|span|sub|sup|button|input|label|select|textarea)$/i.test(b)?"inline":/^(li)$/i.test(b)?"list-item":/^(tr)$/i.test(b)?"table-row":"block"},addClass:function(a,b){a.classList?a.classList.add(b):a.className+=(a.className.length?" ":"")+b},removeClass:function(a,b){a.classList?a.classList.remove(b):a.className=a.className.toString().replace(new RegExp("(^|\\s)"+b.split(" ").join("|")+"(\\s|$)","gi")," ")}},getPropertyValue:function(a,c,e,g){function h(a,c){function e(){j&&v.setPropertyValue(a,"display","none")}var i=0;if(8>=n)i=r.css(a,c);else{var j=!1;if(/^(width|height)$/.test(c)&&0===v.getPropertyValue(a,"display")&&(j=!0,v.setPropertyValue(a,"display",v.Values.getDisplayType(a))),!g){if("height"===c&&"border-box"!==v.getPropertyValue(a,"boxSizing").toString().toLowerCase()){var k=a.offsetHeight-(parseFloat(v.getPropertyValue(a,"borderTopWidth"))||0)-(parseFloat(v.getPropertyValue(a,"borderBottomWidth"))||0)-(parseFloat(v.getPropertyValue(a,"paddingTop"))||0)-(parseFloat(v.getPropertyValue(a,"paddingBottom"))||0);return e(),k}if("width"===c&&"border-box"!==v.getPropertyValue(a,"boxSizing").toString().toLowerCase()){var l=a.offsetWidth-(parseFloat(v.getPropertyValue(a,"borderLeftWidth"))||0)-(parseFloat(v.getPropertyValue(a,"borderRightWidth"))||0)-(parseFloat(v.getPropertyValue(a,"paddingLeft"))||0)-(parseFloat(v.getPropertyValue(a,"paddingRight"))||0);return e(),l}}var m;m=f(a)===d?b.getComputedStyle(a,null):f(a).computedStyle?f(a).computedStyle:f(a).computedStyle=b.getComputedStyle(a,null),n&&"borderColor"===c&&(c="borderTopColor"),i=9===n&&"filter"===c?m.getPropertyValue(c):m[c],(""===i||null===i)&&(i=a.style[c]),e()}if("auto"===i&&/^(top|right|bottom|left)$/i.test(c)){var o=h(a,"position");("fixed"===o||"absolute"===o&&/top|left/i.test(c))&&(i=r(a).position()[c]+"px")}return i}var i;if(v.Hooks.registered[c]){var j=c,k=v.Hooks.getRoot(j);e===d&&(e=v.getPropertyValue(a,v.Names.prefixCheck(k)[0])),v.Normalizations.registered[k]&&(e=v.Normalizations.registered[k]("extract",a,e)),i=v.Hooks.extractValue(j,e)}else if(v.Normalizations.registered[c]){var l,m;l=v.Normalizations.registered[c]("name",a),"transform"!==l&&(m=h(a,v.Names.prefixCheck(l)[0]),v.Values.isCSSNullValue(m)&&v.Hooks.templates[c]&&(m=v.Hooks.templates[c][1])),i=v.Normalizations.registered[c]("extract",a,m)}return/^[\d-]/.test(i)||(i=f(a)&&f(a).isSVG&&v.Names.SVGAttribute(c)?/^(height|width)$/i.test(c)?a.getBBox()[c]:a.getAttribute(c):h(a,v.Names.prefixCheck(c)[0])),v.Values.isCSSNullValue(i)&&(i=0),s.debug>=2&&console.log("Get "+c+": "+i),i},setPropertyValue:function(a,c,d,e,g){var h=c;if("scroll"===c)g.container?g.container["scroll"+g.direction]=d:"Left"===g.direction?b.scrollTo(d,g.alternateValue):b.scrollTo(g.alternateValue,d);else if(v.Normalizations.registered[c]&&"transform"===v.Normalizations.registered[c]("name",a))v.Normalizations.registered[c]("inject",a,d),h="transform",d=f(a).transformCache[c];else{if(v.Hooks.registered[c]){var i=c,j=v.Hooks.getRoot(c);e=e||v.getPropertyValue(a,j),d=v.Hooks.injectValue(i,d,e),c=j}if(v.Normalizations.registered[c]&&(d=v.Normalizations.registered[c]("inject",a,d),c=v.Normalizations.registered[c]("name",a)),h=v.Names.prefixCheck(c)[0],8>=n)try{a.style[h]=d}catch(k){s.debug&&console.log("Browser does not support ["+d+"] for ["+h+"]")}else f(a)&&f(a).isSVG&&v.Names.SVGAttribute(c)?a.setAttribute(c,d):a.style[h]=d;s.debug>=2&&console.log("Set "+c+" ("+h+"): "+d)}return[h,d]},flushTransformCache:function(a){function b(b){return parseFloat(v.getPropertyValue(a,b))}var c="";if((n||s.State.isAndroid&&!s.State.isChrome)&&f(a).isSVG){var d={translate:[b("translateX"),b("translateY")],skewX:[b("skewX")],skewY:[b("skewY")],scale:1!==b("scale")?[b("scale"),b("scale")]:[b("scaleX"),b("scaleY")],rotate:[b("rotateZ"),0,0]};r.each(f(a).transformCache,function(a){/^translate/i.test(a)?a="translate":/^scale/i.test(a)?a="scale":/^rotate/i.test(a)&&(a="rotate"),d[a]&&(c+=a+"("+d[a].join(" ")+") ",delete d[a])})}else{var e,g;r.each(f(a).transformCache,function(b){return e=f(a).transformCache[b],"transformPerspective"===b?(g=e,!0):(9===n&&"rotateZ"===b&&(b="rotate"),void(c+=b+e+" "))}),g&&(c="perspective"+g+" "+c)}v.setPropertyValue(a,"transform",c)}};v.Hooks.register(),v.Normalizations.register(),s.animate=function(){function a(){return m?C.promise||null:o}function g(){function a(){function a(a){var b=d,c=d,e=d;return q.isArray(a)?(b=a[0],!q.isArray(a[1])&&/^[\d-]/.test(a[1])||q.isFunction(a[1])?e=a[1]:(q.isString(a[1])||q.isArray(a[1]))&&(c=h(a[1],j.duration),a[2]!==d&&(e=a[2]))):b=a,c=c||j.easing,q.isFunction(b)&&(b=b.call(g,z,y)),q.isFunction(e)&&(e=e.call(g,z,y)),[b||0,c,e]}function k(a,b){var c,d;return d=(b||0).toString().toLowerCase().replace(/[%A-z]+$/,function(a){return c=a,""}),c||(c=v.Values.getUnitType(a)),[d,c]}function l(){var a={parent:g.parentNode,position:v.getPropertyValue(g,"position"),fontSize:v.getPropertyValue(g,"fontSize")},d=a.position===H.lastPosition&&a.parent===H.lastParent,e=a.fontSize===H.lastFontSize&&a.parent===H.lastParent;H.lastParent=a.parent,H.lastPosition=a.position,H.lastFontSize=a.fontSize,null===H.remToPx&&(H.remToPx=parseFloat(v.getPropertyValue(c.body,"fontSize"))||16),null===H.vwToPx&&(H.vwToPx=parseFloat(b.innerWidth)/100,H.vhToPx=parseFloat(b.innerHeight)/100);var h={overflowX:null,overflowY:null,boxSizing:null,width:null,minWidth:null,maxWidth:null,height:null,minHeight:null,maxHeight:null,paddingLeft:null},i={},j=10;if(i.remToPx=H.remToPx,i.vwToPx=H.vwToPx,i.vhToPx=H.vhToPx,n&&!f(g).isSVG)var k=/^auto$/i.test(g.currentStyle.width),l=/^auto$/i.test(g.currentStyle.height);d&&e||(f(g).isSVG||(h.overflowX=v.getPropertyValue(g,"overflowX"),h.overflowY=v.getPropertyValue(g,"overflowY"),h.boxSizing=v.getPropertyValue(g,"boxSizing"),h.minWidth=v.getPropertyValue(g,"minWidth"),h.maxWidth=v.getPropertyValue(g,"maxWidth")||"none",h.minHeight=v.getPropertyValue(g,"minHeight"),h.maxHeight=v.getPropertyValue(g,"maxHeight")||"none",h.paddingLeft=v.getPropertyValue(g,"paddingLeft")),h.width=v.getPropertyValue(g,"width",null,!0),h.height=v.getPropertyValue(g,"height",null,!0)),d?(i.percentToPxRatioWidth=H.lastPercentToPxWidth,i.percentToPxRatioHeight=H.lastPercentToPxHeight):(f(g).isSVG||(v.setPropertyValue(g,"overflowX","hidden"),v.setPropertyValue(g,"overflowY","hidden"),v.setPropertyValue(g,"boxSizing","content-box"),v.setPropertyValue(g,"minWidth",j+"%"),v.setPropertyValue(g,"maxWidth",j+"%"),v.setPropertyValue(g,"minHeight",j+"%"),v.setPropertyValue(g,"maxHeight",j+"%")),v.setPropertyValue(g,"width",j+"%"),v.setPropertyValue(g,"height",j+"%")),e?i.emToPx=H.lastEmToPx:f(g).isSVG||v.setPropertyValue(g,"paddingLeft",j+"em"),d||(i.percentToPxRatioWidth=H.lastPercentToPxWidth=(parseFloat(v.getPropertyValue(g,"width",null,!0))||1)/j,i.percentToPxRatioHeight=H.lastPercentToPxHeight=(parseFloat(v.getPropertyValue(g,"height",null,!0))||1)/j),e||(i.emToPx=H.lastEmToPx=(parseFloat(v.getPropertyValue(g,"paddingLeft"))||1)/j);for(var m in h)null!==h[m]&&v.setPropertyValue(g,m,h[m]);return f(g).isSVG||(n?(k&&v.setPropertyValue(g,"width","auto"),l&&v.setPropertyValue(g,"height","auto")):(v.setPropertyValue(g,"height","auto"),h.height!==v.getPropertyValue(g,"height",null,!0)&&v.setPropertyValue(g,"height",h.height),v.setPropertyValue(g,"width","auto"),h.width!==v.getPropertyValue(g,"width",null,!0)&&v.setPropertyValue(g,"width",h.width))),s.debug>=1&&console.log("Unit ratios: "+JSON.stringify(i),g),i}if(j.begin&&0===z)try{j.begin.call(t,t)}catch(o){setTimeout(function(){throw o},1)}if("scroll"===D){var p,x,A,B=/^x$/i.test(j.axis)?"Left":"Top",E=parseFloat(j.offset)||0;j.container?j.container.jquery||q.isNode(j.container)?(j.container=j.container[0]||j.container,p=j.container["scroll"+B],A=p+r(g).position()[B.toLowerCase()]+E):j.container=null:(p=s.State.scrollAnchor[s.State["scrollProperty"+B]],x=s.State.scrollAnchor[s.State["scrollProperty"+("Left"===B?"Top":"Left")]],A=r(g).offset()[B.toLowerCase()]+E),m={scroll:{rootPropertyValue:!1,startValue:p,currentValue:p,endValue:A,unitType:"",easing:j.easing,scrollData:{container:j.container,direction:B,alternateValue:x}},element:g}}else if("reverse"===D){if(!f(g).tweensContainer)return void r.dequeue(g,j.queue);"none"===f(g).opts.display&&(f(g).opts.display="block"),"hidden"===f(g).opts.visibility&&(f(g).opts.visibility="visible"),f(g).opts.loop=!1,f(g).opts.begin=null,f(g).opts.complete=null,w.easing||delete j.easing,w.duration||delete j.duration,j=r.extend({},f(g).opts,j);var F=r.extend(!0,{},f(g).tweensContainer);for(var G in F)if("element"!==G){var J=F[G].startValue;F[G].startValue=F[G].currentValue=F[G].endValue,F[G].endValue=J,w&&(F[G].easing=j.easing)}m=F}else if("start"===D){var F;f(g).tweensContainer&&f(g).isAnimating===!0&&(F=f(g).tweensContainer);for(var K in u){var L=a(u[K]),M=L[0],N=L[1],O=L[2];K=v.Names.camelCase(K);var P=v.Hooks.getRoot(K),Q=!1;if(f(g).isSVG||v.Names.prefixCheck(P)[1]!==!1||v.Normalizations.registered[P]!==d){(j.display&&"none"!==j.display||j.visibility&&"hidden"!==j.visibility)&&/opacity|filter/.test(K)&&!O&&0!==M&&(O=0),j._cacheValues&&F&&F[K]?(O===d&&(O=F[K].endValue+F[K].unitType),Q=f(g).rootPropertyValueCache[P]):v.Hooks.registered[K]?O===d?(Q=v.getPropertyValue(g,P),O=v.getPropertyValue(g,K,Q)):Q=v.Hooks.templates[P][1]:O===d&&(O=v.getPropertyValue(g,K));var R,S,T,U=!1;R=k(K,O),O=R[0],T=R[1],R=k(K,M),M=R[0].replace(/^([+-\/*])=/,function(a,b){return U=b,""}),S=R[1],O=parseFloat(O)||0,M=parseFloat(M)||0;var V;if("%"===S&&(/^(fontSize|lineHeight)$/.test(K)?(M/=100,S="em"):/^scale/.test(K)?(M/=100,S=""):/(Red|Green|Blue)$/i.test(K)&&(M=M/100*255,S="")),/[\/*]/.test(U))S=T;else if(T!==S&&0!==O)if(0===M)S=T;else{V=V||l();var W=/margin|padding|left|right|width|text|word|letter/i.test(K)||/X$/.test(K)?"x":"y";switch(T){case"%":O*="x"===W?V.percentToPxRatioWidth:V.percentToPxRatioHeight;break;case"px":break;default:O*=V[T+"ToPx"]}switch(S){case"%":O*=1/("x"===W?V.percentToPxRatioWidth:V.percentToPxRatioHeight);break;case"px":break;default:O*=1/V[S+"ToPx"]}}switch(U){case"+":M=O+M;break;case"-":M=O-M;break;case"*":M=O*M;break;case"/":M=O/M}m[K]={rootPropertyValue:Q,startValue:O,currentValue:O,endValue:M,unitType:S,easing:N},s.debug&&console.log("tweensContainer ("+K+"): "+JSON.stringify(m[K]),g)}else s.debug&&console.log("Skipping ["+P+"] due to a lack of browser support.")}m.element=g}m.element&&(v.Values.addClass(g,"animating"),I.push(m),f(g).tweensContainer=m,f(g).opts=j,f(g).isAnimating=!0,z===y-1?(s.State.calls.length>1e4&&(s.State.calls=e(s.State.calls)),s.State.calls.push([I,t,j,null,C.resolver]),s.State.isTicking===!1&&(s.State.isTicking=!0,i())):z++)}var g=this,j=r.extend({},s.defaults,w),m={};if(f(g)===d&&r.data(g,k,{isSVG:q.isSVG(g),isAnimating:!1,computedStyle:null,tweensContainer:null,rootPropertyValueCache:{},transformCache:{}}),parseFloat(j.delay)&&j.queue!==!1&&r.queue(g,j.queue,function(a){s.velocityQueueEntryFlag=!0,f(g).delayTimer={setTimeout:setTimeout(a,parseFloat(j.delay)),next:a}}),s.mock===!0)j.duration=1;else switch(j.duration.toString().toLowerCase()){case"fast":j.duration=200;break;case"normal":j.duration=l;break;case"slow":j.duration=600;break;default:j.duration=parseFloat(j.duration)||1}j.easing=h(j.easing,j.duration),j.begin&&!q.isFunction(j.begin)&&(j.begin=null),j.progress&&!q.isFunction(j.progress)&&(j.progress=null),j.complete&&!q.isFunction(j.complete)&&(j.complete=null),j.display&&(j.display=j.display.toString().toLowerCase(),"auto"===j.display&&(j.display=s.CSS.Values.getDisplayType(g))),j.visibility&&(j.visibility=j.visibility.toString().toLowerCase()),j.mobileHA=j.mobileHA&&s.State.isMobile&&!s.State.isGingerbread,j.queue===!1?j.delay?setTimeout(a,j.delay):a():r.queue(g,j.queue,function(b,c){return c===!0?(C.promise&&C.resolver(t),!0):(s.velocityQueueEntryFlag=!0,void a(b))}),""!==j.queue&&"fx"!==j.queue||"inprogress"===r.queue(g)[0]||r.dequeue(g)}var m,o,p,t,u,w,x=arguments[0]&&(r.isPlainObject(arguments[0].properties)&&!arguments[0].properties.names||q.isString(arguments[0].properties));if(q.isWrapped(this)?(m=!1,p=0,t=this,o=this):(m=!0,p=1,t=x?arguments[0].elements:arguments[0]),t=q.isWrapped(t)?[].slice.call(t):t){x?(u=arguments[0].properties,w=arguments[0].options):(u=arguments[p],w=arguments[p+1]);var y=q.isArray(t)||q.isNodeList(t)?t.length:1,z=0;if("stop"!==u&&!r.isPlainObject(w)){var A=p+1;w={};for(var B=A;B<arguments.length;B++)!q.isArray(arguments[B])&&/^\d/.test(arguments[B])?w.duration=parseFloat(arguments[B]):q.isString(arguments[B])||q.isArray(arguments[B])?w.easing=arguments[B]:q.isFunction(arguments[B])&&(w.complete=arguments[B])}var C={promise:null,resolver:null,rejecter:null};m&&s.Promise&&(C.promise=new s.Promise(function(a,b){C.resolver=a,C.rejecter=b}));var D;switch(u){case"scroll":D="scroll";break;case"reverse":D="reverse";break;case"stop":r.each(q.isNode(t)?[t]:t,function(a,b){f(b)&&f(b).delayTimer&&(clearTimeout(f(b).delayTimer.setTimeout),f(b).delayTimer.next(),delete f(b).delayTimer)});var E=[];return r.each(s.State.calls,function(a,b){b!==!1&&r.each(q.isNode(b[1])?[b[1]]:b[1],function(b,c){r.each(q.isNode(t)?[t]:t,function(b,d){if(d===c){if(f(d)&&r.each(f(d).tweensContainer,function(a,b){b.endValue=b.currentValue}),w===!0||q.isString(w)){var e=q.isString(w)?w:"";r.each(r.queue(d,e),function(a,b){q.isFunction(b)&&b(null,!0)}),r.queue(d,e,[])}E.push(a)}})})}),r.each(E,function(a,b){j(b,!0)}),C.promise&&C.resolver(t),a();default:if(!r.isPlainObject(u)||r.isEmptyObject(u)){if(q.isString(u)&&s.Sequences[u]){var F=w.duration;return w.backwards===!0&&(t=(t.jquery?[].slice.call(t):t).reverse()),r.each(t,function(a,b){parseFloat(w.stagger)?w.delay=parseFloat(w.stagger)*a:q.isFunction(w.stagger)&&(w.delay=w.stagger.call(b,a,y)),w.drag&&(w.duration=parseFloat(F)||(/^(callout|transition)/.test(u)?1e3:l),w.duration=Math.max(w.duration*(w.backwards?1-a/y:(a+1)/y),.75*w.duration,200)),s.Sequences[u].call(b,b,w||{},a,y,t,C.promise?C:d)}),a()}var G="Velocity: First argument ("+u+") was not a property map, a known action, or a registered sequence. Aborting.";return C.promise?C.rejecter(new Error(G)):console.log(G),a()}D="start"}var H={lastParent:null,lastPosition:null,lastFontSize:null,lastPercentToPxWidth:null,lastPercentToPxHeight:null,lastEmToPx:null,remToPx:null,vwToPx:null,vhToPx:null},I=[];r.each(q.isNode(t)?[t]:t,function(a,b){q.isNode(b)&&g.call(b)});var J,K=r.extend({},s.defaults,w);if(K.loop=parseInt(K.loop),J=2*K.loop-1,K.loop)for(var L=0;J>L;L++){var M={delay:K.delay};K.complete&&L===J-1&&(M.complete=K.complete),s.animate(t,"reverse",M)}return a()}};var w=b.jQuery||b.Zepto;w&&(w.fn.velocity=s.animate,w.fn.velocity.defaults=s.defaults),"undefined"!=typeof define&&define.amd?define('velocity',[],function(){return s}):"undefined"!=typeof module&&module.exports&&(module.exports=s),r.each(["Down","Up"],function(a,b){s.Sequences["slide"+b]=function(a,c){var d=r.extend({},c),e={height:null,marginTop:null,marginBottom:null,paddingTop:null,paddingBottom:null,overflow:null,overflowX:null,overflowY:null},f=d.begin,g=d.complete,h=!1;null!==d.display&&(d.display="Down"===b?d.display||"auto":d.display||"none"),d.begin=function(){function c(){e.height=parseFloat(s.CSS.getPropertyValue(a,"height")),a.style.height="auto",s.CSS.getPropertyValue(a,"height")===e.height&&(h=!0),s.CSS.setPropertyValue(a,"height",e.height+"px")}if("Down"===b){e.overflow=[s.CSS.getPropertyValue(a,"overflow"),0],e.overflowX=[s.CSS.getPropertyValue(a,"overflowX"),0],e.overflowY=[s.CSS.getPropertyValue(a,"overflowY"),0],a.style.overflow="hidden",a.style.overflowX="visible",a.style.overflowY="hidden",c();for(var d in e)if(!/^overflow/.test(d)){var g=s.CSS.getPropertyValue(a,d);"height"===d&&(g=parseFloat(g)),e[d]=[g,0]}}else{c();for(var d in e){var g=s.CSS.getPropertyValue(a,d);"height"===d&&(g=parseFloat(g)),e[d]=[0,g]}a.style.overflow="hidden",a.style.overflowX="visible",a.style.overflowY="hidden"}f&&f.call(a,a)},d.complete=function(a){var c="Down"===b?0:1;h===!0?e.height[c]="auto":e.height[c]+="px";for(var d in e)a.style[d]=e[d][c];g&&g.call(a,a)},s.animate(a,e,d)}}),r.each(["In","Out"],function(a,b){s.Sequences["fade"+b]=function(a,c,d,e){var f=r.extend({},c),g={opacity:"In"===b?1:0};d!==e-1&&(f.complete=f.begin=null),null!==f.display&&(f.display=f.display||("In"===b?"auto":"none")),s.animate(this,g,f)}})}(window.jQuery||window.Zepto||window,window,document);
+
+/* turn.js r3 | turnjs.com/license.txt */
+(function(h){var x,y="",G=Math.PI,E=G/2,q="Touch"in window,I=q?{start:"touchstart",move:"touchmove",end:"touchend"}:{start:"mousedown",move:"mousemove",end:"mouseup"},J={backward:["bl","tl"],forward:["br","tr"],all:["tl","bl","tr","br"]},O=["single","double"],P={page:1,gradients:!0,duration:600,acceleration:!0,display:"double",when:null},Q={folding:null,corners:"forward",cornerSize:100,gradients:!0,duration:600,acceleration:!0},K={"0":{top:0,left:0,right:"auto",bottom:"auto"},1:{top:0,right:0,left:"auto",
+bottom:"auto"}},l=function(a,b,c,d){return{css:{position:"absolute",top:a,left:b,overflow:d||"hidden","z-index":c||"auto"}}},L=function(a,b,c,d,e){var f=1-e,C=f*f*f,i=e*e*e;return j(Math.round(C*a.x+3*e*f*f*b.x+3*e*e*f*c.x+i*d.x),Math.round(C*a.y+3*e*f*f*b.y+3*e*e*f*c.y+i*d.y))},j=function(a,b){return{x:a,y:b}},s=function(a,b,c){return x&&c?" translate3d("+a+"px,"+b+"px, 0px) ":" translate("+a+"px, "+b+"px) "},t=function(a){return" rotate("+a+"deg) "},p=function(a,b){return Object.prototype.hasOwnProperty.call(b,
+a)},R=function(){for(var a=["Moz","Webkit","Khtml","O","ms"],b=a.length,c="";b--;)a[b]+"Transform"in document.body.style&&(c="-"+a[b].toLowerCase()+"-");return c},M=function(a,b,c,d,e){var f,C=[];if("-webkit-"==y){for(f=0;f<e;f++)C.push("color-stop("+d[f][0]+", "+d[f][1]+")");a.css({"background-image":"-webkit-gradient(linear, "+b.x+"% "+b.y+"%,  "+c.x+"% "+c.y+"%, "+C.join(",")+" )"})}else{var b={x:b.x/100*a.width(),y:b.y/100*a.height()},c={x:c.x/100*a.width(),y:c.y/100*a.height()},i=c.x-b.x;f=c.y-
+b.y;var h=Math.atan2(f,i),g=h-Math.PI/2,g=Math.abs(a.width()*Math.sin(g))+Math.abs(a.height()*Math.cos(g)),i=Math.sqrt(f*f+i*i),c=j(c.x<b.x?a.width():0,c.y<b.y?a.height():0),n=Math.tan(h);f=-1/n;n=(f*c.x-c.y-n*b.x+b.y)/(f-n);c=f*n-f*c.x+c.y;b=Math.sqrt(Math.pow(n-b.x,2)+Math.pow(c-b.y,2));for(f=0;f<e;f++)C.push(" "+d[f][1]+" "+100*(b+i*d[f][0])/g+"%");a.css({"background-image":y+"linear-gradient("+-h+"rad,"+C.join(",")+")"})}},g={init:function(a){void 0===x&&(x="WebKitCSSMatrix"in window||"MozPerspective"in
+document.body.style,y=R());var b,c=this.data(),d=this.children(),a=h.extend({width:this.width(),height:this.height()},P,a);c.opts=a;c.pageObjs={};c.pages={};c.pageWrap={};c.pagePlace={};c.pageMv=[];c.totalPages=a.pages||0;if(a.when)for(b in a.when)p(b,a.when)&&this.bind(b,a.when[b]);this.css({position:"relative",width:a.width,height:a.height});this.turn("display",a.display);x&&!q&&a.acceleration&&this.transform(s(0,0,!0));for(b=0;b<d.length;b++)this.turn("addPage",d[b],b+1);this.turn("page",a.page);
+J=h.extend({},J,a.corners);h(this).bind(I.start,function(a){for(var b in c.pages)if(p(b,c.pages)&&i._eventStart.call(c.pages[b],a)===false)return false});h(document).bind(I.move,function(a){for(var b in c.pages)p(b,c.pages)&&i._eventMove.call(c.pages[b],a)}).bind(I.end,function(a){for(var b in c.pages)p(b,c.pages)&&i._eventEnd.call(c.pages[b],a)});c.done=!0;return this},addPage:function(a,b){var c=!1,d=this.data(),e=d.totalPages+1;if(b)if(b==e)b=e,c=!0;else{if(b>e)throw Error('It is impossible to add the page "'+
+b+'", the maximum value is: "'+e+'"');}else b=e,c=!0;1<=b&&b<=e&&(d.done&&this.turn("stop"),b in d.pageObjs&&g._movePages.call(this,b,1),c&&(d.totalPages=e),d.pageObjs[b]=h(a).addClass("turn-page p"+b),g._addPage.call(this,b),d.done&&this.turn("update"),g._removeFromDOM.call(this));return this},_addPage:function(a){var b=this.data(),c=b.pageObjs[a];if(c)if(g._necessPage.call(this,a)){if(!b.pageWrap[a]){var d="double"==b.display?this.width()/2:this.width(),e=this.height();c.css({width:d,height:e});
+b.pagePlace[a]=a;b.pageWrap[a]=h("<div/>",{"class":"turn-page-wrapper",page:a,css:{position:"absolute",overflow:"hidden",width:d,height:e}}).css(K["double"==b.display?a%2:0]);this.append(b.pageWrap[a]);b.pageWrap[a].prepend(b.pageObjs[a])}(!a||1==g._setPageLoc.call(this,a))&&g._makeFlip.call(this,a)}else b.pagePlace[a]=0,b.pageObjs[a]&&b.pageObjs[a].remove()},hasPage:function(a){return a in this.data().pageObjs},_makeFlip:function(a){var b=this.data();if(!b.pages[a]&&b.pagePlace[a]==a){var c="single"==
+b.display,d=a%2;b.pages[a]=b.pageObjs[a].css({width:c?this.width():this.width()/2,height:this.height()}).flip({page:a,next:c&&a===b.totalPages?a-1:d||c?a+1:a-1,turn:this,duration:b.opts.duration,acceleration:b.opts.acceleration,corners:c?"all":d?"forward":"backward",backGradient:b.opts.gradients,frontGradient:b.opts.gradients}).flip("disable",b.disabled).bind("pressed",g._pressed).bind("released",g._released).bind("start",g._start).bind("end",g._end).bind("flip",g._flip)}return b.pages[a]},_makeRange:function(){var a;
+this.data();var b=this.turn("range");for(a=b[0];a<=b[1];a++)g._addPage.call(this,a)},range:function(a){var b,c,d=this.data(),a=a||d.tpage||d.page,e=g._view.call(this,a);if(1>a||a>d.totalPages)throw Error('"'+a+'" is not a page for range');e[1]=e[1]||e[0];1<=e[0]&&e[1]<=d.totalPages?(a=Math.floor(2),d.totalPages-e[1]>e[0]?(b=Math.min(e[0]-1,a),c=2*a-b):(c=Math.min(d.totalPages-e[1],a),b=2*a-c)):c=b=5;return[Math.max(1,e[0]-b),Math.min(d.totalPages,e[1]+c)]},_necessPage:function(a){if(0===a)return!0;
+var b=this.turn("range");return a>=b[0]&&a<=b[1]},_removeFromDOM:function(){var a,b=this.data();for(a in b.pageWrap)p(a,b.pageWrap)&&!g._necessPage.call(this,a)&&g._removePageFromDOM.call(this,a)},_removePageFromDOM:function(a){var b=this.data();if(b.pages[a]){var c=b.pages[a].data();c.f&&c.f.fwrapper&&c.f.fwrapper.remove();b.pages[a].remove();delete b.pages[a]}b.pageObjs[a]&&b.pageObjs[a].remove();b.pageWrap[a]&&(b.pageWrap[a].remove(),delete b.pageWrap[a]);delete b.pagePlace[a]},removePage:function(a){var b=
+this.data();b.pageObjs[a]&&(this.turn("stop"),g._removePageFromDOM.call(this,a),delete b.pageObjs[a],g._movePages.call(this,a,-1),b.totalPages-=1,g._makeRange.call(this),b.page>b.totalPages&&this.turn("page",b.totalPages));return this},_movePages:function(a,b){var c,d=this.data(),e="single"==d.display,f=function(a){var c=a+b,f=c%2;d.pageObjs[a]&&(d.pageObjs[c]=d.pageObjs[a].removeClass("page"+a).addClass("page"+c));d.pagePlace[a]&&d.pageWrap[a]&&(d.pagePlace[c]=c,d.pageWrap[c]=d.pageWrap[a].css(K[e?
+0:f]).attr("page",c),d.pages[a]&&(d.pages[c]=d.pages[a].flip("options",{page:c,next:e||f?c+1:c-1,corners:e?"all":f?"forward":"backward"})),b&&(delete d.pages[a],delete d.pagePlace[a],delete d.pageObjs[a],delete d.pageWrap[a],delete d.pageObjs[a]))};if(0<b)for(c=d.totalPages;c>=a;c--)f(c);else for(c=a;c<=d.totalPages;c++)f(c)},display:function(a){var b=this.data(),c=b.display;if(a){if(-1==h.inArray(a,O))throw Error('"'+a+'" is not a value for display');"single"==a?b.pageObjs[0]||(this.turn("stop").css({overflow:"hidden"}),
+b.pageObjs[0]=h("<div />",{"class":"turn-page p-temporal"}).css({width:this.width(),height:this.height()}).appendTo(this)):b.pageObjs[0]&&(this.turn("stop").css({overflow:""}),b.pageObjs[0].remove(),delete b.pageObjs[0]);b.display=a;c&&(a=this.turn("size"),g._movePages.call(this,1,0),this.turn("size",a.width,a.height).turn("update"));return this}return c},animating:function(){return 0<this.data().pageMv.length},disable:function(a){var b,c=this.data(),d=this.turn("view");c.disabled=void 0===a||!0===
+a;for(b in c.pages)p(b,c.pages)&&c.pages[b].flip("disable",a?h.inArray(b,d):!1);return this},size:function(a,b){if(a&&b){var c=this.data(),d="double"==c.display?a/2:a,e;this.css({width:a,height:b});c.pageObjs[0]&&c.pageObjs[0].css({width:d,height:b});for(e in c.pageWrap)p(e,c.pageWrap)&&(c.pageObjs[e].css({width:d,height:b}),c.pageWrap[e].css({width:d,height:b}),c.pages[e]&&c.pages[e].css({width:d,height:b}));this.turn("resize");return this}return{width:this.width(),height:this.height()}},resize:function(){var a,
+b=this.data();b.pages[0]&&(b.pageWrap[0].css({left:-this.width()}),b.pages[0].flip("resize",!0));for(a=1;a<=b.totalPages;a++)b.pages[a]&&b.pages[a].flip("resize",!0)},_removeMv:function(a){var b,c=this.data();for(b=0;b<c.pageMv.length;b++)if(c.pageMv[b]==a)return c.pageMv.splice(b,1),!0;return!1},_addMv:function(a){var b=this.data();g._removeMv.call(this,a);b.pageMv.push(a)},_view:function(a){var b=this.data(),a=a||b.page;return"double"==b.display?a%2?[a-1,a]:[a,a+1]:[a]},view:function(a){var b=this.data(),
+a=g._view.call(this,a);return"double"==b.display?[0<a[0]?a[0]:0,a[1]<=b.totalPages?a[1]:0]:[0<a[0]&&a[0]<=b.totalPages?a[0]:0]},stop:function(){var a,b,c=this.data(),d=c.pageMv;c.pageMv=[];c.tpage&&(c.page=c.tpage,delete c.tpage);for(a in d)p(a,d)&&(b=c.pages[d[a]].data().f.opts,i._moveFoldingPage.call(c.pages[d[a]],null),c.pages[d[a]].flip("hideFoldedPage"),c.pagePlace[b.next]=b.next,b.force&&(b.next=0===b.page%2?b.page-1:b.page+1,delete b.force));this.turn("update");return this},pages:function(a){var b=
+this.data();if(a){if(a<b.totalPages){for(var c=a+1;c<=b.totalPages;c++)this.turn("removePage",c);this.turn("page")>a&&this.turn("page",a)}b.totalPages=a;return this}return b.totalPages},_fitPage:function(a,b){var c=this.data(),d=this.turn("view",a);c.page!=a&&(this.trigger("turning",[a,d]),-1!=h.inArray(1,d)&&this.trigger("first"),-1!=h.inArray(c.totalPages,d)&&this.trigger("last"));c.pageObjs[a]&&(c.tpage=a,this.turn("stop",b),g._removeFromDOM.call(this),g._makeRange.call(this),this.trigger("turned",
+[a,d]))},_turnPage:function(a){var b,c,d=this.data(),e=this.turn("view"),f=this.turn("view",a);d.page!=a&&(this.trigger("turning",[a,f]),-1!=h.inArray(1,f)&&this.trigger("first"),-1!=h.inArray(d.totalPages,f)&&this.trigger("last"));if(d.pageObjs[a]&&(d.tpage=a,this.turn("stop"),g._makeRange.call(this),"single"==d.display?(b=e[0],c=f[0]):e[1]&&a>e[1]?(b=e[1],c=f[0]):e[0]&&a<e[0]&&(b=e[0],c=f[1]),d.pages[b]))a=d.pages[b].data().f.opts,d.tpage=c,a.next!=c&&(a.next=c,d.pagePlace[c]=a.page,a.force=!0),
+"single"==d.display?d.pages[b].flip("turnPage",f[0]>e[0]?"br":"bl"):d.pages[b].flip("turnPage")},page:function(a){var a=parseInt(a,10),b=this.data();return 0<a&&a<=b.totalPages?(!b.done||-1!=h.inArray(a,this.turn("view"))?g._fitPage.call(this,a):g._turnPage.call(this,a),this):b.page},next:function(){var a=this.data();return this.turn("page",g._view.call(this,a.page).pop()+1)},previous:function(){var a=this.data();return this.turn("page",g._view.call(this,a.page).shift()-1)},_addMotionPage:function(){var a=
+h(this).data().f.opts,b=a.turn,c=b.data();a.pageMv=a.page;g._addMv.call(b,a.pageMv);c.pagePlace[a.next]=a.page;b.turn("update")},_start:function(a,b,c){var d=b.turn.data(),e=h.Event("start");a.stopPropagation();b.turn.trigger(e,[b,c]);e.isDefaultPrevented()?a.preventDefault():("single"==d.display&&(c="l"==c.charAt(1),1==b.page&&c||b.page==d.totalPages&&!c?a.preventDefault():c?(b.next=b.next<b.page?b.next:b.page-1,b.force=!0):b.next=b.next>b.page?b.next:b.page+1),g._addMotionPage.call(this))},_end:function(a,
+b){var c=h(this).data().f.opts,d=c.turn,e=d.data();a.stopPropagation();if(b||e.tpage){if(e.tpage==c.next||e.tpage==c.page)delete e.tpage,g._fitPage.call(d,e.tpage||c.next,!0)}else g._removeMv.call(d,c.pageMv),d.turn("update")},_pressed:function(){var a,b=h(this).data().f,c=b.opts.turn.data().pages;for(a in c)a!=b.opts.page&&c[a].flip("disable",!0);return b.time=(new Date).getTime()},_released:function(a,b){var c=h(this),d=c.data().f;a.stopPropagation();if(200>(new Date).getTime()-d.time||0>b.x||b.x>
+h(this).width())a.preventDefault(),d.opts.turn.data().tpage=d.opts.next,d.opts.turn.turn("update"),h(c).flip("turnPage")},_flip:function(){var a=h(this).data().f.opts;a.turn.trigger("turn",[a.next])},calculateZ:function(a){var b,c,d,e,f=this,i=this.data();b=this.turn("view");var h=b[0]||b[1],g={pageZ:{},partZ:{},pageV:{}},j=function(a){a=f.turn("view",a);a[0]&&(g.pageV[a[0]]=!0);a[1]&&(g.pageV[a[1]]=!0)};for(b=0;b<a.length;b++)c=a[b],d=i.pages[c].data().f.opts.next,e=i.pagePlace[c],j(c),j(d),c=i.pagePlace[d]==
+d?d:c,g.pageZ[c]=i.totalPages-Math.abs(h-c),g.partZ[e]=2*i.totalPages+Math.abs(h-c);return g},update:function(){var a,b=this.data();if(b.pageMv.length&&0!==b.pageMv[0]){var c=this.turn("calculateZ",b.pageMv);this.turn("view",b.tpage);for(a in b.pageWrap)p(a,b.pageWrap)&&(b.pageWrap[a].css({display:c.pageV[a]?"":"none","z-index":c.pageZ[a]||0}),b.pages[a]&&(b.pages[a].flip("z",c.partZ[a]||null),c.pageV[a]&&b.pages[a].flip("resize"),b.tpage&&b.pages[a].flip("disable",!0)))}else for(a in b.pageWrap)p(a,
+b.pageWrap)&&(c=g._setPageLoc.call(this,a),b.pages[a]&&b.pages[a].flip("disable",b.disabled||1!=c).flip("z",null))},_setPageLoc:function(a){var b=this.data(),c=this.turn("view");if(a==c[0]||a==c[1])return b.pageWrap[a].css({"z-index":b.totalPages,display:""}),1;if("single"==b.display&&a==c[0]+1||"double"==b.display&&a==c[0]-2||a==c[1]+2)return b.pageWrap[a].css({"z-index":b.totalPages-1,display:""}),2;b.pageWrap[a].css({"z-index":0,display:"none"});return 0}},i={init:function(a){a.gradients&&(a.frontGradient=
+!0,a.backGradient=!0);this.data({f:{}});this.flip("options",a);i._addPageWrapper.call(this);return this},setData:function(a){var b=this.data();b.f=h.extend(b.f,a);return this},options:function(a){var b=this.data().f;return a?(i.setData.call(this,{opts:h.extend({},b.opts||Q,a)}),this):b.opts},z:function(a){var b=this.data().f;b.opts["z-index"]=a;b.fwrapper.css({"z-index":a||parseInt(b.parent.css("z-index"),10)||0});return this},_cAllowed:function(){return J[this.data().f.opts.corners]||this.data().f.opts.corners},
+_cornerActivated:function(a){if(void 0===a.originalEvent)return!1;var a=q?a.originalEvent.touches:[a],b=this.data().f,c=b.parent.offset(),d=this.width(),e=this.height(),a={x:Math.max(0,a[0].pageX-c.left),y:Math.max(0,a[0].pageY-c.top)},b=b.opts.cornerSize,c=i._cAllowed.call(this);if(0>=a.x||0>=a.y||a.x>=d||a.y>=e)return!1;if(a.y<b)a.corner="t";else if(a.y>=e-b)a.corner="b";else return!1;if(a.x<=b)a.corner+="l";else if(a.x>=d-b)a.corner+="r";else return!1;return-1==h.inArray(a.corner,c)?!1:a},_c:function(a,
+b){b=b||0;return{tl:j(b,b),tr:j(this.width()-b,b),bl:j(b,this.height()-b),br:j(this.width()-b,this.height()-b)}[a]},_c2:function(a){return{tl:j(2*this.width(),0),tr:j(-this.width(),0),bl:j(2*this.width(),this.height()),br:j(-this.width(),this.height())}[a]},_foldingPage:function(){var a=this.data().f.opts;if(a.folding)return a.folding;if(a.turn){var b=a.turn.data();return"single"==b.display?b.pageObjs[a.next]?b.pageObjs[0]:null:b.pageObjs[a.next]}},_backGradient:function(){var a=this.data().f,b=a.opts.turn;
+if((b=a.opts.backGradient&&(!b||"single"==b.data().display||2!=a.opts.page&&a.opts.page!=b.data().totalPages-1))&&!a.bshadow)a.bshadow=h("<div/>",l(0,0,1)).css({position:"",width:this.width(),height:this.height()}).appendTo(a.parent);return b},resize:function(a){var b=this.data().f,c=this.width(),d=this.height(),e=Math.round(Math.sqrt(Math.pow(c,2)+Math.pow(d,2)));a&&(b.wrapper.css({width:e,height:e}),b.fwrapper.css({width:e,height:e}).children(":first-child").css({width:c,height:d}),b.fpage.css({width:d,
+height:c}),b.opts.frontGradient&&b.ashadow.css({width:d,height:c}),i._backGradient.call(this)&&b.bshadow.css({width:c,height:d}));b.parent.is(":visible")&&(b.fwrapper.css({top:b.parent.offset().top,left:b.parent.offset().left}),b.opts.turn&&b.fparent.css({top:-b.opts.turn.offset().top,left:-b.opts.turn.offset().left}));this.flip("z",b.opts["z-index"])},_addPageWrapper:function(){var a=this.data().f,b=this.parent();if(!a.wrapper){this.css("left");this.css("top");var c=this.width(),d=this.height();
+Math.round(Math.sqrt(Math.pow(c,2)+Math.pow(d,2)));a.parent=b;a.fparent=a.opts.turn?a.opts.turn.data().fparent:h("#turn-fwrappers");a.fparent||(c=h("<div/>",{css:{"pointer-events":"none"}}).hide(),c.data().flips=0,a.opts.turn?(c.css(l(-a.opts.turn.offset().top,-a.opts.turn.offset().left,"auto","visible").css).appendTo(a.opts.turn),a.opts.turn.data().fparent=c):c.css(l(0,0,"auto","visible").css).attr("id","turn-fwrappers").appendTo(h("body")),a.fparent=c);this.css({position:"absolute",top:0,left:0,
+bottom:"auto",right:"auto"});a.wrapper=h("<div/>",l(0,0,this.css("z-index"))).appendTo(b).prepend(this);a.fwrapper=h("<div/>",l(b.offset().top,b.offset().left)).hide().appendTo(a.fparent);a.fpage=h("<div/>",{css:{cursor:"default"}}).appendTo(h("<div/>",l(0,0,0,"visible")).appendTo(a.fwrapper));a.opts.frontGradient&&(a.ashadow=h("<div/>",l(0,0,1)).appendTo(a.fpage));i.setData.call(this,a);i.resize.call(this,!0)}},_fold:function(a){var b=this,c=0,d=0,e,f,h,g,v,H,n=j(0,0),p=j(0,0),k=j(0,0),r=this.width(),
+u=this.height(),l=i._foldingPage.call(this);Math.tan(d);var o=this.data().f,w=o.opts.acceleration,y=o.wrapper.height(),q=i._c.call(this,a.corner),D="t"==a.corner.substr(0,1),A="l"==a.corner.substr(1,1),F=function(){var m=j(q.x?q.x-a.x:a.x,q.y?q.y-a.y:a.y),B=Math.atan2(m.y,m.x),z;d=E-B;c=180*(d/G);z=j(A?r-m.x/2:a.x+m.x/2,m.y/2);var l=d-Math.atan2(z.y,z.x),l=Math.max(0,Math.sin(l)*Math.sqrt(Math.pow(z.x,2)+Math.pow(z.y,2)));k=j(l*Math.sin(d),l*Math.cos(d));if(d>E&&(k.x+=Math.abs(k.y*Math.tan(B)),k.y=
+0,Math.round(k.x*Math.tan(G-d))<u))return a.y=Math.sqrt(Math.pow(u,2)+2*z.x*m.x),D&&(a.y=u-a.y),F();if(d>E&&(m=G-d,B=y-u/Math.sin(m),n=j(Math.round(B*Math.cos(m)),Math.round(B*Math.sin(m))),A&&(n.x=-n.x),D))n.y=-n.y;e=Math.round(k.y/Math.tan(d)+k.x);m=r-e;B=m*Math.cos(2*d);z=m*Math.sin(2*d);p=j(Math.round(A?m-B:e+B),Math.round(D?z:u-z));v=m*Math.sin(d);m=i._c2.call(b,a.corner);m=Math.sqrt(Math.pow(m.x-a.x,2)+Math.pow(m.y-a.y,2));H=m<r?m/r:1;if(o.opts.frontGradient&&(g=100<v?(v-100)/v:0,f=j(100*(v*
+Math.sin(E-d)/u),100*(v*Math.cos(E-d)/r)),D&&(f.y=100-f.y),A))f.x=100-f.x;if(i._backGradient.call(b)&&(h=j(100*(v*Math.sin(d)/r),100*(v*Math.cos(d)/u)),A||(h.x=100-h.x),!D))h.y=100-h.y;k.x=Math.round(k.x);k.y=Math.round(k.y);return!0},x=function(a,c,e,k){var l=["0","auto"],v=(r-y)*e[0]/100,q=(u-y)*e[1]/100,c={left:l[c[0]],top:l[c[1]],right:l[c[2]],bottom:l[c[3]]},l=90!=k&&-90!=k?A?-1:1:0,e=e[0]+"% "+e[1]+"%";b.css(c).transform(t(k)+s(a.x+l,a.y,w),e);o.fpage.parent().css(c);o.wrapper.transform(s(-a.x+
+v-l,-a.y+q,w)+t(-k),e);o.fwrapper.transform(s(-a.x+n.x+v,-a.y+n.y+q,w)+t(-k),e);o.fpage.parent().transform(t(k)+s(a.x+p.x-n.x,a.y+p.y-n.y,w),e);o.opts.frontGradient&&M(o.ashadow,j(A?100:0,D?100:0),j(f.x,f.y),[[g,"rgba(0,0,0,0)"],[0.8*(1-g)+g,"rgba(0,0,0,"+0.2*H+")"],[1,"rgba(255,255,255,"+0.2*H+")"]],3,d);i._backGradient.call(b)&&M(o.bshadow,j(A?0:100,D?0:100),j(h.x,h.y),[[0.8,"rgba(0,0,0,0)"],[1,"rgba(0,0,0,"+0.3*H+")"],[1,"rgba(0,0,0,0)"]],3)};switch(a.corner){case "tl":a.x=Math.max(a.x,1);F();
+x(k,[1,0,0,1],[100,0],c);o.fpage.transform(s(-u,-r,w)+t(90-2*c),"100% 100%");l.transform(t(90)+s(0,-u,w),"0% 0%");break;case "tr":a.x=Math.min(a.x,r-1);F();x(j(-k.x,k.y),[0,0,0,1],[0,0],-c);o.fpage.transform(s(0,-r,w)+t(-90+2*c),"0% 100%");l.transform(t(270)+s(-r,0,w),"0% 0%");break;case "bl":a.x=Math.max(a.x,1);F();x(j(k.x,-k.y),[1,1,0,0],[100,100],-c);o.fpage.transform(s(-u,0,w)+t(-90+2*c),"100% 0%");l.transform(t(270)+s(-r,0,w),"0% 0%");break;case "br":a.x=Math.min(a.x,r-1),F(),x(j(-k.x,-k.y),
+[0,1,1,0],[0,100],c),o.fpage.transform(t(90-2*c),"0% 0%"),l.transform(t(90)+s(0,-u,w),"0% 0%")}o.point=a},_moveFoldingPage:function(a){var b=this.data().f,c=i._foldingPage.call(this);if(c)if(a){if(!b.fpage.children()[b.ashadow?"1":"0"])i.setData.call(this,{backParent:c.parent()}),b.fpage.prepend(c)}else b.backParent&&b.backParent.prepend(c)},_showFoldedPage:function(a,b){var c=i._foldingPage.call(this),d=this.data(),e=d.f;if(!e.point||e.point.corner!=a.corner){var f=h.Event("start");this.trigger(f,
+[e.opts,a.corner]);if(f.isDefaultPrevented())return!1}if(c){if(b){var g=this,c=e.point&&e.point.corner==a.corner?e.point:i._c.call(this,a.corner,1);this.animatef({from:[c.x,c.y],to:[a.x,a.y],duration:500,frame:function(b){a.x=Math.round(b[0]);a.y=Math.round(b[1]);i._fold.call(g,a)}})}else i._fold.call(this,a),d.effect&&!d.effect.turning&&this.animatef(!1);e.fwrapper.is(":visible")||(e.fparent.show().data().flips++,i._moveFoldingPage.call(this,!0),e.fwrapper.show(),e.bshadow&&e.bshadow.show());return!0}return!1},
+hide:function(){var a=this.data().f,b=i._foldingPage.call(this);0===--a.fparent.data().flips&&a.fparent.hide();this.css({left:0,top:0,right:"auto",bottom:"auto"}).transform("","0% 100%");a.wrapper.transform("","0% 100%");a.fwrapper.hide();a.bshadow&&a.bshadow.hide();b.transform("","0% 0%");return this},hideFoldedPage:function(a){var b=this.data().f;if(b.point){var c=this,d=b.point,e=function(){b.point=null;c.flip("hide");c.trigger("end",[!1])};if(a){var f=i._c.call(this,d.corner),a="t"==d.corner.substr(0,
+1)?Math.min(0,d.y-f.y)/2:Math.max(0,d.y-f.y)/2,h=j(d.x,d.y+a),g=j(f.x,f.y-a);this.animatef({from:0,to:1,frame:function(a){a=L(d,h,g,f,a);d.x=a.x;d.y=a.y;i._fold.call(c,d)},complete:e,duration:800,hiding:!0})}else this.animatef(!1),e()}},turnPage:function(a){var b=this,c=this.data().f,a={corner:c.corner?c.corner.corner:a||i._cAllowed.call(this)[0]},d=c.point||i._c.call(this,a.corner,c.opts.turn?c.opts.turn.data().opts.elevation:0),e=i._c2.call(this,a.corner);this.trigger("flip").animatef({from:0,to:1,
+frame:function(c){c=L(d,d,e,e,c);a.x=c.x;a.y=c.y;i._showFoldedPage.call(b,a)},complete:function(){b.trigger("end",[!0])},duration:c.opts.duration,turning:!0});c.corner=null},moving:function(){return"effect"in this.data()},isTurning:function(){return this.flip("moving")&&this.data().effect.turning},_eventStart:function(a){var b=this.data().f;if(!b.disabled&&!this.flip("isTurning")){b.corner=i._cornerActivated.call(this,a);if(b.corner&&i._foldingPage.call(this,b.corner))return i._moveFoldingPage.call(this,
+!0),this.trigger("pressed",[b.point]),!1;b.corner=null}},_eventMove:function(a){var b=this.data().f;if(!b.disabled)if(a=q?a.originalEvent.touches:[a],b.corner){var c=b.parent.offset();b.corner.x=a[0].pageX-c.left;b.corner.y=a[0].pageY-c.top;i._showFoldedPage.call(this,b.corner)}else!this.data().effect&&this.is(":visible")&&((a=i._cornerActivated.call(this,a[0]))?(b=i._c.call(this,a.corner,b.opts.cornerSize/2),a.x=b.x,a.y=b.y,i._showFoldedPage.call(this,a,!0)):i.hideFoldedPage.call(this,!0))},_eventEnd:function(){var a=
+this.data().f;if(!a.disabled&&a.point){var b=h.Event("released");this.trigger(b,[a.point]);b.isDefaultPrevented()||i.hideFoldedPage.call(this,!0)}a.corner=null},disable:function(a){i.setData.call(this,{disabled:a});return this}},N=function(a,b,c){if(!c[0]||"object"==typeof c[0])return b.init.apply(a,c);if(b[c[0]]&&"_"!=c[0].toString().substr(0,1))return b[c[0]].apply(a,Array.prototype.slice.call(c,1));throw c[0]+" is an invalid value";};h.extend(h.fn,{flip:function(a,b){return N(this,i,arguments)},
+turn:function(a){return N(this,g,arguments)},transform:function(a,b){var c={};b&&(c[y+"transform-origin"]=b);c[y+"transform"]=a;return this.css(c)},animatef:function(a){var b=this.data();b.effect&&clearInterval(b.effect.handle);if(a){a.to.length||(a.to=[a.to]);a.from.length||(a.from=[a.from]);a.easing||(a.easing=function(a,b,c,d,e){return d*Math.sqrt(1-(b=b/e-1)*b)+c});var c,d=[],e=a.to.length,f=this,h=a.fps||30,i=-h,g=function(){var c,g=[];i=Math.min(a.duration,i+h);for(c=0;c<e;c++)g.push(a.easing(1,
+i,a.from[c],d[c],a.duration));a.frame(e==1?g[0]:g);if(i==a.duration){clearInterval(b.effect.handle);delete b.effect;f.data(b);a.complete&&a.complete()}};for(c=0;c<e;c++)d.push(a.to[c]-a.from[c]);b.effect=a;b.effect.handle=setInterval(g,h);this.data(b);g()}else delete b.effect}});h.isTouch=q})(jQuery);
+
+define("pageTurn", function(){});
+
+(function(){var define,requireModule,require,requirejs;(function(){var registry={},seen={};define=function(name,deps,callback){registry[name]={deps:deps,callback:callback}};requirejs=require=requireModule=function(name){requirejs._eak_seen=registry;if(seen[name]){return seen[name]}seen[name]={};if(!registry[name]){throw new Error("Could not find module "+name)}var mod=registry[name],deps=mod.deps,callback=mod.callback,reified=[],exports;for(var i=0,l=deps.length;i<l;i++){if(deps[i]==="exports"){reified.push(exports={})}else{reified.push(requireModule(resolve(deps[i])))}}var value=callback.apply(this,reified);return seen[name]=exports||value;function resolve(child){if(child.charAt(0)!=="."){return child}var parts=child.split("/");var parentBase=name.split("/").slice(0,-1);for(var i=0,l=parts.length;i<l;i++){var part=parts[i];if(part===".."){parentBase.pop()}else if(part==="."){continue}else{parentBase.push(part)}}return parentBase.join("/")}}})();define("promise/all",["./utils","exports"],function(__dependency1__,__exports__){var isArray=__dependency1__.isArray;var isFunction=__dependency1__.isFunction;function all(promises){var Promise=this;if(!isArray(promises)){throw new TypeError("You must pass an array to all.")}return new Promise(function(resolve,reject){var results=[],remaining=promises.length,promise;if(remaining===0){resolve([])}function resolver(index){return function(value){resolveAll(index,value)}}function resolveAll(index,value){results[index]=value;if(--remaining===0){resolve(results)}}for(var i=0;i<promises.length;i++){promise=promises[i];if(promise&&isFunction(promise.then)){promise.then(resolver(i),reject)}else{resolveAll(i,promise)}}})}__exports__.all=all});define("promise/asap",["exports"],function(__exports__){var browserGlobal=typeof window!=="undefined"?window:{};var BrowserMutationObserver=browserGlobal.MutationObserver||browserGlobal.WebKitMutationObserver;var local=typeof global!=="undefined"?global:this===undefined?window:this;function useNextTick(){return function(){process.nextTick(flush)}}function useMutationObserver(){var iterations=0;var observer=new BrowserMutationObserver(flush);var node=document.createTextNode("");observer.observe(node,{characterData:true});return function(){node.data=iterations=++iterations%2}}function useSetTimeout(){return function(){local.setTimeout(flush,1)}}var queue=[];function flush(){for(var i=0;i<queue.length;i++){var tuple=queue[i];var callback=tuple[0],arg=tuple[1];callback(arg)}queue=[]}var scheduleFlush;if(typeof process!=="undefined"&&{}.toString.call(process)==="[object process]"){scheduleFlush=useNextTick()}else if(BrowserMutationObserver){scheduleFlush=useMutationObserver()}else{scheduleFlush=useSetTimeout()}function asap(callback,arg){var length=queue.push([callback,arg]);if(length===1){scheduleFlush()}}__exports__.asap=asap});define("promise/config",["exports"],function(__exports__){var config={instrument:false};function configure(name,value){if(arguments.length===2){config[name]=value}else{return config[name]}}__exports__.config=config;__exports__.configure=configure});define("promise/polyfill",["./promise","./utils","exports"],function(__dependency1__,__dependency2__,__exports__){var RSVPPromise=__dependency1__.Promise;var isFunction=__dependency2__.isFunction;function polyfill(){var local;if(typeof global!=="undefined"){local=global}else if(typeof window!=="undefined"&&window.document){local=window}else{local=self}var es6PromiseSupport="Promise"in local&&"resolve"in local.Promise&&"reject"in local.Promise&&"all"in local.Promise&&"race"in local.Promise&&function(){var resolve;new local.Promise(function(r){resolve=r});return isFunction(resolve)}();if(!es6PromiseSupport){local.Promise=RSVPPromise}}__exports__.polyfill=polyfill});define("promise/promise",["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],function(__dependency1__,__dependency2__,__dependency3__,__dependency4__,__dependency5__,__dependency6__,__dependency7__,__exports__){var config=__dependency1__.config;var configure=__dependency1__.configure;var objectOrFunction=__dependency2__.objectOrFunction;var isFunction=__dependency2__.isFunction;var now=__dependency2__.now;var all=__dependency3__.all;var race=__dependency4__.race;var staticResolve=__dependency5__.resolve;var staticReject=__dependency6__.reject;var asap=__dependency7__.asap;var counter=0;config.async=asap;function Promise(resolver){if(!isFunction(resolver)){throw new TypeError("You must pass a resolver function as the first argument to the promise constructor")}if(!(this instanceof Promise)){throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.")}this._subscribers=[];invokeResolver(resolver,this)}function invokeResolver(resolver,promise){function resolvePromise(value){resolve(promise,value)}function rejectPromise(reason){reject(promise,reason)}try{resolver(resolvePromise,rejectPromise)}catch(e){rejectPromise(e)}}function invokeCallback(settled,promise,callback,detail){var hasCallback=isFunction(callback),value,error,succeeded,failed;if(hasCallback){try{value=callback(detail);succeeded=true}catch(e){failed=true;error=e}}else{value=detail;succeeded=true}if(handleThenable(promise,value)){return}else if(hasCallback&&succeeded){resolve(promise,value)}else if(failed){reject(promise,error)}else if(settled===FULFILLED){resolve(promise,value)}else if(settled===REJECTED){reject(promise,value)}}var PENDING=void 0;var SEALED=0;var FULFILLED=1;var REJECTED=2;function subscribe(parent,child,onFulfillment,onRejection){var subscribers=parent._subscribers;var length=subscribers.length;subscribers[length]=child;subscribers[length+FULFILLED]=onFulfillment;subscribers[length+REJECTED]=onRejection}function publish(promise,settled){var child,callback,subscribers=promise._subscribers,detail=promise._detail;for(var i=0;i<subscribers.length;i+=3){child=subscribers[i];callback=subscribers[i+settled];invokeCallback(settled,child,callback,detail)}promise._subscribers=null}Promise.prototype={constructor:Promise,_state:undefined,_detail:undefined,_subscribers:undefined,then:function(onFulfillment,onRejection){var promise=this;var thenPromise=new this.constructor(function(){});if(this._state){var callbacks=arguments;config.async(function invokePromiseCallback(){invokeCallback(promise._state,thenPromise,callbacks[promise._state-1],promise._detail)})}else{subscribe(this,thenPromise,onFulfillment,onRejection)}return thenPromise},"catch":function(onRejection){return this.then(null,onRejection)}};Promise.all=all;Promise.race=race;Promise.resolve=staticResolve;Promise.reject=staticReject;function handleThenable(promise,value){var then=null,resolved;try{if(promise===value){throw new TypeError("A promises callback cannot return that same promise.")}if(objectOrFunction(value)){then=value.then;if(isFunction(then)){then.call(value,function(val){if(resolved){return true}resolved=true;if(value!==val){resolve(promise,val)}else{fulfill(promise,val)}},function(val){if(resolved){return true}resolved=true;reject(promise,val)});return true}}}catch(error){if(resolved){return true}reject(promise,error);return true}return false}function resolve(promise,value){if(promise===value){fulfill(promise,value)}else if(!handleThenable(promise,value)){fulfill(promise,value)}}function fulfill(promise,value){if(promise._state!==PENDING){return}promise._state=SEALED;promise._detail=value;config.async(publishFulfillment,promise)}function reject(promise,reason){if(promise._state!==PENDING){return}promise._state=SEALED;promise._detail=reason;config.async(publishRejection,promise)}function publishFulfillment(promise){publish(promise,promise._state=FULFILLED)}function publishRejection(promise){publish(promise,promise._state=REJECTED)}__exports__.Promise=Promise});define("promise/race",["./utils","exports"],function(__dependency1__,__exports__){var isArray=__dependency1__.isArray;function race(promises){var Promise=this;if(!isArray(promises)){throw new TypeError("You must pass an array to race.")}return new Promise(function(resolve,reject){var results=[],promise;for(var i=0;i<promises.length;i++){promise=promises[i];if(promise&&typeof promise.then==="function"){promise.then(resolve,reject)}else{resolve(promise)}}})}__exports__.race=race});define("promise/reject",["exports"],function(__exports__){function reject(reason){var Promise=this;return new Promise(function(resolve,reject){reject(reason)})}__exports__.reject=reject});define("promise/resolve",["exports"],function(__exports__){function resolve(value){if(value&&typeof value==="object"&&value.constructor===this){return value}var Promise=this;return new Promise(function(resolve){resolve(value)})}__exports__.resolve=resolve});define("promise/utils",["exports"],function(__exports__){function objectOrFunction(x){return isFunction(x)||typeof x==="object"&&x!==null}function isFunction(x){return typeof x==="function"}function isArray(x){return Object.prototype.toString.call(x)==="[object Array]"}var now=Date.now||function(){return(new Date).getTime()};__exports__.objectOrFunction=objectOrFunction;__exports__.isFunction=isFunction;__exports__.isArray=isArray;__exports__.now=now});requireModule("promise/polyfill").polyfill()})();(function(){var Promise=typeof module!=="undefined"&&module.exports?require("promise"):this.Promise;var db=null;var dbInfo={};var indexedDB=indexedDB||this.indexedDB||this.webkitIndexedDB||this.mozIndexedDB||this.OIndexedDB||this.msIndexedDB;if(!indexedDB){return}function _initStorage(options){if(options){for(var i in options){dbInfo[i]=options[i]}}return new Promise(function(resolve,reject){var openreq=indexedDB.open(dbInfo.name,dbInfo.version);openreq.onerror=function withStoreOnError(){reject(openreq.error)};openreq.onupgradeneeded=function withStoreOnUpgradeNeeded(){openreq.result.createObjectStore(dbInfo.storeName)};openreq.onsuccess=function withStoreOnSuccess(){db=openreq.result;resolve()}})}function getItem(key,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){var store=db.transaction(dbInfo.storeName,"readonly").objectStore(dbInfo.storeName);var req=store.get(key);req.onsuccess=function(){var value=req.result;if(value===undefined){value=null}if(callback){callback(value)}resolve(value)};req.onerror=function(){if(callback){callback(null,req.error)}reject(req.error)}})})}function setItem(key,value,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){var store=db.transaction(dbInfo.storeName,"readwrite").objectStore(dbInfo.storeName);if(value===undefined){value=null}var req=store.put(value,key);req.onsuccess=function(){if(callback){callback(value)}resolve(value)};req.onerror=function(){if(callback){callback(null,req.error)}reject(req.error)}})})}function removeItem(key,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){var store=db.transaction(dbInfo.storeName,"readwrite").objectStore(dbInfo.storeName);var req=store["delete"](key);req.onsuccess=function(){if(callback){callback()}resolve()};req.onerror=function(){if(callback){callback(req.error)}reject(req.error)};req.onabort=function(event){var error=event.target.error;if(error==="QuotaExceededError"){if(callback){callback(error)}reject(error)}}})})}function clear(callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){var store=db.transaction(dbInfo.storeName,"readwrite").objectStore(dbInfo.storeName);var req=store.clear();req.onsuccess=function(){if(callback){callback()}resolve()};req.onerror=function(){if(callback){callback(null,req.error)}reject(req.error)}})})}function length(callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){var store=db.transaction(dbInfo.storeName,"readonly").objectStore(dbInfo.storeName);var req=store.count();req.onsuccess=function(){if(callback){callback(req.result)}resolve(req.result)};req.onerror=function(){if(callback){callback(null,req.error)}reject(req.error)}})})}function key(n,callback){var _this=this;return new Promise(function(resolve,reject){if(n<0){if(callback){callback(null)}resolve(null);return}_this.ready().then(function(){var store=db.transaction(dbInfo.storeName,"readonly").objectStore(dbInfo.storeName);var advanced=false;var req=store.openCursor();req.onsuccess=function(){var cursor=req.result;if(!cursor){if(callback){callback(null)}resolve(null);return}if(n===0){if(callback){callback(cursor.key)}resolve(cursor.key)}else{if(!advanced){advanced=true;cursor.advance(n)}else{if(callback){callback(cursor.key)}resolve(cursor.key)}}};req.onerror=function(){if(callback){callback(null,req.error)}reject(req.error)}})})}var asyncStorage={_driver:"asyncStorage",_initStorage:_initStorage,getItem:getItem,setItem:setItem,removeItem:removeItem,clear:clear,length:length,key:key};if(typeof define==="function"&&define.amd){define("asyncStorage",function(){return asyncStorage})}else if(typeof module!=="undefined"&&module.exports){module.exports=asyncStorage}else{this.asyncStorage=asyncStorage}}).call(this);(function(){var keyPrefix="";var dbInfo={};var Promise=typeof module!=="undefined"&&module.exports?require("promise"):this.Promise;var localStorage=null;try{localStorage=this.localStorage}catch(e){return}function _initStorage(options){if(options){for(var i in options){dbInfo[i]=options[i]}}keyPrefix=dbInfo.name+"/";return Promise.resolve()}var SERIALIZED_MARKER="__lfsc__:";var SERIALIZED_MARKER_LENGTH=SERIALIZED_MARKER.length;var TYPE_ARRAYBUFFER="arbf";var TYPE_BLOB="blob";var TYPE_INT8ARRAY="si08";var TYPE_UINT8ARRAY="ui08";var TYPE_UINT8CLAMPEDARRAY="uic8";var TYPE_INT16ARRAY="si16";var TYPE_INT32ARRAY="si32";var TYPE_UINT16ARRAY="ur16";var TYPE_UINT32ARRAY="ui32";var TYPE_FLOAT32ARRAY="fl32";var TYPE_FLOAT64ARRAY="fl64";var TYPE_SERIALIZED_MARKER_LENGTH=SERIALIZED_MARKER_LENGTH+TYPE_ARRAYBUFFER.length;function clear(callback){var _this=this;return new Promise(function(resolve){_this.ready().then(function(){localStorage.clear();if(callback){callback()}resolve()})})}function getItem(key,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){try{var result=localStorage.getItem(keyPrefix+key);if(result){result=_deserialize(result)}if(callback){callback(result,null)}resolve(result)}catch(e){if(callback){callback(null,e)}reject(e)}})})}function key(n,callback){var _this=this;return new Promise(function(resolve){_this.ready().then(function(){var result=localStorage.key(n);if(result){result=result.substring(keyPrefix.length)}if(callback){callback(result)}resolve(result)})})}function length(callback){var _this=this;return new Promise(function(resolve){_this.ready().then(function(){var result=localStorage.length;if(callback){callback(result)}resolve(result)})})}function removeItem(key,callback){var _this=this;return new Promise(function(resolve){_this.ready().then(function(){localStorage.removeItem(keyPrefix+key);if(callback){callback()}resolve()})})}function _deserialize(value){if(value.substring(0,SERIALIZED_MARKER_LENGTH)!==SERIALIZED_MARKER){return JSON.parse(value)}var serializedString=value.substring(TYPE_SERIALIZED_MARKER_LENGTH);var type=value.substring(SERIALIZED_MARKER_LENGTH,TYPE_SERIALIZED_MARKER_LENGTH);var buffer=new ArrayBuffer(serializedString.length*2);var bufferView=new Uint16Array(buffer);for(var i=serializedString.length-1;i>=0;i--){bufferView[i]=serializedString.charCodeAt(i)}switch(type){case TYPE_ARRAYBUFFER:return buffer;case TYPE_BLOB:return new Blob([buffer]);case TYPE_INT8ARRAY:return new Int8Array(buffer);case TYPE_UINT8ARRAY:return new Uint8Array(buffer);case TYPE_UINT8CLAMPEDARRAY:return new Uint8ClampedArray(buffer);case TYPE_INT16ARRAY:return new Int16Array(buffer);case TYPE_UINT16ARRAY:return new Uint16Array(buffer);case TYPE_INT32ARRAY:return new Int32Array(buffer);case TYPE_UINT32ARRAY:return new Uint32Array(buffer);case TYPE_FLOAT32ARRAY:return new Float32Array(buffer);case TYPE_FLOAT64ARRAY:return new Float64Array(buffer);default:throw new Error("Unkown type: "+type)}}function _bufferToString(buffer){var str="";var uint16Array=new Uint16Array(buffer);try{str=String.fromCharCode.apply(null,uint16Array)}catch(e){for(var i=0;i<uint16Array.length;i++){str+=String.fromCharCode(uint16Array[i])}}return str}function _serialize(value,callback){var valueString="";if(value){valueString=value.toString()}if(value&&(value.toString()==="[object ArrayBuffer]"||value.buffer&&value.buffer.toString()==="[object ArrayBuffer]")){var buffer;var marker=SERIALIZED_MARKER;if(value instanceof ArrayBuffer){buffer=value;marker+=TYPE_ARRAYBUFFER}else{buffer=value.buffer;if(valueString==="[object Int8Array]"){marker+=TYPE_INT8ARRAY}else if(valueString==="[object Uint8Array]"){marker+=TYPE_UINT8ARRAY}else if(valueString==="[object Uint8ClampedArray]"){marker+=TYPE_UINT8CLAMPEDARRAY}else if(valueString==="[object Int16Array]"){marker+=TYPE_INT16ARRAY}else if(valueString==="[object Uint16Array]"){marker+=TYPE_UINT16ARRAY}else if(valueString==="[object Int32Array]"){marker+=TYPE_INT32ARRAY}else if(valueString==="[object Uint32Array]"){marker+=TYPE_UINT32ARRAY}else if(valueString==="[object Float32Array]"){marker+=TYPE_FLOAT32ARRAY}else if(valueString==="[object Float64Array]"){marker+=TYPE_FLOAT64ARRAY}else{callback(new Error("Failed to get type for BinaryArray"))}}callback(marker+_bufferToString(buffer))}else if(valueString==="[object Blob]"){var fileReader=new FileReader;fileReader.onload=function(){var str=_bufferToString(this.result);callback(SERIALIZED_MARKER+TYPE_BLOB+str)};fileReader.readAsArrayBuffer(value)}else{try{callback(JSON.stringify(value))}catch(e){if(this.console&&this.console.error){this.console.error("Couldn't convert value into a JSON string: ",value)}callback(null,e)}}}function setItem(key,value,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){if(value===undefined){value=null}var originalValue=value;_serialize(value,function(value,error){if(error){if(callback){callback(null,error)}reject(error)}else{try{localStorage.setItem(keyPrefix+key,value)}catch(e){if(e.name==="QuotaExceededError"||e.name==="NS_ERROR_DOM_QUOTA_REACHED"){if(callback){callback(null,e)}reject(e)}}if(callback){callback(originalValue)}resolve(originalValue)}})})})}var localStorageWrapper={_driver:"localStorageWrapper",_initStorage:_initStorage,getItem:getItem,setItem:setItem,removeItem:removeItem,clear:clear,length:length,key:key};if(typeof define==="function"&&define.amd){define("localStorageWrapper",function(){return localStorageWrapper})}else if(typeof module!=="undefined"&&module.exports){module.exports=localStorageWrapper}else{this.localStorageWrapper=localStorageWrapper}}).call(this);(function(){var BASE_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";var Promise=typeof module!=="undefined"&&module.exports?require("promise"):this.Promise;var openDatabase=this.openDatabase;var db=null;var dbInfo={};var SERIALIZED_MARKER="__lfsc__:";var SERIALIZED_MARKER_LENGTH=SERIALIZED_MARKER.length;var TYPE_ARRAYBUFFER="arbf";var TYPE_BLOB="blob";var TYPE_INT8ARRAY="si08";var TYPE_UINT8ARRAY="ui08";var TYPE_UINT8CLAMPEDARRAY="uic8";var TYPE_INT16ARRAY="si16";var TYPE_INT32ARRAY="si32";var TYPE_UINT16ARRAY="ur16";var TYPE_UINT32ARRAY="ui32";var TYPE_FLOAT32ARRAY="fl32";var TYPE_FLOAT64ARRAY="fl64";var TYPE_SERIALIZED_MARKER_LENGTH=SERIALIZED_MARKER_LENGTH+TYPE_ARRAYBUFFER.length;if(!openDatabase){return}function _initStorage(options){var _this=this;if(options){for(var i in options){dbInfo[i]=typeof options[i]!=="string"?options[i].toString():options[i]}}return new Promise(function(resolve){try{db=openDatabase(dbInfo.name,dbInfo.version,dbInfo.description,dbInfo.size)}catch(e){return _this.setDriver("localStorageWrapper").then(resolve)}db.transaction(function(t){t.executeSql("CREATE TABLE IF NOT EXISTS "+dbInfo.storeName+" (id INTEGER PRIMARY KEY, key unique, value)",[],function(){resolve()},null)})})}function getItem(key,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){db.transaction(function(t){t.executeSql("SELECT * FROM "+dbInfo.storeName+" WHERE key = ? LIMIT 1",[key],function(t,results){var result=results.rows.length?results.rows.item(0).value:null;if(result){result=_deserialize(result)}if(callback){callback(result)}resolve(result)},function(t,error){if(callback){callback(null,error)}reject(error)})})})})}function setItem(key,value,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){if(value===undefined){value=null}var originalValue=value;_serialize(value,function(value,error){if(error){reject(error)}else{db.transaction(function(t){t.executeSql("INSERT OR REPLACE INTO "+dbInfo.storeName+" (key, value) VALUES (?, ?)",[key,value],function(){if(callback){callback(originalValue)}resolve(originalValue)},function(t,error){if(callback){callback(null,error)}reject(error)})},function(sqlError){if(sqlError.code===sqlError.QUOTA_ERR){if(callback){callback(null,sqlError)}reject(sqlError)}})}})})})}function removeItem(key,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){db.transaction(function(t){t.executeSql("DELETE FROM "+dbInfo.storeName+" WHERE key = ?",[key],function(){if(callback){callback()}resolve()},function(t,error){if(callback){callback(error)}reject(error)})})})})}function clear(callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){db.transaction(function(t){t.executeSql("DELETE FROM "+dbInfo.storeName,[],function(){if(callback){callback()}resolve()},function(t,error){if(callback){callback(error)}reject(error)})})})})}function length(callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){db.transaction(function(t){t.executeSql("SELECT COUNT(key) as c FROM "+dbInfo.storeName,[],function(t,results){var result=results.rows.item(0).c;if(callback){callback(result)}resolve(result)},function(t,error){if(callback){callback(null,error)}reject(error)})})})})}function key(n,callback){var _this=this;return new Promise(function(resolve,reject){_this.ready().then(function(){db.transaction(function(t){t.executeSql("SELECT key FROM "+dbInfo.storeName+" WHERE id = ? LIMIT 1",[n+1],function(t,results){var result=results.rows.length?results.rows.item(0).key:null;if(callback){callback(result)}resolve(result)},function(t,error){if(callback){callback(null,error)}reject(error)})})})})}function _bufferToString(buffer){var bytes=new Uint8Array(buffer);var i;var base64String="";for(i=0;i<bytes.length;i+=3){base64String+=BASE_CHARS[bytes[i]>>2];base64String+=BASE_CHARS[(bytes[i]&3)<<4|bytes[i+1]>>4];base64String+=BASE_CHARS[(bytes[i+1]&15)<<2|bytes[i+2]>>6];base64String+=BASE_CHARS[bytes[i+2]&63]}if(bytes.length%3===2){base64String=base64String.substring(0,base64String.length-1)+"="}else if(bytes.length%3===1){base64String=base64String.substring(0,base64String.length-2)+"=="}return base64String}function _deserialize(value){if(value.substring(0,SERIALIZED_MARKER_LENGTH)!==SERIALIZED_MARKER){return JSON.parse(value)}var serializedString=value.substring(TYPE_SERIALIZED_MARKER_LENGTH);var type=value.substring(SERIALIZED_MARKER_LENGTH,TYPE_SERIALIZED_MARKER_LENGTH);var bufferLength=serializedString.length*.75;var len=serializedString.length;var i;var p=0;var encoded1,encoded2,encoded3,encoded4;if(serializedString[serializedString.length-1]==="="){bufferLength--;if(serializedString[serializedString.length-2]==="="){bufferLength--}}var buffer=new ArrayBuffer(bufferLength);var bytes=new Uint8Array(buffer);for(i=0;i<len;i+=4){encoded1=BASE_CHARS.indexOf(serializedString[i]);encoded2=BASE_CHARS.indexOf(serializedString[i+1]);encoded3=BASE_CHARS.indexOf(serializedString[i+2]);encoded4=BASE_CHARS.indexOf(serializedString[i+3]);bytes[p++]=encoded1<<2|encoded2>>4;bytes[p++]=(encoded2&15)<<4|encoded3>>2;bytes[p++]=(encoded3&3)<<6|encoded4&63}switch(type){case TYPE_ARRAYBUFFER:return buffer;case TYPE_BLOB:return new Blob([buffer]);case TYPE_INT8ARRAY:return new Int8Array(buffer);case TYPE_UINT8ARRAY:return new Uint8Array(buffer);case TYPE_UINT8CLAMPEDARRAY:return new Uint8ClampedArray(buffer);case TYPE_INT16ARRAY:return new Int16Array(buffer);case TYPE_UINT16ARRAY:return new Uint16Array(buffer);case TYPE_INT32ARRAY:return new Int32Array(buffer);case TYPE_UINT32ARRAY:return new Uint32Array(buffer);case TYPE_FLOAT32ARRAY:return new Float32Array(buffer);case TYPE_FLOAT64ARRAY:return new Float64Array(buffer);default:throw new Error("Unkown type: "+type)}}function _serialize(value,callback){var valueString="";if(value){valueString=value.toString()}if(value&&(value.toString()==="[object ArrayBuffer]"||value.buffer&&value.buffer.toString()==="[object ArrayBuffer]")){var buffer;var marker=SERIALIZED_MARKER;if(value instanceof ArrayBuffer){buffer=value;marker+=TYPE_ARRAYBUFFER}else{buffer=value.buffer;if(valueString==="[object Int8Array]"){marker+=TYPE_INT8ARRAY}else if(valueString==="[object Uint8Array]"){marker+=TYPE_UINT8ARRAY}else if(valueString==="[object Uint8ClampedArray]"){marker+=TYPE_UINT8CLAMPEDARRAY}else if(valueString==="[object Int16Array]"){marker+=TYPE_INT16ARRAY}else if(valueString==="[object Uint16Array]"){marker+=TYPE_UINT16ARRAY}else if(valueString==="[object Int32Array]"){marker+=TYPE_INT32ARRAY}else if(valueString==="[object Uint32Array]"){marker+=TYPE_UINT32ARRAY}else if(valueString==="[object Float32Array]"){marker+=TYPE_FLOAT32ARRAY}else if(valueString==="[object Float64Array]"){marker+=TYPE_FLOAT64ARRAY}else{callback(new Error("Failed to get type for BinaryArray"))}}callback(marker+_bufferToString(buffer))}else if(valueString==="[object Blob]"){var fileReader=new FileReader;fileReader.onload=function(){var str=_bufferToString(this.result);callback(SERIALIZED_MARKER+TYPE_BLOB+str)};fileReader.readAsArrayBuffer(value)}else{try{callback(JSON.stringify(value))}catch(e){if(this.console&&this.console.error){this.console.error("Couldn't convert value into a JSON string: ",value)}callback(null,e)}}}var webSQLStorage={_driver:"webSQLStorage",_initStorage:_initStorage,getItem:getItem,setItem:setItem,removeItem:removeItem,clear:clear,length:length,key:key};if(typeof define==="function"&&define.amd){define("webSQLStorage",function(){return webSQLStorage})}else if(typeof module!=="undefined"&&module.exports){module.exports=webSQLStorage}else{this.webSQLStorage=webSQLStorage}}).call(this);(function(){var Promise=typeof module!=="undefined"&&module.exports?require("promise"):this.Promise;var MODULE_TYPE_DEFINE=1;var MODULE_TYPE_EXPORT=2;var MODULE_TYPE_WINDOW=3;var moduleType=MODULE_TYPE_WINDOW;if(typeof define==="function"&&define.amd){moduleType=MODULE_TYPE_DEFINE}else if(typeof module!=="undefined"&&module.exports){moduleType=MODULE_TYPE_EXPORT}var indexedDB=indexedDB||this.indexedDB||this.webkitIndexedDB||this.mozIndexedDB||this.OIndexedDB||this.msIndexedDB;var supportsIndexedDB=indexedDB&&indexedDB.open("_localforage_spec_test",1).onupgradeneeded===null;var openDatabase=this.openDatabase;var _this=this;var localForage={INDEXEDDB:"asyncStorage",LOCALSTORAGE:"localStorageWrapper",WEBSQL:"webSQLStorage",_config:{description:"",name:"localforage",size:3980736,storeName:"keyvaluepairs",version:1},config:function(options){if(typeof options==="object"){if(this._ready){return new Error("Can't call config() after localforage "+"has been used.")}for(var i in options){this._config[i]=options[i]}return true}else if(typeof options==="string"){return this._config[options]}else{return this._config}},driver:function(){return this._driver||null},_ready:Promise.reject(new Error("setDriver() wasn't called")),setDriver:function(driverName,callback){var driverSet=new Promise(function(resolve,reject){if(!supportsIndexedDB&&driverName===localForage.INDEXEDDB||!openDatabase&&driverName===localForage.WEBSQL){reject(localForage);return}localForage._ready=null;if(moduleType===MODULE_TYPE_DEFINE){require([driverName],function(lib){localForage._extend(lib);resolve(localForage)});return}else if(moduleType===MODULE_TYPE_EXPORT){var driver;switch(driverName){case localForage.INDEXEDDB:driver=require("./drivers/indexeddb");break;case localForage.LOCALSTORAGE:driver=require("./drivers/localstorage");break;case localForage.WEBSQL:driver=require("./drivers/websql")}localForage._extend(driver)}else{localForage._extend(_this[driverName])}resolve(localForage)});driverSet.then(callback,callback);return driverSet},ready:function(callback){if(this._ready===null){this._ready=this._initStorage(this._config)}this._ready.then(callback,callback);return this._ready},_extend:function(libraryMethodsAndProperties){for(var i in libraryMethodsAndProperties){if(libraryMethodsAndProperties.hasOwnProperty(i)){this[i]=libraryMethodsAndProperties[i]}}}};var storageLibrary;if(supportsIndexedDB){storageLibrary=localForage.INDEXEDDB}else if(openDatabase){storageLibrary=localForage.WEBSQL}else{storageLibrary=localForage.LOCALSTORAGE}if(this.localForageConfig){localForage.config=this.localForageConfig}localForage.setDriver(storageLibrary);if(moduleType===MODULE_TYPE_DEFINE){define('localForage',[],function(){return localForage})}else if(moduleType===MODULE_TYPE_EXPORT){module.exports=localForage}else{this.localforage=localForage}}).call(this);
 /**
  * @license
  * Lo-Dash 2.4.1 (Custom Build) lodash.com/license | Underscore.js 1.5.2 underscorejs.org/LICENSE
@@ -253,228 +447,451 @@ define('util/d3plugins',['d3'], function d3Plugins(d3){
     return d3;
 });
 
-//----------------------------------------------------------------------------
-//Logger library
-//    author: Erik Hazzard
-//
-//Provides a LOGGER object which can be used to perform client side logging
-//    Maintains a list of of all messages by log type. To log:
-//            LOGGER.log('type', 'message', param1, param2, etc...);
-//
-//    e.g.,
-//            LOGGER.log('error', 'Woops', { some: data });
-//
-//    To change logger options:
-//            LOGGER.options.logLevel = 'all' // ( or true ) - Shows ALL messages
-//            LOGGER.options.logLevel = ['error', 'debug'] // only shows the types 
-//              passed in
-//
-//            LOGGER.options.storeHistory = true | false
-//    To access history:
-//            LOGGER.history[type] to access messages by type
-//----------------------------------------------------------------------------
-define('logger',['d3'], function(d3) {
-    var LOGGER;
+/* =========================================================================
+ * Bragi (Javascript Logger)
+ * ----------------------------------
+ * v1.0.0
+ * Distributed under MIT license
+ * Author : Erik Hazzard ( http://vasir.net )
+ *
+ * Provides a LOGGER object which can be used to perform logging
+ * Maintains a list of of all messages by log type. To log:
+ *      LOGGER.log('type', 'message', param1, param2, etc...);
+ *      
+ *  e.g.,
+ *      LOGGER.log('error', 'Woops', { some: data });
+ *
+ * To change logger options:
+ *      LOGGER.options.logLevel = true; // Shows ALL messages (false to show none)
+ *      LOGGER.options.logLevel = ['error', 'debug']; // only shows passed in types 
+ *
+ *   LOGGER.options.storeHistory = true or false
+ *      NOTE: By default, history will be stored only for logged messages.
+ *
+ *      Set LOGGER.options.storeAllHistory = true; to enable storing history 
+ *      for unlogged messages
+ *
+ *      To access history:
+ *          LOGGER.history[type] to access messages by `type`
+ *
+ *
+ * What this library does currently not support:
+ *      Automatically sending the history / log messages to some server. 
+ *      Currently, you'll need to take the LOGGER.history object and pipe it
+ *      somwhere if you want to access the stored messages
+ *
+ *      TODO: For node, expose a `useEvents` option that would emit an event
+ *      on true, which would allow other libraries to do stuff with the log 
+ *      messages??
+ * ========================================================================= */
+(function(root, factory) {
+    // Setup logger for the environment
+    if(typeof define === 'function' && define.amd) {
+        // RequireJS / AMD
+        define('logger',['exports'], function(exports) {
+            root = factory(root, exports);
+            return root;
+        });
+    } else if (typeof exports !== 'undefined') {
+        // CommonJS
+        factory(root, exports); 
+        module.exports = factory();
+    } else {
+        // browser global if neither are supported
+        root.logger = factory(root, {});
+    }
+}(this, function(root, logger) {
 
-    // generate some color scales, give a wide range of unique colors
-    var colorScales = [
-        d3.scale.category20c(),
-        d3.scale.category20b(),
-        d3.scale.category20(),
-        d3.scale.category10()
-    ];
+    // This is a bit hacky, but we need to check if this is called from a
+    // command line or browser. Cheapest + fastest is to check if a global
+    // window object exists
+    var _isBrowser = typeof window === 'undefined' ? false : true;
 
-    // remember lastGroup
-    var LAST_GROUP = null;
+    // Some nice color variations
+    var COLORS, STYLES;
+    var COLOR_RESET = '\033[0m';
 
-    // values of found colors, to check for same colors
-    var foundColors = ['#dd4444'];
+    if(_isBrowser){
+        COLORS = [
+            '#3182bd',
+            '#dfc27d',
+            '#35978f',
+            '#543005',
+            '#c51b7d',
+            '#c6dbef',
+            '#af8dc3',
+            '#7fbf7b',
+            '#8c510a',
+            '#f5f5f5',
+            '#e9a3c9',
+            '#543005',
+            '#66c2a5',
+            '#f6e8c3',
+            '#80cdc1',
+            '#878787',
+            '#8c510a',
+            '#80cdc1',
+            '#542788',
+            '#003c30',
+            '#e6f598',
+            '#c7eae5'
+        ];
+    } else {
+        STYLES = {
+            colors: {
+                'white': '\x1B[37m',
+                'grey': '\x1B[90m',
+                'black': '\x1B[30m',
+                'blue': '\x1B[34m',
+                'cyan': '\x1B[36m',
+                'green': '\x1B[32m',
+                'magenta': '\x1B[35m',
+                'red': '\x1B[31m',
+                'yellow': '\x1B[33m'
+            },
+            styles: {
+                'blink': '\x1B[49;5;8m',
+                'underline': '\x1B[4m', 
+                'bold': '\x1B[1m'
+            },
+            backgrounds: {
+                'white': '\x1B[47m',
+                'black': '\x1B[40m',
+                'blue': '\x1B[44m',
+                'cyan': '\x1B[46m',
+                'green': '\x1B[42m',
+                'magenta': '\x1B[45m',
+                'red': '\x1B[41m',
+                'yellow': '\x1B[43m'
+            }
+        };
 
-    // key : value of colors so we don't generate new colors
-    // for each key
-    // set some default colors
-    var colorDict = {error: '#dd4444'};
+        COLORS = [
+            STYLES.colors.blue,
+            STYLES.colors.green,
+            STYLES.colors.magenta,
+            STYLES.colors.yellow,
+            STYLES.colors.cyan,
+            STYLES.colors.red,
 
-    var getColor = function loggerGetColor(target){
-        // generates or returns a color used by a target key
-        var i=0;
-        var color = '';
-        if(colorDict[target]){ return colorDict[target]; }
+            STYLES.backgrounds.blue + STYLES.colors.black,
+            STYLES.backgrounds.blue + STYLES.colors.white,
+            STYLES.backgrounds.blue + STYLES.colors.magenta,
 
-        while(i<colorScales.length){
-            color = colorScales[i](target);
+            STYLES.backgrounds.yellow + STYLES.colors.red,
+            STYLES.backgrounds.yellow + STYLES.colors.black,
+            STYLES.backgrounds.yellow + STYLES.colors.magenta,
 
-            // did NOT find the color, update the objects and break loop
-            if(foundColors.indexOf(color) === -1){
-                foundColors.push(color);
-                colorDict[target] = color;
-                break;
-            } 
+            STYLES.backgrounds.white + STYLES.colors.red,
+            STYLES.backgrounds.white + STYLES.colors.blue,
+            STYLES.backgrounds.white + STYLES.colors.black,
+            STYLES.backgrounds.white + STYLES.colors.magenta,
+            STYLES.backgrounds.white + STYLES.colors.yellow,
+            STYLES.backgrounds.white + STYLES.colors.cyan,
 
-            i += 1;
+            STYLES.backgrounds.magenta+ STYLES.colors.white,
+            STYLES.backgrounds.magenta + STYLES.colors.black,
+            STYLES.backgrounds.magenta + STYLES.colors.blue,
+            STYLES.backgrounds.magenta + STYLES.colors.green,
+            STYLES.backgrounds.magenta + STYLES.colors.yellow
+        ];
+    }
+
+    // Setup the logger
+    var LOGGER = {};
+
+    LOGGER.options = {
+        // default options
+        // Primary configuration options
+        // --------------------------
+        // logLevel: specifies what logs to display. Can be either:
+        //      1. an {array} of log levels 
+        //          e.g,. ['error', 'myLog1', 'myLog2']
+        //    or 
+        //
+        //      2. a {Boolean} : true to see *all* log messages, false to 
+        //          see *no* messages
+        logLevel: true,
+
+        // storeHistory: {Boolean} specifies wheter to save all log message 
+        //      objects.  This is required to send messages to a server, 
+        //      but can incur a small performance (memory) hit, depending 
+        //      on the number of logs. NOTE: This will, by default, only
+        //      store history for messages found in logLevel. 
+        //      Set `storeAllHistory` to store *all* messages
+        storeHistory: true,
+
+        // storeAllHistory: {Boolean} specifies wheter to store history for
+        // all log messages, regardless if they are logged
+        storeAllHistory: false,
+
+        // Secondary (display related) configuration options
+        // --------------------------
+        // showCaller: {Boolean} will automatically include the calling 
+        //      function's name. Useful for tracing execution of flow
+        showCaller: true,
+
+        // showTime: {Boolean} specifies wheter to include timestamp
+        showTime: true
+    };
+
+    LOGGER.history = {
+        // stored log messages by log type
+        // e.g.,:
+        // 'logType': [ { ... message 1 ...}, { ... message 2 ... }, ... ]
+    };
+
+    LOGGER.canLog = function canLog(type){ 
+        // Check the logLevels and passed in type. If the message cannot be
+        // logged, return false - otherwise, return true
+        //
+        // Note - this should not be accessed by the user
+        var logLevel = LOGGER.options.logLevel;
+        // by default, allow logging
+        var canLogIt = true;
+
+        if(logLevel === true){
+            canLogIt = true;
+
+        } else if(logLevel === false || logLevel === null){
+            // Don't ever log if logging is disabled
+            canLogIt = false;
+
+        } else if(logLevel instanceof Array){
+            // if an array of log levels is set, check it
+            canLogIt = false;
+
+            for(var i=0, len=logLevel.length; i<len; i++){
+                // the current logLevel will be a string we check type against;
+                // for instance,
+                //      if type is "group1:group2", and if the current log level
+                //      is "group1:group3", it will NOT match; but, "group1:group2" 
+                //      would match.
+                //          Likewise, "group1:group2:group3" WOULD match
+
+                // If the current item is a regular expression, run the regex
+                if(logLevel[i] instanceof RegExp){
+                    if(logLevel[i].test(type)){
+                        canLogIt = true;
+                        break;
+                    }
+                } else if(type.indexOf(logLevel[i]) === 0){
+                    canLogIt = true;
+                    break;
+                }
+            }
+        } 
+
+        return canLogIt;
+    };
+
+    // UTIL functions
+    // ----------------------------------
+    LOGGER.util = {};
+    LOGGER.util.darken = function darken(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // darkened value
+        color = color.replace(/#/g,'');
+        color = parseInt(color, 16);
+        color = color - 90000;
+        if(color < 0){ color = 0; }
+        color = color.toString(16);
+        return '#' + color;
+    };
+    LOGGER.util.lighten = function darken(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // lightened value
+        // TODO: combine this and darken
+        color = color.replace(/#/g,'');
+        color = parseInt(color, 16);
+        color = color + 90000;
+        if(color > 16777215){
+            color = 16777215;
         }
+        color = color.toString(16);
+        return '#' + color;
+    };
+
+    LOGGER.util.getForegroundColor = function getForegroundColor(color){
+        // Takes in a hex color {String} (e.g., '#336699') and returns a 
+        // darkened value
+        var colors = /(\w\w)(\w\w)(\w\w)/.exec(color);
+        if(!colors){ return '#000000'; }
+
+        var red = parseInt(colors[1], 16);
+        var green = parseInt(colors[2], 16);
+        var blue = parseInt(colors[3], 16);
+
+        // based on YIQ (http://en.wikipedia.org/wiki/YIQ)
+        var brightness = ((red * 299) + (green * 587) + (blue * 114)) / 1000;
+
+        if (brightness >= 128 || isNaN(brightness)) {
+            return '#000000';
+        } else {
+            return '#ffffff';
+        }
+    };
+
+    // backgroundColor
+    // ----------------------------------
+    // keeps track of colors being used. Uses a redundent array for quicker
+    // lookup
+    var _foundColors = [];
+    // and which logType goes to which color
+    var _colorDict = _isBrowser ? {error: '#dd4444'} : { error:  STYLES.styles.blink + STYLES.backgrounds.red + STYLES.colors.white };
+
+    function getBackgroundColor(type){
+        // Returns the background color for a passed in log type
+        // TODO: if more found colors exist than the original length of the
+        // COLOR array, cycle back and modify the original color
+        //
+        var color = '';
+
+        // For color, get the first group
+        type = type.split(':')[0];
+
+        // if a color exists for the passed in log group, use it
+        if(_colorDict[type]){ 
+            return _colorDict[type];
+        }
+
+        if(_foundColors.length >= COLORS.length){
+            // is the index too high? loop around if so
+            color = COLORS[Math.random() * COLORS.length | 0];
+            if(!_isBrowser){
+                color = STYLES.styles.underline + color;
+            } else {
+                for(var i=0;i<Math.random() * 10 | 0;i++){
+                    if(Math.random() < 0.5){
+                        color = LOGGER.util.darken(color);
+                    } else {
+                        color = LOGGER.util.lighten(color);
+                    }
+                }
+            }
+        } else {
+            // The length of the colors array is >= to the index of the color
+            color = COLORS[_foundColors.length];
+        }
+
+        // update the stored color info
+        _foundColors.push(color);
+        _colorDict[type] = color;
 
         return color;
-    };
-
-    LOGGER = {};
-    LOGGER.options = {
-        logLevel: 'all',
-        storeHistory: false
-    };
-    LOGGER.history = {};
-    LOGGER.can_log = function(type) {
-        var logLevel, return_value;
-
-        return_value = false;
-        logLevel = LOGGER.options.logLevel;
-        if (logLevel === 'all' || logLevel === true) {
-            return_value = true;
-        } else if (logLevel instanceof Array) {
-            if (logLevel.indexOf(type) > -1) {
-                return_value = true;
-            }
-        } else if (logLevel === null || logLevel === void 0 || logLevel === 'none' || logLevel === false) {
-            return_value = false;
-        } else {
-            if (logLevel === type) {
-                return_value = true;
-            }
-        }
-        return return_value;
-    };
-    LOGGER.log = function(type) {
-        var args, cur_date, logHistory;
-
-        args = Array.prototype.slice.call(arguments);
-        if ((type == null) || arguments.length === 1) {
-            type = 'debug';
-            args.splice(0, 0, 'debug');
-        }
-        if (!LOGGER.can_log(type)) {
-            return false;
-        }
-        cur_date = new Date();
-        args.push({
-            'Date': cur_date,
-            'Milliseconds': cur_date.getMilliseconds(),
-            'Time': cur_date.getTime()
-        });
-
-        if(LOGGER.options.storeHistory){
-                logHistory = LOGGER.history;
-                logHistory[type] = logHistory[type] || [];
-                logHistory[type].push(args);
-        }
-        if (window && window.console) {
-            //console.log(Array.prototype.slice.call(args));
-            // add a spacer between each arg
-            var len = args.length;
-            var newArgs = Array.prototype.slice.call(args);
-
-            // close group if the groups aren't the same
-            if(type !== LAST_GROUP){
-                console.groupEnd();
-                // start a group
-                console.group(type);
-                LAST_GROUP = type;
-            }
-
-
-            // NOTE: this will only add color to %c specified strings
-
-            // Add color to everything
-            if(newArgs[1] && typeof newArgs[1] === 'string'){
-                var shifted = newArgs.shift();
-
-                // if the string is a formatted string, add in the
-                // log type, the message, then the time
-                newArgs[0] = '%c' + 
-                    shifted + '\t:\t' + 
-                    newArgs[0].replace('%c', '') + 
-                    ' <time:%O>';
-
-                // If the second argument is a string and it is 
-                // NOT a color format string, the create one
-                if(typeof newArgs[1] !== 'string' || (typeof newArgs[1] === 'string' && newArgs[1].match(/[a-z ]+:[a-z ]+;/) === null)){
-                    var background = getColor(shifted);
-                    var color = d3.rgb(background);
-                    var border = color.darker();
-
-                    // make the text bright or light depending on how
-                    // dark or light it already is
-                    if(color.r + color.g + color.b < 378){
-                        color = color.brighter().brighter().brighter().brighter().brighter();
-                    } else { 
-                        color = color.darker().darker().darker().darker().darker();
-                    }
-
-                    // format string
-                    var formatString = "background: " + background + ';' + 
-                        'color:' + color + ';' + 
-                        'border: 2px solid ' + border + ';';
-
-                    newArgs.splice(1, 0, formatString);
-                    console.log.apply(console, newArgs);
-                }
-            } else {
-                // no special formatting, just call it normally
-                console.log(args);
-            }
-        }
-        return true;
-    };
-    LOGGER.options.log_types = ['debug', 'error', 'info', 'warn'];
-    LOGGER.options.setup_log_types = function() {
-        var log_type, _i, _len, _ref, _results;
-
-        LOGGER.log('logger', 'setup_log_types()', 'Called setup log types!');
-        _ref = LOGGER.options.log_types;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            log_type = _ref[_i];
-            _results.push((function(log_type) {
-                LOGGER[log_type] = function() {
-                    var args;
-
-                    args = Array.prototype.slice.call(arguments);
-                    args.splice(0, 0, log_type);
-                    return LOGGER.log.apply(null, args);
-                };
-                return LOGGER[log_type];
-            })(log_type));
-        }
-        return _results;
-    };
-    LOGGER.options.setup_log_types();
-    if (window) {
-        if (window.console && LOGGER.options) {
-            if (LOGGER.options.logLevel === 'none' || LOGGER.options.logLevel === null) {
-                console.log = function() {
-                    return {};
-                };
-            }
-        }
-        if (!window.console) {
-            window.console = {
-                log: function consoleLog() {
-                    return {};
-                }
-            };
-        }
-        if (!window.console.group) {
-            window.console.group = function consoleGroup() {};
-        }
-        if (!window.console.error) {
-            window.console.error = function consoleError() {};
-        }
-        window.onerror = function(msg, url, line) {
-            LOGGER.error(msg, url, line);
-            return false;
-        };
     }
+
+    LOGGER.getFormatString = function getFormatString (type){
+        var background = getBackgroundColor(type);
+        var color = LOGGER.util.getForegroundColor(background);
+
+        // Generate some formatted CSS
+        var formatString = "background: " + background + ';' + 
+            'color:' + color + ';' + 
+            'line-height: 1.8em;' +
+            'margin: 2px;' +
+            'padding: 2px;' +
+            'border: 2px solid rgba(0,0,0,0.5);';
+
+        return formatString;
+    };
+
+    // LOG function
+    // ----------------------------------
+    LOGGER.log = function loggerLog(type, message){
+        // Main logging function. Takes in two (plus n) parameters:
+        //   type: {String} specifies the log level, or log type
+        //
+        //   message: {String} the message to log. The message must be a single
+        //      string, but can have multiple objects inside using `%O`. e.g.,
+        //          logger.log('test', 'some object: %O', {answer: 42});
+        //
+        //   all other parameters are objects or strings that will be formatted
+        //   into the message
+        
+        // can this message be logged? If not, do nothing
+        if( !LOGGER.canLog(type) ){ 
+            // Can NOT be logged. If the storeAllHistory is set, we'll want
+            // to save the history
+            if(!LOGGER.options.storeAllHistory){
+                return false;
+            }
+        }
+        
+        // get all arguments
+        var extraArgs = Array.prototype.slice.call(arguments, 2);
+        // remove the type from the args array, so the new args array will
+        // just be an array of the message string and any formatted objects
+        // to pass into it
+
+        // Setup the log
+        // ------------------------------
+        var formatString = LOGGER.getFormatString(type);
+
+        // TODO: determine if a wrong number of args was passed in, concat 
+        //  string instead if so
+
+        // Format the message
+        // the final log array should look like:
+        //  [ "%c `type` : `message` ", `formatString`, formatting objects ... ]
+        //
+        var finalLog = [];
+
+        // Logger
+        // ------------------------------
+        // Include some meta info (time, function that called, etc.)
+        message += '\t\t';
+        if(loggerLog.caller && loggerLog.caller.name && LOGGER.options.showCaller){
+            message += ' | <caller: ' + loggerLog.caller.name + '()>';
+        } 
+        if(LOGGER.options.showTime){
+            // JSON timestamp
+            message += ' | <time: ' + new Date().toJSON() + '>';
+        }
+
+        if(!_isBrowser){
+            // For node, log line number and filename
+        }
+
+
+        // Setup final log message format, depending on if it's a browser or not
+        // ------------------------------
+        if(_isBrowser){
+            finalLog.push(
+                "%c [ " + type + " ]\t:\t" + message
+            );
+            finalLog.push(formatString);
+
+        } else {
+            finalLog.push(
+                COLOR_RESET + "[ " + 
+                (getBackgroundColor(type) + type + COLOR_RESET) + 
+                " ]\t:\t" + message + 
+                COLOR_RESET
+            );
+        }
+
+        finalLog.push(extraArgs);
+
+        // Finally, check if it should be added to the history
+        // ------------------------------
+        if(LOGGER.options.storeHistory || LOGGER.options.storeAllHistory){
+            // show the history be stored? if so, store it
+            LOGGER.history[type] = LOGGER.history[type] || []; //ensure existence
+            LOGGER.history[type].push(finalLog);
+        }
+
+        // Log it
+        // ------------------------------
+        if( LOGGER.canLog(type) ){ 
+            // Only output if it was specified in the log level
+            console.log.apply( console, finalLog );
+        }
+
+    };
+
     return LOGGER;
-});
+}));
 
 // ===========================================================================
 //
@@ -714,7 +1131,6 @@ define(
     'models/AppUser',[ 'events', 'logger', 'util/API_URL' ], function AppUserModel(
         events, logger, API_URL
     ){
-
         // UTIL
         // ------------------------------
         var unsetCookie = function(){
@@ -1476,7 +1892,12 @@ define(
 
                 // Meta
                 // --------------------------
-                _lastUseTime: null  // keep track of last cast time (for cooldown)
+                // meta is an arbitrary object containing various properties,
+                // e.g., used for sorting abilities in character create
+                meta: {},
+
+                // keep track of last cast time (for cooldown)
+                _lastUseTime: null
             };
         },
         
@@ -2272,6 +2693,11 @@ define(
             return url;
         },
 
+        generateName: function(){
+            // simply returns a new name (does not set it)
+            return generateName();
+        }, 
+
         initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
             options = options || {};
@@ -2296,9 +2722,12 @@ define(
                 this.set({ aiDelay: Math.random() * 3 });
             }
 
-            // --------------------------
-            // SET ABILITIES FROM CLASS
-            // --------------------------
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            // // SET ABILITIES FROM CLASS
+            // TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TODO: Don't use class - it doesn't exist anymore. Get abilities
+            // from a list of IDs or something
+            //
             if(this.get('class')){
                 this.set({ abilities: this.get('class').get('abilities') }, { silent: true });
             } else {
@@ -2308,6 +2737,7 @@ define(
                     self.set({ abilities: self.get('class').get('abilities') });
                 });
             }
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
             // --------------------------
             // Set stats from race
@@ -3610,616 +4040,97 @@ define(
 
 // ===========================================================================
 //
-// PageTitleScreen
-// 
+// Race List Item
+//
+// ItemView for race item
+//
 // ===========================================================================
 define(
-    'views/PageHome',[ 
-        'd3', 'backbone', 'marionette',
-        'logger', 'events'
-    ], function viewPageHome(
-        d3, backbone, marionette, 
-        logger, events
+    'views/create/RaceListItem',[ 
+        'd3', 'logger', 'events'
+    ], function viewRaceListItem(
+        d3, logger, events
     ){
 
-    var PageHome = Backbone.Marionette.Layout.extend({
-        template: '#template-page-home',
-        'className': 'page-home-wrapper',
+    var RaceListItem = Backbone.Marionette.ItemView.extend({
+        'className': 'race-list-item',
+        template: '#template-create-race-list-item',
+
         events: {
-            'click .btn-play-game': 'playGame'
+            'click': 'raceClicked'
         },
 
-        initialize: function initialize(options){
-            // initialize:
-            logger.log('views/PageHome', 'initialize() called');
-            return this;
+        serializeData: function(){
+            return _.extend({ cid: this.model.cid }, this.model.toJSON());
         },
-        onShow: function homeOnShow(){
-            logger.log('views/PageHome', 'onShow called');
+
+        initialize: function(){
+            logger.log('views/create/RaceListItem', 'initialize : model %O',
+                this.model);
             return this;
         },
 
-        // ------------------------------
-        //
-        // User Interaction
-        //
-        // ------------------------------
-        playGame: function homePlayGame(e){
-            logger.log('views/PageHome', 'playGame button clicked');
-            e.stopPropagation();
-            e.preventDefault();
-            
-            // Let controller know play game was clicked
-            events.trigger('controller:showCreateCharacter');
+        onShow: function(){
+            var self = this;
+            logger.log('views/create/RaceListItem', '\t onShow() called');
+
+            // Redelegate events on a timeout. 
+            // TODO : Why doesn't this work without the timeout? It seems
+            // that maybe the elements haven't been rendered to the DOM yet
+            setTimeout(function(){
+                self._delegateDOMEvents();
+            }, 1000);
+            return this;
+        },
+
+        raceClicked: function raceClicked (){
+            logger.log('views/create/RaceListItem', 'race clicked: %O', 
+                this.model);
+
+            events.trigger('create:page2:raceClicked', { 
+                $el: this.$el,
+                model: this.model
+            });
+            return this;
+        }
+
+    });
+
+    return RaceListItem;
+});
+
+// ===========================================================================
+//
+// Races List
+//
+// Collection for races in the create screen
+//
+// ===========================================================================
+define(
+    'views/create/RaceList',[ 
+        'd3', 'logger', 'events', 
+        'views/create/RaceListItem'
+    ], function viewRaceListCollection(
+        d3, logger, events,
+        RaceListItem
+    ){
+
+    var RaceListCollection = Backbone.Marionette.CollectionView.extend({
+        'className': 'races-list',
+
+        itemView: RaceListItem,
+
+        initialize: function(options){
+            logger.log(
+                'views/create/RaceList.js', 
+                'collectionView initialized : %O', options);
+            this.itemView = RaceListItem;
+
+            return this;
         }
     });
 
-    return PageHome;
-});
-
-// ===========================================================================
-//
-// data-abilities
-//
-//      TODO: should be loaded from server and abilities should load on a per
-//      entity level
-//
-// ===========================================================================
-define(
-    'models/data-abilities',[ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
-        events, logger, Ability, Timer
-    ){
-    // TODO: think of structure.
-    // Maybe instead of damage and heal, `amount` is used, and a separate
-    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
-    // DoT, buff, etc. type spell
-    logger.log('models/data-abilities', 'Creating abilities');
-
-    // Here be abilities. This would be loaded in a DB and entities would
-    // get abilities from server
-    var abilities = {
-        // ------------------------------
-        // Damage - Arcane
-        // ------------------------------
-        'magicmissle': new Ability({
-            name: 'Magic Missle',
-            effectId: 'magicMissle',
-            castTime: 2,
-            timeCost: 2,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: {light: 0.7, fire: 0.3},
-            damage: 15
-        }),
-
-        // ------------------------------
-        // Damage - Fire
-        // ------------------------------
-        'flamelick': new Ability({
-            name: 'Flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 10
-        }),
-        'fireball': new Ability({
-            name: 'Fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 40
-        }),
-
-        // ------------------------------
-        // Healing - Light
-        // ------------------------------
-        'trivialhealing': new Ability({
-            name: 'Trivial Healing',
-            effectId: 'trivialHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 5
-        }),
-        'minorhealing': new Ability({
-            name: 'Minor Healing',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 15
-        }),
-
-        // ==============================
-        // 
-        // Cleric
-        //
-        // ==============================
-        heal: new Ability({
-            name: 'Heal',
-            effectId: 'minorHealing',
-            castTime: 5.5,
-            timeCost: 5.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 20
-        }),
-        smite: new Ability({
-            name: 'Smite',
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: 10,
-            heal: 5,
-            healTarget: 'source'
-        }),
-        virtue: new Ability({
-            name: 'Virtue',
-            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            heal: 10,
-
-            buffDuration: 8,
-            buffEffects: { 
-                armor: 10,
-                magicResist: 10,
-                maxHealth: 10,
-
-                abilities: {
-                    //// 20% faster, so decrease time by 20%
-                    //coolDown: -0.5,
-                    //castDuration: -0.5,
-                    //castTime: -0.5,
-                    //timeCost: -0.5
-                }
-            }
-        }),
-
-        // TODO:  Have truedamage be a side effect in the default damage func
-        judgement: new Ability({
-            name: 'Judgement',
-            effectId: 'placeHolder',
-            castTime: 5,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: '10%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        }),
-
-        // ==============================
-        // 
-        // Shadowknight
-        //
-        // ==============================
-        darkblade: new Ability({
-            name: 'Dark Blade',
-            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'placeHolder',
-            castTime: 3,
-            timeCost: 3,
-            castDuration: 0.3,
-            validTargets: ['enemy'],
-            type: {'magic': 0.3, 'physical': 0.7},
-            element: 'dark',
-            damage: 9,
-            heal: 5,
-            healTarget: 'source'
-        }),
-
-        // TODO: Have true damage be a part of the damage func
-        deathtouch: new Ability({
-            name: 'Death Touch',
-            description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 1.5,
-            validTargets: ['enemy'],
-            type: {'magic': 0.5, 'physical': 0.5},
-            element: 'dark',
-            damage: '25%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.25 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        }),
-
-        // ==============================
-        // 
-        // Assassin
-        //
-        // ==============================
-        stab: new Ability({
-            name: 'Stab',
-            description: 'A quick stabbing attack which deals a small amount of damage',
-            effectId: 'placeHolder',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 0.2,
-            validTargets: ['enemy'],
-            type: {'physical': 1},
-            element: 'air',
-            damage: 3,
-            attackBonusPercent: 0.1
-        }),
-        backstab: new Ability({
-            name: 'Backstab',
-            description: 'A powerful attack which will do additional damage if the enemy has recently been stabbed',
-            effectId: 'placeHolder',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 1,
-            validTargets: ['enemy'],
-            type: {'physical': 1},
-            element: 'air',
-            damage: 7,
-            attackBonusPercent: 0.2,
-            effect: function effect(options){
-                var self = this;
-                var delay = this.getCastDuration(options);
-                var amount = this.get('damage');
-                var intendedTarget = options[this.get('damageTarget')];
-                // TODO: make sure castDuration is always the current castDuration
-                var castDuration = self.attributes.castDuration * 1000;
-
-                new Timer(function effectDamageDelay(){
-                    var healthHistory = intendedTarget.get('healthHistory');
-                    var i,len;
-                    var now = new Date();
-                    if(healthHistory){
-                        for(i=0,len=healthHistory.length;i<len;i++){
-                            // only check for effects that have happened since this was cast
-                            if((now - healthHistory[i].date) <= castDuration){
-                                // TODO: check for a single ability
-                                // TODO: scale based on entity's attack bonus
-                                amount += 10;
-                            } else {
-                                // otherwise, break
-                                break;
-                            }
-                        }
-                    }
-                    amount = intendedTarget.takeDamage({
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount,
-                        sourceAbility: self,
-                        target: options.target,
-                        source: options.source
-                    });
-                    if(options.callback){ options.callback(); }
-                }, delay);
-
-            }
-        }),
-
-        cripple: new Ability({
-            name: 'Cripple',
-            description: "Cripple weakens an enemy, lowering their attack and defense",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            damage: 0,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'air',
-
-            buffDuration: 8,
-            // TODO : scale effect
-            buffEffects: { 
-                armor: -10,
-                attack: -10
-            }
-        }),
-
-        assassinate: new Ability({
-            name: 'Assassinate',
-            description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
-            effectId: 'placeHolder',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 1,
-            validTargets: ['enemy'],
-            type: {'physical': 1},
-            element: 'air',
-            damage: 10,
-            attackBonusPercent: 0.6,
-            effect: function effect(options){
-                var self = this;
-                var delay = this.getCastDuration(options);
-                var amount = this.get('damage');
-                var intendedTarget = options[this.get('damageTarget')];
-                // TODO: make sure castDuration is always the current castDuration
-                var castDuration = self.attributes.castDuration * 1000;
-
-                // Add the entity's health to the effect.
-                // TODO: calculate entity difficultly and scale damage based on
-                // it
-                amount += (
-                    intendedTarget.get('attributes').get('health') / (Math.random() * 4 | 0)
-                );
-
-                new Timer(function effectDamageDelay(){
-                    amount = intendedTarget.takeDamage({
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount,
-                        sourceAbility: self,
-                        target: options.target,
-                        source: options.source
-                    });
-                    if(options.callback){ options.callback(); }
-                }, delay);
-
-            }
-        }),
-
-        // ------------------------------
-        // Other effects
-        // ------------------------------
-        freezeTime: new Ability({
-            name: 'Freeze Time',
-            description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: -1.0,
-
-                abilities: {
-                }
-            }
-        }),
-        stun: new Ability({
-            name: 'Stun',
-            description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            // to prevent ability usage, set the time to be greater than the
-            // entitiy's max timer value. Setting to something ridiculously high
-            // also accomplishes this
-            buffEffects: { 
-                abilities: {
-                    castTime: 9999999
-                }
-            }
-        }),
-        comatose: new Ability({
-            name: 'Comatose',
-            description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-
-            damage: 1,
-            // TODO: Deal damage based on entity's timer value
-
-            buffDuration: 8,
-            // to prevent ability usage, set the time to be greater than the
-            // entitiy's max timer value. Setting to something ridiculously high
-            // also accomplishes this
-            buffEffects: { 
-                timerFactor: -1.0,
-                abilities: {
-                    castTime: 9999999
-                }
-            }
-        }),
-        haste: new Ability({
-            name: 'Haste',
-            description: "Increases your timer speed by 50%",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: 0.5
-            }
-        })
-
-    };
-
-
-    return abilities;
-});
-
-// ===========================================================================
-//
-// data-classes
-//
-//      TODO: should be loaded from server and abilities should load 
-//      TODO: Think of group of classes (DPS / Tank / Healer?)
-//
-//      -- Classes can be generally divided into types:
-//          Type: Physical and Magical
-//          Elements: Earth, Wind, Water, Fire, Light, Dark
-//          
-//          Class could be parts of any type / element
-//
-//
-// ===========================================================================
-define(
-    'models/data-entity-classes',[ 'events', 'logger', 'models/EntityClass',
-        'collections/Abilities', 'models/data-abilities'], function(
-        events, logger, EntityClass,
-        Abilities, ABILITIES
-    ){
-
-    var ENTITY_CLASSES = [
-        new EntityClass({
-            name: 'Cleric',
-            description: 'Clerics uselight magic to aid their allies and disable their foes',
-            sprite: 'cleric',
-            abilities: new Abilities([
-                // Basic heal
-                ABILITIES.heal,
-                // damage target and heal self
-                ABILITIES.smite,
-                // health and armor buff
-                ABILITIES.virtue
-                ,ABILITIES.judgement
-                //// res
-                //ABILITIES.resurrect
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Shadowknight',
-            description: 'A veteran dabbling in dark magic',
-            sprite: 'shadowknight',
-            abilities: new Abilities([
-                // basic physical attack
-                ABILITIES.darkblade
-                //// attack + dot
-                //ABILITIES.darkblade,
-                //// siphon abilities
-                //ABILITIES.siphonstrength,
-                ,ABILITIES.deathtouch
-
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Inferno Sage',
-            description: 'A weilder of flame',
-            sprite: 'wizard',
-            abilities: new Abilities([
-                ABILITIES.flamelick
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Time Mage',
-            description: 'Bla',
-            sprite: 'timemage',
-            abilities: new Abilities([
-                ABILITIES.freezeTime,
-                ABILITIES.stun,
-                ABILITIES.comatose,
-                ABILITIES.haste
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Ranger',
-            description: 'An archer',
-            sprite: 'ranger',
-            abilities: new Abilities([
-                ABILITIES.magicmissle
-                //// single target
-                //ABILITIES.headshot,
-                //// dot + damage
-                //ABILITIES.poisonedarrow,
-                //// increases damage of next spell
-                //ABILITIES.aim,
-                //// aoe (will increase aggro - could be bad)
-                //ABILITIES.barrage
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Assassin',
-            description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
-            sprite: 'assassin',
-            abilities: new Abilities([
-                //// Basic damage attack
-                ABILITIES.stab,
-                
-                //// if an ability was recently used, deal extra damage
-                ABILITIES.backstab,
-
-                //// significantly reduces enemy's armor for a short period
-                ABILITIES.cripple,
-
-                //// some sort of ult
-                ////  Chance to instantly kill mob. Chance scales based on 
-                ////  enemy's health
-                ABILITIES.assassinate
-            ])
-        })
-
-
-    ];
-
-
-    return ENTITY_CLASSES;
+    return RaceListCollection;
 });
 
 // ===========================================================================
@@ -4240,7 +4151,7 @@ define(
     var RACES = [
         new Race({
             name: 'Elf',
-            description: 'An elf',
+            description: 'The long-lived elves are children of the natural world, mortals who are in tune with the natural world around them.',
             sprite: 'elf',
             baseStats: {
                 attack: 4,
@@ -4289,6 +4200,628 @@ define(
 
 // ===========================================================================
 //
+//  Races Collection
+//
+//      This collection contains a collection of races for the create screen,
+//      the list of available races for the player
+// ===========================================================================
+define(
+    'collections/Races',[ 'backbone', 'marionette', 'logger', 'events', 
+        'models/Race',
+        'models/data-races'
+    ], function RaceCollection(
+        Backbone, Marionette, logger, events,
+        Race,
+        RACES
+    ){
+
+    var Races = Backbone.Collection.extend({
+        model: Race,
+
+        initialize: function(models, options){
+            var self = this;
+            logger.log('collections/Races', 'initialize() called');
+
+            // TODO: don't do this, get from server
+            this.add(RACES);
+
+            return this;
+        },
+        comparator: function(model){
+            return model.get('name');
+        }
+
+    });
+
+    return Races;
+});
+
+// ===========================================================================
+//
+// PageTitleScreen
+// 
+// ===========================================================================
+define(
+    'views/PageHome',[ 
+        'd3', 'backbone', 'marionette',
+        'logger', 'events',
+        'async',
+        'models/Entity',
+        'views/create/RaceList',
+        'collections/Races'
+    ], function viewPageHome(
+        d3, backbone, marionette, 
+        logger, events,
+        async,
+        Entity,
+        RaceList,
+        Races
+    ){
+
+    // CONFIG
+    // ----------------------------------
+    var baseDelay = 1000;
+
+    // View 
+    // ----------------------------------
+    var PageHome = Backbone.Marionette.Layout.extend({
+        template: '#template-page-home',
+        'className': 'page-home-wrapper',
+
+        'regions': {
+            'regionRaceList': '#region-create-races'
+        },
+
+        events: {
+        },
+
+        initialize: function initialize(options){
+            // initialize:
+            logger.log('views/PageHome', 'initialize() called');
+
+            // Create a new entity model for character create
+            this.model = new Entity({});
+
+            // Setup races and collection
+            this.races = new Races();
+            this.raceListView = new RaceList({
+                collection: this.races
+            });
+
+            // When race is clicked, continue on to the next step
+            this.listenTo(events, 'create:page2:raceClicked', this.raceClicked);
+
+            return this;
+        },
+
+        onShow: function homeOnShow(){
+            // When the view is rendered, set everything up
+            
+            var self = this;
+            logger.log('views/PageHome', 'onShow called');
+
+            // setup races
+            this.regionRaceList.show(this.raceListView);
+
+            // keep reference to pages
+            this.$pages = $('#book-pages', this.$el);
+
+            // remove 'hidden' pages
+            $('.hidden', this.$pages).removeClass('hidden');
+
+            // Setup templates
+            this.templateRaceDescription = _.template($('#template-create-race-description').html());
+
+            // Seutp global "skip" behavior to allow skipping all the fade ins
+            // TODO: 
+            this.pagesCompleted = {
+                1: false, // title page
+                2: false, // race page
+                3: false, // templates
+                4: false, // abilities
+                5: false, // overview of character
+                6: false // final page - play
+            };
+
+            // Setup cached els
+            this.$cachedEls = {
+                nextStepArrow: $('#arrow-right'),
+                previousStepArrow: $('#arrow-left'),
+                page5name: $('#create-final-name')
+            };
+
+            // Setup pageturn
+            this.setupPageturn();
+
+            // Setup title page stuff
+            this.setupPage1();
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // Pageturn util
+        //
+        // ------------------------------
+        setupPageturn: function setupPageturn(){
+            // Initializes the pageTurn animation library
+            //
+            var self = this;
+            this.curStep = 1;
+
+            self.$pages.turn({
+                display: 'double',
+                acceleration: true,
+                page: 2,
+                gradients: !$.isTouch,
+                duration: 1300,
+                elevation: 250,
+                when: {
+                    // ------------------
+                    //
+                    // CALLBACK When page is turned
+                    //
+                    // ------------------
+                    turned: function(e, page) {
+                        logger.log('views/PageHome:pageTurn', 
+                            'finished turning page : %O : %O', 
+                            e, page);
+                    }
+                }
+            });
+
+            function pageNext(e){
+                // Called to show the next page. This is state based, as
+                // the user cannot see 
+                // NOTE: Here, "step" means the set of of pages (step 1 is
+                //      title / race, step 2 is templates / abilities, step 3
+                //      is final)
+                logger.log('views/PageHome:pageNext', 'curStep ' + self.curStep);
+
+                if(self.curStep < 3){
+                    logger.log('views/PageHome', '\t showing next page');
+                    e.preventDefault();
+                    self.curStep++;
+                    self.$pages.turn('next');
+
+                    // Templates / abilities
+                    if(self.curStep === 2){
+                        logger.log('views/PageHome:pageNext', 
+                            'showing page 3...');
+
+                        // initial setup or show of page 3 (step 4 - templates)
+                        if(self.pagesCompleted[3] !== true){
+                            logger.log('views/PageHome:pageNext', 'setting up page 3...');
+                            self.setupPage3(); 
+
+                        } else {
+                            logger.log('views/PageHome:pageNext', 'showing page 3');
+                            // Show it (don't setup)
+                            self.showPage3(); 
+                        }
+                    }
+
+                }
+            }
+            function pagePrevious(e){
+                // Called to show the previous page
+                logger.log('views/PageHome:pagePrevious', 'curStep ' + self.curStep);
+
+                if(self.curStep > 1){
+                    logger.log('views/PageHome', '\t showing previous page');
+                    e.preventDefault();
+                    self.$pages.turn('previous');
+                    self.curStep--;
+
+                    // Step 1 is the first set of pages (title and race)
+                    if(self.curStep === 1){
+                        logger.log('views/PageHome:pagePrevious', 
+                            'showing page 2...');
+
+                        self.showPage2();
+                    }
+                }
+            }
+
+            // store functions for page turning
+            this.pageNext = pageNext;
+            this.pagePrevious = pagePrevious;
+            
+            // Turn pages on events
+            // --------------------------
+            $(window).bind('keydown', function(e){
+                // Don't let pages go below 2 (we don't have a cover page) and
+                // don't let it go above the number of pages we have
+                logger.log('views/PageHome:pageTurn:keyPress', 
+                    'key pressed : ' + e.keyCode + ' | curStep : ' + 
+                    self.curStep);
+
+                if (e.keyCode==37) {
+                    logger.log('views/PageHome:pageTurn:keyPress', 'going back');
+                    pagePrevious(e);
+
+                } else if (e.keyCode==39) {
+                    // can we go forward?
+                    if(
+                        (self.curStep === 1 && self.pagesCompleted[2]) || 
+                        (self.curStep === 2 && self.pagesCompleted[4])
+                    ){
+                        logger.log('views/PageHome:pageTurn:keyPress', 'going forward');
+                        pageNext(e);
+
+                    } else {
+                        logger.log('views/PageHome:pageTurn:keyPress', '[x] cannot go forward');
+                    }
+                }
+            });
+
+            // arrows
+            $('#arrow-right').click(function(e){
+                logger.log('views/PageHome:arrowClick', 'arrow-right clicked');
+                if(
+                    (self.curStep === 1 && self.pagesCompleted[2]) || 
+                    (self.curStep === 2 && self.pagesCompleted[4])
+                ){
+                    return pageNext(e);
+                }
+            });
+            $('#arrow-left').click(function(e){
+                logger.log('views/PageHome:arrowClick', 'arrow-left clicked');
+                return pagePrevious(e);
+            });
+        },
+
+        // ==============================
+        //
+        // Page 1  - Title
+        // 
+        // ==============================
+        setupPage1: function setupStep1(){
+            // Sets up flow for the title page
+            //
+            // TODO: Think of best on board flow. Fade in word by word?
+            // TODO: When mouse over bottom left, should the name text
+            // fade in automatically instead of waiting for the user to read
+            // the text?
+            logger.log('views/PageHome', 'setupPage1() called');
+
+            var self = this;
+            var $paragraph = $('#book-page-title p', this.$el);
+            var $paragraphName = $($paragraph[1]);
+
+            var animation = 'fadeInDown';
+            var $name = $('#create-name');
+            var enteredText = false;
+
+            $($paragraph[0]).velocity({ opacity: 1 });
+            $($paragraph[0]).addClass('animated ' + animation);
+
+            // --------------------------
+            // Fade in text
+            // --------------------------
+            $('#create-title-intro-text').wordWriter({
+                finalCss: { opacity: 0.8 },
+
+                callback: function writerCallback(wasCancelled){
+                    // Called when all words have been faded, or when the
+                    // user clicks on text
+                    logger.log('views/PageHome', 
+                        '\t finished showing words, was cancelled? : %O',
+                        wasCancelled);
+
+                    $paragraphName.velocity({ opacity: 1 });
+                    $paragraphName.addClass('animated fadeInUp');
+
+                    // Show the name input box
+                    setTimeout(function showName(){
+                        $name.addClass('animated fadeInLeft');
+                        $name.velocity({ opacity: 1 });
+                        $name.attr('placeholder', '');
+
+                        // Fade in "name text"
+                        async.eachSeries(['N','a','m','e'], 
+                        function(i, cb){
+                            $name.attr(
+                                'placeholder', 
+                                $name.attr('placeholder') + i
+                            );
+
+                            setTimeout(function(){
+                                cb();
+                            }, baseDelay * 0.8);
+                        }, function allDone (){ 
+                            logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
+                                enteredText);
+
+                            if(!enteredText){
+                                $name.removeClass();
+                                setTimeout(function(){
+                                    logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                    $name.addClass('animated pulse infinite');
+                                }, 500);
+                            }
+                        });
+
+                    }, baseDelay / 2);
+                }
+            });
+
+
+            // Remove the pulsating effect when user clicks input
+            $name.focus(function (){ 
+                logger.log('views/PageHome', '\t name focused');
+
+                enteredText = true;
+                $name.removeClass('pulse infinite'); 
+
+                setTimeout(function showPage2(){
+                    // DONE, Show page 2
+                    $name.removeClass('pulse infinite'); 
+                    logger.log('views/PageHome', 
+                        '\t setupPage1: calling setupPage2...');
+                    self.setupPage2();
+
+                }, baseDelay * 0.7);
+            });
+
+            $name.on('input change', function(e){
+                // After input has been changed, user can continue to the
+                // second page (race selection)
+                var name = $(this).val();
+                if(!name || name.length < 1){
+                    name = self.model.generateName();
+                }
+                self.model.set({ name: name });
+                self.$cachedEls.page5name.html(name);
+            });
+
+            return this;
+        },
+
+
+        // ===================================================================
+        //
+        // Page 2 - Race
+        // 
+        // ===================================================================
+        setupPage2: function setupPage2 (){
+            var self = this;
+            logger.log('views/PageHome', 'setupPage2() called');
+
+            this.pagesCompleted[1] = true;
+
+            var animation = 'fadeInDown';
+            var $raceHeader = $('#race-header');
+            var $raceWrapper = $('#create-race-wrapper');
+            self.$raceHeader = $raceHeader;
+            self.$raceWrapper = $raceWrapper;
+
+            $raceHeader.velocity({ opacity: 1 });
+            $raceHeader.addClass('animated fadeInDown');
+
+            // then show the seletion
+            setTimeout(function(){
+                $raceWrapper.velocity({ opacity: 1 });
+                $raceWrapper.addClass('animated fadeInUp');
+            }, baseDelay * 1.2);
+
+            // remove the animated classes so page switches don't re-trigger
+            // transitions
+            setTimeout(function removeAnimatedClasses(){
+                $raceWrapper.removeClass();
+                $raceHeader.removeClass();
+            }, baseDelay * 5);
+
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // race clicked
+        //
+        // ------------------------------
+        raceClicked: function raceClicked (options){
+            // Called when a race is clicked. Show the race description,
+            // and allow user to progress to next step
+            //
+            logger.log('views/PageHome', 'raceClicked() passed options: %O',
+                options);
+            var self = this;
+
+            if(this.pagesCompleted[1] !== true){
+                logger.log('views/PageHome', '[x] first page incomplete, must enter name');
+                return false;
+            }
+
+            // done with race page
+            this.pagesCompleted[2] = true;
+
+            // Show the right arrow
+            this.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
+            this.$cachedEls.nextStepArrow.addClass('animated fadeIn');
+            
+            // If the same race was clicked, do nothing
+            if(this._previousRaceSelected === options.model.attributes.name){
+                logger.log('views/PageHome', '[x] same race selected, doing nothing');
+                return false;
+            }
+
+            // store state
+            this._previousRaceSelected = options.model.attributes.name;
+
+            // remove selected class from other entity selections
+            $('#region-create-races .race-list-item.selected')
+                .removeClass('selected');
+
+            // add selected class to selected entity
+            options.$el.addClass('selected');
+
+            this.$raceDescription = this.$raceDescription || $('#race-description');
+            if(!this.$raceDescription){ 
+                logger.log('error', 'this.$raceDescription does not exist');
+                return false;
+            }
+
+            logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
+
+            // update the race description div with the template
+            // --------------------------
+            // Show race description
+            this.$raceDescription.velocity({ opacity: 0 });
+            //self.$raceDescription.addClass('fadeOutDown');
+            self.$raceDescription.addClass('fadeOut');
+
+            // update the HTML below the race info
+            setTimeout(function(){
+                self.$raceDescription.html(
+                    self.templateRaceDescription({ model: options.model })
+                );
+
+                self.$raceDescription.velocity({ opacity: 1 });
+                //self.$raceDescription.removeClass('fadeOutDown');
+                self.$raceDescription.removeClass('fadeOut');
+                self.$raceDescription.addClass('animated fadeIn');
+
+                // clear out fadeIn class so page turn doesn't trigger redraw
+                setTimeout(function(){
+                    self.$raceDescription.removeClass('fadeIn');
+                }, baseDelay / 2);
+
+            }, baseDelay / 2);
+
+            // Pulsate arrow
+            // --------------------------
+            // clear existing timeout
+            clearTimeout(this.page2arrowPulseTimeout);
+
+            this.page2arrowPulseTimeout = setTimeout(function() {
+                $('.arrow', self.$cachedEls.nextStepArrow).addClass('pulse infinite');
+            }, baseDelay * 3); 
+
+            return this;
+        },
+
+        // ------------------------------
+        // SHOW Page 2 
+        //      Called when page turns to page 2
+        // ------------------------------
+        showPage2: function showPage2(){
+            var self = this;
+            self.$cachedEls.nextStepArrow.removeClass('fadeOut');
+            self.$cachedEls.nextStepArrow.addClass('fadeIn');
+
+            self.$cachedEls.previousStepArrow.removeClass('fadeIn');
+            self.$cachedEls.previousStepArrow.addClass('animated fadeOut');
+            return this;
+        },
+
+        // ===================================================================
+        //
+        // Page 3 - Templates
+        // 
+        // ===================================================================
+        setupPage3: function setupPage3 (){
+            // This is called *initially* to set up the third page. Once setup
+            // it is not called again
+            var self = this;
+            logger.log('views/PageHome:setupPage3', 'setupPage3() (templates) called');
+
+            if(this.pagesCompleted[3]){ 
+                logger.log('views/PageHome:setupPage3', 
+                    '[x] third page complete already, returning');
+                return this;
+            }
+
+            this.pagesCompleted[3] = true;
+
+            // remove existing arrow pulsate
+            clearTimeout(this.page2arrowPulseTimeout);
+            clearTimeout(this.page3arrowPulseTimeout);
+            $('.arrow', self.$cachedEls.nextStepArrow).removeClass('pulse infinite');
+
+            // hide the right arrow
+            self.$cachedEls.nextStepArrow.addClass('fadeOut');
+            
+            // show the previous arrow after a delay
+            setTimeout(function(){
+                logger.log('views/PageHome:setupPage3', 'showing previous step arrow');
+                self.$cachedEls.previousStepArrow.velocity({ opacity: 1 });
+                self.$cachedEls.previousStepArrow.removeClass('fadeOut');
+                self.$cachedEls.previousStepArrow.addClass('fadeIn');
+            }, baseDelay * 2);
+
+            return this;
+        },
+
+
+        showPage3: function showPage3 (){
+            // This is called whenever player goes from page 3 back to page 2
+            var self = this;
+            logger.log('views/PageHome:setupPage3', 'showPage3() (race) called');
+
+            clearTimeout(this.page2arrowPulseTimeout);
+            clearTimeout(this.page3arrowPulseTimeout);
+
+            // hide the right arrow ONLY if the player hasn't selected their
+            // abilities
+            if(this.pagesCompleted[4] !== 4){ 
+                self.$cachedEls.nextStepArrow.addClass('fadeOut');
+            }
+
+            // show the previous arrow 
+            self.$cachedEls.previousStepArrow.velocity({ opacity: 1 });
+            self.$cachedEls.previousStepArrow.removeClass('fadeOut fadeOutRight');
+            self.$cachedEls.previousStepArrow.addClass('fadeIn');
+            return this;
+        }
+
+    });
+
+    return PageHome;
+});
+
+/* =========================================================================
+ *
+ * abilities
+ *  data file containing all abilities
+ *
+ *  ======================================================================== */
+define(
+'data/abilities',[ 'logger', 'util/Timer' ], function( logger, Timer){
+    // Here be abilities. This would be loaded in a DB and entities would
+    // get abilities from server
+    var abilities = {
+
+        'magic-missile': {
+            name: 'Magic Missle',
+            effectId: 'magicMissle',
+            castTime: 2,
+            timeCost: 2,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: {light: 0.7, fire: 0.3},
+            damage: 15
+        },
+
+        'fireball': {
+            name: 'Fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 40
+        }
+
+    };
+
+    return abilities;
+});
+
+// ===========================================================================
+//
 //  Battle
 //
 //      This model manages an individual battle.
@@ -4300,16 +4833,20 @@ define(
         'events', 'd3', 'util/API_URL',
         'collections/Entities',
         'models/Entity',
-        'collections/Abilities'
+
+        'collections/Abilities',
+        'models/Ability',
+        'data/abilities'
         // TODO : remove this, get from server
-        ,'models/data-entity-classes'
         ,'models/data-races'
     ], function MapModel(
         Backbone, Marionette, logger,
         events, d3, API_URL,
         Entities, Entity,
+
         Abilities,
-        CLASSES,
+        Ability,
+        dataAbilities,
         RACES
     ){
 
@@ -4396,15 +4933,16 @@ define(
         getRandomEntity: function getRandomEntity(){
             // Returns a randomly generate enemy entity
             // TODO: make this more smarter, depending on player levels, etc.
-            var abilities = [];
             var entity;
+            var abilities = new Abilities();
+            abilities.add([new Ability(dataAbilities.fireball)]);
 
             // generate new entity
             entity = new Entity({
                 //// FOR ALL : 
-                // 'class': CLASSES[Math.random() * CLASSES.length | 0],
-                'class': CLASSES[2],
-                'race': RACES[Math.random() * RACES.length | 0]
+                //TODO: set abilities
+                abilities: abilities,
+                race: RACES[Math.random() * RACES.length | 0]
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
@@ -5394,7 +5932,9 @@ define(
             });
 
             this.entityInfoView = new EntityInfoView({});
-            console.log(this.model.attributes.playerEntities);
+            logger.log('views/map/ContainerMap',
+                'Player entities: %O', 
+                this.model.attributes.playerEntities);
 
             // Handle escape key to close entity info
             // --------------------------
@@ -6926,7 +7466,8 @@ define(
                 canBeUsed = true;
             } else {
                 logger.log('views/subviews/Battle', 
-                    'handleAbilityActivated  : CANNOT be used');
+                    'handleAbilityActivated  : CANNOT be used : %O : %O',
+                    entityTime, ability.get('castTime'));
             }
 
             // store desired target
@@ -9036,806 +9577,6 @@ define(
 
 // ===========================================================================
 //
-// getSelector
-//
-//  Returns a function views can use to get and cache DOM selectors.
-//  TODO: extend Marionette's view classes to have this, along with delete
-//  the cache when the view is closed
-//
-// ===========================================================================
-define('views/EoALayoutView',[ 'backbone', 'marionette'], function(
-        Backbone, Marionette
-    ){
-    
-        // ------------------------------
-        // EoALayoutView
-        // ------------------------------
-        EoALayoutView = Backbone.Marionette.Layout.extend({});
-
-        EoALayoutView.prototype.getSelector = function EoALayoutViewGetSelector(selector){
-            // takes in a selector and returns the element(s) that belong
-            // to `this` $el. Uses a cache to avoid dom hits
-            var sel;
-            if(this._elCache === undefined){ this._elCache = {}; }
-
-            if(this._elCache[selector]){ 
-                // in cache, return it
-                sel = this._elCache[selector];
-            }
-            else {
-                // not in cache
-                sel = $(selector, this.$el);
-                this._elCache[selector] = sel;
-            }
-
-            return sel;
-        };
-
-        EoALayoutView.prototype.close = function EoALayoutViewOnClose(){
-            // get rid of the element cache
-            delete this._elCache;
-
-            Backbone.Marionette.Layout.prototype.close.call(this);
-
-            return this;
-        };
-
-        return EoALayoutView;
-});
-
-// ===========================================================================
-//
-// Race List Item
-//
-// ItemView for race item
-//
-// ===========================================================================
-define(
-    'views/create/RaceListItem',[ 
-        'd3', 'logger', 'events'
-    ], function viewRaceListItem(
-        d3, logger, events
-    ){
-
-    var RaceListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'race-list-item',
-        template: '#template-create-race-list-item',
-
-        serializeData: function(){
-            return _.extend({ cid: this.model.cid }, this.model.toJSON());
-        },
-
-        initialize: function(){
-            logger.log('views/create/RaceListItem', 'initialize : model %O',
-                this.model);
-            return this;
-        },
-
-        onShow: function(){
-            var sprite = this.model.get('sprite');
-
-            var sel = d3.select($('.race-sprite', this.$el)[0]);
-            sel = sel.append('image')
-                .attr({
-                    'xlink:href': function(d, i){
-                        return "/static/img/characters/" + 
-                            sprite + '.gif';
-                    },
-                    width: 50,
-                    height: 50
-                });
-
-
-            //// TODO: handle sprite loading 
-            //// NOTE: to use sticker...
-            //var sel = d3.select($('.race-sprite', this.$el)[0]);
-            //var $character = d3.sticker('#race-' + this.model.get('sprite'));
-            //$character = $character(sel);
-
-            return this;
-        }
-
-    });
-
-    return RaceListItem;
-});
-
-// ===========================================================================
-//
-// Races List
-//
-// Collection for races in the create screen
-//
-// ===========================================================================
-define(
-    'views/create/RaceList',[ 
-        'd3', 'logger', 'events', 
-        'views/create/RaceListItem'
-    ], function viewRaceListCollection(
-        d3, logger, events,
-        RaceListItem
-    ){
-
-    var RaceListCollection = Backbone.Marionette.CollectionView.extend({
-        'className': 'races-list',
-
-        itemView: RaceListItem,
-
-        initialize: function(options){
-            logger.log(
-                'views/create/RaceList.js', 
-                'collectionView initialized : %O', options);
-            this.itemView = RaceListItem;
-            return this;
-        }
-    });
-
-    return RaceListCollection;
-});
-
-// ===========================================================================
-//
-//  Races Collection
-//
-//      This collection contains a collection of races for the create screen,
-//      the list of available races for the player
-// ===========================================================================
-define(
-    'collections/Races',[ 'backbone', 'marionette', 'logger', 'events', 
-        'models/Race',
-        'models/data-races'
-    ], function RaceCollection(
-        Backbone, Marionette, logger, events,
-        Race,
-        RACES
-    ){
-
-    var Races = Backbone.Collection.extend({
-        model: Race,
-
-        initialize: function(models, options){
-            var self = this;
-            logger.log('collections/Races', 'initialize() called');
-
-            // TODO: don't do this, get from server
-            this.add(RACES);
-
-            return this;
-        },
-        comparator: function(model){
-            return model.get('name');
-        }
-
-    });
-
-    return Races;
-});
-
-// ===========================================================================
-//
-// Class List Item
-//
-// ItemView for class item
-//
-// ===========================================================================
-define(
-    'views/create/ClassListItem',[ 
-        'd3', 'logger', 'events'
-    ], function viewClassListItem(
-        d3, logger, events
-    ){
-
-    var ClassListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'class-list-item',
-        template: '#template-create-class-list-item',
-
-        serializeData: function(){
-            return _.extend({ cid: this.model.cid }, this.model.toJSON());
-        },
-
-        initialize: function(){
-            logger.log('views/create/ClassListItem', 'initialize : model %O',
-                this.model);
-            return this;
-        },
-
-        onShow: function(){
-            var sprite = this.model.get('sprite');
-            var sel = $('.class-sprite', this.$el);
-            sel.attr({ 'src' : "/static/img/classes/" + sprite + '.svg' });
-
-            return this;
-        }
-
-    });
-
-    return ClassListItem;
-});
-
-// ===========================================================================
-//
-// Class List
-//
-// Collection for classes in the create screen
-//
-// ===========================================================================
-define(
-    'views/create/ClassList',[ 
-        'd3', 'logger', 'events', 
-        'views/create/ClassListItem'
-    ], function viewClassListCollection(
-        d3, logger, events,
-        ClassListItem
-    ){
-
-    var ClassListCollection = Backbone.Marionette.CollectionView.extend({
-        'className': 'class-list',
-
-        itemView: ClassListItem,
-
-        initialize: function(options){
-            logger.log(
-                'views/create/ClassList.js', 
-                'collectionView initialized : %O', options);
-            this.itemView = ClassListItem;
-            return this;
-        }
-    });
-
-    return ClassListCollection;
-});
-
-// ===========================================================================
-//
-//  Classes Collection
-//
-//      This collection contains a collection of races for the create screen,
-//      the list of available races for the player
-// ===========================================================================
-define(
-    'collections/Classes',[ 'backbone', 'marionette', 'logger', 'events', 
-        'models/EntityClass',
-        'models/data-entity-classes'
-    ], function EntityClassCollection(
-        Backbone, Marionette, logger, events,
-        EntityClass,
-        ENTITY_CLASSES
-    ){
-
-    var Classes = Backbone.Collection.extend({
-        model: EntityClass,
-
-        initialize: function(models, options){
-            var self = this;
-            logger.log('collections/Classes', 'initialize() called');
-
-            // TODO: don't do this, get from server
-            this.add(ENTITY_CLASSES);
-
-            return this;
-        },
-
-        comparator: function(model){
-            return model.get('name');
-        }
-
-    });
-
-    return Classes;
-});
-
-// ===========================================================================
-//
-// Ability List Item
-//
-// ItemView for ability item
-//
-// ===========================================================================
-define(
-    'views/create/AbilityListItem',[ 
-        'd3', 'logger', 'events'
-    ], function viewAbilityListItem(
-        d3, logger, events
-    ){
-
-    var AbilityListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'ability-list-item',
-        template: '#template-create-ability-list-item',
-
-        serializeData: function(){
-            return _.extend({ cid: this.model.cid }, this.model.toJSON());
-        },
-
-        initialize: function(){
-            logger.log('views/create/AbilityListItem', 'initialize : model %O',
-                this.model);
-            return this;
-        },
-
-        onShow: function(){
-            return this;
-        }
-
-    });
-
-    return AbilityListItem;
-});
-
-// ===========================================================================
-//
-// Ability List
-//
-// Collection for classes in the create screen
-//
-// ===========================================================================
-define(
-    'views/create/AbilityList',[ 
-        'd3', 'logger', 'events', 
-        'views/create/AbilityListItem'
-    ], function viewAbilityListCollection(
-        d3, logger, events,
-        AbilityListItem
-    ){
-
-    var AbilityListCollection = Backbone.Marionette.CollectionView.extend({
-        'className': 'ability-list',
-
-        itemView: AbilityListItem,
-
-        initialize: function(options){
-            logger.log(
-                'views/create/AbilityList.js', 
-                'collectionView initialized : %O', options);
-            this.itemView = AbilityListItem;
-            return this;
-        }
-    });
-
-    return AbilityListCollection;
-});
-
-// ===========================================================================
-//
-// Page Create Character
-//  
-//  TODO: Whenever sprite changes, update the element
-// 
-// ===========================================================================
-define(
-    'views/PageCreateCharacter',[ 
-        'd3', 'backbone', 'marionette',
-        'views/EoALayoutView',
-        'logger', 'events',
-
-        'util/generateName',
-
-        'views/create/RaceList',
-        'collections/Races',
-
-        'views/create/ClassList',
-        'collections/Classes',
-
-        'views/create/AbilityList'
-
-    ], function viewPageCreateCharacter(
-        d3, Backbone, Marionette, 
-        EoALayoutView,
-        logger, events,
-
-        generateName,
-
-        RaceList,
-        Races,
-
-        ClassList,
-        Classes,
-
-        AbilityList
-    ){
-
-    var PageCreateCharacter = EoALayoutView.extend({
-        template: '#template-page-create-character',
-        'className': 'page-create-character-wrapper',
-        regions: {
-            'regionRaceList': '#region-create-races',
-            'regionClassList': '#region-create-classes',
-            'regionAbilityList': '#region-create-abilities'
-        },
-
-        // UI events
-        events: {
-            'click .race-list-item .item': 'raceClicked',
-            'touchend .race-list-item .item': 'raceClicked',
-
-            'click .class-list-item .item': 'classClicked',
-            'touchend .class-list-item .item': 'classClicked',
-
-            'click .btn-previous': 'previousClicked',
-            'touchend .btn-previous': 'previousClicked',
-            'click .btn-next': 'nextClicked',
-            'touchend.btn-next': 'nextClicked',
-
-            // generate name
-            'click .btn-generate-name': 'generateNewName',
-            'touchend .btn-generate-name': 'generateNewName'
-        },
-
-        // ------------------------------
-        // init
-        // ------------------------------
-        initialize: function initialize(options){
-            // initialize:
-            logger.log('views/PageCreateCharacter', 'initialize() called');
-            this.races = new Races();
-            this.classes = new Classes();
-
-            // state for the create process - race or class
-            // NOTE: could use a FSM here, but this is simple enough - just two
-            // possible states
-            this.createState = 0;
-            // possible states
-            this.createStates = ['race', 'class'];
-
-            // Listen for key presses to navigate through class / race list
-            this.listenTo(events, 'keyPress:enter', this.handleKeyEnter);
-            this.listenTo(events, 'keyPress:backspace', this.handleKeyBackspace);
-            this.listenTo(events, 'keyPress:escape', this.handleKeyBackspace);
-            this.listenTo(events, 'keyPress:up', this.handleKeyUpUp);
-            this.listenTo(events, 'keyPress:down', this.handleKeyUpDown);
-
-            // TODO: if entity already has a race or class, trigger the
-            // event to show it
-            return this;
-        },
-
-        // ------------------------------
-        // Key handlers
-        // ------------------------------
-        handleKeyEnter: function(){
-            logger.log('views/PageCreateCharacter', 'handleKeyEnter() called');
-            this.changeState('next');
-        },
-        handleKeyBackspace: function(){
-            logger.log('views/PageCreateCharacter', 'handleKeyBackspace() called');
-            this.changeState('previous');
-        },
-
-        handleKeyUpUp: function(){
-            logger.log('views/PageCreateCharacter', 'handleKeyUpUp() called');
-            // TODO : cycle through current list
-        },
-        handleKeyUpDown: function(){
-            logger.log('views/PageCreateCharacter', 'handleKeyUpDown() called');
-            // TODO : cycle through current list
-        },
-
-        // ------------------------------
-        //
-        // Show
-        //
-        // ------------------------------
-        onShow: function homeOnShow(){
-            logger.log('views/PageCreateCharacter', 'onShow called');
-
-            // remove existing el cache
-            delete this._elCache;
-
-            // Generate a random name
-            this.getSelector('.input-character-name').attr({
-                placeholder: generateName()
-            });
-
-            // show regions
-            // TODO: how to handle race collection?
-            this.raceListView = new RaceList({
-                collection: this.races
-            });
-            this.classListView = new ClassList({
-                collection: this.classes
-            });
-
-            this.regionRaceList.show(this.raceListView);
-            this.regionClassList.show(this.classListView);
-
-            return this;
-        },
-
-        // ------------------------------
-        //
-        // State Functions
-        //
-        // ------------------------------
-        changeState: function changeState(state){
-            // Shows the corresponding race or class list
-            // params: state {String} either 'next' or 'previous'
-            //
-            // TODO: TODO:  After figuring out what will happen, rewrite
-            // this logic to handle it
-            //
-            //
-            logger.log('views/PageCreateCharacter', 'changeState() called : %O',
-                state);
-
-            // Allow 'next' or 'previous' to change the currently selected 
-            // state, either go forward or backward between states
-            var targetState = this.createState;
-
-            // Ensure the next state can be gone to
-            if(state === 'next'){
-                // ensure a race was picked
-                if(this.createState === 0 && !this.model.get('race')){
-                    alert('pick a race');
-                    return false;
-                }
-
-                // ensure a class was picked
-                if(this.createState === 1 && !this.model.get('class')){
-                    alert('pick a class');
-                    return false;
-                }
-            }
-
-
-            if(state === 'next'){ targetState += 1; }
-            else if(state === 'previous'){ targetState -= 1; }
-
-            // make sure state doesn't fall outside of state bounds
-            if(targetState < 0){ targetState = 0; }
-
-            // Check for FINISH state
-            if(targetState > this.createStates.length - 1){ 
-                // FINISHED
-                // ----------------------
-                return this.finishProcess();
-            }
-
-            // set the state index
-            this.createState = targetState;
-
-            logger.log('views/PageCreateCharacter', 'current state: %O | %O',
-                this.createState, this.createStates[this.createState]);
-
-            // show corresponding lists, hide button states
-            if(this.createStates[this.createState] === 'race'){
-                // ----------------------
-                // RACE
-                // ----------------------
-                // button
-                this.getSelector('.btn-previous').addClass('blur');
-                this.getSelector('.btn-next').removeClass('blur');
-                this.getSelector('.btn-next').html('Next');
-
-                // list stuff
-                this.getSelector('#create-races').removeClass('list-hidden');
-                this.getSelector('#create-classes').addClass('list-hidden');
-
-            } else if(this.createStates[this.createState] === 'class'){
-                // ----------------------
-                // CLASS
-                // ----------------------
-                // button
-                this.getSelector('.btn-previous').removeClass('blur');
-
-                // if a class has already been selected, the user CAN move on
-                if(this.model.get('class')){
-                    this.getSelector('.btn-next').removeClass('blur');
-                    this.getSelector('.btn-next').html('Finish');
-                } else {
-                    // otherwise, they need to select a class
-                    this.getSelector('.btn-next').addClass('blur');
-                }
-
-                // list stuff
-                this.getSelector('#create-races').addClass('list-hidden');
-                this.getSelector('#create-classes').removeClass('list-hidden');
-            }
-            return this;
-        },
-
-        // ------------------------------
-        // Nav / State Buttons
-        // ------------------------------
-        previousClicked: function previousClicked(e){
-            e.preventDefault(); e.stopPropagation();
-
-            logger.log('views/PageCreateCharacter', 'previousClicked() called');
-            this.changeState('previous');
-        },
-        nextClicked: function nextClicked(e){
-            e.preventDefault(); e.stopPropagation();
-
-            logger.log('views/PageCreateCharacter', 'nextClicked() called');
-            this.changeState('next');
-        },
-
-        generateNewName: function generateNewName(){
-            // Generate a random name
-            this.getSelector('.input-character-name').val(
-                generateName()
-            );
-
-            return this;
-        },
-
-        // ------------------------------
-        //
-        // User Interaction
-        //
-        // ------------------------------
-        // ==============================
-        //
-        // Race
-        //
-        // ==============================
-        raceClicked: function raceClicked(e){
-            // When a race item is clicked from the race list, update the model,
-            // which updates the display, then update the list to show the classes
-            // Get the race model
-            logger.log('views/PageCreateCharacter', 'raceClicked() called');
-            e.preventDefault(); e.stopPropagation();
-
-            // get race from clicked element
-            var cid = $(e.target).attr('data-race-cid');
-            return this.setRace(cid);
-        },
-
-        setRace: function(cid){
-            // Called to set the race for the entity model. Updates the HTML 
-            // and updates the model
-            //
-            // get race model
-            var self = this;
-            var raceModel = this.races.get(cid); 
-
-            // --------------------------
-            // Update DOM elements
-            // --------------------------
-            // Generate a random name
-            this.getSelector('.input-character-name').attr({
-                placeholder: generateName()
-            });
-            
-            // add / remove active class for all other races
-            this.getSelector('.races-list .item').removeClass('active');
-            // (get item by race cid, so we don't need an event passed in)
-            $(".item[data-race-cid='" + cid + "']").addClass('active');
-
-            // remove the initial blur on the main character area
-            this.getSelector('#create-character-display-wrapper').removeClass('blur');
-
-            // remove blur / disable on the next button
-            this.getSelector('.btn-next').removeClass('blur');
-
-            // Update race info
-            // --------------------------
-            self.getSelector('.race-info-wrapper').empty().append(
-                Backbone.Marionette.TemplateCache.get('#template-create-race-info')({
-                    race: raceModel
-                })
-            );
-
-            // update race viz
-            // TODO: Don't empty / append, have a view and call update on it
-            this.getSelector('.race-viz-wrapper').empty().append(
-                Backbone.Marionette.TemplateCache.get('#template-create-race-viz')({
-                    stats: raceModel.get('baseStats')
-                })
-            );
-
-            // --------------------------
-            // Update model
-            // --------------------------
-            // update the entity (this.model) with the race
-            // update the entity sprite
-            // TODO: use a more robust sprite system, allow for differences
-            //   in classes 
-            this.model.set({ 
-                race: raceModel, 
-                sprite: raceModel.get('sprite') 
-            }, { silent: true });
-            this.model.trigger('change:race');
-            this.model.trigger('change:sprite');
-
-            logger.log('views/PageCreateCharacter', 'finished setting race to %O',
-                raceModel);
-            return this;
-        },
-
-        // ==============================
-        //
-        // Update Class 
-        //
-        // ==============================
-        classClicked: function classClicked(e){
-            // Similar to race clicked, but fires when a class item is clicked
-            logger.log('views/PageCreateCharacter', 'classClicked() called');
-            e.preventDefault(); e.stopPropagation();
-            // get race from clicked element
-            var cid = $(e.target).attr('data-class-cid');
-
-            // TODO just set model's race and have event listener for change
-
-            return this.setClass(cid);
-        },
-
-        setClass: function(cid){
-            // if raceCid was passed in, allow it to override the one from the
-            // click event
-            var classModel = this.classes.get(cid); 
-
-            logger.log('views/PageCreateCharacter', 'classModel: %O, cid: %O',
-                classModel, cid);
-
-            // --------------------------
-            // Update DOM elements
-            // --------------------------
-            // remove blur / disable on the next button
-            this.getSelector('.btn-next').removeClass('blur');
-            // add / remove active class on all other classes in the list
-            this.getSelector('.class-list .item').removeClass('active');
-            // add active class to the class
-            $(".item[data-class-cid='" + cid + "']").addClass('active');
-
-            // Update abilities based on class
-            // TODO: hide abilities that haven't been unlocked? 
-            // ... game design task
-            var abilities = classModel.get('abilities');
-
-            // update class html elements (TODO: View?)
-            this.getSelector('.class-info-wrapper').removeClass('hidden');
-            this.getSelector('.class-info-wrapper').empty().append(
-                Backbone.Marionette.TemplateCache.get('#template-create-class-info')({
-                    classModel: classModel
-                })
-            );
-
-            // update the ability list
-            // --------------------------
-            // ability wrapper starts out hidden until a class is selected
-            this.getSelector('.abilities-wrapper').removeClass('hidden');
-
-            this.abilityListView = new AbilityList({
-                collection: abilities
-            });
-            this.regionAbilityList.show( this.abilityListView );
-
-            // --------------------------
-            // update model
-            // --------------------------
-            // TODO: TODO: !!!!!!!!!!! Think about this : should entity
-            // get a class passed in, or just the abilities? here, class
-            // is passed in, and entity model gets abilities from it
-            this.model.set({ 'class' : classModel }, { silent: true });
-            this.model.trigger('change:class');
-
-            return this;
-        },
-
-        // --------------------------------------------------------------------
-        //
-        // Finish creation
-        //
-        // -------------------------------------------------------------------
-        finishProcess: function finishProcess(){
-            // Called when the creation process is completely finished.
-            //
-            // TODO: show an in app prompt
-            this.model.set({ 
-                name: this.getSelector('.input-character-name').val() || this.getSelector('.input-character-name').attr('placeholder')
-            });
-
-            // TODO: only trigger if prompt is true
-            // If done, show the game and pass in the entities
-            events.trigger('controller:showGame');
-            return this;
-        }
-    });
-
-    return PageCreateCharacter;
-});
-
-// ===========================================================================
-//
 // DevTools
 //
 //  Admin / Dev utilities
@@ -9917,14 +9658,9 @@ define('Controller',[
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
-    'views/PageCreateCharacter',
 
     // TODO: remove, only for dev
     'views/DevTools'
-
-    // FOR DEV for manually adding entities
-    ,'collections/Classes'
-    ,'collections/Races'
 
     ], function(
         Backbone, Marionette, logger, events,
@@ -9935,13 +9671,9 @@ define('Controller',[
         // include views here
         PageHome,
         PageGame,
-        PageCreateCharacter,
 
         // TODO: remove once out of dev
         DevTools
-
-        ,Classes
-        ,Races
     ){
 
     // console color
@@ -10054,52 +9786,25 @@ define('Controller',[
         //
         // ===================================================================
         showHome: function controllerShowHome(){
-            // This shows the homepage for logged out appUsers. If appUser is
-            // logged in when trying to access this page, it will load their
-            // profile page instead. (If they log in from the homepage, the 
-            // initializer catches it and redirects them to their page).
+            // The "home" page is the initial landing experience / create
+            // character flow. It is called immediately. If the user is logged
+            // in, account links should fade in, along with more race options.
             //
-            // If the appUser is already logged in when they load the site,
-            // they will be redirected to the /me endpoint (set in html
-            // head before anything loads)
             var self = this;
             logger.log('Controller', 'showHome() called');
 
             if(!this.pageHome){
                 logger.log('Controller', 'creating new pageHome view');
+                this.pageHome = new PageHome({});
             }
+
             // Otherwise, show the homepage
-            this.pageHome = new PageHome({});
             this.currentRegion = this.pageHome;
             this.regionMain.show(this.currentRegion);
 
             return this;
         },
 
-        // ------------------------------
-        //
-        // Character Create
-        //
-        // ------------------------------
-        showCreateCharacter: function controllerShowCreateCharacter(){
-            logger.log('Controller', 'showCreateCharacter() called');
-
-            if(!appUser.get('isLoggedIn')){ 
-                logger.log('Controller', 'not logged in, returning false');
-                return false;
-            }
-
-            // TODO: Reuse game view, don't show / hide it? Use a different
-            // region?
-            this.pageCreateCharacter = new PageCreateCharacter({
-                // Hmm, model should be an empty entity?
-                model: new Entity({})
-            });
-
-            this.regionMain.show(this.pageCreateCharacter);
-
-            return this;
-        },
 
         // ------------------------------
         //
@@ -10121,10 +9826,12 @@ define('Controller',[
                 logger.log('Controller', 'creating new pageGame view');
             }
 
+            var playerEntityModels = [];
+
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [ this.pageCreateCharacter.model ];
+                playerEntityModels = [ this.pageCreateCharacter.model ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;
@@ -10138,6 +9845,10 @@ define('Controller',[
             this.pageGame = new PageGame({
                 model: this.modelGame
             });
+
+            logger.log('Controller', 'showing game : %O, %O',
+                playerEntityModels,
+                this.modelGame);
 
             this.currentRegion = this.pageGame;
             this.regionMain.show(this.currentRegion);
@@ -10208,16 +9919,20 @@ requirejs.config({
 
         d3: 'lib/d3',
         async: 'lib/async.min',
-    
         // We're using lodash in place of underscore
         lodash: 'lib/lodash.min',
         
         jwerty: 'lib/jwerty.min',
 
+        localForage: 'lib/localForage.min',
+
+        velocity: 'lib/jquery.velocity',
+        pageTurn: 'lib/turn',
+
         backbone: 'lib/backbone',
         localstorage: 'lib/backbone.localstorage',
         marionette: 'lib/marionette',
-        bootstrap: 'lib/bootstrap',
+        bootstrap: 'lib/bootstrap'
     },
     shim: {
         'jquery-ui': {
@@ -10266,6 +9981,9 @@ requirejs.config({
 require([
     //libs
     'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
+    'lib/jquery.wordwriter',
+    'velocity', 'pageTurn', 
+    'localForage',
     'backbone', 'marionette', 'bootstrap',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
@@ -10284,6 +10002,9 @@ require([
     ],
     function main(
         $, $transit, $visibility,
+        $wordWriter,
+        $velocity, $turn,
+        localForage,
         Backbone, marionette, bootstrap,
         d3plugins,
 
@@ -10328,7 +10049,7 @@ require([
 
         // optional / for dev
         // ------------------------------
-        //,'Controller'
+        ,'Controller'
         //,'views/subviews/Battle'
         //,'views/subviews/Map'
         //,'models/Map'
@@ -10337,7 +10058,7 @@ require([
     ];
 
     //// log EVERYTHING:
-    //logger.options.logLevel = true;
+    logger.options.logLevel = true;
 
     //-----------------------------------
     //APP Config - Add router / controller

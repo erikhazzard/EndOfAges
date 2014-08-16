@@ -27,7 +27,7 @@ define(
         },
 
         onShow: function(){
-            var sprite = this.model.get('sprite');
+            var sprite = this.model.get('effectId');
             var sel = $('.class-sprite', this.$el);
             sel.attr({ 'src' : "/static/img/classes/" + sprite + '.svg' });
 

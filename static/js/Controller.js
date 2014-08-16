@@ -15,14 +15,9 @@ define([
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
-    'views/PageCreateCharacter',
 
     // TODO: remove, only for dev
     'views/DevTools'
-
-    // FOR DEV for manually adding entities
-    ,'collections/Classes'
-    ,'collections/Races'
 
     ], function(
         Backbone, Marionette, logger, events,
@@ -33,13 +28,9 @@ define([
         // include views here
         PageHome,
         PageGame,
-        PageCreateCharacter,
 
         // TODO: remove once out of dev
         DevTools
-
-        ,Classes
-        ,Races
     ){
 
     // console color
@@ -152,52 +143,25 @@ define([
         //
         // ===================================================================
         showHome: function controllerShowHome(){
-            // This shows the homepage for logged out appUsers. If appUser is
-            // logged in when trying to access this page, it will load their
-            // profile page instead. (If they log in from the homepage, the 
-            // initializer catches it and redirects them to their page).
+            // The "home" page is the initial landing experience / create
+            // character flow. It is called immediately. If the user is logged
+            // in, account links should fade in, along with more race options.
             //
-            // If the appUser is already logged in when they load the site,
-            // they will be redirected to the /me endpoint (set in html
-            // head before anything loads)
             var self = this;
             logger.log('Controller', 'showHome() called');
 
             if(!this.pageHome){
                 logger.log('Controller', 'creating new pageHome view');
+                this.pageHome = new PageHome({});
             }
+
             // Otherwise, show the homepage
-            this.pageHome = new PageHome({});
             this.currentRegion = this.pageHome;
             this.regionMain.show(this.currentRegion);
 
             return this;
         },
 
-        // ------------------------------
-        //
-        // Character Create
-        //
-        // ------------------------------
-        showCreateCharacter: function controllerShowCreateCharacter(){
-            logger.log('Controller', 'showCreateCharacter() called');
-
-            if(!appUser.get('isLoggedIn')){ 
-                logger.log('Controller', 'not logged in, returning false');
-                return false;
-            }
-
-            // TODO: Reuse game view, don't show / hide it? Use a different
-            // region?
-            this.pageCreateCharacter = new PageCreateCharacter({
-                // Hmm, model should be an empty entity?
-                model: new Entity({})
-            });
-
-            this.regionMain.show(this.pageCreateCharacter);
-
-            return this;
-        },
 
         // ------------------------------
         //
@@ -219,10 +183,12 @@ define([
                 logger.log('Controller', 'creating new pageGame view');
             }
 
+            var playerEntityModels = [];
+
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                var playerEntityModels = [ this.pageCreateCharacter.model ];
+                playerEntityModels = [ this.pageCreateCharacter.model ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;
@@ -236,6 +202,10 @@ define([
             this.pageGame = new PageGame({
                 model: this.modelGame
             });
+
+            logger.log('Controller', 'showing game : %O, %O',
+                playerEntityModels,
+                this.modelGame);
 
             this.currentRegion = this.pageGame;
             this.regionMain.show(this.currentRegion);

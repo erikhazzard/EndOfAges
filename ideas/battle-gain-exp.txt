@@ -1,0 +1,1 @@
+Gain exp on ability usage, not as a whole / aggregate

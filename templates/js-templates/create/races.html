@@ -1,28 +1,8 @@
 {{// Race list and race items }}
 <script id='template-create-race-list-item' type='text/template'>
     <div class='item' data-race-cid='<%= cid %>'>
-        <svg 
-            xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
-            class='race-sprite' height=50 width=50 ></svg>
+        <img src='/static/img/characters/<%= sprite %>.gif' height='50' width='50' />
         <%= name %>
-    </div>
-</script>
-
-{{ // race info templates }}
-<script id='template-create-race-info' type='text/template'>
-    <h1 class='race-name'><%= race.get('name') %></h1>
-    <div class='race-description'>
-        {{// TODO: handle sprite differently - change the src - generate sprite, use base64 string(?) }}
-        <!-- sprite goes here -->
-        <div class='character-display'>
-            <image src='/static/img/characters/<%= race.get('sprite') %>.gif' />
-        </div>
-
-        <!-- description here -->
-        <p>
-            <%= race.get('description') %>
-        </p>
-        <div class='clear'></div>
     </div>
 </script>
 
@@ -33,4 +13,16 @@
             <%= key %>: <%= value %>
         </div>
     <% }); %>
+</script>
+
+
+<!-- TEMPLATE for race info -->
+<script id='template-create-race-description' type='text/template'>
+    <h3>
+        <%= model.attributes.name %>
+    </h3>
+
+    <div id='race-visualizations'>
+        <%= model.attributes.description %>
+    </div>
 </script>

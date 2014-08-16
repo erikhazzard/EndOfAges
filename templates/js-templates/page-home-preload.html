@@ -1,13 +1,65 @@
-{{/* Game Menu - Will be either new game or continue, depending if the user 
-    has an active game */ }}
 <div id='home'>
-    <div class='home-bg-gradient'></div>
 
-    <div class='home-callout-wrapper'>
-        <div class='logo-text'>
-            <h1 class='copy'>End of Ages</h1>
-            <h1>End of Ages</h1>
+    <div id='book-wrapper'>
+
+        <!-- Page wrappers for flip library -->
+        <div id='book-pages'>
+            <!-- empty cover page (used as an empty page for flip library) -->
+            <div class='page-cover'></div>
+
+            <!-- Title page -->
+            <div id='book-page-title' class='page-left'>
+                <div class='inner'>
+
+                    {{ include create/page-title.html }}
+                </div>
+            </div>
+
+            <!-- Race page -->
+            <div id='book-page-race' class='page-right'>
+                <div class='inner'>
+
+                    {{ include create/page-race.html }}
+                </div>
+            </div>
+
+
+            <div id='book-page-templates' class='page-left hidden'>
+                <div class='inner'>
+                    {{ include create/page-templates.html }}
+                </div>
+            </div>
+
+
+            <div id='book-page-abilities' class='page-right hidden'>
+                <div class='inner'>
+                    {{ include create/page-abilities.html }}
+                </div>
+            </div>
+
+
+            <div id='book-page-templates' class='page-left hidden'>
+                <div class='inner'>
+                    <h2 id='create-final-name'>Finalize - Name here</h2>
+                </div>
+            </div>
+
+
+            <div id='book-page-abilities' class='page-right hidden'>
+                <div class='inner'>
+                    <h2>Begin Journey</h2>
+                </div>
+            </div>
+
+
+        </div> <!-- close book wrapper -->
+        
+        <!-- Arrows -->
+        <div id='arrow-right' class='interaction animated'>
+            <div class='arrow animated'></div>
         </div>
-        <a href='' class='btn-play-game btn btn-primary btn-lg'>Play Game</a>
+        <div id='arrow-left' class='interaction animated'>
+            <div class='arrow animated'></div>
+        </div>
     </div>
 </div>

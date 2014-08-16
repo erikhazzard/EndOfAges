@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>End of Ages</title>
+
+    <meta name="description" content="Quint - the Personality Genome Project">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+
+    <link rel="shortcut icon" href="/static/resources/favicon.ico" />
+
+    <!-- bootstrap -->
+    <!-- TODO: UNCOMMENT for non dev -->
+    <!--<link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css' />-->
+
+    <!-- THIRD PART ( TODO: COMBINE ) -->
+    <link rel='stylesheet' href='{{= STATIC_URL }}css/compiled/bootstrap.min.css' />
+    <link rel='stylesheet' href='{{= STATIC_URL }}css/compiled/animate.css' />
+
+    <!-- CSS -->
+    <link rel='stylesheet' href='{{= STATIC_URL }}css/compiled/main.css' />
+
+    <!-- font awesome -->
+    <!-- TODO: UNCOMMENT for non dev -->
+    <!--<link rel='stylesheet' href='//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.min.css' />-->
+
+    <!-- FONT TESTS -->
+    <!-- TODO: FIGURE OUT WHAT FONT TO USE -->
+    <link href='http://fonts.googleapis.com/css?family=Alegreya+Sans+SC|Averia+Sans+Libre|Lustria|Fenix|Rosarivo|Gudea|Alegreya+Sans|Actor|Andada|Zeyada|Inika|IM+Fell+English' rel='stylesheet' type='text/css'>
+
+
+    <style>
+        * { box-sizing: border-box }
+
+        html, body {
+            background: #000000 url(/static/img/ui/create/wood-bg.jpg);
+            background: #000000 url(/static/img/home.jpg);
+            background-size: cover;
+        }
+
+        ul { margin: 0; padding: 0 }
+        li {
+            display: block; 
+            border: 1px solid;
+            margin: 0;
+            padding: 20px 0;
+        }
+        #site-wrapper {
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        #book-wrapper {
+            background: url(/static/img/ui/create/book-bg.gif) no-repeat;
+            bottom: 0;
+            left: 50%;
+            margin-left: -455px;
+            position: absolute;
+            top: 20px;
+            width: 890px;
+        }
+
+        #page-left {
+            color: rgba(20,20,20,0.9);
+            left: 72px;
+            position: absolute;
+            height: 605px;  
+            top: 35px;
+            width: 350px;
+        }
+            #page-left .inner {
+                padding: 10px;
+            }
+            #page-left h2 { 
+                font-size: 3.6em;
+                font-variant: small-caps;
+                text-align: center;
+            }
+            .ofthe {
+                font-size: 0.5em;
+            }
+
+            #page-right {
+            }
+
+        #page-right {
+            left: 470px;
+            position: absolute;
+            height: 605px;  
+            top: 35px;
+            width: 350px;
+        }
+
+            #arrow-right {
+                cursor: pointer;
+                height: 142px;
+                padding: 30px 10px 10px 30px;
+                position: absolute;
+                right: -70px;
+                top: 230px;
+                width: 73px;
+            }
+
+            #arrow-right .arrow {
+                background-repeat: no-repeat;
+                background-image: url(/static/img/ui/create/sprite-arrow-right.png);
+                background-position: -2px -76px;
+                height: 72px;
+                width: 43px;
+            }
+            #arrow-right .arrow.disabled {background-position: -2px -2px}
+            #arrow-right:hover .arrow {
+                background-position: -2px -150px !important;
+            }
+
+            hr {
+                border-top: 1px solid rgba(0,0,0,0.8);
+            }
+
+        .race {
+            font-size: 1.3em;
+            margin-left: 20%;
+            width: 70%;
+        }
+        .race img {
+            -webkit-filter: grayscale(100%);
+            -moz-filter: grayscale(100%);
+            filter: grayscale(100%);
+        }
+
+    </style>
+</head>
+<body>
+
+<div id='site-wrapper'>
+
+    <div id='book-wrapper'>
+
+        <div id='page-left'>
+            <div class='inner'>
+                <h2>
+                    Scars
+                    <br />
+                    <div class='ofthe'>
+                        of the
+                    </div>
+                    Untrodden
+                </h2>
+                <hr />
+            </div>
+        </div>
+        <div id='page-right'>
+
+            <h2>Race</h2>
+
+            <div class='races'>
+                <div class='race'>
+                    <image src="/static/img/characters/elf.gif" width="50" height="50" />
+                    Elf
+                </div>
+
+            </div>
+
+            <!-- Arrows -->
+            <div id='arrow-right'>
+                <div class='arrow animated pulse'></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id='character-wrapper'>
+    </div>
+
+</div>
+</body>
+</html>

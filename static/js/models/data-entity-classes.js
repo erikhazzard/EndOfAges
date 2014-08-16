@@ -22,77 +22,6 @@ define(
 
     var ENTITY_CLASSES = [
         new EntityClass({
-            name: 'Cleric',
-            description: 'Clerics uselight magic to aid their allies and disable their foes',
-            sprite: 'cleric',
-            abilities: new Abilities([
-                // Basic heal
-                ABILITIES.heal,
-                // damage target and heal self
-                ABILITIES.smite,
-                // health and armor buff
-                ABILITIES.virtue
-                ,ABILITIES.judgement
-                //// res
-                //ABILITIES.resurrect
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Shadowknight',
-            description: 'A veteran dabbling in dark magic',
-            sprite: 'shadowknight',
-            abilities: new Abilities([
-                // basic physical attack
-                ABILITIES.darkblade
-                //// attack + dot
-                //ABILITIES.darkblade,
-                //// siphon abilities
-                //ABILITIES.siphonstrength,
-                ,ABILITIES.deathtouch
-
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Inferno Sage',
-            description: 'A weilder of flame',
-            sprite: 'wizard',
-            abilities: new Abilities([
-                ABILITIES.flamelick
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Time Mage',
-            description: 'Bla',
-            sprite: 'timemage',
-            abilities: new Abilities([
-                ABILITIES.freezeTime,
-                ABILITIES.stun,
-                ABILITIES.comatose,
-                ABILITIES.haste
-            ])
-        }),
-
-        new EntityClass({
-            name: 'Ranger',
-            description: 'An archer',
-            sprite: 'ranger',
-            abilities: new Abilities([
-                ABILITIES.magicmissle
-                //// single target
-                //ABILITIES.headshot,
-                //// dot + damage
-                //ABILITIES.poisonedarrow,
-                //// increases damage of next spell
-                //ABILITIES.aim,
-                //// aoe (will increase aggro - could be bad)
-                //ABILITIES.barrage
-            ])
-        }),
-
-        new EntityClass({
             name: 'Assassin',
             description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
             sprite: 'assassin',
@@ -112,8 +41,6 @@ define(
                 ABILITIES.assassinate
             ])
         })
-
-
     ];
 
 

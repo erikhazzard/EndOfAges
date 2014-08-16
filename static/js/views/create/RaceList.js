@@ -24,6 +24,7 @@ define(
                 'views/create/RaceList.js', 
                 'collectionView initialized : %O', options);
             this.itemView = RaceListItem;
+
             return this;
         }
     });

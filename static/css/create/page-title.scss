@@ -1,0 +1,43 @@
+#book-page-title {
+
+    p {
+        margin: 1em 0 1.5em;
+    }
+    h2 { 
+        font-size: 3.6em;
+        font-variant: small-caps;
+        text-align: center;
+    }
+    .ofthe {
+        font-size: 0.5em;
+    }
+
+    input {
+        background: $BACKGROUND-INTERACTION;
+        border: none;
+        border-bottom: 2px solid $COLOR-INTERACTION;
+        color: #ffffff;
+        font-family: $input-font;
+        font-size: 1.2em;
+        font-variant: small-caps;
+        letter-spacing: 2.2px;
+        font-weight: normal;
+        text-align: center;
+        max-width: 220px;
+    }
+    input:focus {
+        outline:none;
+    }
+    ::-webkit-input-placeholder { color: rgba(200,200,200,0.5); }
+    :-moz-placeholder { color: rgba(200,200,200,0.5); }
+    ::-moz-placeholder { color: rgba(200,200,200,0.5); }
+    :-ms-input-placeholder { color: #a0a0a0; }
+
+    #name-input-wrapper {
+        bottom: 70px;
+        left: 30px;
+        margin: 3em 0 0 0;
+        position: absolute;
+        right: 24px;
+    }
+}

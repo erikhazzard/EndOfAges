@@ -16,7 +16,7 @@ define(
     var RACES = [
         new Race({
             name: 'Elf',
-            description: 'An elf',
+            description: 'The long-lived elves are children of the natural world, mortals who are in tune with the natural world around them.',
             sprite: 'elf',
             baseStats: {
                 attack: 4,

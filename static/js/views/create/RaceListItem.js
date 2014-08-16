@@ -16,6 +16,10 @@ define(
         'className': 'race-list-item',
         template: '#template-create-race-list-item',
 
+        events: {
+            'click': 'raceClicked'
+        },
+
         serializeData: function(){
             return _.extend({ cid: this.model.cid }, this.model.toJSON());
         },
@@ -27,26 +31,26 @@ define(
         },
 
         onShow: function(){
-            var sprite = this.model.get('sprite');
+            var self = this;
+            logger.log('views/create/RaceListItem', '\t onShow() called');
 
-            var sel = d3.select($('.race-sprite', this.$el)[0]);
-            sel = sel.append('image')
-                .attr({
-                    'xlink:href': function(d, i){
-                        return "/static/img/characters/" + 
-                            sprite + '.gif';
-                    },
-                    width: 50,
-                    height: 50
-                });
+            // Redelegate events on a timeout. 
+            // TODO : Why doesn't this work without the timeout? It seems
+            // that maybe the elements haven't been rendered to the DOM yet
+            setTimeout(function(){
+                self._delegateDOMEvents();
+            }, 1000);
+            return this;
+        },
 
+        raceClicked: function raceClicked (){
+            logger.log('views/create/RaceListItem', 'race clicked: %O', 
+                this.model);
 
-            //// TODO: handle sprite loading 
-            //// NOTE: to use sticker...
-            //var sel = d3.select($('.race-sprite', this.$el)[0]);
-            //var $character = d3.sticker('#race-' + this.model.get('sprite'));
-            //$character = $character(sel);
-
+            events.trigger('create:page2:raceClicked', { 
+                $el: this.$el,
+                model: this.model
+            });
             return this;
         }
 

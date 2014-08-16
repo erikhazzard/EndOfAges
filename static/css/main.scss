@@ -10,13 +10,16 @@ $opacity-transition-time: 0.3s;
 
 $main-font: 'Lustria', serif;
 $header-font: 'IM Fell English', san-serif;
+$input-font: 'Nothing You Could Do', cursive;
 
 // --------------------------------------
 //
 // Imports
 //
 // --------------------------------------
+@import "colors";
 @import "_mixins";
+@import "word-writer";
 @import "layout";
 
 @import "dev-tools";
@@ -80,6 +83,7 @@ svg {
 //
 // --------------------------------------
 .hidden { display: none; }
+.opacity-zero { opacity: 0; }
 .clear { clear: both; }
 
 .blur {

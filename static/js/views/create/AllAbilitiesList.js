@@ -8,7 +8,7 @@
 define(
     [ 
         'd3', 'logger', 'events', 
-        'views/create/ClassListItem'
+        'views/create/AllAbilitiesListItem'
     ], function viewClassListCollection(
         d3, logger, events,
         ClassListItem

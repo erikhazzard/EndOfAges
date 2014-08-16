@@ -107,6 +107,11 @@ define(
             return url;
         },
 
+        generateName: function(){
+            // simply returns a new name (does not set it)
+            return generateName();
+        }, 
+
         initialize: function entityInitialize(options, opts){
             logger.log('models/Entity', 'initialize() called');
             options = options || {};
@@ -131,9 +136,12 @@ define(
                 this.set({ aiDelay: Math.random() * 3 });
             }
 
-            // --------------------------
-            // SET ABILITIES FROM CLASS
-            // --------------------------
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            // // SET ABILITIES FROM CLASS
+            // TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // TODO: Don't use class - it doesn't exist anymore. Get abilities
+            // from a list of IDs or something
+            //
             if(this.get('class')){
                 this.set({ abilities: this.get('class').get('abilities') }, { silent: true });
             } else {
@@ -143,6 +151,7 @@ define(
                     self.set({ abilities: self.get('class').get('abilities') });
                 });
             }
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
             // --------------------------
             // Set stats from race
