@@ -24,14 +24,17 @@
 
     // Book styles
     #book-wrapper {
-        background: url(../../img/ui/create/book-bg-low.jpg) no-repeat;
+        // background: url(../../img/ui/create/book-bg-low.jpg) no-repeat;
+        // height: 684px;
+
+        background: url(../../img/ui/create/book-bg-lowfi-normal.jpg) no-repeat;
         box-shadow: 0 0 3px #343434;
         bottom: 0;
-        height: 684px;
+        height: 562px;
         left: 50%;
         margin-left: -436px;
         position: absolute;
-        top: 20px;
+        top: 5%;
         width: 872px;
     }
 
@@ -45,16 +48,20 @@
 
     // Page styles
     .page-left {
-        background: url(../../img/ui/create/page-left.jpg) no-repeat;
-        height: 658px;
+        //background: url(../../img/ui/create/page-left.jpg) no-repeat;
+        //height: 658px;
+        background: url(../../img/ui/create/page-small-left.jpg) no-repeat;
+        height: 562px;
         left: 0;
         position: absolute;
         top: 0;
         width: 397px;
     }
     .page-right {
-        background: url(../../img/ui/create/page-right.jpg) no-repeat;
-        height: 658px;
+        //background: url(../../img/ui/create/page-right.jpg) no-repeat;
+        //height: 658px;
+        background: url(../../img/ui/create/page-small-right.jpg) no-repeat;
+        height: 562px;
         left: 395px;
         position: absolute;
         top: 0;

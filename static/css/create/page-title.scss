@@ -6,6 +6,8 @@
     h2 { 
         font-size: 3.6em;
         font-variant: small-caps;
+        margin-top: 0;
+        padding-top: 0;
         text-align: center;
     }
     .ofthe {
@@ -34,7 +36,7 @@
     :-ms-input-placeholder { color: #a0a0a0; }
 
     #name-input-wrapper {
-        bottom: 70px;
+        bottom: 30px;
         left: 30px;
         margin: 3em 0 0 0;
         position: absolute;

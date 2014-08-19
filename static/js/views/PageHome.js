@@ -282,12 +282,9 @@ define(
                         $name.attr('placeholder', '');
 
                         // Fade in "name text"
-                        async.eachSeries(['N','a','m','e'], 
-                        function(i, cb){
-                            $name.attr(
-                                'placeholder', 
-                                $name.attr('placeholder') + i
-                            );
+                        async.eachSeries(['N','Na','Nam','Name'], 
+                        function(val, cb){
+                            $name.attr('placeholder', val);
 
                             setTimeout(function(){
                                 cb();
@@ -295,6 +292,9 @@ define(
                         }, function allDone (){ 
                             logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
                                 enteredText);
+
+                            // remove fade in left class to prevent it triggering later
+                            $name.removeClass('fadeInLeft');
 
                             if(!enteredText){
                                 $name.removeClass();
@@ -313,9 +313,14 @@ define(
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
                 logger.log('views/PageHome', '\t name focused');
+                $name.removeClass('pulse infinite'); 
+
+                if(self.pagesCompleted[1] === true){
+                    logger.log('views/PageHome', '\t [x] already setup page2');
+                    return false;
+                }
 
                 enteredText = true;
-                $name.removeClass('pulse infinite'); 
 
                 setTimeout(function showPage2(){
                     // DONE, Show page 2
@@ -429,6 +434,8 @@ define(
 
             // update the race description div with the template
             // --------------------------
+            // TODO: This is fucked up, keeps adding / removing classes 
+            // in wrong order
             // Show race description
             this.$raceDescription.velocity({ opacity: 0 });
             //self.$raceDescription.addClass('fadeOutDown');
@@ -448,9 +455,9 @@ define(
                 // clear out fadeIn class so page turn doesn't trigger redraw
                 setTimeout(function(){
                     self.$raceDescription.removeClass('fadeIn');
-                }, baseDelay / 2);
+                }, baseDelay / 3 + 16);
 
-            }, baseDelay / 2);
+            }, baseDelay / 3);
 
             // Pulsate arrow
             // --------------------------

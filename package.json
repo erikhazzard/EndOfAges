@@ -27,7 +27,7 @@
     },
     "devDependencies": {
         "jshint": "*",
-        "requirejs": "*",
+        "requirejs": "2.1.10",
         "chai": "*",
         "mocha": "*",
         "supertest": "*",
