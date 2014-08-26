@@ -16,7 +16,7 @@ define(
     var RACES = [
         new Race({
             name: 'Elf',
-            description: 'The long-lived elves are children of the natural world, mortals who are in tune with the natural world around them.',
+            description: 'Wise and agile creatures in touch with the natural world.',
             sprite: 'elf',
             baseStats: {
                 attack: 4,
@@ -27,7 +27,7 @@ define(
         }),
         new Race({
             name: 'Human',
-            description: 'Boring',
+            description: 'Well rounded jack of all trades',
             sprite: 'human',
             baseStats: {
                 attack: 4,
@@ -38,7 +38,7 @@ define(
         }),
         new Race({
             name: 'Dark Elf',
-            description: 'Dark elf',
+            description: 'Agile and intelligent creatures raised in darkness',
             sprite: 'darkelf',
             baseStats: {
                 attack: 8,
@@ -49,7 +49,7 @@ define(
         }),
         new Race({
             name: 'Mimirian',
-            description: 'Boring',
+            description: 'Strong, but slow, mountain dwelling creatures',
             sprite: 'mimirian',
             baseStats: {
                 attack: 1,

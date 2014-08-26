@@ -790,11 +790,13 @@
   #home #book-page-title :-ms-input-placeholder {
     color: #a0a0a0; }
   #home #book-page-title #name-input-wrapper {
-    bottom: 30px;
+    bottom: 42px;
     left: 30px;
     margin: 3em 0 0 0;
     position: absolute;
     right: 24px; }
+  #home #book-page-race h2 {
+    text-align: center; }
   #home #book-page-race #create-race-wrapper {
     margin-bottom: 1em;
     position: relative; }
@@ -833,6 +835,10 @@
         font-family: "Nothing You Could Do", cursive;
         font-size: 1.2em;
         font-variant: small-caps; }
+  #home #book-page-templates h2 {
+    text-align: center; }
+  #home #book-page-abilities h2 {
+    text-align: center; }
   #home #arrow-right, #home #arrow-left {
     cursor: pointer !important;
     height: 142px;
