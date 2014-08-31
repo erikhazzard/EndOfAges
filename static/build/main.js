@@ -3712,6 +3712,9 @@ define(
             sprite: 'elf',
             baseStats: {
                 attack: 4,
+                defense: 2,
+                health: 10,
+                // TODO: Don't use these props?
                 armor: 2,
                 magicResist: 4,
                 magicPower: 4
@@ -3722,7 +3725,10 @@ define(
             description: 'Well rounded jack of all trades',
             sprite: 'human',
             baseStats: {
-                attack: 4,
+                attack: 3,
+                defense: 3,
+                health: 15,
+
                 armor: 4,
                 magicResist: 3,
                 magicPower: 3
@@ -3733,7 +3739,10 @@ define(
             description: 'Agile and intelligent creatures raised in darkness',
             sprite: 'darkelf',
             baseStats: {
-                attack: 8,
+                attack: 4,
+                defense: 2,
+                health: 20,
+
                 armor: 4,
                 magicResist: 26,
                 magicPower: 10
@@ -3745,6 +3754,9 @@ define(
             sprite: 'mimirian',
             baseStats: {
                 attack: 1,
+                defense: 4,
+                health: 20,
+
                 armor: 6,
                 magicResist: 5,
                 magicPower: 2
@@ -3793,9 +3805,148 @@ define(
     return Races;
 });
 
+/* =========================================================================
+ *
+ * RaceViz
+ *      Visualization function for the race in the create screen
+ *
+ * ========================================================================= */
+// Renders a visualization of stats to the passed in element
+define('views/create/RaceViz',[ 'd3', 'logger', 'events' ], 
+function viewRaceViz( d3, logger, events){
+
+    function RaceViz ( $el ){
+        logger.log('RaceViz', 'initialized raceViz chart object');
+
+        this.chart = d3.select($el[0]).append('svg')
+            .attr({
+                width: '100%',
+                height: '100%'
+            })
+            .append('g')
+                .attr({ 'class': 'create-race-viz-chart' });
+
+        // data properties
+        this.PROPS = {
+            data: null
+        };
+
+        this.hasBeenDrawn = false;
+
+        return this;
+    }
+
+    RaceViz.prototype.update = function update (){
+        // Draws or updates the chart based on the data
+        logger.log('RaceViz', 'drawing chart : data : ', {
+            data: this.PROPS.data
+        });
+
+        // prepare data
+        var data = [
+            ['Health', this.PROPS.data.health],
+            ['Attack', this.PROPS.data.attack],
+            ['Defense', this.PROPS.data.defense]
+        ];
+
+        // setup scales
+        var maxWidth = 300;
+        this.healthScale = d3.scale.linear()
+            .domain([ 0, 100 ])
+            .range([ 0, maxWidth ]);
+        this.attackDefenseScale = d3.scale.linear()
+            .domain([ 0, 20 ])
+            .range([ 0, maxWidth ]);
+
+        // 1. Draw
+        // ------------------------------
+        // Setup groups
+        var groups = this.chart.selectAll('g')
+            .data(data)
+            .enter()
+                .append('g')
+                .attr({ 
+                    'class': 'propWrapper',
+                    transform: function translate(d,i){
+                        return 'translate(' + [
+                            0, 40 * i
+                        ] + ')';
+                    }
+                });
+
+        // Setup outlines
+        var rectOutlines = this.chart.selectAll('.outline')
+            .data(data)
+            .enter()
+                .append('rect')
+                .attr({
+                    'class': 'outline',
+                    width: maxWidth,
+                    height: 30,
+                    x: 0,
+                    y: 0
+                });
+
+        // Setup fills
+        var rectFills = this.chart.selectAll('.bar')
+            .data(data);
+
+        rectFills
+            .enter()
+                .append('rect')
+                .attr({
+                    'class': 'bar',
+                    height: 30,
+                    x: 0,
+                    y: 0
+                });
+
+        // 2. Update
+        // ------------------------------
+        rectFills 
+            .attr({
+                'class': function setupClassName(d,i){
+                    return 'bar ' + d[0];
+                },
+                width: function setupWidth (d,i){
+                    return Math.random() * 200;
+                }
+            });
+
+        return this;
+    };
+
+    // =====================================================================
+    //
+    // Getter / Setters (reusable charts paradigm)
+    //
+    // =====================================================================
+    RaceViz.prototype.getterSetter = function helper(key){
+        // Getter / setter helper funciton. Takes in a key for the
+        // PROPS obj and returns a getter / setter func which accesses
+        // the passed in key
+        return function getSetterHelperRet(value){
+            // getter
+            if(arguments.length === 0){ return this.PROPS[key]; }
+            // setter
+            this.PROPS[key] = value;
+            return this;
+        };
+    };
+    
+    //setup getter / setters
+    RaceViz.prototype.data = RaceViz.prototype.getterSetter('data');
+
+    return RaceViz;
+});
+
 // ===========================================================================
 //
-// PageTitleScreen
+// PageHome
+//      Main homepage - handles character creation
+//
+// TODO: Metrics on play time, etc. Every 30(?) seconds, ping server
+// with stats
 // 
 // ===========================================================================
 define(
@@ -3805,14 +3956,16 @@ define(
         'async',
         'models/Entity',
         'views/create/RaceList',
-        'collections/Races'
+        'collections/Races',
+        'views/create/RaceViz'
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
         async,
         Entity,
         RaceList,
-        Races
+        Races,
+        RaceViz
     ){
 
     // CONFIG
@@ -3867,7 +4020,9 @@ define(
             $('.hidden', this.$pages).removeClass('hidden');
 
             // Setup templates
+            // --------------------------
             this.templateRaceDescription = _.template($('#template-create-race-description').html());
+            this.templateRaceVisualization = _.template($('#template-create-race-description').html());
 
             // Seutp global "skip" behavior to allow skipping all the fade ins
             // TODO: 
@@ -4209,17 +4364,47 @@ define(
                 return false;
             }
 
+            // ==========================
+            // Update description and race viz, allow going to next page,
+            // pulsate arrow
+            // ==========================
+            
+            // --------------------------
+            // Race Visualization
+            // --------------------------
+            // Only do this once (if no previous race was selected)
+            if(!this.raceViz){
+                this.$raceViz = this.$raceViz || $('#home-race-visualization');
+
+                // setup viz object
+                this.raceViz = new RaceViz( this.$raceViz );
+                
+                setTimeout(function(){
+                    self.$raceViz.addClass('animated fadeIn');
+                    self.raceViz
+                        .data(options.model.attributes)
+                        .update();
+                }, 200);
+            } else {
+                this.raceViz
+                    .data(options.model.attributes)
+                    .update();
+            }
+
             // store state
             this._previousRaceSelected = options.model.attributes.name;
 
             // remove selected class from other entity selections
+            // --------------------------
             $('#region-create-races .race-list-item.selected')
                 .removeClass('selected');
 
             // add selected class to selected entity
             options.$el.addClass('selected');
 
-            this.$raceDescription = this.$raceDescription || $('#race-description');
+            // Race description
+            // --------------------------
+            this.$raceDescription = this.$raceDescription || $('#home-race-description');
             if(!this.$raceDescription){ 
                 logger.log('error', 'this.$raceDescription does not exist');
                 return false;
@@ -4228,16 +4413,17 @@ define(
             logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
 
             // update the race description div with the template
-            // --------------------------
-            // TODO: This is fucked up, keeps adding / removing classes 
-            // in wrong order
             // Show race description
             this.$raceDescription.velocity({ opacity: 0 });
             //self.$raceDescription.addClass('fadeOutDown');
             self.$raceDescription.addClass('fadeOut');
 
+            clearTimeout(this.raceDescriptionFadeIn);
+            clearTimeout(this.raceDescriptionFadeIn2);
+
             // update the HTML below the race info
-            setTimeout(function(){
+            // --------------------------
+            this.raceDescriptionFadeIn = setTimeout(function(){
                 self.$raceDescription.html(
                     self.templateRaceDescription({ model: options.model })
                 );
@@ -4247,13 +4433,9 @@ define(
                 self.$raceDescription.removeClass('fadeOut');
                 self.$raceDescription.addClass('animated fadeIn');
 
-                // clear out fadeIn class so page turn doesn't trigger redraw
-                setTimeout(function(){
-                    self.$raceDescription.removeClass('fadeIn');
-                }, baseDelay / 3 + 16);
+            }, baseDelay / 5);
 
-            }, baseDelay / 3);
-
+            // --------------------------
             // Pulsate arrow
             // --------------------------
             // clear existing timeout
@@ -4285,10 +4467,19 @@ define(
         // Page 3 - Templates
         // 
         // ===================================================================
+        cleanupPage2: function cleanupPage2(){
+            // Removes any classes that would trigger reanimataions from page2
+            this.$raceDescription.removeClass('fadeIn');
+            return this;
+        },
+
         setupPage3: function setupPage3 (){
             // This is called *initially* to set up the third page. Once setup
             // it is not called again
             var self = this;
+
+            this.cleanupPage2();
+
             logger.log('views/PageHome:setupPage3', 'setupPage3() (templates) called');
 
             if(this.pagesCompleted[3]){ 
@@ -4320,9 +4511,11 @@ define(
 
 
         showPage3: function showPage3 (){
-            // This is called whenever player goes from page 3 back to page 2
+            // This is called whenever player goes from page 2 to page 3
             var self = this;
-            logger.log('views/PageHome:setupPage3', 'showPage3() (race) called');
+            logger.log('views/PageHome:setupPage3', 'showPage3() (templates) called');
+
+            this.cleanupPage2();
 
             clearTimeout(this.page2arrowPulseTimeout);
             clearTimeout(this.page3arrowPulseTimeout);
@@ -9549,6 +9742,7 @@ require([
     'velocity', 'pageTurn', 
     'localForage',
     'backbone', 'marionette', 'bootstrap',
+    'd3',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
     //utils
@@ -9570,6 +9764,7 @@ require([
         $velocity, $turn,
         localForage,
         Backbone, marionette, bootstrap,
+        d3,
         d3plugins,
 
         logger, 
@@ -9583,6 +9778,8 @@ require([
         getAppRouter
     ){
 
+    window.d3 = d3;
+
     // Allows multiple modals 
     if (!$.support.transition) { $.fn.transition = $.fn.animate; }
 
@@ -9593,36 +9790,8 @@ require([
     //-----------------------------------
     //Configure log options (set app-wide) 
     
-    ////NO logging:
-    //logger.options.logLevel = false;
-    
-    //// log errors:
-    logger.options.logLevel = [ 
-        // should always include these
-        // ------------------------------
-        'error',
-        ,'warn'
-        ,'views/subviews/Battle'
-        ,'views/map/PartyMember'
-        //,'views/subviews/battle/EntityInfoCollection'
-        //,'views/DevTools'
-
-        //,'app'
-
-        //,'views/subviews/Battle'
-
-        // optional / for dev
-        // ------------------------------
-        ,'Controller'
-        //,'views/subviews/Battle'
-        //,'views/subviews/Map'
-        //,'models/Map'
-        //,'models/Entity'
-        //,'models/Ability'
-    ];
-
-    //// log EVERYTHING:
-    logger.options.logLevel = true;
+    // log options
+    logger.transports.get('Console').property({ showMeta: false });
 
     //-----------------------------------
     //APP Config - Add router / controller

@@ -1,7 +1,6 @@
 // Page home
 // --------------------------------------
 #home {
-
     @include noSelect();
     background: #686c49 url(../../img/home.jpg);
     background-size: cover;
@@ -68,10 +67,12 @@
         width: 397px;
     }
 
+    // padding for the inner page without the border
+    $book-inner-padding: 30px;
     .inner {
         bottom: 0;
         left: 0;
-        padding: 30px 30px;
+        padding: $book-inner-padding;
         position: absolute;
         right: 0;
         top: 0;

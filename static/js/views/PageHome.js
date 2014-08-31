@@ -1,6 +1,10 @@
 // ===========================================================================
 //
-// PageTitleScreen
+// PageHome
+//      Main homepage - handles character creation
+//
+// TODO: Metrics on play time, etc. Every 30(?) seconds, ping server
+// with stats
 // 
 // ===========================================================================
 define(
@@ -10,14 +14,16 @@ define(
         'async',
         'models/Entity',
         'views/create/RaceList',
-        'collections/Races'
+        'collections/Races',
+        'views/create/RaceViz'
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
         async,
         Entity,
         RaceList,
-        Races
+        Races,
+        RaceViz
     ){
 
     // CONFIG
@@ -72,7 +78,9 @@ define(
             $('.hidden', this.$pages).removeClass('hidden');
 
             // Setup templates
+            // --------------------------
             this.templateRaceDescription = _.template($('#template-create-race-description').html());
+            this.templateRaceVisualization = _.template($('#template-create-race-description').html());
 
             // Seutp global "skip" behavior to allow skipping all the fade ins
             // TODO: 
@@ -414,17 +422,47 @@ define(
                 return false;
             }
 
+            // ==========================
+            // Update description and race viz, allow going to next page,
+            // pulsate arrow
+            // ==========================
+            
+            // --------------------------
+            // Race Visualization
+            // --------------------------
+            // Only do this once (if no previous race was selected)
+            if(!this.raceViz){
+                this.$raceViz = this.$raceViz || $('#home-race-visualization');
+
+                // setup viz object
+                this.raceViz = new RaceViz( this.$raceViz );
+                
+                setTimeout(function(){
+                    self.$raceViz.addClass('animated fadeIn');
+                    self.raceViz
+                        .data(options.model.attributes)
+                        .update();
+                }, 200);
+            } else {
+                this.raceViz
+                    .data(options.model.attributes)
+                    .update();
+            }
+
             // store state
             this._previousRaceSelected = options.model.attributes.name;
 
             // remove selected class from other entity selections
+            // --------------------------
             $('#region-create-races .race-list-item.selected')
                 .removeClass('selected');
 
             // add selected class to selected entity
             options.$el.addClass('selected');
 
-            this.$raceDescription = this.$raceDescription || $('#race-description');
+            // Race description
+            // --------------------------
+            this.$raceDescription = this.$raceDescription || $('#home-race-description');
             if(!this.$raceDescription){ 
                 logger.log('error', 'this.$raceDescription does not exist');
                 return false;
@@ -433,16 +471,17 @@ define(
             logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
 
             // update the race description div with the template
-            // --------------------------
-            // TODO: This is fucked up, keeps adding / removing classes 
-            // in wrong order
             // Show race description
             this.$raceDescription.velocity({ opacity: 0 });
             //self.$raceDescription.addClass('fadeOutDown');
             self.$raceDescription.addClass('fadeOut');
 
+            clearTimeout(this.raceDescriptionFadeIn);
+            clearTimeout(this.raceDescriptionFadeIn2);
+
             // update the HTML below the race info
-            setTimeout(function(){
+            // --------------------------
+            this.raceDescriptionFadeIn = setTimeout(function(){
                 self.$raceDescription.html(
                     self.templateRaceDescription({ model: options.model })
                 );
@@ -452,13 +491,9 @@ define(
                 self.$raceDescription.removeClass('fadeOut');
                 self.$raceDescription.addClass('animated fadeIn');
 
-                // clear out fadeIn class so page turn doesn't trigger redraw
-                setTimeout(function(){
-                    self.$raceDescription.removeClass('fadeIn');
-                }, baseDelay / 3 + 16);
+            }, baseDelay / 5);
 
-            }, baseDelay / 3);
-
+            // --------------------------
             // Pulsate arrow
             // --------------------------
             // clear existing timeout
@@ -490,10 +525,19 @@ define(
         // Page 3 - Templates
         // 
         // ===================================================================
+        cleanupPage2: function cleanupPage2(){
+            // Removes any classes that would trigger reanimataions from page2
+            this.$raceDescription.removeClass('fadeIn');
+            return this;
+        },
+
         setupPage3: function setupPage3 (){
             // This is called *initially* to set up the third page. Once setup
             // it is not called again
             var self = this;
+
+            this.cleanupPage2();
+
             logger.log('views/PageHome:setupPage3', 'setupPage3() (templates) called');
 
             if(this.pagesCompleted[3]){ 
@@ -525,9 +569,11 @@ define(
 
 
         showPage3: function showPage3 (){
-            // This is called whenever player goes from page 3 back to page 2
+            // This is called whenever player goes from page 2 to page 3
             var self = this;
-            logger.log('views/PageHome:setupPage3', 'showPage3() (race) called');
+            logger.log('views/PageHome:setupPage3', 'showPage3() (templates) called');
+
+            this.cleanupPage2();
 
             clearTimeout(this.page2arrowPulseTimeout);
             clearTimeout(this.page3arrowPulseTimeout);

@@ -77,6 +77,7 @@ require([
     'velocity', 'pageTurn', 
     'localForage',
     'backbone', 'marionette', 'bootstrap',
+    'd3',
     'util/d3plugins', // always load d3 plugins, extends d3 object
 
     //utils
@@ -98,6 +99,7 @@ require([
         $velocity, $turn,
         localForage,
         Backbone, marionette, bootstrap,
+        d3,
         d3plugins,
 
         logger, 
@@ -111,6 +113,8 @@ require([
         getAppRouter
     ){
 
+    window.d3 = d3;
+
     // Allows multiple modals 
     if (!$.support.transition) { $.fn.transition = $.fn.animate; }
 
@@ -121,36 +125,8 @@ require([
     //-----------------------------------
     //Configure log options (set app-wide) 
     
-    ////NO logging:
-    //logger.options.logLevel = false;
-    
-    //// log errors:
-    logger.options.logLevel = [ 
-        // should always include these
-        // ------------------------------
-        'error',
-        ,'warn'
-        ,'views/subviews/Battle'
-        ,'views/map/PartyMember'
-        //,'views/subviews/battle/EntityInfoCollection'
-        //,'views/DevTools'
-
-        //,'app'
-
-        //,'views/subviews/Battle'
-
-        // optional / for dev
-        // ------------------------------
-        ,'Controller'
-        //,'views/subviews/Battle'
-        //,'views/subviews/Map'
-        //,'models/Map'
-        //,'models/Entity'
-        //,'models/Ability'
-    ];
-
-    //// log EVERYTHING:
-    logger.options.logLevel = true;
+    // log options
+    logger.transports.get('Console').property({ showMeta: false });
 
     //-----------------------------------
     //APP Config - Add router / controller

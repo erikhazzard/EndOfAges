@@ -750,7 +750,7 @@
   #home .inner {
     bottom: 0;
     left: 0;
-    padding: 30px 30px;
+    padding: 30px;
     position: absolute;
     right: 0;
     top: 0;
@@ -835,6 +835,20 @@
         font-family: "Nothing You Could Do", cursive;
         font-size: 1.2em;
         font-variant: small-caps; }
+  #home #book-page-race #home-race-visualization {
+    position: absolute;
+    bottom: 30px;
+    height: 142px;
+    left: 30px;
+    right: 30px; }
+    #home #book-page-race #home-race-visualization .outline {
+      fill: none; }
+    #home #book-page-race #home-race-visualization .bar.Health {
+      fill: #f06464; }
+    #home #book-page-race #home-race-visualization .bar.Attack {
+      fill: #64f064; }
+    #home #book-page-race #home-race-visualization .bar.Defense {
+      fill: #6464f0; }
   #home #book-page-templates h2 {
     text-align: center; }
   #home #book-page-abilities h2 {

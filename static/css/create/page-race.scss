@@ -55,4 +55,25 @@
             }
         }
     }
+
+    #home-race-visualization {
+        position: absolute;
+        bottom: $book-inner-padding;
+        height: 142px;
+        left: $book-inner-padding;
+        right: $book-inner-padding;
+
+        .outline {
+            fill: none;
+        }
+        .bar.Health {
+            fill: rgba(240,100,100,1);
+        }
+        .bar.Attack{
+            fill: rgba(100,240,100,1);
+        }
+        .bar.Defense{
+            fill: rgba(100,100,240,1);
+        }
+    }
 }
