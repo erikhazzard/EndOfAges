@@ -375,11 +375,11 @@ define(
             $raceHeader.velocity({ opacity: 1 });
             $raceHeader.addClass('animated fadeInDown');
 
-            // then show the seletion
+            // then show the selection
             setTimeout(function(){
                 $raceWrapper.velocity({ opacity: 1 });
                 $raceWrapper.addClass('animated fadeInUp');
-            }, baseDelay * 1.2);
+            }, baseDelay * 0.8);
 
             // remove the animated classes so page switches don't re-trigger
             // transitions
@@ -442,6 +442,12 @@ define(
                     self.raceViz
                         .data(options.model.attributes)
                         .update();
+
+                    // remove fadeIn class when the animation is over
+                    setTimeout(function(){
+                        self.$raceViz.css({ opacity: 1 });
+                        self.$raceViz.removeClass('fadeIn');
+                    }, 800);
                 }, 200);
             } else {
                 this.raceViz

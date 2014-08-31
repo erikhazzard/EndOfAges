@@ -842,13 +842,15 @@
     left: 30px;
     right: 30px; }
     #home #book-page-race #home-race-visualization .outline {
-      fill: none; }
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.5);
+      stroke-width: 1px; }
     #home #book-page-race #home-race-visualization .bar.Health {
-      fill: #f06464; }
+      fill: rgba(161, 32, 32, 0.27); }
     #home #book-page-race #home-race-visualization .bar.Attack {
-      fill: #64f064; }
+      fill: rgba(245, 228, 140, 0.25); }
     #home #book-page-race #home-race-visualization .bar.Defense {
-      fill: #6464f0; }
+      fill: rgba(29, 63, 99, 0.32); }
   #home #book-page-templates h2 {
     text-align: center; }
   #home #book-page-abilities h2 {

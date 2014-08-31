@@ -65,15 +65,17 @@
 
         .outline {
             fill: none;
+            stroke: rgba(0,0,0,0.5);
+            stroke-width: 1px;
         }
         .bar.Health {
-            fill: rgba(240,100,100,1);
+            fill: rgba(161, 32, 32, 0.27);
         }
         .bar.Attack{
-            fill: rgba(100,240,100,1);
+            fill: rgba(245, 228, 140, 0.25);
         }
         .bar.Defense{
-            fill: rgba(100,100,240,1);
+            fill: rgba(29, 63, 99, 0.32);
         }
     }
 }

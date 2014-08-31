@@ -24,6 +24,10 @@ function viewRaceViz( d3, logger, events){
             data: null
         };
 
+
+        // prepare data
+        this.chartData = null;
+
         this.hasBeenDrawn = false;
 
         return this;
@@ -31,15 +35,16 @@ function viewRaceViz( d3, logger, events){
 
     RaceViz.prototype.update = function update (){
         // Draws or updates the chart based on the data
+        var self = this;
         logger.log('RaceViz', 'drawing chart : data : ', {
             data: this.PROPS.data
         });
 
         // prepare data
         var data = [
-            ['Health', this.PROPS.data.health],
-            ['Attack', this.PROPS.data.attack],
-            ['Defense', this.PROPS.data.defense]
+            {key: 'Health', value: this.PROPS.data.baseStats.health},
+            {key: 'Attack', value: this.PROPS.data.baseStats.attack},
+            {key: 'Defense', value: this.PROPS.data.baseStats.defense},
         ];
 
         // setup scales
@@ -54,26 +59,33 @@ function viewRaceViz( d3, logger, events){
         // 1. Draw
         // ------------------------------
         // Setup groups
-        var groups = this.chart.selectAll('g')
-            .data(data)
+        var groups = this.chart.selectAll('.propWrapper')
+            // specify a key function to control how data
+            // is joined to elements - use the `key` key
+            .data(data, function(d){ return d.key; });
+
+        groups
             .enter()
                 .append('g')
                 .attr({ 
                     'class': 'propWrapper',
                     transform: function translate(d,i){
                         return 'translate(' + [
-                            0, 40 * i
+                            0, 2 + (40 * i)
                         ] + ')';
                     }
                 });
 
         // Setup outlines
-        var rectOutlines = this.chart.selectAll('.outline')
-            .data(data)
+        var rectOutlines = groups.selectAll('.outline')
+            .data(function(d,i){ return [d]; });
+
+        rectOutlines
             .enter()
                 .append('rect')
                 .attr({
                     'class': 'outline',
+                    filter: 'url(#filter-wavy)',
                     width: maxWidth,
                     height: 30,
                     x: 0,
@@ -81,28 +93,33 @@ function viewRaceViz( d3, logger, events){
                 });
 
         // Setup fills
-        var rectFills = this.chart.selectAll('.bar')
-            .data(data);
+        var rectFills = groups.selectAll('.bar')
+            .data(function(d,i){ return [d]; });
 
         rectFills
             .enter()
                 .append('rect')
                 .attr({
                     'class': 'bar',
-                    height: 30,
-                    x: 0,
-                    y: 0
+                    height: 28,
+                    x: 1,
+                    y: 1
                 });
 
         // 2. Update
         // ------------------------------
         rectFills 
+            .transition()
+            .delay(150)
+            .duration(600)
             .attr({
                 'class': function setupClassName(d,i){
-                    return 'bar ' + d[0];
+                    logger.log('RaceViz', '...', d);
+                    return 'bar ' + d.key;
                 },
+                filter: 'url(#filter-wavy)',
                 width: function setupWidth (d,i){
-                    return Math.random() * 200;
+                    return self.attackDefenseScale(d.value) - 1;
                 }
             });
 
