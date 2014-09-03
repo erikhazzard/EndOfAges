@@ -19,7 +19,7 @@ define(
             description: 'Wise and agile creatures in touch with the natural world.',
             sprite: 'elf',
             baseStats: {
-                attack: 4,
+                power: 4,
                 defense: 2,
                 health: 70,
 
@@ -34,7 +34,7 @@ define(
             description: 'Well rounded jack of all trades',
             sprite: 'human',
             baseStats: {
-                attack: 4,
+                power: 4,
                 defense: 4,
                 health: 75,
 
@@ -47,8 +47,9 @@ define(
             name: 'Dark Elf',
             description: 'Agile and intelligent creatures raised in darkness',
             sprite: 'darkelf',
+            specialDescription: 'Has a {5%} bonus to something',
             baseStats: {
-                attack: 5,
+                power: 5,
                 defense: 2,
                 health: 60,
 
@@ -62,7 +63,7 @@ define(
             description: 'Strong, but slow, mountain dwelling creatures',
             sprite: 'mimirian',
             baseStats: {
-                attack: 1,
+                power: 1,
                 defense: 5,
                 health: 90,
 

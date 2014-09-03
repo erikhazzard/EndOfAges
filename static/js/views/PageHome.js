@@ -5,7 +5,7 @@
 //
 // TODO: Metrics on play time, etc. Every 30(?) seconds, ping server
 // with stats
-// 
+//
 // ===========================================================================
 define(
     [ 
@@ -28,7 +28,8 @@ define(
 
     // CONFIG
     // ----------------------------------
-    var baseDelay = 1000;
+    var ORIGINAL_BASE_DELAY = 1000;
+    var baseDelay = ORIGINAL_BASE_DELAY;
 
     // View 
     // ----------------------------------
@@ -237,11 +238,12 @@ define(
                     // are we on step 1?
                     if(self.curStep === 1 && self.pagesCompleted[1] === false){
                         // finish step 1
+                        baseDelay = 1;
                         self.step1WriterCallback();
                         self.page1Writer.trigger('finish');
                         self.setupPage2();
+                        setTimeout(function(){ baseDelay = ORIGINAL_BASE_DELAY; }, 200);
                     }
-
                 }
             });
 
@@ -342,7 +344,7 @@ define(
             self.page1Writer = $('#create-title-intro-text').wordWriter({
                 finalCss: { opacity: 0.8 },
 
-                callback: self.step1WriteCallback
+                callback: self.step1WriterCallback
             });
 
             // Remove the pulsating effect when user clicks input
@@ -380,7 +382,6 @@ define(
 
             return this;
         },
-
 
         // ===================================================================
         //

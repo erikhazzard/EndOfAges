@@ -3718,7 +3718,7 @@ define(
             description: 'Wise and agile creatures in touch with the natural world.',
             sprite: 'elf',
             baseStats: {
-                attack: 4,
+                power: 4,
                 defense: 2,
                 health: 70,
 
@@ -3733,7 +3733,7 @@ define(
             description: 'Well rounded jack of all trades',
             sprite: 'human',
             baseStats: {
-                attack: 4,
+                power: 4,
                 defense: 4,
                 health: 75,
 
@@ -3746,8 +3746,9 @@ define(
             name: 'Dark Elf',
             description: 'Agile and intelligent creatures raised in darkness',
             sprite: 'darkelf',
+            specialDescription: 'Has a {5%} bonus to something',
             baseStats: {
-                attack: 5,
+                power: 5,
                 defense: 2,
                 health: 60,
 
@@ -3761,7 +3762,7 @@ define(
             description: 'Strong, but slow, mountain dwelling creatures',
             sprite: 'mimirian',
             baseStats: {
-                attack: 1,
+                power: 1,
                 defense: 5,
                 health: 90,
 
@@ -3818,6 +3819,7 @@ define(
  * RaceViz
  *      Visualization function for the race in the create screen
  *
+ *  TODO: TEXT-ANCHOR END
  * ========================================================================= */
 // Renders a visualization of stats to the passed in element
 define('views/create/RaceViz',[ 'd3', 'logger', 'events' ], 
@@ -3858,9 +3860,11 @@ function viewRaceViz( d3, logger, events){
         // prepare data
         var data = [
             {key: 'Health', value: this.PROPS.data.baseStats.health},
-            {key: 'Attack', value: this.PROPS.data.baseStats.attack},
+            {key: 'Power', value: this.PROPS.data.baseStats.power},
             {key: 'Defense', value: this.PROPS.data.baseStats.defense},
         ];
+
+        var barHeight = 20;
 
         // setup scales
         var maxWidth = 330;
@@ -3871,7 +3875,7 @@ function viewRaceViz( d3, logger, events){
         this.healthScale = d3.scale.linear()
             .domain([ 0, 100 ])
             .range([ 0, maxWidth ]);
-        this.attackDefenseScale = d3.scale.linear()
+        this.powerDefenseScale = d3.scale.linear()
             .domain([ 0, 10 ])
             .range([ 0, maxWidth ]);
 
@@ -3890,7 +3894,7 @@ function viewRaceViz( d3, logger, events){
                     'class': 'propWrapper',
                     transform: function translate(d,i){
                         return 'translate(' + [
-                            0, 2 + (40 * i)
+                            0, 2 + (30 * i)
                         ] + ')';
                     }
                 });
@@ -3906,7 +3910,7 @@ function viewRaceViz( d3, logger, events){
                     'class': 'outline',
                     filter: 'url(#filter-wavy)',
                     width: maxWidth,
-                    height: 30,
+                    height: barHeight,
                     x: startX,
                     y: 0
                 });
@@ -3920,7 +3924,7 @@ function viewRaceViz( d3, logger, events){
                 .append('rect')
                 .attr({
                     'class': 'bar',
-                    height: 28,
+                    height: barHeight,
                     x: startX+1,
                     y: 1
                 });
@@ -3941,7 +3945,7 @@ function viewRaceViz( d3, logger, events){
                     if(d.key.toLowerCase() === 'health'){
                         return self.healthScale(d.value) - 1;
                     } else {
-                        return self.attackDefenseScale(d.value) - 1;
+                        return self.powerDefenseScale(d.value) - 1;
                     }
                 }
             });
@@ -3956,8 +3960,8 @@ function viewRaceViz( d3, logger, events){
             .append('text')
             .attr({
                 'class': 'label',
-                x: 0,
-                y: 24
+                x: 10,
+                y: 18
             })
             .text(function(d,i){
                 return d.key;
@@ -3998,7 +4002,7 @@ function viewRaceViz( d3, logger, events){
 //
 // TODO: Metrics on play time, etc. Every 30(?) seconds, ping server
 // with stats
-// 
+//
 // ===========================================================================
 define(
     'views/PageHome',[ 
@@ -4021,7 +4025,8 @@ define(
 
     // CONFIG
     // ----------------------------------
-    var baseDelay = 1000;
+    var ORIGINAL_BASE_DELAY = 1000;
+    var baseDelay = ORIGINAL_BASE_DELAY;
 
     // View 
     // ----------------------------------
@@ -4230,11 +4235,12 @@ define(
                     // are we on step 1?
                     if(self.curStep === 1 && self.pagesCompleted[1] === false){
                         // finish step 1
+                        baseDelay = 1;
                         self.step1WriterCallback();
                         self.page1Writer.trigger('finish');
                         self.setupPage2();
+                        setTimeout(function(){ baseDelay = ORIGINAL_BASE_DELAY; }, 200);
                     }
-
                 }
             });
 
@@ -4335,7 +4341,7 @@ define(
             self.page1Writer = $('#create-title-intro-text').wordWriter({
                 finalCss: { opacity: 0.8 },
 
-                callback: self.step1WriteCallback
+                callback: self.step1WriterCallback
             });
 
             // Remove the pulsating effect when user clicks input
@@ -4373,7 +4379,6 @@ define(
 
             return this;
         },
-
 
         // ===================================================================
         //

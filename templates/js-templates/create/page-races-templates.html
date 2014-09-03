@@ -2,7 +2,9 @@
 <script id='template-create-race-list-item' type='text/template'>
     <div class='item' data-race-cid='<%= cid %>'>
         <img src='/static/img/characters/<%= sprite %>.gif' height='50' width='50' />
-        <%= name %>
+        <span class='race-name'>
+            <%= name %>
+        </span>
     </div>
 </script>
 
@@ -19,6 +21,6 @@
 <!-- TEMPLATE for race info -->
 <script id='template-create-race-description' type='text/template'>
     <div id='race-info'>
-        <%= model.attributes.description %>
+        <%= model.attributes.specialDescription %>
     </div>
 </script>

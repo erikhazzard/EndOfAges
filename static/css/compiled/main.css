@@ -772,7 +772,7 @@
     border: none;
     border-bottom: 2px solid rgba(23, 118, 16, 0.6);
     color: #ffffff;
-    font-family: "Nothing You Could Do", cursive;
+    font-family: "Shadows Into Light", cursive;
     font-size: 1.2em;
     font-variant: small-caps;
     letter-spacing: 2.2px;
@@ -822,7 +822,10 @@
         -moz-filter: grayscale(100%);
         filter: grayscale(100%); }
       #home #book-page-race #create-race-wrapper #region-create-races .race-list-item {
-        transition: all 0.3s;
+        -webkit-transition: padding 0.2s, opacity 0.2s;
+        -moz-transition: padding 0.2s, opacity 0.2s;
+        -o-transition: padding 0.2s, opacity 0.2s;
+        transition: padding 0.2s, opacity 0.2s;
         color: #b0b0b0;
         padding-left: 0; }
       #home #book-page-race #create-race-wrapper #region-create-races .race-list-item:hover {
@@ -832,9 +835,16 @@
         background: rgba(255, 255, 255, 0.4);
         color: #ffffff;
         padding-left: 40px;
-        font-family: "Nothing You Could Do", cursive;
-        font-size: 1.2em;
+        font-family: "Shadows Into Light", cursive;
+        font-size: 1.4em;
         font-variant: small-caps; }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item img {
+        cursor: pointer; }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-name {
+        cursor: pointer;
+        opacity: 0.5; }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.selected .race-name {
+        opacity: 1; }
   #home #book-page-race #home-race-visualization {
     position: absolute;
     bottom: 30px;
@@ -847,12 +857,14 @@
       stroke-width: 1px; }
     #home #book-page-race #home-race-visualization .bar.Health {
       fill: rgba(161, 32, 32, 0.27); }
-    #home #book-page-race #home-race-visualization .bar.Attack {
+    #home #book-page-race #home-race-visualization .bar.Power {
       fill: rgba(245, 228, 140, 0.25); }
     #home #book-page-race #home-race-visualization .bar.Defense {
       fill: rgba(29, 63, 99, 0.32); }
     #home #book-page-race #home-race-visualization .label {
-      font-family: "Nothing You Could Do", cursive; }
+      font-family: "Shadows Into Light", cursive;
+      font-size: 0.95em;
+      fill: rgba(20, 20, 20, 0.7); }
   #home #book-page-templates h2 {
     text-align: center; }
   #home #book-page-abilities h2 {

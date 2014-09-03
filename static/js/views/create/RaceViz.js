@@ -3,6 +3,7 @@
  * RaceViz
  *      Visualization function for the race in the create screen
  *
+ *  TODO: TEXT-ANCHOR END
  * ========================================================================= */
 // Renders a visualization of stats to the passed in element
 define([ 'd3', 'logger', 'events' ], 
@@ -43,9 +44,11 @@ function viewRaceViz( d3, logger, events){
         // prepare data
         var data = [
             {key: 'Health', value: this.PROPS.data.baseStats.health},
-            {key: 'Attack', value: this.PROPS.data.baseStats.attack},
+            {key: 'Power', value: this.PROPS.data.baseStats.power},
             {key: 'Defense', value: this.PROPS.data.baseStats.defense},
         ];
+
+        var barHeight = 20;
 
         // setup scales
         var maxWidth = 330;
@@ -56,7 +59,7 @@ function viewRaceViz( d3, logger, events){
         this.healthScale = d3.scale.linear()
             .domain([ 0, 100 ])
             .range([ 0, maxWidth ]);
-        this.attackDefenseScale = d3.scale.linear()
+        this.powerDefenseScale = d3.scale.linear()
             .domain([ 0, 10 ])
             .range([ 0, maxWidth ]);
 
@@ -75,7 +78,7 @@ function viewRaceViz( d3, logger, events){
                     'class': 'propWrapper',
                     transform: function translate(d,i){
                         return 'translate(' + [
-                            0, 2 + (40 * i)
+                            0, 2 + (30 * i)
                         ] + ')';
                     }
                 });
@@ -91,7 +94,7 @@ function viewRaceViz( d3, logger, events){
                     'class': 'outline',
                     filter: 'url(#filter-wavy)',
                     width: maxWidth,
-                    height: 30,
+                    height: barHeight,
                     x: startX,
                     y: 0
                 });
@@ -105,7 +108,7 @@ function viewRaceViz( d3, logger, events){
                 .append('rect')
                 .attr({
                     'class': 'bar',
-                    height: 28,
+                    height: barHeight,
                     x: startX+1,
                     y: 1
                 });
@@ -126,7 +129,7 @@ function viewRaceViz( d3, logger, events){
                     if(d.key.toLowerCase() === 'health'){
                         return self.healthScale(d.value) - 1;
                     } else {
-                        return self.attackDefenseScale(d.value) - 1;
+                        return self.powerDefenseScale(d.value) - 1;
                     }
                 }
             });
@@ -141,8 +144,8 @@ function viewRaceViz( d3, logger, events){
             .append('text')
             .attr({
                 'class': 'label',
-                x: 0,
-                y: 24
+                x: 10,
+                y: 18
             })
             .text(function(d,i){
                 return d.key;
