@@ -48,12 +48,16 @@ function viewRaceViz( d3, logger, events){
         ];
 
         // setup scales
-        var maxWidth = 300;
+        var maxWidth = 330;
+        var startX = 90;
+
+        maxWidth = maxWidth - startX;
+
         this.healthScale = d3.scale.linear()
             .domain([ 0, 100 ])
             .range([ 0, maxWidth ]);
         this.attackDefenseScale = d3.scale.linear()
-            .domain([ 0, 20 ])
+            .domain([ 0, 10 ])
             .range([ 0, maxWidth ]);
 
         // 1. Draw
@@ -88,7 +92,7 @@ function viewRaceViz( d3, logger, events){
                     filter: 'url(#filter-wavy)',
                     width: maxWidth,
                     height: 30,
-                    x: 0,
+                    x: startX,
                     y: 0
                 });
 
@@ -102,7 +106,7 @@ function viewRaceViz( d3, logger, events){
                 .attr({
                     'class': 'bar',
                     height: 28,
-                    x: 1,
+                    x: startX+1,
                     y: 1
                 });
 
@@ -119,9 +123,31 @@ function viewRaceViz( d3, logger, events){
                 },
                 filter: 'url(#filter-wavy)',
                 width: function setupWidth (d,i){
-                    return self.attackDefenseScale(d.value) - 1;
+                    if(d.key.toLowerCase() === 'health'){
+                        return self.healthScale(d.value) - 1;
+                    } else {
+                        return self.attackDefenseScale(d.value) - 1;
+                    }
                 }
             });
+
+        // Text
+        // ------------------------------
+        var labels = groups.selectAll('.label')
+            .data(function(d,i){ return [d]; });
+        
+        labels
+            .enter()
+            .append('text')
+            .attr({
+                'class': 'label',
+                x: 0,
+                y: 24
+            })
+            .text(function(d,i){
+                return d.key;
+            });
+        
 
         return this;
     };

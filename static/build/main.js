@@ -3713,7 +3713,8 @@ define(
             baseStats: {
                 attack: 4,
                 defense: 2,
-                health: 10,
+                health: 70,
+
                 // TODO: Don't use these props?
                 armor: 2,
                 magicResist: 4,
@@ -3725,9 +3726,9 @@ define(
             description: 'Well rounded jack of all trades',
             sprite: 'human',
             baseStats: {
-                attack: 3,
-                defense: 3,
-                health: 15,
+                attack: 4,
+                defense: 4,
+                health: 75,
 
                 armor: 4,
                 magicResist: 3,
@@ -3739,9 +3740,9 @@ define(
             description: 'Agile and intelligent creatures raised in darkness',
             sprite: 'darkelf',
             baseStats: {
-                attack: 4,
+                attack: 5,
                 defense: 2,
-                health: 20,
+                health: 60,
 
                 armor: 4,
                 magicResist: 26,
@@ -3754,8 +3755,8 @@ define(
             sprite: 'mimirian',
             baseStats: {
                 attack: 1,
-                defense: 4,
-                health: 20,
+                defense: 5,
+                health: 90,
 
                 armor: 6,
                 magicResist: 5,
@@ -3855,12 +3856,16 @@ function viewRaceViz( d3, logger, events){
         ];
 
         // setup scales
-        var maxWidth = 300;
+        var maxWidth = 330;
+        var startX = 90;
+
+        maxWidth = maxWidth - startX;
+
         this.healthScale = d3.scale.linear()
             .domain([ 0, 100 ])
             .range([ 0, maxWidth ]);
         this.attackDefenseScale = d3.scale.linear()
-            .domain([ 0, 20 ])
+            .domain([ 0, 10 ])
             .range([ 0, maxWidth ]);
 
         // 1. Draw
@@ -3895,7 +3900,7 @@ function viewRaceViz( d3, logger, events){
                     filter: 'url(#filter-wavy)',
                     width: maxWidth,
                     height: 30,
-                    x: 0,
+                    x: startX,
                     y: 0
                 });
 
@@ -3909,7 +3914,7 @@ function viewRaceViz( d3, logger, events){
                 .attr({
                     'class': 'bar',
                     height: 28,
-                    x: 1,
+                    x: startX+1,
                     y: 1
                 });
 
@@ -3926,9 +3931,31 @@ function viewRaceViz( d3, logger, events){
                 },
                 filter: 'url(#filter-wavy)',
                 width: function setupWidth (d,i){
-                    return self.attackDefenseScale(d.value) - 1;
+                    if(d.key.toLowerCase() === 'health'){
+                        return self.healthScale(d.value) - 1;
+                    } else {
+                        return self.attackDefenseScale(d.value) - 1;
+                    }
                 }
             });
+
+        // Text
+        // ------------------------------
+        var labels = groups.selectAll('.label')
+            .data(function(d,i){ return [d]; });
+        
+        labels
+            .enter()
+            .append('text')
+            .attr({
+                'class': 'label',
+                x: 0,
+                y: 24
+            })
+            .text(function(d,i){
+                return d.key;
+            });
+        
 
         return this;
     };

@@ -851,6 +851,8 @@
       fill: rgba(245, 228, 140, 0.25); }
     #home #book-page-race #home-race-visualization .bar.Defense {
       fill: rgba(29, 63, 99, 0.32); }
+    #home #book-page-race #home-race-visualization .label {
+      font-family: "Nothing You Could Do", cursive; }
   #home #book-page-templates h2 {
     text-align: center; }
   #home #book-page-abilities h2 {
