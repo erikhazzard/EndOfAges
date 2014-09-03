@@ -103,30 +103,37 @@
 
         // Instantly show everything and call the callback
         // ------------------------------
-        if(!options.disableInstant){
-            // instantly animate everything
-            element.click(function (){
-                _stopAnimations = true;
+        function finishNow (){
+            _stopAnimations = true;
 
-                // clear all timeouts
-                for(var i=0,len=_timeouts.length; i<len; i++){
-                    clearTimeout(_timeouts[i]);
-                }
-                clearTimeout(_finalCallbackTimeout);
+            // clear all timeouts
+            for(var i=0,len=_timeouts.length; i<len; i++){
+                clearTimeout(_timeouts[i]);
+            }
+            clearTimeout(_finalCallbackTimeout);
 
-                // add callback 
-                velocityOptionsFadeIn.complete = function (){
-                    // cancelled, did not finish naturally
-                    return callback(true);
-                };
+            // add callback 
+            velocityOptionsFadeIn.complete = function (){
+                // cancelled, did not finish naturally
+                return callback(true);
+            };
 
-                $('.writer-word')
-                    .velocity('stop')
-                    .velocity('stop')
-                    .velocity(fadeInCss, velocityOptionsFadeIn)
-                    .velocity(finalCss, velocityOptionsFinal);
-            });
+            $('.writer-word', $writerWrapper)
+                .velocity('stop')
+                .velocity('stop')
+                .velocity(fadeInCss, velocityOptionsFadeIn)
+                .velocity(finalCss, velocityOptionsFinal);
         }
+
+        // allow finish event to be triggered
+        this.bind('finish', finishNow);
+
+        if(!options.disableInstant){
+            // also, instantly animate everything when the element is clicked
+            element.click(finishNow);
+        }
+
+        return this;
     };
 
 }( $ ));

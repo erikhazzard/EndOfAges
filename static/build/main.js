@@ -110,30 +110,37 @@ define("lib/jquery.visibility", function(){});
 
         // Instantly show everything and call the callback
         // ------------------------------
-        if(!options.disableInstant){
-            // instantly animate everything
-            element.click(function (){
-                _stopAnimations = true;
+        function finishNow (){
+            _stopAnimations = true;
 
-                // clear all timeouts
-                for(var i=0,len=_timeouts.length; i<len; i++){
-                    clearTimeout(_timeouts[i]);
-                }
-                clearTimeout(_finalCallbackTimeout);
+            // clear all timeouts
+            for(var i=0,len=_timeouts.length; i<len; i++){
+                clearTimeout(_timeouts[i]);
+            }
+            clearTimeout(_finalCallbackTimeout);
 
-                // add callback 
-                velocityOptionsFadeIn.complete = function (){
-                    // cancelled, did not finish naturally
-                    return callback(true);
-                };
+            // add callback 
+            velocityOptionsFadeIn.complete = function (){
+                // cancelled, did not finish naturally
+                return callback(true);
+            };
 
-                $('.writer-word')
-                    .velocity('stop')
-                    .velocity('stop')
-                    .velocity(fadeInCss, velocityOptionsFadeIn)
-                    .velocity(finalCss, velocityOptionsFinal);
-            });
+            $('.writer-word', $writerWrapper)
+                .velocity('stop')
+                .velocity('stop')
+                .velocity(fadeInCss, velocityOptionsFadeIn)
+                .velocity(finalCss, velocityOptionsFinal);
         }
+
+        // allow finish event to be triggered
+        this.bind('finish', finishNow);
+
+        if(!options.disableInstant){
+            // also, instantly animate everything when the element is clicked
+            element.click(finishNow);
+        }
+
+        return this;
     };
 
 }( $ ));
@@ -4193,11 +4200,13 @@ define(
                     'key pressed : ' + e.keyCode + ' | curStep : ' + 
                     self.curStep);
 
-                if (e.keyCode==37) {
+                // Left Arrow
+                if (e.keyCode === 37) {
                     logger.log('views/PageHome:pageTurn:keyPress', 'going back');
                     pagePrevious(e);
 
-                } else if (e.keyCode==39) {
+                // Right Arrow
+                } else if (e.keyCode === 39) {
                     // can we go forward?
                     if(
                         (self.curStep === 1 && self.pagesCompleted[2]) || 
@@ -4209,6 +4218,23 @@ define(
                     } else {
                         logger.log('views/PageHome:pageTurn:keyPress', '[x] cannot go forward');
                     }
+
+                // Escape or enter
+                } else if (e.keyCode === 27 || e.keyCode === 13){
+                    // ------------------
+                    // Skip all the transition stuff
+                    // ------------------
+                    logger.log('views/PageHome:pageTurn:keyPress', 
+                        'enter or escape pressed, skipping transitions');
+
+                    // are we on step 1?
+                    if(self.curStep === 1 && self.pagesCompleted[1] === false){
+                        // finish step 1
+                        self.step1WriterCallback();
+                        self.page1Writer.trigger('finish');
+                        self.setupPage2();
+                    }
+
                 }
             });
 
@@ -4252,57 +4278,65 @@ define(
 
             $($paragraph[0]).velocity({ opacity: 1 });
             $($paragraph[0]).addClass('animated ' + animation);
+        
+            // Setup writer callback
+            self.step1WriterCallbackCalled = false;
+
+            self.step1WriterCallback = function writerCallback(wasCancelled){
+                // Called when all words have been faded, or when the
+                // user clicks on text
+                logger.log('views/PageHome', 
+                    '\t finished showing words, was cancelled? : %O',
+                    wasCancelled);
+
+                // if already called, do nothing
+                if(self.step1WriterCallbackCalled){ return false; }
+                self.step1WriterCallbackCalled = true;
+
+                $paragraphName.velocity({ opacity: 1 });
+                $paragraphName.addClass('animated fadeInUp');
+
+                // Show the name input box
+                setTimeout(function showName(){
+                    $name.addClass('animated fadeInLeft');
+                    $name.velocity({ opacity: 1 });
+                    $name.attr('placeholder', '');
+
+                    // Fade in "name text"
+                    async.eachSeries(['N','Na','Nam','Name'], 
+                    function(val, cb){
+                        $name.attr('placeholder', val);
+
+                        setTimeout(function(){
+                            cb();
+                        }, baseDelay * 0.8);
+                    }, function allDone (){ 
+                        logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
+                            enteredText);
+
+                        // remove fade in left class to prevent it triggering later
+                        $name.removeClass('fadeInLeft');
+
+                        if(!enteredText){
+                            $name.removeClass();
+                            setTimeout(function(){
+                                logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                $name.addClass('animated pulse infinite');
+                            }, 500);
+                        }
+                    });
+
+                }, baseDelay / 2);
+            };
 
             // --------------------------
             // Fade in text
             // --------------------------
-            $('#create-title-intro-text').wordWriter({
+            self.page1Writer = $('#create-title-intro-text').wordWriter({
                 finalCss: { opacity: 0.8 },
 
-                callback: function writerCallback(wasCancelled){
-                    // Called when all words have been faded, or when the
-                    // user clicks on text
-                    logger.log('views/PageHome', 
-                        '\t finished showing words, was cancelled? : %O',
-                        wasCancelled);
-
-                    $paragraphName.velocity({ opacity: 1 });
-                    $paragraphName.addClass('animated fadeInUp');
-
-                    // Show the name input box
-                    setTimeout(function showName(){
-                        $name.addClass('animated fadeInLeft');
-                        $name.velocity({ opacity: 1 });
-                        $name.attr('placeholder', '');
-
-                        // Fade in "name text"
-                        async.eachSeries(['N','Na','Nam','Name'], 
-                        function(val, cb){
-                            $name.attr('placeholder', val);
-
-                            setTimeout(function(){
-                                cb();
-                            }, baseDelay * 0.8);
-                        }, function allDone (){ 
-                            logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
-                                enteredText);
-
-                            // remove fade in left class to prevent it triggering later
-                            $name.removeClass('fadeInLeft');
-
-                            if(!enteredText){
-                                $name.removeClass();
-                                setTimeout(function(){
-                                    logger.log('views/PageHome', '\t\t adding pulsate : %O');
-                                    $name.addClass('animated pulse infinite');
-                                }, 500);
-                            }
-                        });
-
-                    }, baseDelay / 2);
-                }
+                callback: self.step1WriteCallback
             });
-
 
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
@@ -4348,6 +4382,10 @@ define(
         // ===================================================================
         setupPage2: function setupPage2 (){
             var self = this;
+
+            if(self.page2SetupCalled){ return false; }
+            self.page2SetupCalled = true;
+
             logger.log('views/PageHome', 'setupPage2() called');
 
             this.pagesCompleted[1] = true;
@@ -4490,6 +4528,8 @@ define(
             // --------------------------
             // clear existing timeout
             clearTimeout(this.page2arrowPulseTimeout);
+            // remove pulse class when race is clicked
+            $('.arrow', self.$cachedEls.nextStepArrow).removeClass('pulse infinite');
 
             this.page2arrowPulseTimeout = setTimeout(function() {
                 $('.arrow', self.$cachedEls.nextStepArrow).addClass('pulse infinite');
