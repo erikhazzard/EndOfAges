@@ -61,10 +61,33 @@
         }
     }
 
+    #create-race-bonus {
+        font-size: 0.9em;
+        font-style: italic;
+        margin-top: -5px;
+        margin-bottom: 10px;
+        text-align: center;
+
+        .positive {
+            color: rgba(0, 100, 16, 0.93);
+            font-size: 1.15em;
+            font-weight: bold;
+        }
+        .negative {
+            color: rgba(95, 0, 0, 0.93);
+            font-size: 1.15em;
+            font-weight: bold;
+        }
+    }
+    #create-race-info {
+        font-size: 0.9em;
+        padding: 0 5px;
+    }
+
     #home-race-visualization {
         position: absolute;
-        bottom: $book-inner-padding;
-        height: 142px;
+        bottom: $book-inner-padding - 10;
+        height: 102px;
         left: $book-inner-padding;
         right: $book-inner-padding;
 
@@ -77,16 +100,16 @@
             fill: rgba(161, 32, 32, 0.27);
         }
         .bar.Power{
-            fill: rgba(245, 228, 140, 0.25);
+            fill: rgba(233, 233, 179, 0.25);
         }
         .bar.Defense{
-            fill: rgba(29, 63, 99, 0.32);
+            fill: rgba(43, 92, 88, 0.32);
         }
 
         .label { 
             font-family: $input-font;
             font-size: 0.95em;
-            fill: rgba(20, 20, 20, 0.7);
+            fill: rgba(20, 20, 20, 0.65);
         }
     }
 }

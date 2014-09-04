@@ -3730,7 +3730,11 @@ define(
         }),
         new Race({
             name: 'Human',
-            description: 'Well rounded jack of all trades',
+
+            description: "Well rounded creatures with moderate attack and defense bonuses",
+            specialDescription: "Receives a <span class='positive'>+10%</span> experience bonus",
+            specialDescription: "<span class='positive'>+10%</span> damage bonus and <span class='negative'>-10%</span> health",
+            
             sprite: 'human',
             baseStats: {
                 power: 4,
@@ -3867,8 +3871,8 @@ function viewRaceViz( d3, logger, events){
         var barHeight = 20;
 
         // setup scales
-        var maxWidth = 330;
-        var startX = 90;
+        var maxWidth = 320;
+        var startX = 70;
 
         maxWidth = maxWidth - startX;
 
@@ -3960,7 +3964,8 @@ function viewRaceViz( d3, logger, events){
             .append('text')
             .attr({
                 'class': 'label',
-                x: 10,
+                'text-anchor': 'end',
+                x: startX - 10,
                 y: 18
             })
             .text(function(d,i){
@@ -4323,13 +4328,14 @@ define(
                         // remove fade in left class to prevent it triggering later
                         $name.removeClass('fadeInLeft');
 
-                        if(!enteredText){
-                            $name.removeClass();
-                            setTimeout(function(){
-                                logger.log('views/PageHome', '\t\t adding pulsate : %O');
-                                $name.addClass('animated pulse infinite');
-                            }, 500);
-                        }
+                        //// No longer pulsating
+                        //if(!enteredText){
+                            //$name.removeClass();
+                            //self.step1$namePulse = setTimeout(function(){
+                                //logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                //$name.addClass('animated pulse infinite');
+                            //}, 2800);
+                        //}
                     });
 
                 }, baseDelay / 2);
@@ -4347,7 +4353,9 @@ define(
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
                 logger.log('views/PageHome', '\t name focused');
-                $name.removeClass('pulse infinite'); 
+                //// No longer pulsating
+                //clearTimeout(self.step1$namePulse);
+                //$name.removeClass('pulse infinite'); 
 
                 if(self.pagesCompleted[1] === true){
                     logger.log('views/PageHome', '\t [x] already setup page2');

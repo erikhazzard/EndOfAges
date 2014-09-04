@@ -326,13 +326,14 @@ define(
                         // remove fade in left class to prevent it triggering later
                         $name.removeClass('fadeInLeft');
 
-                        if(!enteredText){
-                            $name.removeClass();
-                            setTimeout(function(){
-                                logger.log('views/PageHome', '\t\t adding pulsate : %O');
-                                $name.addClass('animated pulse infinite');
-                            }, 500);
-                        }
+                        //// No longer pulsating
+                        //if(!enteredText){
+                            //$name.removeClass();
+                            //self.step1$namePulse = setTimeout(function(){
+                                //logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                //$name.addClass('animated pulse infinite');
+                            //}, 2800);
+                        //}
                     });
 
                 }, baseDelay / 2);
@@ -350,7 +351,9 @@ define(
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
                 logger.log('views/PageHome', '\t name focused');
-                $name.removeClass('pulse infinite'); 
+                //// No longer pulsating
+                //clearTimeout(self.step1$namePulse);
+                //$name.removeClass('pulse infinite'); 
 
                 if(self.pagesCompleted[1] === true){
                     logger.log('views/PageHome', '\t [x] already setup page2');

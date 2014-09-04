@@ -770,15 +770,19 @@
   #home #book-page-title input {
     background: rgba(23, 118, 16, 0.1);
     border: none;
-    border-bottom: 2px solid rgba(23, 118, 16, 0.6);
+    border-bottom: 1px solid rgba(23, 118, 16, 0.6);
+    border-top: 1px solid rgba(23, 118, 16, 0.6);
     color: #ffffff;
+    display: table;
     font-family: "Shadows Into Light", cursive;
     font-size: 1.2em;
     font-variant: small-caps;
+    margin: 0 auto;
     letter-spacing: 2.2px;
     font-weight: normal;
     text-align: center;
-    max-width: 220px; }
+    width: 270px;
+    max-width: 320px; }
   #home #book-page-title input:focus {
     outline: none; }
   #home #book-page-title ::-webkit-input-placeholder {
@@ -845,10 +849,27 @@
         opacity: 0.5; }
       #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.selected .race-name {
         opacity: 1; }
+  #home #book-page-race #create-race-bonus {
+    font-size: 0.9em;
+    font-style: italic;
+    margin-top: -5px;
+    margin-bottom: 10px;
+    text-align: center; }
+    #home #book-page-race #create-race-bonus .positive {
+      color: rgba(0, 100, 16, 0.93);
+      font-size: 1.15em;
+      font-weight: bold; }
+    #home #book-page-race #create-race-bonus .negative {
+      color: rgba(95, 0, 0, 0.93);
+      font-size: 1.15em;
+      font-weight: bold; }
+  #home #book-page-race #create-race-info {
+    font-size: 0.9em;
+    padding: 0 5px; }
   #home #book-page-race #home-race-visualization {
     position: absolute;
-    bottom: 30px;
-    height: 142px;
+    bottom: 20px;
+    height: 102px;
     left: 30px;
     right: 30px; }
     #home #book-page-race #home-race-visualization .outline {
@@ -858,13 +879,13 @@
     #home #book-page-race #home-race-visualization .bar.Health {
       fill: rgba(161, 32, 32, 0.27); }
     #home #book-page-race #home-race-visualization .bar.Power {
-      fill: rgba(245, 228, 140, 0.25); }
+      fill: rgba(233, 233, 179, 0.25); }
     #home #book-page-race #home-race-visualization .bar.Defense {
-      fill: rgba(29, 63, 99, 0.32); }
+      fill: rgba(43, 92, 88, 0.32); }
     #home #book-page-race #home-race-visualization .label {
       font-family: "Shadows Into Light", cursive;
       font-size: 0.95em;
-      fill: rgba(20, 20, 20, 0.7); }
+      fill: rgba(20, 20, 20, 0.65); }
   #home #book-page-templates h2 {
     text-align: center; }
   #home #book-page-abilities h2 {

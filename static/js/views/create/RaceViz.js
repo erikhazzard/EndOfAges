@@ -51,8 +51,8 @@ function viewRaceViz( d3, logger, events){
         var barHeight = 20;
 
         // setup scales
-        var maxWidth = 330;
-        var startX = 90;
+        var maxWidth = 320;
+        var startX = 70;
 
         maxWidth = maxWidth - startX;
 
@@ -144,7 +144,8 @@ function viewRaceViz( d3, logger, events){
             .append('text')
             .attr({
                 'class': 'label',
-                x: 10,
+                'text-anchor': 'end',
+                x: startX - 10,
                 y: 18
             })
             .text(function(d,i){

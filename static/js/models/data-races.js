@@ -31,7 +31,11 @@ define(
         }),
         new Race({
             name: 'Human',
-            description: 'Well rounded jack of all trades',
+
+            description: "Well rounded creatures with moderate attack and defense bonuses",
+            specialDescription: "Receives a <span class='positive'>+10%</span> experience bonus",
+            specialDescription: "<span class='positive'>+10%</span> damage bonus and <span class='negative'>-10%</span> health",
+            
             sprite: 'human',
             baseStats: {
                 power: 4,
