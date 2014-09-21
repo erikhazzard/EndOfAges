@@ -10,11 +10,12 @@ define(
         events, logger, API_URL
     ){
 
-        // Define the app user model. Similar to user model, but a bit different
+        // Define the race model
         var Race = Backbone.Model.extend({
             defaults: {
                 name: 'Race',
                 description: 'Some test',
+                disabled: false,
                 sprite: 'race',
                 baseStats: {
                     // todo: more...

@@ -34,6 +34,10 @@ define(
             var self = this;
             logger.log('views/create/RaceListItem', '\t onShow() called');
 
+            if(this.model.attributes.disabled){
+                this.$el.addClass('disabled');
+            }
+
             // Redelegate events on a timeout. 
             // TODO : Why doesn't this work without the timeout? It seems
             // that maybe the elements haven't been rendered to the DOM yet

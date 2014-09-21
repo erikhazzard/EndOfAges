@@ -439,6 +439,12 @@ define(
                 options);
             var self = this;
 
+            // if a disabled race was clicked, do nothing
+            if(options.model.attributes.disabled){
+                logger.log('views/PageCreateCharacter', '[x] race disabled');
+                return this;
+            }
+
             if(this.pagesCompleted[1] !== true){
                 logger.log('views/PageHome', '[x] first page incomplete, must enter name');
                 return false;

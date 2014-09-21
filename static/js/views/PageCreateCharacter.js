@@ -300,6 +300,13 @@ define(
 
             // get race from clicked element
             var cid = $(e.target).attr('data-race-cid');
+
+            // if a disabled race was clicked, do nothing
+            if($(e.target).hasClass('disabled')){
+                logger.log('views/PageCreateCharacter', '[x] race disabled');
+                return this;
+            }
+
             return this.setRace(cid);
         },
 

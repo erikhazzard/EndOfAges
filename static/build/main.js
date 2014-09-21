@@ -3451,11 +3451,12 @@ define(
         events, logger, API_URL
     ){
 
-        // Define the app user model. Similar to user model, but a bit different
+        // Define the race model
         var Race = Backbone.Model.extend({
             defaults: {
                 name: 'Race',
                 description: 'Some test',
+                disabled: false,
                 sprite: 'race',
                 baseStats: {
                     // todo: more...
@@ -3638,6 +3639,10 @@ define(
             var self = this;
             logger.log('views/create/RaceListItem', '\t onShow() called');
 
+            if(this.model.attributes.disabled){
+                this.$el.addClass('disabled');
+            }
+
             // Redelegate events on a timeout. 
             // TODO : Why doesn't this work without the timeout? It seems
             // that maybe the elements haven't been rendered to the DOM yet
@@ -3714,13 +3719,31 @@ define(
 
     var RACES = [
         new Race({
+            name: 'Human',
+
+            description: "Well rounded creatures with moderate attack and defense bonuses",
+            specialDescription: "<span class='positive'>+20%</span> experience bonus",
+            
+            sprite: 'human',
+            baseStats: {
+                power: 5,
+                defense: 5,
+                health: 85,
+
+                armor: 4,
+                magicResist: 3,
+                magicPower: 3
+            }
+        }),
+        new Race({
             name: 'Elf',
             description: 'Wise and agile creatures in touch with the natural world.',
+            specialDescription: "<span class='positive'>+5%</span> chance to avoid all damage",
             sprite: 'elf',
             baseStats: {
-                power: 4,
-                defense: 2,
-                health: 70,
+                power: 7,
+                defense: 3,
+                health: 50,
 
                 // TODO: Don't use these props?
                 armor: 2,
@@ -3729,25 +3752,8 @@ define(
             }
         }),
         new Race({
-            name: 'Human',
-
-            description: "Well rounded creatures with moderate attack and defense bonuses",
-            specialDescription: "Receives a <span class='positive'>+10%</span> experience bonus",
-            specialDescription: "<span class='positive'>+10%</span> damage bonus and <span class='negative'>-10%</span> health",
-            
-            sprite: 'human',
-            baseStats: {
-                power: 4,
-                defense: 4,
-                health: 75,
-
-                armor: 4,
-                magicResist: 3,
-                magicPower: 3
-            }
-        }),
-        new Race({
             name: 'Dark Elf',
+            disabled: true,
             description: 'Agile and intelligent creatures raised in darkness',
             sprite: 'darkelf',
             specialDescription: 'Has a {5%} bonus to something',
@@ -3763,6 +3769,7 @@ define(
         }),
         new Race({
             name: 'Mimirian',
+            disabled: true,
             description: 'Strong, but slow, mountain dwelling creatures',
             sprite: 'mimirian',
             baseStats: {
@@ -3808,10 +3815,10 @@ define(
             this.add(RACES);
 
             return this;
-        },
-        comparator: function(model){
-            return model.get('name');
         }
+        //,comparator: function(model){
+            //return model.get('name');
+        //}
 
     });
 
@@ -4440,6 +4447,12 @@ define(
             logger.log('views/PageHome', 'raceClicked() passed options: %O',
                 options);
             var self = this;
+
+            // if a disabled race was clicked, do nothing
+            if(options.model.attributes.disabled){
+                logger.log('views/PageCreateCharacter', '[x] race disabled');
+                return this;
+            }
 
             if(this.pagesCompleted[1] !== true){
                 logger.log('views/PageHome', '[x] first page incomplete, must enter name');

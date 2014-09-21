@@ -26,10 +26,10 @@ define(
             this.add(RACES);
 
             return this;
-        },
-        comparator: function(model){
-            return model.get('name');
         }
+        //,comparator: function(model){
+            //return model.get('name');
+        //}
 
     });
 

@@ -42,6 +42,7 @@
                 color: #b0b0b0;
                 padding-left: 0;
             }
+
             .race-list-item:hover {
                 color: #ffffff;
                 padding-left: 20px;
@@ -55,8 +56,23 @@
                 font-variant: small-caps;
             }
 
+            // disabled
+            .race-list-item.disabled {
+                cursor: not-allowed;
+                * {
+                    cursor: not-allowed;
+                }
+                .race-image {
+                    @include filter(blur(1px));
+                }
+            }
+            .race-list-item.disabled:hover {
+                color: #b0b0b0;
+                padding-left: 0;
+            }
+
             .race-list-item img { cursor: pointer; }
-            .race-name { cursor: pointer; opacity: 0.5; }
+            .race-name { cursor: pointer; opacity: 0.8; }
             .race-list-item.selected .race-name { opacity: 1; }
         }
     }

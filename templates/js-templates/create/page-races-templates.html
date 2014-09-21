@@ -1,9 +1,18 @@
 {{// Race list and race items }}
 <script id='template-create-race-list-item' type='text/template'>
-    <div class='item' data-race-cid='<%= cid %>'>
-        <img src='/static/img/characters/<%= sprite %>.gif' height='50' width='50' />
+    <div class='item <% if(disabled){ %>disabled<% } %>' data-race-cid='<%= cid %>'>
+        <% if(disabled){ %>
+            <img src='/static/img/characters/<%= sprite %>-disabled.gif' class='race-image' height='50' width='50' />
+        <% } else { %>
+            <img src='/static/img/characters/<%= sprite %>.gif' class='race-image' height='50' width='50' />
+        <% } %>
+
         <span class='race-name'>
-            <%= name %>
+            <% if(disabled){ %>
+                Undiscovered
+            <% } else { %>
+                <%= name %>
+            <% } %>
         </span>
     </div>
 </script>

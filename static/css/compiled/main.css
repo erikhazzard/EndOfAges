@@ -842,11 +842,22 @@
         font-family: "Shadows Into Light", cursive;
         font-size: 1.4em;
         font-variant: small-caps; }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.disabled {
+        cursor: not-allowed; }
+        #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.disabled * {
+          cursor: not-allowed; }
+        #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.disabled .race-image {
+          -webkit-filter: blur(1px);
+          -moz-filter: blur(1px);
+          filter: blur(1px); }
+      #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.disabled:hover {
+        color: #b0b0b0;
+        padding-left: 0; }
       #home #book-page-race #create-race-wrapper #region-create-races .race-list-item img {
         cursor: pointer; }
       #home #book-page-race #create-race-wrapper #region-create-races .race-name {
         cursor: pointer;
-        opacity: 0.5; }
+        opacity: 0.8; }
       #home #book-page-race #create-race-wrapper #region-create-races .race-list-item.selected .race-name {
         opacity: 1; }
   #home #book-page-race #create-race-bonus {
