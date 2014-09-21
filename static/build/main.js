@@ -4553,7 +4553,7 @@ define(
                         self.templateRaceDescription({ model: options.model })
                     );
 
-                    //self.$raceDescription.velocity({ opacity: 1 });
+                    self.$raceDescription.velocity({ opacity: 1 });
                     self.$raceDescription.css({ opacity: 1 });
                     //self.$raceDescription.removeClass('fadeOutDown');
                     
