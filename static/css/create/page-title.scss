@@ -17,16 +17,16 @@
     input {
         background: $BACKGROUND-INTERACTION;
         border: none;
-        border-bottom: 1px solid $COLOR-INTERACTION;
-        border-top: 1px solid $COLOR-INTERACTION;
-        color: #ffffff;
+        border-bottom: 1px solid $COLOR-INTERACTION-BORDER;
+        border-top: 1px solid $COLOR-INTERACTION-BORDER;
+        color: $COLOR-INTERACTION-TEXT;
         display: table;
         font-family: $input-font;
-        font-size: 1.2em;
+        font-size: 1.4em;
+        font-weight: bold;
         font-variant: small-caps;
         margin: 0 auto;
         letter-spacing: 2.2px;
-        font-weight: normal;
         text-align: center;
         width: 270px;
         max-width: 320px;
@@ -34,10 +34,18 @@
     input:focus {
         outline:none;
     }
-    ::-webkit-input-placeholder { color: rgba(200,200,200,0.5); }
-    :-moz-placeholder { color: rgba(200,200,200,0.5); }
-    ::-moz-placeholder { color: rgba(200,200,200,0.5); }
-    :-ms-input-placeholder { color: #a0a0a0; }
+    ::-webkit-input-placeholder { 
+        color: $COLOR-INTERACTION-PLACEHOLDER;
+    }
+    :-moz-placeholder { 
+        color: $COLOR-INTERACTION-PLACEHOLDER;
+    }
+    ::-moz-placeholder { 
+        color: $COLOR-INTERACTION-PLACEHOLDER;
+    }
+    :-ms-input-placeholder { 
+        color: $COLOR-INTERACTION-PLACEHOLDER;
+    }
 
     #name-input-wrapper {
         bottom: 42px;

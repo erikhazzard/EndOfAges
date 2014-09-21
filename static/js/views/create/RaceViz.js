@@ -25,10 +25,8 @@ function viewRaceViz( d3, logger, events){
             data: null
         };
 
-
         // prepare data
         this.chartData = null;
-
         this.hasBeenDrawn = false;
 
         return this;

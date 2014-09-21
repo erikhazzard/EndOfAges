@@ -15,8 +15,8 @@
             $race-height: 50px;
 
             background: $BACKGROUND-INTERACTION;
-            border-bottom: 1px solid $COLOR-INTERACTION;
-            border-top: 1px solid $COLOR-INTERACTION;
+            border-bottom: 1px solid $COLOR-INTERACTION-BORDER;
+            border-top: 1px solid $COLOR-INTERACTION-BORDER;
             color: #ffffff;
             cursor: pointer;
             font-weight: bold;
@@ -41,19 +41,22 @@
                 @include transition("padding 0.2s, opacity 0.2s");
                 color: #b0b0b0;
                 padding-left: 0;
+                opacity: 0.5;
             }
 
             .race-list-item:hover {
-                color: #ffffff;
+                background: $BACKGROUND-INTERACTION-LIGHT; 
                 padding-left: 20px;
+                opacity: 0.7;
             }
             .race-list-item.selected {
-                background: rgba(255,255,255,0.4);
+                background: $BACKGROUND-INTERACTION; 
                 color: #ffffff;
                 padding-left: 40px;
                 font-family: $input-font;
                 font-size: 1.4em;
                 font-variant: small-caps;
+                opacity: 1;
             }
 
             // disabled
@@ -67,12 +70,18 @@
                 }
             }
             .race-list-item.disabled:hover {
+                background: $BACKGROUND-INTERACTION-LIGHT; 
                 color: #b0b0b0;
                 padding-left: 0;
+                opacity: 0.6;
             }
 
             .race-list-item img { cursor: pointer; }
-            .race-name { cursor: pointer; opacity: 0.8; }
+            .race-name { 
+                color: $COLOR-INTERACTION-TEXT;
+                cursor: pointer; 
+                opacity: 0.3;
+            }
             .race-list-item.selected .race-name { opacity: 1; }
         }
     }

@@ -3852,10 +3852,8 @@ function viewRaceViz( d3, logger, events){
             data: null
         };
 
-
         // prepare data
         this.chartData = null;
-
         this.hasBeenDrawn = false;
 
         return this;
@@ -4463,8 +4461,12 @@ define(
             this.pagesCompleted[2] = true;
 
             // Show the right arrow
-            this.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
-            this.$cachedEls.nextStepArrow.addClass('animated fadeIn');
+            setTimeout(function(){
+                requestAnimationFrame(function(){
+                    self.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
+                    self.$cachedEls.nextStepArrow.addClass('animated fadeIn');
+                });
+            }, 40);
             
             // If the same race was clicked, do nothing
             if(this._previousRaceSelected === options.model.attributes.name){
@@ -4489,9 +4491,12 @@ define(
                 
                 setTimeout(function(){
                     self.$raceViz.addClass('animated fadeIn');
-                    self.raceViz
-                        .data(options.model.attributes)
-                        .update();
+
+                    requestAnimationFrame(function(){
+                        self.raceViz
+                            .data(options.model.attributes)
+                            .update();
+                    });
 
                     // remove fadeIn class when the animation is over
                     setTimeout(function(){
@@ -4500,9 +4505,13 @@ define(
                     }, 800);
                 }, 200);
             } else {
-                this.raceViz
-                    .data(options.model.attributes)
-                    .update();
+
+                // otherwise, update the data
+                requestAnimationFrame(function(){
+                    self.raceViz
+                        .data(options.model.attributes)
+                        .update();
+                });
             }
 
             // store state
@@ -4526,11 +4535,11 @@ define(
 
             logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
 
-            // update the race description div with the template
-            // Show race description
-            this.$raceDescription.velocity({ opacity: 0 });
-            //self.$raceDescription.addClass('fadeOutDown');
-            self.$raceDescription.addClass('fadeOut');
+            requestAnimationFrame(function(){
+                // Show race description
+                self.$raceDescription.velocity({ opacity: 0 });
+                self.$raceDescription.addClass('fadeOut');
+            });
 
             clearTimeout(this.raceDescriptionFadeIn);
             clearTimeout(this.raceDescriptionFadeIn2);
@@ -4538,14 +4547,19 @@ define(
             // update the HTML below the race info
             // --------------------------
             this.raceDescriptionFadeIn = setTimeout(function(){
-                self.$raceDescription.html(
-                    self.templateRaceDescription({ model: options.model })
-                );
+                // update the race description div with the template
+                requestAnimationFrame(function(){
+                    self.$raceDescription.html(
+                        self.templateRaceDescription({ model: options.model })
+                    );
 
-                self.$raceDescription.velocity({ opacity: 1 });
-                //self.$raceDescription.removeClass('fadeOutDown');
-                self.$raceDescription.removeClass('fadeOut');
-                self.$raceDescription.addClass('animated fadeIn');
+                    //self.$raceDescription.velocity({ opacity: 1 });
+                    self.$raceDescription.css({ opacity: 1 });
+                    //self.$raceDescription.removeClass('fadeOutDown');
+                    
+                    self.$raceDescription.removeClass('fadeOut');
+                    self.$raceDescription.addClass('animated fadeIn');
+                });
 
             }, baseDelay / 5);
 
@@ -4553,13 +4567,13 @@ define(
             // Pulsate arrow
             // --------------------------
             // clear existing timeout
-            clearTimeout(this.page2arrowPulseTimeout);
+            clearTimeout(self.page2arrowPulseTimeout);
             // remove pulse class when race is clicked
             $('.arrow', self.$cachedEls.nextStepArrow).removeClass('pulse infinite');
 
             this.page2arrowPulseTimeout = setTimeout(function() {
                 $('.arrow', self.$cachedEls.nextStepArrow).addClass('pulse infinite');
-            }, baseDelay * 3); 
+            }, baseDelay * 4); 
 
             return this;
         },
