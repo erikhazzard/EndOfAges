@@ -94,12 +94,14 @@ define(
                         return self;
                     },
 
-                    error: function(){ 
-                        logger.error('models/AppUser', 
-                            'fetch(): unable to get model from server');
+                    error: function(er){ 
+                        try{
+                            logger.error('models/AppUser', 
+                                'fetch(): unable to get model from server');
 
-                        // unset cookie
-                        unsetCookie();
+                            // unset cookie
+                            unsetCookie();
+                        } catch(err){}
                         self.set({isLoggedIn: false});
                         self.trigger('initialFetchFromServer');
 

@@ -780,12 +780,14 @@ define(
                         return self;
                     },
 
-                    error: function(){ 
-                        logger.error('models/AppUser', 
-                            'fetch(): unable to get model from server');
+                    error: function(er){ 
+                        try{
+                            logger.error('models/AppUser', 
+                                'fetch(): unable to get model from server');
 
-                        // unset cookie
-                        unsetCookie();
+                            // unset cookie
+                            unsetCookie();
+                        } catch(err){}
                         self.set({isLoggedIn: false});
                         self.trigger('initialFetchFromServer');
 
@@ -4818,6 +4820,8 @@ define('Controller',[
                     error: function(e,r){
                         logger.log('Controller', 'Model unable to be fetched : %O, %O',
                             e,r);
+                        //self.modelGame = tmpGameModel;
+                        self.showHome();
                         // Model does not exist, do nothing
                         // TODO: do anything?
                     }
@@ -4850,6 +4854,7 @@ define('Controller',[
                         // NOT LOGGED IN
                         // --------------
                         // TODO: do nothing(?)
+                        handleLoggedIn();
                     }
                 });
             } else {
@@ -4914,7 +4919,6 @@ define('Controller',[
 
             if(!appUser.get('isLoggedIn')){ 
                 logger.log('Controller', 'not logged in, returning false');
-                return false;
             }
 
             // get game model from server(?)

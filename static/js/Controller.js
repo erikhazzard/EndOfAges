@@ -79,6 +79,8 @@ define([
                     error: function(e,r){
                         logger.log('Controller', 'Model unable to be fetched : %O, %O',
                             e,r);
+                        //self.modelGame = tmpGameModel;
+                        self.showHome();
                         // Model does not exist, do nothing
                         // TODO: do anything?
                     }
@@ -111,6 +113,7 @@ define([
                         // NOT LOGGED IN
                         // --------------
                         // TODO: do nothing(?)
+                        handleLoggedIn();
                     }
                 });
             } else {
@@ -175,7 +178,6 @@ define([
 
             if(!appUser.get('isLoggedIn')){ 
                 logger.log('Controller', 'not logged in, returning false');
-                return false;
             }
 
             // get game model from server(?)
