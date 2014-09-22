@@ -13,11 +13,11 @@ define([
     'models/appUser-object',
     'models/Game',
     'models/Entity',
-    'views/PageHome',
-    'views/PageGame',
+    'views/PageHome'
+    //,'views/PageGame'
 
     // TODO: remove, only for dev
-    'views/DevTools'
+    ,'views/DevTools'
 
     ], function(
         Backbone, Marionette, logger, events,
@@ -26,11 +26,11 @@ define([
         Entity,
 
         // include views here
-        PageHome,
-        PageGame,
+        PageHome
+        //,PageGame
 
         // TODO: remove once out of dev
-        DevTools
+        ,DevTools
     ){
 
     // console color

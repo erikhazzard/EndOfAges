@@ -150,6 +150,9 @@ define(
                 //      is final)
                 logger.log('views/PageHome:pageNext', 'curStep ' + self.curStep);
 
+                alert('Thanks for checking out the initial experience. Visit http://vasir.net for updates');
+                return false;
+
                 if(self.curStep < 3){
                     logger.log('views/PageHome', '\t showing next page');
                     e.preventDefault();
