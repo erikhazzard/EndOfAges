@@ -4291,7 +4291,7 @@ define(
 
             var self = this;
             var $paragraph = $('#book-page-title p', this.$el);
-            var $paragraphName = $($paragraph[1]);
+            var $paragraphName = $('#name-input-wrapper');
 
             var animation = 'fadeInDown';
             var $name = $('#create-name');
@@ -4311,14 +4311,29 @@ define(
                     wasCancelled);
 
                 // if already called, do nothing
-                if(self.step1WriterCallbackCalled){ return false; }
+                if(self.step1WriterCallbackCalled){ 
+                    logger.log('views/PageHome', 
+                        '\t\t step1WriterCallbackCalled is TRUE. should return');
+                }
+                // TODO: it only seems to show up the second time this is
+                // called. why?
+                
                 self.step1WriterCallbackCalled = true;
 
-                $paragraphName.velocity({ opacity: 1 });
-                $paragraphName.addClass('animated fadeInUp');
+                requestAnimationFrame(function(){
+                    $paragraphName.velocity({ opacity: 1 });
+                    $paragraphName.addClass('animated fadeInUp');
+                });
 
                 // Show the name input box
-                setTimeout(function showName(){
+                if(self.step1nameTimeout){
+                    clearTimeout(self.step1nameTimeout);
+                }
+                
+                self.step1nameTimeout = setTimeout(function showName(){
+                    logger.log('views/PageHome', 
+                        '\t\t showName() called, showing input...');
+
                     $name.addClass('animated fadeInLeft');
                     $name.velocity({ opacity: 1 });
                     $name.attr('placeholder', '');
