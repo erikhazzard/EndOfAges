@@ -15,7 +15,10 @@ define(
         'models/Entity',
         'views/create/RaceList',
         'collections/Races',
-        'views/create/RaceViz'
+        'views/create/RaceViz',
+
+        'views/create/ClassList',
+        'collections/Classes'
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
@@ -23,7 +26,10 @@ define(
         Entity,
         RaceList,
         Races,
-        RaceViz
+        RaceViz,
+
+        ClassList,
+        Classes 
     ){
 
     // CONFIG
@@ -38,7 +44,8 @@ define(
         'className': 'page-home-wrapper',
 
         'regions': {
-            'regionRaceList': '#region-create-races'
+            'regionRaceList': '#region-create-races',
+            'regionClassList': '#region-create-classes'
         },
 
         events: {
@@ -57,8 +64,15 @@ define(
                 collection: this.races
             });
 
+            // templates (classes)
+            this.classes = new Classes();
+            this.classListView = new ClassList({
+                collection: this.classes
+            });
+
             // When race is clicked, continue on to the next step
             this.listenTo(events, 'create:page2:raceClicked', this.raceClicked);
+            this.listenTo(events, 'create:page3:classClicked', this.classClicked);
 
             return this;
         },
@@ -71,6 +85,7 @@ define(
 
             // setup races
             this.regionRaceList.show(this.raceListView);
+            this.regionClassList.show(this.classListView);
 
             // keep reference to pages
             this.$pages = $('#book-pages', this.$el);
@@ -279,7 +294,7 @@ define(
 
             var self = this;
             var $paragraph = $('#book-page-title p', this.$el);
-            var $paragraphName = $($paragraph[1]);
+            var $paragraphName = $('#name-input-wrapper');
 
             var animation = 'fadeInDown';
             var $name = $('#create-name');
@@ -299,14 +314,29 @@ define(
                     wasCancelled);
 
                 // if already called, do nothing
-                if(self.step1WriterCallbackCalled){ return false; }
+                if(self.step1WriterCallbackCalled){ 
+                    logger.log('views/PageHome', 
+                        '\t\t step1WriterCallbackCalled is TRUE. should return');
+                }
+                // TODO: it only seems to show up the second time this is
+                // called. why?
+                
                 self.step1WriterCallbackCalled = true;
 
-                $paragraphName.velocity({ opacity: 1 });
-                $paragraphName.addClass('animated fadeInUp');
+                requestAnimationFrame(function(){
+                    $paragraphName.velocity({ opacity: 1 });
+                    $paragraphName.addClass('animated fadeInUp');
+                });
 
                 // Show the name input box
-                setTimeout(function showName(){
+                if(self.step1nameTimeout){
+                    clearTimeout(self.step1nameTimeout);
+                }
+                
+                self.step1nameTimeout = setTimeout(function showName(){
+                    logger.log('views/PageHome', 
+                        '\t\t showName() called, showing input...');
+
                     $name.addClass('animated fadeInLeft');
                     $name.velocity({ opacity: 1 });
                     $name.attr('placeholder', '');
@@ -327,13 +357,13 @@ define(
                         $name.removeClass('fadeInLeft');
 
                         //// No longer pulsating
-                        //if(!enteredText){
-                            //$name.removeClass();
-                            //self.step1$namePulse = setTimeout(function(){
-                                //logger.log('views/PageHome', '\t\t adding pulsate : %O');
-                                //$name.addClass('animated pulse infinite');
-                            //}, 2800);
-                        //}
+                        if(!enteredText){
+                            $name.removeClass();
+                            self.step1$namePulse = setTimeout(function(){
+                                logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                $name.addClass('animated-subtle pulse-subtle infinite');
+                            }, 1800);
+                        }
                     });
 
                 }, baseDelay / 2);
@@ -352,8 +382,8 @@ define(
             $name.focus(function (){ 
                 logger.log('views/PageHome', '\t name focused');
                 //// No longer pulsating
-                //clearTimeout(self.step1$namePulse);
-                //$name.removeClass('pulse infinite'); 
+                clearTimeout(self.step1$namePulse);
+                $name.removeClass('pulse-subtle infinite'); 
 
                 if(self.pagesCompleted[1] === true){
                     logger.log('views/PageHome', '\t [x] already setup page2');
@@ -364,7 +394,7 @@ define(
 
                 setTimeout(function showPage2(){
                     // DONE, Show page 2
-                    $name.removeClass('pulse infinite'); 
+                    $name.removeClass('pulse-subtle infinite'); 
                     logger.log('views/PageHome', 
                         '\t setupPage1: calling setupPage2...');
                     self.setupPage2();
@@ -402,7 +432,7 @@ define(
             this.pagesCompleted[1] = true;
 
             var animation = 'fadeInDown';
-            var $raceHeader = $('#race-header');
+            var $raceHeader = $('#create-race-header');
             var $raceWrapper = $('#create-race-wrapper');
             self.$raceHeader = $raceHeader;
             self.$raceWrapper = $raceWrapper;
@@ -629,6 +659,34 @@ define(
                 self.$cachedEls.previousStepArrow.addClass('fadeIn');
             }, baseDelay * 2);
 
+            // setup the fade ins
+            var $classWrapper = $('#create-classes-wrapper');
+
+            // then show the selection
+            setTimeout(function(){
+                $classWrapper.velocity({ opacity: 1 });
+
+                setTimeout(function(){requestAnimationFrame(function(){
+                    $('#create-classes-description').removeClass('opacity-zero');
+                    $('#create-classes-description').wordWriter({
+                        finalCss: { opacity: 0.8 },
+
+                        callback: function(){
+                            $('#region-create-classes')
+                                .addClass('animated fadeIn');
+                        }
+                    });
+                });}, 200);
+
+            }, baseDelay * 0.8);
+
+            // remove the animated classes so page switches don't re-trigger
+            // transitions
+            setTimeout(function removeAnimatedClasses(){
+                $classWrapper.removeClass();
+            }, baseDelay * 5);
+
+
             return this;
         },
 
@@ -636,7 +694,7 @@ define(
         showPage3: function showPage3 (){
             // This is called whenever player goes from page 2 to page 3
             var self = this;
-            logger.log('views/PageHome:setupPage3', 'showPage3() (templates) called');
+            logger.log('views/PageHome:setupPage3', 'showPage3() (classes) called');
 
             this.cleanupPage2();
 
@@ -654,7 +712,25 @@ define(
             self.$cachedEls.previousStepArrow.removeClass('fadeOut fadeOutRight');
             self.$cachedEls.previousStepArrow.addClass('fadeIn');
             return this;
+        },
+
+        classClicked: function classClicked (options){
+            logger.log('views/PageHome', 'classClicked() passed options: %O',
+                options);
+            var self = this;
+
+            // if a disabled race was clicked, do nothing
+            if(options.model.attributes.disabled){
+                logger.log('views/PageCreateCharacter', '[x] class disabled');
+                return this;
+            }
         }
+
+        // =================================================================
+        //
+        // Page 4
+        //
+        // =================================================================
 
     });
 

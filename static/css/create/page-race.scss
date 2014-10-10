@@ -10,80 +10,6 @@
         .fade-out-top {
             background: -webkit-linear-gradient(top, rgba(255,255,255,0), rgba(255,255,255, 1));
         }
-
-        #region-create-races {
-            $race-height: 50px;
-
-            background: $BACKGROUND-INTERACTION;
-            border-bottom: 1px solid $COLOR-INTERACTION-BORDER;
-            border-top: 1px solid $COLOR-INTERACTION-BORDER;
-            color: #ffffff;
-            cursor: pointer;
-            font-weight: bold;
-            height: $race-height * 4 + 10;
-            position: relative;
-            overflow: hidden;
-
-            .race {
-                height: $race-height;
-                font-size: 1.3em;
-                margin-left: 20%;
-                width: 70%;
-            }
-            .race img {
-                -webkit-filter: grayscale(100%);
-                -moz-filter: grayscale(100%);
-                filter: grayscale(100%);
-            }
-
-            .race-list-item {
-                //@include transition("all 0.25s");
-                @include transition("padding 0.2s, opacity 0.2s");
-                color: #b0b0b0;
-                padding-left: 0;
-                opacity: 0.5;
-            }
-
-            .race-list-item:hover {
-                background: $BACKGROUND-INTERACTION-LIGHT; 
-                padding-left: 20px;
-                opacity: 0.7;
-            }
-            .race-list-item.selected {
-                background: $BACKGROUND-INTERACTION; 
-                color: #ffffff;
-                padding-left: 40px;
-                font-family: $input-font;
-                font-size: 1.4em;
-                font-variant: small-caps;
-                opacity: 1;
-            }
-
-            // disabled
-            .race-list-item.disabled {
-                cursor: not-allowed;
-                * {
-                    cursor: not-allowed;
-                }
-                .race-image {
-                    @include filter(blur(1px));
-                }
-            }
-            .race-list-item.disabled:hover {
-                background: $BACKGROUND-INTERACTION-LIGHT; 
-                color: #b0b0b0;
-                padding-left: 0;
-                opacity: 0.6;
-            }
-
-            .race-list-item img { cursor: pointer; }
-            .race-name { 
-                color: $COLOR-INTERACTION-TEXT;
-                cursor: pointer; 
-                opacity: 0.3;
-            }
-            .race-list-item.selected .race-name { opacity: 1; }
-        }
     }
 
     #create-race-bonus {
@@ -137,4 +63,79 @@
             fill: rgba(20, 20, 20, 0.65);
         }
     }
+}
+
+#region-create-races, .interaction-list {
+    $race-height: 50px;
+
+    background: $BACKGROUND-INTERACTION;
+    border-bottom: 1px solid $COLOR-INTERACTION-BORDER;
+    border-top: 1px solid $COLOR-INTERACTION-BORDER;
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: bold;
+    height: $race-height * 4 + 10;
+    position: relative;
+    overflow: hidden;
+
+    .race, .list-item-wrapper {
+        height: $race-height;
+        font-size: 1.3em;
+        margin-left: 20%;
+        width: 70%;
+    }
+    .race img {
+        -webkit-filter: grayscale(100%);
+        -moz-filter: grayscale(100%);
+        filter: grayscale(100%);
+    }
+
+    .race-list-item, .list-item {
+        //@include transition("all 0.25s");
+        @include transition("padding 0.2s, opacity 0.2s");
+        color: #b0b0b0;
+        padding-left: 0;
+        opacity: 0.5;
+    }
+
+    .race-list-item:hover, .list-item:hover {
+        background: $BACKGROUND-INTERACTION-LIGHT; 
+        padding-left: 20px;
+        opacity: 0.7;
+    }
+    .race-list-item.selected, .list-item.selected {
+        background: $BACKGROUND-INTERACTION; 
+        color: #ffffff;
+        padding-left: 40px;
+        font-family: $input-font;
+        font-size: 1.4em;
+        font-variant: small-caps;
+        opacity: 1;
+    }
+
+    // disabled
+    .race-list-item.disabled, .list-item.disabled {
+        cursor: not-allowed;
+        * {
+            cursor: not-allowed;
+        }
+        .race-image {
+            @include filter(blur(1px));
+        }
+    }
+    .race-list-item.disabled:hover, .list-item.disabled:hover {
+        background: $BACKGROUND-INTERACTION-LIGHT; 
+        color: #b0b0b0;
+        padding-left: 0;
+        opacity: 0.6;
+    }
+
+    .race-list-item img, .list-item img { cursor: pointer; }
+    .race-name, .list-item-name { 
+        color: $COLOR-INTERACTION-TEXT;
+        cursor: pointer; 
+        opacity: 0.3;
+    }
+    .race-list-item.selected .race-name { opacity: 1; }
+    .list-item.selected .list-item-name { opacity: 1; }
 }

@@ -58,9 +58,6 @@ define(
             'click .race-list-item .item': 'raceClicked',
             'touchend .race-list-item .item': 'raceClicked',
 
-            'click .class-list-item .item': 'abilityListItemClicked',
-            'touchend .class-list-item .item': 'abilityListItemClicked',
-
             'click .btn-previous': 'previousClicked',
             'touchend .btn-previous': 'previousClicked',
             'click .btn-next': 'nextClicked',

@@ -2,6 +2,7 @@
 // --------------------------------------
 #home {
     @include noSelect();
+    @include forceGpu();
     background: #686c49 url(../../img/home.jpg);
     background-size: cover;
     bottom: 0;
@@ -86,7 +87,7 @@
     // Import styles for each page
     @import "create/page-title";
     @import "create/page-race";
-    @import "create/page-templates";
+    @import "create/page-classes";
     @import "create/page-abilities";
 
     // Arrows

@@ -1,0 +1,18 @@
+{{// Template (class) items }}
+<script id='template-create-class-list-item' type='text/template'>
+    <div class='item <% if(disabled){ %>disabled<% } %>' data-template-cid='<%= cid %>'>
+        <% if(disabled){ %>
+            <img src='/static/img/characters/<%= sprite %>-disabled.gif' class='race-image' height='50' width='50' />
+        <% } else { %>
+            <img src='/static/img/characters/<%= sprite %>.gif' class='race-image' height='50' width='50' />
+        <% } %>
+
+        <span class='list-item-name'>
+            <% if(disabled){ %>
+                Undiscovered
+            <% } else { %>
+                <%= name %>
+            <% } %>
+        </span>
+    </div>
+</script>
