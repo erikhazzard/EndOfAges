@@ -97,6 +97,10 @@
         padding-left: 0;
         opacity: 0.5;
     }
+    .list-item {
+        padding-bottom: 4px;
+        padding-top: 4px;
+    }
 
     .race-list-item:hover, .list-item:hover {
         background: $BACKGROUND-INTERACTION-LIGHT; 

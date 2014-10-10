@@ -875,6 +875,9 @@
       color: #b0b0b0;
       padding-left: 0;
       opacity: 0.5; }
+    #home #region-create-races .list-item, #home .interaction-list .list-item {
+      padding-bottom: 4px;
+      padding-top: 4px; }
     #home #region-create-races .race-list-item:hover, #home #region-create-races .list-item:hover, #home .interaction-list .race-list-item:hover, #home .interaction-list .list-item:hover {
       background: rgba(235, 235, 235, 0.15);
       padding-left: 20px;

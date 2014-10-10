@@ -25,21 +25,14 @@ define(
             name: 'Assassin',
             description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
             sprite: 'assassin',
-            abilities: new Abilities([
-                //// Basic damage attack
-                ABILITIES.stab,
-                
-                //// if an ability was recently used, deal extra damage
-                ABILITIES.backstab,
+            disabled: false
+        }),
 
-                //// significantly reduces enemy's armor for a short period
-                ABILITIES.cripple,
-
-                //// some sort of ult
-                ////  Chance to instantly kill mob. Chance scales based on 
-                ////  enemy's health
-                ABILITIES.assassinate
-            ])
+        new EntityClass({
+            name: 'Ranger',
+            description: 'Possesses unparalleled skill with bows and hunting, allowing them to mark enemies to enhance their attacks',
+            sprite: 'ranger',
+            disabled: false
         })
     ];
 

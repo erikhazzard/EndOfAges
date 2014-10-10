@@ -254,9 +254,12 @@ define(
                     if(self.curStep === 1 && self.pagesCompleted[1] === false){
                         // finish step 1
                         baseDelay = 1;
+
+                        self.step1DidPressEscape = true;
                         self.step1WriterCallback();
                         self.page1Writer.trigger('finish');
                         self.setupPage2();
+
                         setTimeout(function(){ baseDelay = ORIGINAL_BASE_DELAY; }, 200);
                     }
                 }
@@ -337,34 +340,40 @@ define(
                     logger.log('views/PageHome', 
                         '\t\t showName() called, showing input...');
 
-                    $name.addClass('animated fadeInLeft');
                     $name.velocity({ opacity: 1 });
-                    $name.attr('placeholder', '');
+                    $name.attr('placeholder', 'Name');
 
-                    // Fade in "name text"
-                    async.eachSeries(['N','Na','Nam','Name'], 
-                    function(val, cb){
-                        $name.attr('placeholder', val);
+                    // if they skipped through the intro, don't do anything to
+                    // the name input
+                    if(!self.step1DidPressEscape){
+                        $name.addClass('animated fadeInLeft');
+                        $name.attr('placeholder', '');
 
-                        setTimeout(function(){
-                            cb();
-                        }, baseDelay * 0.8);
-                    }, function allDone (){ 
-                        logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
-                            enteredText);
+                        // Fade in "name text"
+                        async.eachSeries(['N','Na','Nam','Name'], 
+                        function(val, cb){
+                            $name.attr('placeholder', val);
 
-                        // remove fade in left class to prevent it triggering later
-                        $name.removeClass('fadeInLeft');
+                            setTimeout(function(){
+                                cb();
+                            }, baseDelay * 0.8);
+                        }, function allDone (){ 
+                            logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
+                                enteredText);
 
-                        //// No longer pulsating
-                        if(!enteredText){
-                            $name.removeClass();
-                            self.step1$namePulse = setTimeout(function(){
-                                logger.log('views/PageHome', '\t\t adding pulsate : %O');
-                                $name.addClass('animated-subtle pulse-subtle infinite');
-                            }, 1800);
-                        }
-                    });
+                            // remove fade in left class to prevent it triggering later
+                            $name.removeClass('fadeInLeft');
+
+                            //// No longer pulsating
+                            if(!enteredText){
+                                $name.removeClass();
+                                self.step1$namePulse = setTimeout(function(){
+                                    logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                    $name.addClass('animated-subtle pulse-subtle infinite');
+                                }, 1800);
+                            }
+                        });
+                    }
 
                 }, baseDelay / 2);
             };
@@ -657,7 +666,7 @@ define(
                 self.$cachedEls.previousStepArrow.velocity({ opacity: 1 });
                 self.$cachedEls.previousStepArrow.removeClass('fadeOut');
                 self.$cachedEls.previousStepArrow.addClass('fadeIn');
-            }, baseDelay * 2);
+            }, baseDelay / 3 | 0);
 
             // setup the fade ins
             var $classWrapper = $('#create-classes-wrapper');
@@ -672,8 +681,10 @@ define(
                         finalCss: { opacity: 0.8 },
 
                         callback: function(){
+                            $('#region-create-classes').velocity({ opacity: 1 });
                             $('#region-create-classes')
-                                .addClass('animated fadeIn');
+                                .addClass('animated fadeInTop');
+
                         }
                     });
                 });}, 200);
@@ -684,12 +695,12 @@ define(
             // transitions
             setTimeout(function removeAnimatedClasses(){
                 $classWrapper.removeClass();
+                $('#region-create-classes').removeClass('animated fadeIn fadeInTop opacity-zero');
             }, baseDelay * 5);
 
 
             return this;
         },
-
 
         showPage3: function showPage3 (){
             // This is called whenever player goes from page 2 to page 3
@@ -719,11 +730,31 @@ define(
                 options);
             var self = this;
 
-            // if a disabled race was clicked, do nothing
+            // if a disabled class was clicked, do nothing
             if(options.model.attributes.disabled){
                 logger.log('views/PageCreateCharacter', '[x] class disabled');
                 return this;
             }
+
+            // done with class page
+            this.pagesCompleted[3] = true;
+
+            // If the same class was clicked, do nothing
+            if(this._previousClassSelected === options.model.attributes.name){
+                logger.log('views/PageHome', '[x] same class selected, doing nothing');
+                return false;
+            }
+
+            // store state
+            this._previousClassSelected = options.model.attributes.name;
+
+            // remove selected class from other entity selections
+            // --------------------------
+            $('#region-create-classes .list-item.selected')
+                .removeClass('selected');
+
+            // add selected class to selected entity
+            options.$el.addClass('selected');
         }
 
         // =================================================================

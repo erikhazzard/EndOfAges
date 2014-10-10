@@ -2,9 +2,9 @@
 <script id='template-create-class-list-item' type='text/template'>
     <div class='item <% if(disabled){ %>disabled<% } %>' data-template-cid='<%= cid %>'>
         <% if(disabled){ %>
-            <img src='/static/img/characters/<%= sprite %>-disabled.gif' class='race-image' height='50' width='50' />
+            <img src='/static/img/classes/<%= sprite %>-disabled.svg' class='class-image' height='46' width='46' />
         <% } else { %>
-            <img src='/static/img/characters/<%= sprite %>.gif' class='race-image' height='50' width='50' />
+            <img src='/static/img/classes/<%= sprite %>.svg' class='class-image' height='46' width='46' />
         <% } %>
 
         <span class='list-item-name'>
@@ -14,5 +14,15 @@
                 <%= name %>
             <% } %>
         </span>
+    </div>
+</script>
+
+{{// Class info }}
+<script id='template-create-class-info' type='text/template'>
+    <h2 class='item-name'>
+        <%= classModel.get('name') %>
+    </h2>
+    <div class='item-description'>
+        <%= classModel.get('description') %>
     </div>
 </script>
