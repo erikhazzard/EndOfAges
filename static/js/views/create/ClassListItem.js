@@ -38,12 +38,17 @@ define(
                 this.$el.addClass('disabled');
             }
 
+            // add the sprite name to allow selection
+            this.$el.attr({
+                id: 'create-race-' + this.model.attributes.sprite.replace(/ /g, '') 
+            });
+
             // Redelegate events on a timeout. 
             // TODO : Why doesn't this work without the timeout? It seems
             // that maybe the elements haven't been rendered to the DOM yet
-            setTimeout(function(){
+            setTimeout(function(){requestAnimationFrame(function(){
                 self._delegateDOMEvents();
-            }, 1000);
+            });}, 100);
             return this;
         },
 

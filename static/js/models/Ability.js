@@ -27,12 +27,16 @@ define(
         defaults: function(){
             return {
                 name: 'Magic Missle',
+                id: 'magicMissle',
 
                 // Keep track of buffs / effects that affect the ability object
                 activeEffects: [],
 
                 // ID of the effect element
                 effectId: null,
+                // sprite for icon itself
+                sprite: null,
+
                 description: 'PLACEHOLDER TEXT :::::::::::',
 
                 // How long must the player wait until they can use this ability

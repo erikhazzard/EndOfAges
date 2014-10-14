@@ -26,10 +26,6 @@ define(
             this.add(ENTITY_CLASSES);
 
             return this;
-        },
-
-        comparator: function(model){
-            return model.get('name');
         }
 
     });

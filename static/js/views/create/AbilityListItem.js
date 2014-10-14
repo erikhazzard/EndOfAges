@@ -13,11 +13,11 @@ define(
     ){
 
     var AbilityListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'ability-list-item',
-        template: '#template-create-ability-list-item',
+        'className': 'list-item',
+        template: '#template-create-all-abilities-list-item',
 
         serializeData: function(){
-            return _.extend({ cid: this.model.cid }, this.model.toJSON());
+            return _.extend({ cid: this.model.cid, disabled: false }, this.model.toJSON());
         },
 
         initialize: function(){

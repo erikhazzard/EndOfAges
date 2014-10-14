@@ -16,8 +16,12 @@ define(
     var Abilities = Backbone.Collection.extend({
         model: Ability,
 
-        initialize: function(){
-            logger.log('collections/Abilities', 'initialize() called');
+        initialize: function(models, options){
+            logger.log('collections:Abilities', 'initialize() called with:', {
+                models: models,
+                options:options
+            });
+            options = options || {};
         }
     });
 

@@ -1336,12 +1336,16 @@ define(
         defaults: function(){
             return {
                 name: 'Magic Missle',
+                id: 'magicMissle',
 
                 // Keep track of buffs / effects that affect the ability object
                 activeEffects: [],
 
                 // ID of the effect element
                 effectId: null,
+                // sprite for icon itself
+                sprite: null,
+
                 description: 'PLACEHOLDER TEXT :::::::::::',
 
                 // How long must the player wait until they can use this ability
@@ -2053,8 +2057,12 @@ define(
     var Abilities = Backbone.Collection.extend({
         model: Ability,
 
-        initialize: function(){
-            logger.log('collections/Abilities', 'initialize() called');
+        initialize: function(models, options){
+            logger.log('collections:Abilities', 'initialize() called with:', {
+                models: models,
+                options:options
+            });
+            options = options || {};
         }
     });
 
@@ -4045,12 +4053,17 @@ define(
                 this.$el.addClass('disabled');
             }
 
+            // add the sprite name to allow selection
+            this.$el.attr({
+                id: 'create-race-' + this.model.attributes.sprite.replace(/ /g, '') 
+            });
+
             // Redelegate events on a timeout. 
             // TODO : Why doesn't this work without the timeout? It seems
             // that maybe the elements haven't been rendered to the DOM yet
-            setTimeout(function(){
+            setTimeout(function(){requestAnimationFrame(function(){
                 self._delegateDOMEvents();
-            }, 1000);
+            });}, 100);
             return this;
         },
 
@@ -4124,221 +4137,19 @@ define(
 
     // Here be abilities. This would be loaded in a DB and entities would
     // get abilities from server
-    var abilities = {
-        // ------------------------------
-        // Damage - Arcane
-        // ------------------------------
-        'magicmissle': new Ability({
-            name: 'Magic Missle',
-            effectId: 'magicMissle',
-            castTime: 2,
-            timeCost: 2,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: {light: 0.7, fire: 0.3},
-            damage: 15
-        }),
-
-        // ------------------------------
-        // Damage - Fire
-        // ------------------------------
-        'flamelick': new Ability({
-            name: 'Flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 10
-        }),
-        'fireball': new Ability({
-            name: 'Fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 40
-        }),
-
-        // ------------------------------
-        // Healing - Light
-        // ------------------------------
-        'trivialhealing': new Ability({
-            name: 'Trivial Healing',
-            effectId: 'trivialHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 5
-        }),
-        'minorhealing': new Ability({
-            name: 'Minor Healing',
-            effectId: 'minorHealing',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 15
-        }),
-
-        // ==============================
-        // 
-        // Cleric
-        //
-        // ==============================
-        heal: new Ability({
-            name: 'Heal',
-            effectId: 'minorHealing',
-            castTime: 5.5,
-            timeCost: 5.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 20
-        }),
-        smite: new Ability({
-            name: 'Smite',
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: 10,
-            heal: 5,
-            healTarget: 'source'
-        }),
-        virtue: new Ability({
-            name: 'Virtue',
-            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            heal: 10,
-
-            buffDuration: 8,
-            buffEffects: { 
-                armor: 10,
-                magicResist: 10,
-                maxHealth: 10,
-
-                abilities: {
-                    //// 20% faster, so decrease time by 20%
-                    //coolDown: -0.5,
-                    //castDuration: -0.5,
-                    //castTime: -0.5,
-                    //timeCost: -0.5
-                }
-            }
-        }),
-
-        // TODO:  Have truedamage be a side effect in the default damage func
-        judgement: new Ability({
-            name: 'Judgement',
-            effectId: 'placeHolder',
-            castTime: 5,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: '10%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        }),
-
-        // ==============================
-        // 
-        // Shadowknight
-        //
-        // ==============================
-        darkblade: new Ability({
-            name: 'Dark Blade',
-            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
-            effectId: 'placeHolder',
-            castTime: 3,
-            timeCost: 3,
-            castDuration: 0.3,
-            validTargets: ['enemy'],
-            type: {'magic': 0.3, 'physical': 0.7},
-            element: 'dark',
-            damage: 9,
-            heal: 5,
-            healTarget: 'source'
-        }),
-
-        // TODO: Have true damage be a part of the damage func
-        deathtouch: new Ability({
-            name: 'Death Touch',
-            description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 1.5,
-            validTargets: ['enemy'],
-            type: {'magic': 0.5, 'physical': 0.5},
-            element: 'dark',
-            damage: '25%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.25 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        }),
+    var abilities = [
 
         // ==============================
         // 
         // Assassin
         //
         // ==============================
-        stab: new Ability({
+        {
             name: 'Stab',
+            id: 'stab',
             description: 'A quick stabbing attack which deals a small amount of damage',
             effectId: 'placeHolder',
+            sprite: 'stab',
             castTime: 0.6,
             timeCost: 0.6,
             castDuration: 0.2,
@@ -4347,11 +4158,13 @@ define(
             element: 'air',
             damage: 3,
             attackBonusPercent: 0.1
-        }),
-        backstab: new Ability({
+        },
+        {
             name: 'Backstab',
-            description: 'A powerful attack which will do additional damage if the enemy has recently been stabbed',
+            id: 'backstab',
+            description: 'A powerful attack which will do additional damage based on previous attacks',
             effectId: 'placeHolder',
+            sprite: 'backstab',
             castTime: 0.6,
             timeCost: 0.6,
             castDuration: 1,
@@ -4378,7 +4191,7 @@ define(
                             if((now - healthHistory[i].date) <= castDuration){
                                 // TODO: check for a single ability
                                 // TODO: scale based on entity's attack bonus
-                                amount += 10;
+                                amount += 5;
                             } else {
                                 // otherwise, break
                                 break;
@@ -4397,12 +4210,14 @@ define(
                 }, delay);
 
             }
-        }),
+        },
 
-        cripple: new Ability({
+        {
             name: 'Cripple',
+            id: 'cripple',
             description: "Cripple weakens an enemy, lowering their attack and defense",
             effectId: 'placeHolder',
+            sprite: 'cripple',
             castTime: 0.5,
             timeCost: 0.5,
             damage: 0,
@@ -4416,12 +4231,14 @@ define(
                 armor: -10,
                 attack: -10
             }
-        }),
+        },
 
-        assassinate: new Ability({
+        {
             name: 'Assassinate',
+            id: 'assassinate',
             description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
             effectId: 'placeHolder',
+            sprite: 'assassinate',
             castTime: 0.6,
             timeCost: 0.6,
             castDuration: 1,
@@ -4458,13 +4275,236 @@ define(
                 }, delay);
 
             }
-        }),
+        },
+
+        {
+            name: 'Haste',
+            id: 'haste',
+            description: "Increases your timer speed by 20%",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+
+            buffDuration: 8,
+            buffEffects: { 
+                timerFactor: 0.2
+            }
+        },
+
+        // ------------------------------
+        // Healing - Light
+        // ------------------------------
+        {
+            name: 'Minor Healing',
+            id: 'minorHealing',
+            effectId: 'minorHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 15
+        },
+        // ==============================
+        // 
+        // Shadowknight
+        //
+        // ==============================
+        {
+            name: 'Dark Blade',
+            id: 'darkblade',
+            description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
+            effectId: 'placeHolder',
+            castTime: 3,
+            timeCost: 3,
+            castDuration: 0.3,
+            validTargets: ['enemy'],
+            type: {'magic': 0.3, 'physical': 0.7},
+            element: 'dark',
+            damage: 9,
+            heal: 5,
+            healTarget: 'source'
+        },
+
+        // TODO: Have true damage be a part of the damage func
+        {
+            name: 'Death Touch',
+            id: 'deathtouch',
+            description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
+            effectId: 'placeHolder',
+            castTime: 1,
+            timeCost: 1,
+            castDuration: 1.5,
+            validTargets: ['enemy'],
+            type: {'magic': 0.5, 'physical': 0.5},
+            element: 'dark',
+            damage: '25%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.25 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        },
+        // ------------------------------
+        // Damage - Arcane
+        // ------------------------------
+        {
+            name: 'Magic Missle',
+            id: 'magicMissle',
+            effectId: 'magicMissle',
+            castTime: 2,
+            timeCost: 2,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: {light: 0.7, fire: 0.3},
+            damage: 15
+        },
+
+        // ------------------------------
+        // Damage - Fire
+        // ------------------------------
+        {
+            name: 'Flamelick',
+            id: 'flamelick',
+            effectId: 'flamelick',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 10
+        },
+        {
+            name: 'Fireball',
+            id: 'fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 40
+        },
+
+        // ==============================
+        // 
+        // Cleric
+        //
+        // ==============================
+        {
+            name: 'Heal',
+            id: 'heal',
+            effectId: 'heal',
+            castTime: 5.5,
+            timeCost: 5.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 20
+        },
+        {
+            name: 'Smite',
+            id: 'smite',
+            effectId: 'placeHolder',
+            castTime: 1,
+            timeCost: 1,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: 10,
+            heal: 5,
+            healTarget: 'source'
+        },
+        {
+            name: 'Virtue',
+            id: 'virtue',
+            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+
+            heal: 10,
+
+            buffDuration: 8,
+            buffEffects: { 
+                armor: 10,
+                magicResist: 10,
+                maxHealth: 10,
+
+                abilities: {
+                    //// 20% faster, so decrease time by 20%
+                    //coolDown: -0.5,
+                    //castDuration: -0.5,
+                    //castTime: -0.5,
+                    //timeCost: -0.5
+                }
+            }
+        },
+
+        // TODO:  Have truedamage be a side effect in the default damage func
+        {
+            name: 'Judgement',
+            id: 'judgement',
+            effectId: 'placeHolder',
+            castTime: 5,
+            timeCost: 1,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: '10%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        },
+
+
 
         // ------------------------------
         // Other effects
         // ------------------------------
-        freezeTime: new Ability({
+        {
             name: 'Freeze Time',
+            id: 'freezeTime',
             description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -4480,9 +4520,10 @@ define(
                 abilities: {
                 }
             }
-        }),
-        stun: new Ability({
+        },
+        {
             name: 'Stun',
+            id: 'stun',
             description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -4500,9 +4541,10 @@ define(
                     castTime: 9999999
                 }
             }
-        }),
-        comatose: new Ability({
+        },
+        {
             name: 'Comatose',
+            id: 'comatose',
             description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -4524,24 +4566,8 @@ define(
                     castTime: 9999999
                 }
             }
-        }),
-        haste: new Ability({
-            name: 'Haste',
-            description: "Increases your timer speed by 50%",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: 0.5
-            }
-        })
-
-    };
+        }
+    ];
 
 
     return abilities;
@@ -4571,17 +4597,55 @@ define(
 
     var ENTITY_CLASSES = [
         new EntityClass({
+            name: 'Custom',
+            description: 'Think you can build an awesome class? Build your own unique combination of abilities',
+            sprite: 'custom',
+            disabled: false,
+            abilities: []
+        }),
+
+        new EntityClass({
             name: 'Assassin',
             description: 'Assassins attack in bursts, combining skills to deal massive amounts of damage.',
             sprite: 'assassin',
-            disabled: false
+            disabled: false,
+            abilities: [
+                // array of effectId names
+                'stab', 'backstab', 'cripple', 'assassinate'
+            ]
         }),
 
         new EntityClass({
             name: 'Ranger',
-            description: 'Possesses unparalleled skill with bows and hunting, allowing them to mark enemies to enhance their attacks',
+            description: "Possesses unparalleled skill with bows and hunting, allowing them to mark enemies to enhance their attacks",
             sprite: 'ranger',
-            disabled: false
+            disabled: false,
+            abilities: [
+                // array of effectId names
+                'stab', 'haste', 'cripple', 'assassinate'
+            ]
+        }),
+
+        new EntityClass({
+            name: 'Shadow Knight',
+            description: "A knight born in darkness, using dark magic to enhance their combat skills",
+            sprite: 'shadowknight',
+            disabled: false,
+            abilities: [
+                // array of effectId names
+                'darkblade', 'deathtouch', 'cripple'
+            ]
+        }),
+
+        new EntityClass({
+            name: 'Wizard',
+            description: "",
+            sprite: 'wizard',
+            disabled: false,
+            abilities: [
+                // array of effectId names
+                'magicMissle', 'flamelick', 'fireball'
+            ]
         })
     ];
 
@@ -4617,15 +4681,182 @@ define(
             this.add(ENTITY_CLASSES);
 
             return this;
-        },
-
-        comparator: function(model){
-            return model.get('name');
         }
 
     });
 
     return Classes;
+});
+
+// ===========================================================================
+//
+// All Ability List
+//
+// ItemView for class item
+//
+// ===========================================================================
+define(
+    'views/create/AllAbilitiesListItem',[ 
+        'd3', 'logger', 'events'
+    ], function viewAllAbilityListItem(
+        d3, logger, events
+    ){
+
+    var AllAbilityListItem = Backbone.Marionette.ItemView.extend({
+        'className': 'list-item',
+        template: '#template-create-all-abilities-list-item',
+
+        events: {
+            'click': 'abilityClicked'
+        },
+
+
+        serializeData: function(){
+            return _.extend({ 
+                cid: this.model.cid,
+                sprite: this.model.attributes.sprite || null,
+                disabled: false
+            }, this.model.toJSON());
+        },
+
+        initialize: function(){
+            logger.log('AllAbilitiesListItem', 'initialize : model %O',
+                this.model);
+            return this;
+        },
+
+        onShow: function(){
+            var self = this;
+
+            var sprite = this.model.get('effectId');
+            this.$el.attr({
+                id: 'create-all-ability-' + 
+                    this.model.attributes.id
+            });
+
+            if(this.model.attributes.disabled){
+                this.$el.addClass('disabled');
+            }
+
+            setTimeout(function(){requestAnimationFrame(function(){
+                self._delegateDOMEvents();
+            });}, 20);
+
+            return this;
+        },
+
+        abilityClicked : function abilityClicked(){
+            logger.log('AllAbilitiesListItem', 'ability item clicked'); 
+
+            events.trigger('create:page4:abilityClicked', { 
+                $el: this.$el,
+                model: this.model
+            });
+
+            return this;
+        }
+
+    });
+
+    return AllAbilityListItem;
+});
+
+// ===========================================================================
+//
+// AllAbility List
+//
+// Collection for classes in the create screen
+//
+// ===========================================================================
+define(
+    'views/create/AllAbilitiesList',[ 
+        'd3', 'logger', 'events', 
+        'views/create/AllAbilitiesListItem'
+    ], function viewAllAbilityListCollection(
+        d3, logger, events,
+        AllAbilityListItem
+    ){
+
+    var AllAbilityListCollection = Backbone.Marionette.CollectionView.extend({
+        'className': 'all-ability-list',
+
+        itemView: AllAbilityListItem,
+
+        initialize: function(options){
+            logger.log(
+                'views/create/AllAbilityList.js', 
+                'collectionView initialized : %O', options);
+            this.itemView = AllAbilityListItem;
+            return this;
+        }
+    });
+
+    return AllAbilityListCollection;
+});
+
+// ===========================================================================
+//
+//  AllAbilities Collection
+//
+//      Loads all abilities and creates a collectino for it
+//
+// ===========================================================================
+define(
+    'collections/AllAbilities',[ 'backbone', 'marionette', 'logger', 'events',
+        'models/data-abilities',
+        'models/Ability'
+    ], function AllAbilitiesCollection(
+        Backbone, Marionette, logger, events,
+        dataAbilities,
+        Ability
+    ){
+
+    var AllAbilities = Backbone.Collection.extend({
+        model: Ability,
+
+        initialize: function(models, options){
+            var self = this;
+
+            logger.log('collections:AllAbilities', 'initialize() called with:', {
+                models: models,
+                options:options
+            });
+            options = options || {};
+
+            if(!options.callback){
+                logger.log('warn:collections:AllAbilities', 'no callback passed');
+            }
+
+            // NOTE: Fetch data from local or server
+            setTimeout(function(){
+                // turn data to array, and create ability objects from data
+                dataAbilities = _.filter(dataAbilities, function(d){ 
+                    return new Ability(d); 
+                });
+
+                // Get data (for now, use local)
+                logger.log('collections:AllAbilities', 'adding data: ', {
+                    data: dataAbilities
+                });
+
+                self.add( dataAbilities );
+
+                logger.log('collections:AllAbilities', 'added! models: ', {
+                    models: self.models
+                });
+
+                setTimeout(function(){
+                    if(options.callback){
+                        // call callback
+                        return options.callback(null, self.models);
+                    }
+                }, 20);
+
+            }, 30);
+        }
+    });
+
+    return AllAbilities;
 });
 
 // ===========================================================================
@@ -4643,12 +4874,21 @@ define(
         'logger', 'events',
         'async',
         'models/Entity',
+
+        // races
         'views/create/RaceList',
         'collections/Races',
         'views/create/RaceViz',
 
+        // classes
         'views/create/ClassList',
-        'collections/Classes'
+        'collections/Classes',
+
+        // abilities
+        'views/create/AllAbilitiesList',
+        'collections/Abilities',
+        'collections/AllAbilities'
+
     ], function viewPageHome(
         d3, backbone, marionette, 
         logger, events,
@@ -4659,13 +4899,20 @@ define(
         RaceViz,
 
         ClassList,
-        Classes 
+        Classes,
+
+        AllAbilityList,
+        Abilities,
+        AllAbilities
     ){
 
     // CONFIG
     // ----------------------------------
     var ORIGINAL_BASE_DELAY = 1000;
     var baseDelay = ORIGINAL_BASE_DELAY;
+
+    // total number of abilities user can have
+    var MAX_ABILITIES = 4;
 
     // View 
     // ----------------------------------
@@ -4675,7 +4922,8 @@ define(
 
         'regions': {
             'regionRaceList': '#region-create-races',
-            'regionClassList': '#region-create-classes'
+            'regionClassList': '#region-create-classes',
+            'regionAllAbilitiesList': '#region-create-all-abilities-list'
         },
 
         events: {
@@ -4683,7 +4931,8 @@ define(
 
         initialize: function initialize(options){
             // initialize:
-            logger.log('views/PageHome', 'initialize() called');
+            var self = this;
+            logger.log('pageHome', 'initialize() called');
 
             // Create a new entity model for character create
             this.model = new Entity({});
@@ -4700,18 +4949,106 @@ define(
                 collection: this.classes
             });
 
-            // When race is clicked, continue on to the next step
+            // all abilities collection and list
+            this.allAbilitiesListView = {};
+
+            this.allAbilities = new AllAbilities([], {
+
+                callback: function(err, collection){
+                    self.allAbilitiesListView = new AllAbilityList({
+                        collection: self.allAbilities
+                    });
+
+                    logger.log('pageHome:setupAllAbilities', 
+                    'callback called, set up allAbilitiesListView', {
+                        list: self.allAbilitiesListView
+                    });
+                }
+
+            });
+
+            // --------------------------
+            // Page - list click callbacks
+            // --------------------------
             this.listenTo(events, 'create:page2:raceClicked', this.raceClicked);
             this.listenTo(events, 'create:page3:classClicked', this.classClicked);
+            this.listenTo(events, 'create:page4:abilityClicked', this.abilityClicked);
+
+            // --------------------------
+            // keep track of selected abilities 
+            // --------------------------
+            this.selectedAbilities = new Abilities();
+            window.s = this.selectedAbilities; 
+
+            // UTILITY
+            // --------------------------
+            // TODO: This should all be cleaned up and optimized
+            function createAbilityIcon( model ){
+                // returns an element
+                return $('<img />')
+                    .attr({
+                        src:'/static/img/abilities/' + model.attributes.id + '.svg',
+                        'class': 'class-image',
+                        height: '60',
+                        width: '60'
+                    });
+            }
+
+            function removeImage( $el ){
+                $('img', $el).remove();
+                return;
+            }
+
+            // Selected ability handlers
+            // --------------------------
+            this.listenTo(this.selectedAbilities, 'add', function(model, collection){
+                var $el = self.$selectedAbilitiesEls[collection.indexOf(model)];
+                removeImage($el);
+
+                $el.append(createAbilityIcon(model));
+            });
+
+            this.listenTo(this.selectedAbilities, 'remove', function(model, collection, options){
+                // When an item from the collection is removed, update the
+                // element states. 
+                // TODO: Fix this, right now it's emptying everything to ensure 
+                //  selected abilities always match
+                _.each(self.$selectedAbilitiesEls, function(el){
+                    removeImage(el);
+                });
+
+                // add back all the selected icons
+                _.each(collection.models, function(curModel, i){
+                    self.$selectedAbilitiesEls[i].append(createAbilityIcon(curModel));
+                });
+
+            });
+
+            this.listenTo(this.selectedAbilities, 'reset', function(model, collection, options){
+                _.each(self.$selectedAbilitiesEls, function(el){
+                    removeImage(el);
+                });
+            });
 
             return this;
         },
 
+        onBeforeClose: function close(){
+            logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
+            $(window).unbind();
+            return this;
+        },
+
+        // ------------------------------
+        //
+        // onShow
+        //
+        // ------------------------------
         onShow: function homeOnShow(){
             // When the view is rendered, set everything up
             
             var self = this;
-            logger.log('views/PageHome', 'onShow called');
+            logger.log('pageHome', 'onShow called');
 
             // setup races
             this.regionRaceList.show(this.raceListView);
@@ -4780,7 +5117,7 @@ define(
                     //
                     // ------------------
                     turned: function(e, page) {
-                        logger.log('views/PageHome:pageTurn', 
+                        logger.log('pageHome:pageTurn', 
                             'finished turning page : %O : %O', 
                             e, page);
                     }
@@ -4793,26 +5130,26 @@ define(
                 // NOTE: Here, "step" means the set of of pages (step 1 is
                 //      title / race, step 2 is templates / abilities, step 3
                 //      is final)
-                logger.log('views/PageHome:pageNext', 'curStep ' + self.curStep);
+                logger.log('pageHome:pageNext', 'curStep ' + self.curStep);
 
                 if(self.curStep < 3){
-                    logger.log('views/PageHome', '\t showing next page');
+                    logger.log('pageHome', '\t showing next page');
                     e.preventDefault();
                     self.curStep++;
                     self.$pages.turn('next');
 
                     // Templates / abilities
                     if(self.curStep === 2){
-                        logger.log('views/PageHome:pageNext', 
+                        logger.log('pageHome:pageNext', 
                             'showing page 3...');
 
                         // initial setup or show of page 3 (step 4 - templates)
                         if(self.pagesCompleted[3] !== true){
-                            logger.log('views/PageHome:pageNext', 'setting up page 3...');
+                            logger.log('pageHome:pageNext', 'setting up page 3...');
                             self.setupPage3(); 
 
                         } else {
-                            logger.log('views/PageHome:pageNext', 'showing page 3');
+                            logger.log('pageHome:pageNext', 'showing page 3');
                             // Show it (don't setup)
                             self.showPage3(); 
                         }
@@ -4822,17 +5159,17 @@ define(
             }
             function pagePrevious(e){
                 // Called to show the previous page
-                logger.log('views/PageHome:pagePrevious', 'curStep ' + self.curStep);
+                logger.log('pageHome:pagePrevious', 'curStep ' + self.curStep);
 
                 if(self.curStep > 1){
-                    logger.log('views/PageHome', '\t showing previous page');
+                    logger.log('pageHome', '\t showing previous page');
                     e.preventDefault();
                     self.$pages.turn('previous');
                     self.curStep--;
 
                     // Step 1 is the first set of pages (title and race)
                     if(self.curStep === 1){
-                        logger.log('views/PageHome:pagePrevious', 
+                        logger.log('pageHome:pagePrevious', 
                             'showing page 2...');
 
                         self.showPage2();
@@ -4849,13 +5186,13 @@ define(
             $(window).bind('keydown', function(e){
                 // Don't let pages go below 2 (we don't have a cover page) and
                 // don't let it go above the number of pages we have
-                logger.log('views/PageHome:pageTurn:keyPress', 
+                logger.log('pageHome:pageTurn:keyPress', 
                     'key pressed : ' + e.keyCode + ' | curStep : ' + 
                     self.curStep);
 
                 // Left Arrow
                 if (e.keyCode === 37) {
-                    logger.log('views/PageHome:pageTurn:keyPress', 'going back');
+                    logger.log('pageHome:pageTurn:keyPress', 'going back');
                     pagePrevious(e);
 
                 // Right Arrow
@@ -4865,11 +5202,11 @@ define(
                         (self.curStep === 1 && self.pagesCompleted[2]) || 
                         (self.curStep === 2 && self.pagesCompleted[4])
                     ){
-                        logger.log('views/PageHome:pageTurn:keyPress', 'going forward');
+                        logger.log('pageHome:pageTurn:keyPress', 'going forward');
                         pageNext(e);
 
                     } else {
-                        logger.log('views/PageHome:pageTurn:keyPress', '[x] cannot go forward');
+                        logger.log('pageHome:pageTurn:keyPress', '[x] cannot go forward');
                     }
 
                 // Escape or enter
@@ -4877,7 +5214,7 @@ define(
                     // ------------------
                     // Skip all the transition stuff
                     // ------------------
-                    logger.log('views/PageHome:pageTurn:keyPress', 
+                    logger.log('pageHome:pageTurn:keyPress', 
                         'enter or escape pressed, skipping transitions');
 
                     // are we on step 1?
@@ -4897,7 +5234,7 @@ define(
 
             // arrows
             $('#arrow-right').click(function(e){
-                logger.log('views/PageHome:arrowClick', 'arrow-right clicked');
+                logger.log('pageHome:arrowClick', 'arrow-right clicked');
                 if(
                     (self.curStep === 1 && self.pagesCompleted[2]) || 
                     (self.curStep === 2 && self.pagesCompleted[4])
@@ -4906,7 +5243,7 @@ define(
                 }
             });
             $('#arrow-left').click(function(e){
-                logger.log('views/PageHome:arrowClick', 'arrow-left clicked');
+                logger.log('pageHome:arrowClick', 'arrow-left clicked');
                 return pagePrevious(e);
             });
         },
@@ -4923,7 +5260,7 @@ define(
             // TODO: When mouse over bottom left, should the name text
             // fade in automatically instead of waiting for the user to read
             // the text?
-            logger.log('views/PageHome', 'setupPage1() called');
+            logger.log('pageHome', 'setupPage1() called');
 
             var self = this;
             var $paragraph = $('#book-page-title p', this.$el);
@@ -4942,13 +5279,13 @@ define(
             self.step1WriterCallback = function writerCallback(wasCancelled){
                 // Called when all words have been faded, or when the
                 // user clicks on text
-                logger.log('views/PageHome', 
+                logger.log('pageHome', 
                     '\t finished showing words, was cancelled? : %O',
                     wasCancelled);
 
                 // if already called, do nothing
                 if(self.step1WriterCallbackCalled){ 
-                    logger.log('views/PageHome', 
+                    logger.log('pageHome', 
                         '\t\t step1WriterCallbackCalled is TRUE. should return');
                 }
                 // TODO: it only seems to show up the second time this is
@@ -4967,7 +5304,7 @@ define(
                 }
                 
                 self.step1nameTimeout = setTimeout(function showName(){
-                    logger.log('views/PageHome', 
+                    logger.log('pageHome', 
                         '\t\t showName() called, showing input...');
 
                     $name.velocity({ opacity: 1 });
@@ -4988,7 +5325,7 @@ define(
                                 cb();
                             }, baseDelay * 0.8);
                         }, function allDone (){ 
-                            logger.log('views/PageHome', '\t\t pulsating name : entetedText: %O',
+                            logger.log('pageHome', '\t\t pulsating name : entetedText: %O',
                                 enteredText);
 
                             // remove fade in left class to prevent it triggering later
@@ -4998,7 +5335,7 @@ define(
                             if(!enteredText){
                                 $name.removeClass();
                                 self.step1$namePulse = setTimeout(function(){
-                                    logger.log('views/PageHome', '\t\t adding pulsate : %O');
+                                    logger.log('pageHome', '\t\t adding pulsate : %O');
                                     $name.addClass('animated-subtle pulse-subtle infinite');
                                 }, 1800);
                             }
@@ -5019,13 +5356,13 @@ define(
 
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
-                logger.log('views/PageHome', '\t name focused');
+                logger.log('pageHome', '\t name focused');
                 //// No longer pulsating
                 clearTimeout(self.step1$namePulse);
                 $name.removeClass('pulse-subtle infinite'); 
 
                 if(self.pagesCompleted[1] === true){
-                    logger.log('views/PageHome', '\t [x] already setup page2');
+                    logger.log('pageHome', '\t [x] already setup page2');
                     return false;
                 }
 
@@ -5034,7 +5371,7 @@ define(
                 setTimeout(function showPage2(){
                     // DONE, Show page 2
                     $name.removeClass('pulse-subtle infinite'); 
-                    logger.log('views/PageHome', 
+                    logger.log('pageHome', 
                         '\t setupPage1: calling setupPage2...');
                     self.setupPage2();
 
@@ -5066,7 +5403,13 @@ define(
             if(self.page2SetupCalled){ return false; }
             self.page2SetupCalled = true;
 
-            logger.log('views/PageHome', 'setupPage2() called');
+            // setup *abilities* here, so they will be setup by the time
+            // the abilities page fades in
+            setTimeout(function(){requestAnimationFrame(function(){
+                self.regionAllAbilitiesList.show(self.allAbilitiesListView);
+            });}, 105);
+
+            logger.log('pageHome', 'setupPage2() called');
 
             this.pagesCompleted[1] = true;
 
@@ -5104,7 +5447,7 @@ define(
             // Called when a race is clicked. Show the race description,
             // and allow user to progress to next step
             //
-            logger.log('views/PageHome', 'raceClicked() passed options: %O',
+            logger.log('pageHome', 'raceClicked() passed options: %O',
                 options);
             var self = this;
 
@@ -5115,7 +5458,7 @@ define(
             }
 
             if(this.pagesCompleted[1] !== true){
-                logger.log('views/PageHome', '[x] first page incomplete, must enter name');
+                logger.log('pageHome', '[x] first page incomplete, must enter name');
                 return false;
             }
 
@@ -5132,7 +5475,7 @@ define(
             
             // If the same race was clicked, do nothing
             if(this._previousRaceSelected === options.model.attributes.name){
-                logger.log('views/PageHome', '[x] same race selected, doing nothing');
+                logger.log('pageHome', '[x] same race selected, doing nothing');
                 return false;
             }
 
@@ -5140,6 +5483,7 @@ define(
             // Update description and race viz, allow going to next page,
             // pulsate arrow
             // ==========================
+            this.model.set({ race: options.model });
             
             // --------------------------
             // Race Visualization
@@ -5166,8 +5510,8 @@ define(
                         self.$raceViz.removeClass('fadeIn');
                     }, 800);
                 }, 200);
+                
             } else {
-
                 // otherwise, update the data
                 requestAnimationFrame(function(){
                     self.raceViz
@@ -5195,7 +5539,7 @@ define(
                 return false;
             }
 
-            logger.log('views/PageHome', 'raceDescription: %O', this.$raceDescription);
+            logger.log('pageHome', 'raceDescription: %O', this.$raceDescription);
 
             requestAnimationFrame(function(){
                 // Show race description
@@ -5272,10 +5616,10 @@ define(
 
             this.cleanupPage2();
 
-            logger.log('views/PageHome:setupPage3', 'setupPage3() (templates) called');
+            logger.log('pageHome:setupPage3', 'setupPage3() (templates) called');
 
             if(this.pagesCompleted[3]){ 
-                logger.log('views/PageHome:setupPage3', 
+                logger.log('pageHome:setupPage3', 
                     '[x] third page complete already, returning');
                 return this;
             }
@@ -5292,7 +5636,7 @@ define(
             
             // show the previous arrow after a delay
             setTimeout(function(){
-                logger.log('views/PageHome:setupPage3', 'showing previous step arrow');
+                logger.log('pageHome:setupPage3', 'showing previous step arrow');
                 self.$cachedEls.previousStepArrow.velocity({ opacity: 1 });
                 self.$cachedEls.previousStepArrow.removeClass('fadeOut');
                 self.$cachedEls.previousStepArrow.addClass('fadeIn');
@@ -5317,6 +5661,8 @@ define(
 
                         }
                     });
+
+                    self.page3canClickClass = true;
                 });}, 200);
 
             }, baseDelay * 0.8);
@@ -5335,7 +5681,7 @@ define(
         showPage3: function showPage3 (){
             // This is called whenever player goes from page 2 to page 3
             var self = this;
-            logger.log('views/PageHome:setupPage3', 'showPage3() (classes) called');
+            logger.log('pageHome:setupPage3', 'showPage3() (classes) called');
 
             this.cleanupPage2();
 
@@ -5356,9 +5702,14 @@ define(
         },
 
         classClicked: function classClicked (options){
-            logger.log('views/PageHome', 'classClicked() passed options: %O',
+            // when clicking on a calling / class, show the ability list
+            logger.log('pageHome', 'classClicked() passed options: %O',
                 options);
             var self = this;
+
+            if(!self.page3canClickClass){
+                return false;
+            }
 
             // if a disabled class was clicked, do nothing
             if(options.model.attributes.disabled){
@@ -5371,7 +5722,7 @@ define(
 
             // If the same class was clicked, do nothing
             if(this._previousClassSelected === options.model.attributes.name){
-                logger.log('views/PageHome', '[x] same class selected, doing nothing');
+                logger.log('pageHome', '[x] same class selected, doing nothing');
                 return false;
             }
 
@@ -5385,14 +5736,178 @@ define(
 
             // add selected class to selected entity
             options.$el.addClass('selected');
-        }
+
+            this.setupPage4();
+
+            // --------------------------
+            // Select abilities
+            // --------------------------
+            if(!this.$step4AbilityListItems){
+                this.$step4AbilityListItems = $('#region-create-all-abilities-list .list-item');
+            }
+            if(!this.$step4AbilityList){
+                this.$step4AbilityList = $('#region-create-all-abilities-list');
+            }
+
+            this.$step4AbilityListItems.removeClass('selected');
+            // empty the currently selected abilities
+            this.selectedAbilities.reset();
+
+            self.selectedAbilities.reset();
+
+            // select abilities from model list
+            _.each(options.model.attributes.abilities, function(id){
+                $('#create-all-ability-' + id).addClass('selected');
+
+                // add model
+                var ability = self.allAbilities.findWhere({
+                    id: id
+                });
+                self.selectedAbilities.add(ability);
+            });
+
+            return this;
+        },
 
         // =================================================================
         //
         // Page 4
         //
         // =================================================================
+        setupPage4: function setupPage4 (){
+            var self = this;
 
+            if(self.page4SetupCalled){ return false; }
+            self.page4SetupCalled = true;
+
+            this.$selectedAbilitiesEls = [
+                $('#create-selected-abilities-1'),
+                $('#create-selected-abilities-2'),
+                $('#create-selected-abilities-3'),
+                $('#create-selected-abilities-4')
+            ];
+
+            // change description when mousing over ability
+            this.$step4templateDescription =
+                _.template($('#template-create-abilities-item-info').html());
+            this.$step4abilityDescription = $('#create-all-abilities-description');
+
+            // when user mouses over item, update description
+            _.each(this.$selectedAbilitiesEls, function(el, i){
+
+                el.on('mouseenter', function(){
+                    self.step4UpdateDescription(self.selectedAbilities.models[i]);
+                });
+
+                el.on('mouseleave', function(){
+                    // reset html
+                    self.step4ResetHtml();
+                });
+
+            });
+
+            // TODO
+            // event handling when user clicks selected ability to remove it
+            //  (maybe there is an "x" when mouseover)
+            //
+            
+
+            logger.log('pageHome:setupPage4', 'setting up page 4');
+
+            return this.showPage4();
+        },
+
+        showPage4: function showPage4 () { 
+            var self = this;
+            logger.log('pageHome:setupPage4', 'showing page 4');
+
+            $('#create-abilities-header').velocity({ opacity: 1 });
+
+            $('#create-abilities-wrapper').velocity({ opacity: 1 });
+            $('#region-create-all-abilities-list').velocity({ opacity: 1 });
+
+            self.page4canClickAbility = true;
+
+            // TODO: set this after all abilities selected
+            this.pagesCompleted[4] = true;
+
+            return this;
+        },
+
+        // ------------------------------
+        // Step 4 - UTILITY
+        // ------------------------------
+        step4UpdateDescription: function(model){
+            // Updates the description based on passed in model
+            // TODO: Flesh this out
+            var self = this;
+
+            // provide a default description if none is available in the
+            // model
+            var attrs = {description: ''};
+
+            if(model && model.attributes && model.attributes.description){
+                attrs = model.attributes;
+            }
+
+            this.$step4abilityDescription.html( 
+                this.$step4templateDescription( attrs )
+            );
+
+            return this;
+        },
+
+        step4ResetHtml: function ste4ResetHtml(){
+            // Called on mouseleave of selected abilities or ability list items
+            this.$step4abilityDescription.html(''); 
+            return this;
+        },
+
+
+        changeToCustomClass: function changeToCustomClass(){
+            // Select new ability, change class to "Custom"
+            $('#region-create-classes .selected').removeClass('selected');
+            $('#create-race-custom').addClass('selected');
+
+            // store state
+            this._previousClassSelected = 'Custom';
+        },
+
+        abilityClicked: function abilityClicked( options ){
+            logger.log('pageHome:abilityClicked', 'passed options: %O',
+                options);
+            var self = this;
+
+            if(!self.page4canClickAbility){
+                return false;
+            }
+
+            // is the ability already selected?
+            if(this.selectedAbilities.indexOf(options.model) > -1){
+                // Yes, the model was selected. Remove it
+                this.selectedAbilities.remove(options.model);
+                options.$el.removeClass('selected');
+                this.changeToCustomClass();
+
+            } else {
+                // no, the model was NOT selected. Add it IF there is enough
+                // room in the selected abilities array
+                if(this.selectedAbilities.models.length >= MAX_ABILITIES){
+                    // If there are too many abilities selected, do a shake or
+                    // some other effect
+                    logger.log('pageHome:abilityClicked', 
+                        'too many abilities selected, cannot add another');
+
+                } else {
+                    // There is space for it, add it
+                    this.selectedAbilities.add(options.model);
+                    options.$el.addClass('selected');
+                    this.changeToCustomClass();
+                }
+
+            } 
+
+        }
     });
 
     return PageHome;
@@ -10652,6 +11167,7 @@ require([
     
     // log options
     logger.transports.get('Console').property({ showMeta: false });
+    logger.options.groupsEnabled = [/pageHome/];
 
     //-----------------------------------
     //APP Config - Add router / controller

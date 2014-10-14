@@ -1,0 +1,24 @@
+{{// Template (abilities) }}
+<script id='template-create-all-abilities-list-item' type='text/template'>
+    <div class='item <% if(disabled){ %>disabled<% } %>' data-template-cid='<%= cid %>'>
+        <% if(disabled){ %>
+            <img src='/static/img/abilities/disabled.svg' class='class-image' height='46' width='46' />
+        <% } else { %>
+            <img src='/static/img/abilities/<%= id %>.svg' class='class-image' height='46' width='46' />
+        <% } %>
+
+        <span class='list-item-name'>
+            <% if(disabled){ %>
+                Undiscovered
+            <% } else { %>
+                <%= name %>
+            <% } %>
+        </span>
+    </div>
+</script>
+
+{{// Abilities description }}
+<script id='template-create-abilities-item-info' type='text/template'>
+    <%= description %>
+</script>
+

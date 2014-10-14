@@ -76,7 +76,8 @@
     font-weight: bold;
     height: $race-height * 4 + 10;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     .race, .list-item-wrapper {
         height: $race-height;

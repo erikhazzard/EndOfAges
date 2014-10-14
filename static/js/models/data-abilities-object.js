@@ -18,16 +18,15 @@ define(
 
     // Here be abilities. This would be loaded in a DB and entities would
     // get abilities from server
-    var abilities = [
+    var abilities = {
 
         // ==============================
         // 
         // Assassin
         //
         // ==============================
-        {
+        stab: new Ability({
             name: 'Stab',
-            id: 'stab',
             description: 'A quick stabbing attack which deals a small amount of damage',
             effectId: 'placeHolder',
             sprite: 'stab',
@@ -39,11 +38,10 @@ define(
             element: 'air',
             damage: 3,
             attackBonusPercent: 0.1
-        },
-        {
+        }),
+        backstab: new Ability({
             name: 'Backstab',
-            id: 'backstab',
-            description: 'A powerful attack which will do additional damage based on previous attacks',
+            description: 'A powerful attack which will do additional damage if the enemy has recently been stabbed',
             effectId: 'placeHolder',
             sprite: 'backstab',
             castTime: 0.6,
@@ -72,7 +70,7 @@ define(
                             if((now - healthHistory[i].date) <= castDuration){
                                 // TODO: check for a single ability
                                 // TODO: scale based on entity's attack bonus
-                                amount += 5;
+                                amount += 10;
                             } else {
                                 // otherwise, break
                                 break;
@@ -91,11 +89,10 @@ define(
                 }, delay);
 
             }
-        },
+        }),
 
-        {
+        cripple: new Ability({
             name: 'Cripple',
-            id: 'cripple',
             description: "Cripple weakens an enemy, lowering their attack and defense",
             effectId: 'placeHolder',
             sprite: 'cripple',
@@ -112,11 +109,10 @@ define(
                 armor: -10,
                 attack: -10
             }
-        },
+        }),
 
-        {
+        assassinate: new Ability({
             name: 'Assassinate',
-            id: 'assassinate',
             description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
             effectId: 'placeHolder',
             sprite: 'assassinate',
@@ -156,31 +152,62 @@ define(
                 }, delay);
 
             }
-        },
+        }),
 
-        {
-            name: 'Haste',
-            id: 'haste',
-            description: "Increases your timer speed by 20%",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
+
+        // ------------------------------
+        // Damage - Arcane
+        // ------------------------------
+        'magicmissle': new Ability({
+            name: 'Magic Missle',
+            effectId: 'magicMissle',
+            castTime: 2,
+            timeCost: 2,
+            validTargets: ['enemy'],
             type: 'magic',
-            element: 'light',
+            element: {light: 0.7, fire: 0.3},
+            damage: 15
+        }),
 
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: 0.2
-            }
-        },
+        // ------------------------------
+        // Damage - Fire
+        // ------------------------------
+        'flamelick': new Ability({
+            name: 'Flamelick',
+            effectId: 'flamelick',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 10
+        }),
+        'fireball': new Ability({
+            name: 'Fireball',
+            effectId: 'fireball',
+            castTime: 4,
+            timeCost: 4,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 40
+        }),
 
         // ------------------------------
         // Healing - Light
         // ------------------------------
-        {
+        'trivialhealing': new Ability({
+            name: 'Trivial Healing',
+            effectId: 'trivialHealing',
+            castTime: 3,
+            timeCost: 3,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 5
+        }),
+        'minorhealing': new Ability({
             name: 'Minor Healing',
-            id: 'minorHealing',
             effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
@@ -188,15 +215,103 @@ define(
             type: 'magic',
             element: 'light',
             heal: 15
-        },
+        }),
+
+        // ==============================
+        // 
+        // Cleric
+        //
+        // ==============================
+        heal: new Ability({
+            name: 'Heal',
+            effectId: 'minorHealing',
+            castTime: 5.5,
+            timeCost: 5.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 20
+        }),
+        smite: new Ability({
+            name: 'Smite',
+            effectId: 'placeHolder',
+            castTime: 1,
+            timeCost: 1,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: 10,
+            heal: 5,
+            healTarget: 'source'
+        }),
+        virtue: new Ability({
+            name: 'Virtue',
+            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+
+            heal: 10,
+
+            buffDuration: 8,
+            buffEffects: { 
+                armor: 10,
+                magicResist: 10,
+                maxHealth: 10,
+
+                abilities: {
+                    //// 20% faster, so decrease time by 20%
+                    //coolDown: -0.5,
+                    //castDuration: -0.5,
+                    //castTime: -0.5,
+                    //timeCost: -0.5
+                }
+            }
+        }),
+
+        // TODO:  Have truedamage be a side effect in the default damage func
+        judgement: new Ability({
+            name: 'Judgement',
+            effectId: 'placeHolder',
+            castTime: 5,
+            timeCost: 1,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
+            damage: '10%',
+            effect: function(options){
+                // Does 10% of entity's health in damage
+                var self = this;
+                var delay = this.getCastDuration(options);
+
+                new Timer(function effectDamageDelay(){
+                    var target = options.target;
+                    var amount = target.get('baseAttributes').get('maxHealth');
+                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
+
+                    target.takeTrueDamage({
+                        sourceAbility: self,
+                        source: options.source,
+                        target: options.target,
+                        type: self.get('type'),
+                        element: self.get('element'),
+                        amount: amount
+                    });
+
+                }, delay);
+            }
+        }),
+
         // ==============================
         // 
         // Shadowknight
         //
         // ==============================
-        {
+        darkblade: new Ability({
             name: 'Dark Blade',
-            id: 'darkblade',
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'placeHolder',
             castTime: 3,
@@ -208,12 +323,11 @@ define(
             damage: 9,
             heal: 5,
             healTarget: 'source'
-        },
+        }),
 
         // TODO: Have true damage be a part of the damage func
-        {
+        deathtouch: new Ability({
             name: 'Death Touch',
-            id: 'deathtouch',
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
             effectId: 'placeHolder',
             castTime: 1,
@@ -244,148 +358,13 @@ define(
 
                 }, delay);
             }
-        },
-        // ------------------------------
-        // Damage - Arcane
-        // ------------------------------
-        {
-            name: 'Magic Missle',
-            id: 'magicMissle',
-            effectId: 'magicMissle',
-            castTime: 2,
-            timeCost: 2,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: {light: 0.7, fire: 0.3},
-            damage: 15
-        },
-
-        // ------------------------------
-        // Damage - Fire
-        // ------------------------------
-        {
-            name: 'Flamelick',
-            id: 'flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 10
-        },
-        {
-            name: 'Fireball',
-            id: 'fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 40
-        },
-
-        // ==============================
-        // 
-        // Cleric
-        //
-        // ==============================
-        {
-            name: 'Heal',
-            id: 'heal',
-            effectId: 'heal',
-            castTime: 5.5,
-            timeCost: 5.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 20
-        },
-        {
-            name: 'Smite',
-            id: 'smite',
-            effectId: 'placeHolder',
-            castTime: 1,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: 10,
-            heal: 5,
-            healTarget: 'source'
-        },
-        {
-            name: 'Virtue',
-            id: 'virtue',
-            description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-
-            heal: 10,
-
-            buffDuration: 8,
-            buffEffects: { 
-                armor: 10,
-                magicResist: 10,
-                maxHealth: 10,
-
-                abilities: {
-                    //// 20% faster, so decrease time by 20%
-                    //coolDown: -0.5,
-                    //castDuration: -0.5,
-                    //castTime: -0.5,
-                    //timeCost: -0.5
-                }
-            }
-        },
-
-        // TODO:  Have truedamage be a side effect in the default damage func
-        {
-            name: 'Judgement',
-            id: 'judgement',
-            effectId: 'placeHolder',
-            castTime: 5,
-            timeCost: 1,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'light',
-            damage: '10%',
-            effect: function(options){
-                // Does 10% of entity's health in damage
-                var self = this;
-                var delay = this.getCastDuration(options);
-
-                new Timer(function effectDamageDelay(){
-                    var target = options.target;
-                    var amount = target.get('baseAttributes').get('maxHealth');
-                    amount = Math.ceil(0.15 * target.get('baseAttributes').get('health'));
-
-                    target.takeTrueDamage({
-                        sourceAbility: self,
-                        source: options.source,
-                        target: options.target,
-                        type: self.get('type'),
-                        element: self.get('element'),
-                        amount: amount
-                    });
-
-                }, delay);
-            }
-        },
-
-
+        }),
 
         // ------------------------------
         // Other effects
         // ------------------------------
-        {
+        freezeTime: new Ability({
             name: 'Freeze Time',
-            id: 'freezeTime',
             description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -401,10 +380,9 @@ define(
                 abilities: {
                 }
             }
-        },
-        {
+        }),
+        stun: new Ability({
             name: 'Stun',
-            id: 'stun',
             description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -422,10 +400,9 @@ define(
                     castTime: 9999999
                 }
             }
-        },
-        {
+        }),
+        comatose: new Ability({
             name: 'Comatose',
-            id: 'comatose',
             description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -447,8 +424,24 @@ define(
                     castTime: 9999999
                 }
             }
-        }
-    ];
+        }),
+        haste: new Ability({
+            name: 'Haste',
+            description: "Increases your timer speed by 50%",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+
+            buffDuration: 8,
+            buffEffects: { 
+                timerFactor: 0.5
+            }
+        })
+
+    };
 
 
     return abilities;

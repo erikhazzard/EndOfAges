@@ -857,7 +857,8 @@
     font-weight: bold;
     height: 210px;
     position: relative;
-    overflow: hidden; }
+    overflow-y: auto;
+    overflow-x: hidden; }
     #home #region-create-races .race, #home #region-create-races .list-item-wrapper, #home .interaction-list .race, #home .interaction-list .list-item-wrapper {
       height: 50px;
       font-size: 1.3em;
@@ -915,8 +916,46 @@
       opacity: 1; }
   #home #book-page-classes h2 {
     text-align: center; }
+  #home #book-page-classes #region-create-classes {
+    height: 280px; }
   #home #book-page-abilities h2 {
     text-align: center; }
+  #home #book-page-abilities #region-create-all-abilities-list {
+    height: 270px; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item {
+      padding-bottom: 2px;
+      padding-top: 2px; }
+      #home #book-page-abilities #region-create-all-abilities-list .list-item img {
+        height: 30px;
+        width: 30px; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item .list-item-name {
+      font-size: 0.9em; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item.selected .list-item-name {
+      font-size: 0.9em; }
+  #home #book-page-abilities #create-selected-abilities-wrapper {
+    bottom: 40px;
+    position: absolute;
+    left: 50px;
+    right: 30px; }
+    #home #book-page-abilities #create-selected-abilities-wrapper .selected-hotkey {
+      position: absolute;
+      left: 21px;
+      top: 18px;
+      opacity: 0.7; }
+  #home #book-page-abilities #create-selected-abilities {
+    position: relative; }
+  #home #book-page-abilities .create-selected-abilities-item {
+    border: 1px solid rgba(90, 90, 90, 0.8);
+    background: rgba(40, 40, 40, 0.3);
+    float: left;
+    height: 60px;
+    margin: 0 1% 0;
+    position: relative;
+    width: 60px; }
+    #home #book-page-abilities .create-selected-abilities-item img {
+      position: absolute;
+      right: 0;
+      left: 0; }
   #home #arrow-right, #home #arrow-left {
     cursor: pointer !important;
     height: 142px;
