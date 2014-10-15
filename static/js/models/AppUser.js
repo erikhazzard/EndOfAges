@@ -95,7 +95,7 @@ define(
                     },
 
                     error: function(){ 
-                        logger.error('models/AppUser', 
+                        logger.log('error:models:AppUser', 
                             'fetch(): unable to get model from server');
 
                         // unset cookie

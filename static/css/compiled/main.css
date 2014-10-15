@@ -932,28 +932,37 @@
       font-size: 0.9em; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected .list-item-name {
       font-size: 0.9em; }
-  #home #book-page-abilities #create-selected-abilities-wrapper {
+  #home #book-pages #create-selected-abilities-wrapper {
+    -webkit-transition: opacity 0.6s;
+    -moz-transition: opacity 0.6s;
+    -o-transition: opacity 0.6s;
+    transition: opacity 0.6s;
     bottom: 40px;
+    opacity: 0;
     position: absolute;
     left: 65px;
     right: 30px; }
-    #home #book-page-abilities #create-selected-abilities-wrapper .selected-hotkey {
+    #home #book-pages #create-selected-abilities-wrapper .selected-hotkey {
       position: absolute;
       left: 21px;
       top: 18px;
       opacity: 0.7; }
-  #home #book-page-abilities #create-selected-abilities {
+  #home #book-pages #create-selected-abilities-wrapper.visible {
+    opacity: 1; }
+  #home #book-pages #create-selected-abilities {
     position: relative; }
-  #home #book-page-abilities .create-selected-abilities-item {
-    border: 1px solid rgba(90, 90, 90, 0.8);
+  #home #book-pages .create-selected-abilities-item {
+    border: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(40, 40, 40, 0.3);
     float: left;
     height: 60px;
     margin: 0 1% 0;
     position: relative;
     width: 60px; }
-    #home #book-page-abilities .create-selected-abilities-item img {
+    #home #book-pages .create-selected-abilities-item img {
       position: absolute;
+      height: 58px;
+      width: 58px;
       right: 0;
       left: 0; }
   #home #arrow-right, #home #arrow-left {

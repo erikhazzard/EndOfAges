@@ -1791,8 +1791,8 @@ define(
 
             if(options.index === undefined ||
                 !options.entityGroup){
-                logger.error("views/subviews/Battle : startTimerAnimation : " +
-                    'invalid parameters passed in: %O', options);
+                logger.log("error:view:Battle:startTimerAnimation",
+                    'invalid parameters passed in', options);
                 return false;
             }
 

@@ -25,10 +25,14 @@
             font-size: 0.9em;
         }
     }
+}
 
+#book-pages {
     // Selected abilities
     #create-selected-abilities-wrapper {
+        @include transition("opacity 0.6s");
         bottom: 40px;
+        opacity: 0;
         position: absolute;
         left: 65px;
         right: 30px;
@@ -40,12 +44,15 @@
             opacity: 0.7;
         }
     }
+    #create-selected-abilities-wrapper.visible {
+        opacity: 1;
+    }
 
     #create-selected-abilities {
         position: relative;
     }
     .create-selected-abilities-item {
-        border: 1px solid rgba(90,90,90,0.8);
+        border: 1px solid rgba(255,255,255,0.5);
         background: rgba(40,40,40,0.3);
         float: left;
         height: 60px;
@@ -55,6 +62,8 @@
 
         img {
             position: absolute;
+            height: 58px;
+            width: 58px;
             right: 0;
             left: 0;
         }

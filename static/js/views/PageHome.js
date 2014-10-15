@@ -113,6 +113,9 @@ define(
             this.listenTo(events, 'create:page3:classClicked', this.classClicked);
             this.listenTo(events, 'create:page4:abilityClicked', this.abilityClicked);
 
+            this.listenTo(events, 'create:page4:allAbilityMouseenter', this.allAbilityMouseenter);
+            this.listenTo(events, 'create:page4:allAbilityMouseleave', this.allAbilityMouseleave);
+
             // --------------------------
             // keep track of selected abilities 
             // --------------------------
@@ -171,7 +174,10 @@ define(
 
             return this;
         },
-
+        
+        // ------------------------------
+        // cleanup
+        // ------------------------------
         onBeforeClose: function close(){
             logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
             $(window).unbind();
@@ -794,10 +800,15 @@ define(
                         finalCss: { opacity: 0.8 },
 
                         callback: function(){
+                            // Show classes when done
                             $('#region-create-classes').velocity({ opacity: 1 });
                             $('#region-create-classes')
                                 .addClass('animated fadeInTop');
 
+                            // SHOW SELECTED ABILITIES
+                            setTimeout(function(){requestAnimationFrame(function(){
+                                $('#create-selected-abilities-wrapper').addClass('visible');
+                            });}, 500);
                         }
                     });
 
@@ -933,23 +944,15 @@ define(
 
             // when user mouses over item, update description
             _.each(this.$selectedAbilitiesEls, function(el, i){
-
                 el.on('mouseenter', function(){
                     self.step4UpdateDescription(self.selectedAbilities.models[i]);
                 });
 
                 el.on('mouseleave', function(){
                     // reset html
-                    self.step4ResetHtml();
+                    self.step4ResetAbilityDescription();
                 });
-
             });
-
-            // TODO
-            // event handling when user clicks selected ability to remove it
-            //  (maybe there is an "x" when mouseover)
-            //
-            
 
             logger.log('pageHome:setupPage4', 'setting up page 4');
 
@@ -980,25 +983,33 @@ define(
             // Updates the description based on passed in model
             // TODO: Flesh this out
             var self = this;
+            logger.log('pageHome:step4UpdateDescription', 
+            'called with model', {
+                model: model
+            });
 
             // provide a default description if none is available in the
             // model
-            var attrs = {description: ''};
+            var attrs = {description: '', name: ''};
 
             if(model && model.attributes && model.attributes.description){
                 attrs = model.attributes;
             }
 
-            this.$step4abilityDescription.html( 
-                this.$step4templateDescription( attrs )
-            );
+            if(this.$step4abilityDescription){
+                this.$step4abilityDescription.html( 
+                    this.$step4templateDescription( attrs )
+                );
+            }
 
             return this;
         },
 
-        step4ResetHtml: function ste4ResetHtml(){
+        step4ResetAbilityDescription: function ste4ResetHtml(){
             // Called on mouseleave of selected abilities or ability list items
-            this.$step4abilityDescription.html(''); 
+            if(this.$step4abilityDescription){
+                this.$step4abilityDescription.html(''); 
+            }
             return this;
         },
 
@@ -1012,7 +1023,19 @@ define(
             this._previousClassSelected = 'Custom';
         },
 
-        abilityClicked: function abilityClicked( options ){
+        // ------------------------------
+        // All ability callbacks
+        // ------------------------------
+        allAbilityMouseenter: function allAbilityMouseenter (options){
+            this.step4UpdateDescription(options.model);
+            return this;
+        }, 
+        allAbilityMouseleave: function allAbilityMouseleave (options){
+            this.step4ResetAbilityDescription();
+            return this;
+        }, 
+
+        abilityClicked: function abilityClicked ( options ){
             logger.log('pageHome:abilityClicked', 'passed options: %O',
                 options);
             var self = this;

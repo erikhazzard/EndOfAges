@@ -17,7 +17,9 @@ define(
         template: '#template-create-all-abilities-list-item',
 
         events: {
-            'click': 'abilityClicked'
+            'click': 'abilityClicked',
+            'mouseenter': 'mouseenter', 
+            'mouseleave': 'mouseleave'
         },
 
 
@@ -55,6 +57,9 @@ define(
             return this;
         },
 
+        // ------------------------------
+        // UI callbacks
+        // ------------------------------
         abilityClicked : function abilityClicked(){
             logger.log('AllAbilitiesListItem', 'ability item clicked'); 
 
@@ -63,6 +68,21 @@ define(
                 model: this.model
             });
 
+            return this;
+        },
+
+        mouseenter: function mouseenter(){
+            events.trigger('create:page4:allAbilityMouseenter', { 
+                $el: this.$el,
+                model: this.model
+            });
+            return this;
+        },
+        mouseleave: function mouseleave(){
+            events.trigger('create:page4:allAbilityMouseleave', { 
+                $el: this.$el,
+                model: this.model
+            });
             return this;
         }
 

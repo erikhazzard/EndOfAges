@@ -114,8 +114,8 @@ define(
             // If the node instance was clicked and an instance is already 
             // active, do nothing
             if(this.model.get('activeNodeInstance') !== null){
-                logger.error('views/PageGame : node instance already active!');
-                logger.log('views/PageGame', '2. exiting function');
+                logger.log('error:views:PageGame', 
+                    '[x] node instance already active! 2. exiting');
                 return this;
             }
 
