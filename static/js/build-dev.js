@@ -2,7 +2,7 @@
     baseUrl: "./",
     appDir: './',
     paths: {
-        jquery: "lib/require-jquery.min"
+        jquery: "lib/requirejs-jquery.min"
     },
     dir: '../build',
     include: ['lib/almond', 'main'],

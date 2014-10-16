@@ -1,5 +1,5 @@
 !function (name, context, definition) {
-  if (typeof require === 'function' && typeof exports === 'object' && typeof module === 'object') {
+  if (typeof requirejs === 'function' && typeof exports === 'object' && typeof module === 'object') {
     module.exports = definition();
   } else if (typeof define === 'function' && typeof define.amd  === 'object') {
     define(function () {
@@ -10,35 +10,35 @@
   }
 }('chai', this, function () {
 
-  function require(p) {
-    var path = require.resolve(p)
-      , mod = require.modules[path];
-    if (!mod) throw new Error('failed to require "' + p + '"');
+  function requirejs(p) {
+    var path = requirejs.resolve(p)
+      , mod = requirejs.modules[path];
+    if (!mod) throw new Error('failed to requirejs "' + p + '"');
     if (!mod.exports) {
       mod.exports = {};
-      mod.call(mod.exports, mod, mod.exports, require.relative(path));
+      mod.call(mod.exports, mod, mod.exports, requirejs.relative(path));
     }
     return mod.exports;
   }
 
-  require.modules = {};
+  requirejs.modules = {};
 
-  require.resolve = function (path) {
+  requirejs.resolve = function (path) {
     var orig = path
       , reg = path + '.js'
       , index = path + '/index.js';
-    return require.modules[reg] && reg
-      || require.modules[index] && index
+    return requirejs.modules[reg] && reg
+      || requirejs.modules[index] && index
       || orig;
   };
 
-  require.register = function (path, fn) {
-    require.modules[path] = fn;
+  requirejs.register = function (path, fn) {
+    requirejs.modules[path] = fn;
   };
 
-  require.relative = function (parent) {
+  requirejs.relative = function (parent) {
     return function(p){
-      if ('.' != p.charAt(0)) return require(p);
+      if ('.' != p.charAt(0)) return requirejs(p);
 
       var path = parent.split('/')
         , segs = p.split('/');
@@ -50,17 +50,17 @@
         else if ('.' != seg) path.push(seg);
       }
 
-      return require(path.join('/'));
+      return requirejs(path.join('/'));
     };
   };
 
-  require.alias = function (from, to) {
-    var fn = require.modules[from];
-    require.modules[to] = fn;
+  requirejs.alias = function (from, to) {
+    var fn = requirejs.modules[from];
+    requirejs.modules[to] = fn;
   };
 
 
-  require.register("chai.js", function(module, exports, require){
+  requirejs.register("chai.js", function(module, exports, requirejs){
     /*!
      * chai
      * Copyright(c) 2011-2012 Jake Luer <jake@alogicalparadox.com>
@@ -80,19 +80,19 @@
      * Primary `Assertion` prototype
      */
 
-    exports.Assertion = require('./chai/assertion');
+    exports.Assertion = requirejs('./chai/assertion');
 
     /*!
      * Assertion Error
      */
 
-    exports.AssertionError = require('./chai/error');
+    exports.AssertionError = requirejs('./chai/error');
 
     /*!
      * Utils for plugins (not exported)
      */
 
-    var util = require('./chai/utils');
+    var util = requirejs('./chai/utils');
 
     /**
      * # .use(function)
@@ -117,33 +117,33 @@
      * Core Assertions
      */
 
-    var core = require('./chai/core/assertions');
+    var core = requirejs('./chai/core/assertions');
     exports.use(core);
 
     /*!
      * Expect interface
      */
 
-    var expect = require('./chai/interface/expect');
+    var expect = requirejs('./chai/interface/expect');
     exports.use(expect);
 
     /*!
      * Should interface
      */
 
-    var should = require('./chai/interface/should');
+    var should = requirejs('./chai/interface/should');
     exports.use(should);
 
     /*!
      * Assert interface
      */
 
-    var assert = require('./chai/interface/assert');
+    var assert = requirejs('./chai/interface/assert');
     exports.use(assert);
 
   }); // module: chai.js
 
-  require.register("chai/assertion.js", function(module, exports, require){
+  requirejs.register("chai/assertion.js", function(module, exports, requirejs){
     /*!
      * chai
      * http://chaijs.com
@@ -155,8 +155,8 @@
      * Module dependencies.
      */
 
-    var AssertionError = require('./error')
-      , util = require('./utils')
+    var AssertionError = requirejs('./error')
+      , util = requirejs('./utils')
       , flag = util.flag;
 
     /*!
@@ -264,7 +264,7 @@
 
   }); // module: chai/assertion.js
 
-  require.register("chai/core/assertions.js", function(module, exports, require){
+  requirejs.register("chai/core/assertions.js", function(module, exports, requirejs){
     /*!
      * chai
      * http://chaijs.com
@@ -1190,7 +1190,7 @@
           ? keys
           : Array.prototype.slice.call(arguments);
 
-        if (!keys.length) throw new Error('keys required');
+        if (!keys.length) throw new Error('keys requirejsd');
 
         var actual = Object.keys(obj)
           , len = keys.length;
@@ -1463,7 +1463,7 @@
 
   }); // module: chai/core/assertions.js
 
-  require.register("chai/error.js", function(module, exports, require){
+  requirejs.register("chai/error.js", function(module, exports, requirejs){
     /*!
      * chai
      * Copyright(c) 2011-2012 Jake Luer <jake@alogicalparadox.com>
@@ -1527,7 +1527,7 @@
 
   }); // module: chai/error.js
 
-  require.register("chai/interface/assert.js", function(module, exports, require){
+  requirejs.register("chai/interface/assert.js", function(module, exports, requirejs){
     /*!
      * chai
      * Copyright(c) 2011-2012 Jake Luer <jake@alogicalparadox.com>
@@ -2517,7 +2517,7 @@
 
   }); // module: chai/interface/assert.js
 
-  require.register("chai/interface/expect.js", function(module, exports, require){
+  requirejs.register("chai/interface/expect.js", function(module, exports, requirejs){
     /*!
      * chai
      * Copyright(c) 2011-2012 Jake Luer <jake@alogicalparadox.com>
@@ -2533,7 +2533,7 @@
 
   }); // module: chai/interface/expect.js
 
-  require.register("chai/interface/should.js", function(module, exports, require){
+  requirejs.register("chai/interface/should.js", function(module, exports, requirejs){
     /*!
      * chai
      * Copyright(c) 2011-2012 Jake Luer <jake@alogicalparadox.com>
@@ -2550,7 +2550,7 @@
             set: function (value) {
               // See https://github.com/chaijs/chai/issues/86: this makes
               // `whatever.should = someValue` actually set `someValue`, which is
-              // especially useful for `global.should = require('chai').should()`.
+              // especially useful for `global.should = requirejs('chai').should()`.
               //
               // Note that we have to use [[DefineProperty]] instead of [[Put]]
               // since otherwise we would trigger this very setter!
@@ -2613,7 +2613,7 @@
 
   }); // module: chai/interface/should.js
 
-  require.register("chai/utils/addChainableMethod.js", function(module, exports, require){
+  requirejs.register("chai/utils/addChainableMethod.js", function(module, exports, requirejs){
     /*!
      * Chai - addChainingMethod utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -2624,7 +2624,7 @@
      * Module dependencies
      */
 
-    var transferFlags = require('./transferFlags');
+    var transferFlags = requirejs('./transferFlags');
 
     /**
      * ### addChainableMethod (ctx, name, method, chainingBehavior)
@@ -2687,7 +2687,7 @@
 
   }); // module: chai/utils/addChainableMethod.js
 
-  require.register("chai/utils/addMethod.js", function(module, exports, require){
+  requirejs.register("chai/utils/addMethod.js", function(module, exports, requirejs){
     /*!
      * Chai - addMethod utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -2728,7 +2728,7 @@
 
   }); // module: chai/utils/addMethod.js
 
-  require.register("chai/utils/addProperty.js", function(module, exports, require){
+  requirejs.register("chai/utils/addProperty.js", function(module, exports, requirejs){
     /*!
      * Chai - addProperty utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -2772,7 +2772,7 @@
 
   }); // module: chai/utils/addProperty.js
 
-  require.register("chai/utils/eql.js", function(module, exports, require){
+  requirejs.register("chai/utils/eql.js", function(module, exports, requirejs){
     // This is (almost) directly from Node.js assert
     // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/assert.js
 
@@ -2781,7 +2781,7 @@
     // for the browser
     var Buffer;
     try {
-      Buffer = require('buffer').Buffer;
+      Buffer = requirejs('buffer').Buffer;
     } catch (ex) {
       Buffer = {
         isBuffer: function () { return false; }
@@ -2898,7 +2898,7 @@
 
   }); // module: chai/utils/eql.js
 
-  require.register("chai/utils/flag.js", function(module, exports, require){
+  requirejs.register("chai/utils/flag.js", function(module, exports, requirejs){
     /*!
      * Chai - flag utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -2934,7 +2934,7 @@
 
   }); // module: chai/utils/flag.js
 
-  require.register("chai/utils/getActual.js", function(module, exports, require){
+  requirejs.register("chai/utils/getActual.js", function(module, exports, requirejs){
     /*!
      * Chai - getActual utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -2957,7 +2957,7 @@
 
   }); // module: chai/utils/getActual.js
 
-  require.register("chai/utils/getMessage.js", function(module, exports, require){
+  requirejs.register("chai/utils/getMessage.js", function(module, exports, requirejs){
     /*!
      * Chai - message composition utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -2968,10 +2968,10 @@
      * Module dependancies
      */
 
-    var flag = require('./flag')
-      , getActual = require('./getActual')
-      , inspect = require('./inspect')
-      , objDisplay = require('./objDisplay');
+    var flag = requirejs('./flag')
+      , getActual = requirejs('./getActual')
+      , inspect = requirejs('./inspect')
+      , objDisplay = requirejs('./objDisplay');
 
     /**
      * ### .getMessage(object, message, negateMessage)
@@ -3010,7 +3010,7 @@
 
   }); // module: chai/utils/getMessage.js
 
-  require.register("chai/utils/getName.js", function(module, exports, require){
+  requirejs.register("chai/utils/getName.js", function(module, exports, requirejs){
     /*!
      * Chai - getName utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3034,7 +3034,7 @@
 
   }); // module: chai/utils/getName.js
 
-  require.register("chai/utils/getPathValue.js", function(module, exports, require){
+  requirejs.register("chai/utils/getPathValue.js", function(module, exports, requirejs){
     /*!
      * Chai - getPathValue utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3140,7 +3140,7 @@
 
   }); // module: chai/utils/getPathValue.js
 
-  require.register("chai/utils/index.js", function(module, exports, require){
+  requirejs.register("chai/utils/index.js", function(module, exports, requirejs){
     /*!
      * chai
      * Copyright(c) 2011 Jake Luer <jake@alogicalparadox.com>
@@ -3157,100 +3157,100 @@
      * test utility
      */
 
-    exports.test = require('./test');
+    exports.test = requirejs('./test');
 
     /*!
      * message utility
      */
 
-    exports.getMessage = require('./getMessage');
+    exports.getMessage = requirejs('./getMessage');
 
     /*!
      * actual utility
      */
 
-    exports.getActual = require('./getActual');
+    exports.getActual = requirejs('./getActual');
 
     /*!
      * Inspect util
      */
 
-    exports.inspect = require('./inspect');
+    exports.inspect = requirejs('./inspect');
 
     /*!
      * Object Display util
      */
 
-    exports.objDisplay = require('./objDisplay');
+    exports.objDisplay = requirejs('./objDisplay');
 
     /*!
      * Flag utility
      */
 
-    exports.flag = require('./flag');
+    exports.flag = requirejs('./flag');
 
     /*!
      * Flag transferring utility
      */
 
-    exports.transferFlags = require('./transferFlags');
+    exports.transferFlags = requirejs('./transferFlags');
 
     /*!
      * Deep equal utility
      */
 
-    exports.eql = require('./eql');
+    exports.eql = requirejs('./eql');
 
     /*!
      * Deep path value
      */
 
-    exports.getPathValue = require('./getPathValue');
+    exports.getPathValue = requirejs('./getPathValue');
 
     /*!
      * Function name
      */
 
-    exports.getName = require('./getName');
+    exports.getName = requirejs('./getName');
 
     /*!
      * add Property
      */
 
-    exports.addProperty = require('./addProperty');
+    exports.addProperty = requirejs('./addProperty');
 
     /*!
      * add Method
      */
 
-    exports.addMethod = require('./addMethod');
+    exports.addMethod = requirejs('./addMethod');
 
     /*!
      * overwrite Property
      */
 
-    exports.overwriteProperty = require('./overwriteProperty');
+    exports.overwriteProperty = requirejs('./overwriteProperty');
 
     /*!
      * overwrite Method
      */
 
-    exports.overwriteMethod = require('./overwriteMethod');
+    exports.overwriteMethod = requirejs('./overwriteMethod');
 
     /*!
      * Add a chainable method
      */
 
-    exports.addChainableMethod = require('./addChainableMethod');
+    exports.addChainableMethod = requirejs('./addChainableMethod');
 
 
   }); // module: chai/utils/index.js
 
-  require.register("chai/utils/inspect.js", function(module, exports, require){
+  requirejs.register("chai/utils/inspect.js", function(module, exports, requirejs){
     // This is (almost) directly from Node.js utils
     // https://github.com/joyent/node/blob/f8c335d0caf47f16d31413f89aa28eda3878e3aa/lib/util.js
 
-    var getName = require('./getName');
+    var getName = requirejs('./getName');
 
     module.exports = inspect;
 
@@ -3564,7 +3564,7 @@
 
   }); // module: chai/utils/inspect.js
 
-  require.register("chai/utils/objDisplay.js", function(module, exports, require){
+  requirejs.register("chai/utils/objDisplay.js", function(module, exports, requirejs){
     /*!
      * Chai - flag utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3575,7 +3575,7 @@
      * Module dependancies
      */
 
-    var inspect = require('./inspect');
+    var inspect = requirejs('./inspect');
 
     /**
      * ### .objDisplay (object)
@@ -3612,7 +3612,7 @@
 
   }); // module: chai/utils/objDisplay.js
 
-  require.register("chai/utils/overwriteMethod.js", function(module, exports, require){
+  requirejs.register("chai/utils/overwriteMethod.js", function(module, exports, requirejs){
     /*!
      * Chai - overwriteMethod utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3667,7 +3667,7 @@
 
   }); // module: chai/utils/overwriteMethod.js
 
-  require.register("chai/utils/overwriteProperty.js", function(module, exports, require){
+  requirejs.register("chai/utils/overwriteProperty.js", function(module, exports, requirejs){
     /*!
      * Chai - overwriteProperty utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3725,7 +3725,7 @@
 
   }); // module: chai/utils/overwriteProperty.js
 
-  require.register("chai/utils/test.js", function(module, exports, require){
+  requirejs.register("chai/utils/test.js", function(module, exports, requirejs){
     /*!
      * Chai - test utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3736,7 +3736,7 @@
      * Module dependancies
      */
 
-    var flag = require('./flag');
+    var flag = requirejs('./flag');
 
     /**
      * # test(object, expression)
@@ -3755,7 +3755,7 @@
 
   }); // module: chai/utils/test.js
 
-  require.register("chai/utils/transferFlags.js", function(module, exports, require){
+  requirejs.register("chai/utils/transferFlags.js", function(module, exports, requirejs){
     /*!
      * Chai - transferFlags utility
      * Copyright(c) 2012 Jake Luer <jake@alogicalparadox.com>
@@ -3803,7 +3803,7 @@
 
   }); // module: chai/utils/transferFlags.js
 
-  require.alias("./chai.js", "chai");
+  requirejs.alias("./chai.js", "chai");
 
-  return require('chai');
+  return requirejs('chai');
 });

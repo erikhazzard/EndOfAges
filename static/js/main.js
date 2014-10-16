@@ -70,7 +70,7 @@ requirejs.config({
 //========================================
 // Set everything up
 //========================================
-require([
+requirejs([
     //libs
     'jquery', 'lib/jquery.transit.min', 'lib/jquery.visibility',
     'lib/jquery.wordwriter',

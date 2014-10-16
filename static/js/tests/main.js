@@ -1,7 +1,7 @@
 //========================================
 //Require Config (load additional libraries)
 //========================================
-requirejs.config({
+requirejsjs.config({
     baseUrl: '/static/js',
     //For dev
     urlArgs: 'v='+(new Date()).getTime(),
@@ -69,11 +69,11 @@ requirejs.config({
 //========================================
 //Setup tests
 //========================================
-require(['events',
+requirejs(['events',
         'util/d3plugins', // always load d3 plugins, extends d3 object
         'logger',
-        'require', 'lib/chai', 'lib/mocha', 'sinon'], 
-        function(events, d3plugins, logger, require, chai, sinon){
+        'requirejs', 'lib/chai', 'lib/mocha', 'sinon'], 
+        function(events, d3plugins, logger, requirejs, chai, sinon){
 
     assert = chai.assert;
     should = chai.should();
@@ -90,7 +90,7 @@ require(['events',
     //-----------------------------------
     //Tests go here
     //-----------------------------------
-    require([
+    requirejs([
         'tests/collections/Entities'
         , 'tests/models/Entity'
         , 'tests/models/Entity-damage'

@@ -1,37 +1,37 @@
 ;(function(){
 
 
-// CommonJS require()
+// CommonJS requirejs()
 
-function require(p){
-    var path = require.resolve(p)
-      , mod = require.modules[path];
-    if (!mod) throw new Error('failed to require "' + p + '"');
+function requirejs(p){
+    var path = requirejs.resolve(p)
+      , mod = requirejs.modules[path];
+    if (!mod) throw new Error('failed to requirejs "' + p + '"');
     if (!mod.exports) {
       mod.exports = {};
-      mod.call(mod.exports, mod, mod.exports, require.relative(path));
+      mod.call(mod.exports, mod, mod.exports, requirejs.relative(path));
     }
     return mod.exports;
   }
 
-require.modules = {};
+requirejs.modules = {};
 
-require.resolve = function (path){
+requirejs.resolve = function (path){
     var orig = path
       , reg = path + '.js'
       , index = path + '/index.js';
-    return require.modules[reg] && reg
-      || require.modules[index] && index
+    return requirejs.modules[reg] && reg
+      || requirejs.modules[index] && index
       || orig;
   };
 
-require.register = function (path, fn){
-    require.modules[path] = fn;
+requirejs.register = function (path, fn){
+    requirejs.modules[path] = fn;
   };
 
-require.relative = function (parent) {
+requirejs.relative = function (parent) {
     return function(p){
-      if ('.' != p.charAt(0)) return require(p);
+      if ('.' != p.charAt(0)) return requirejs(p);
       
       var path = parent.split('/')
         , segs = p.split('/');
@@ -43,12 +43,12 @@ require.relative = function (parent) {
         else if ('.' != seg) path.push(seg);
       }
 
-      return require(path.join('/'));
+      return requirejs(path.join('/'));
     };
   };
 
 
-require.register("browser/debug.js", function(module, exports, require){
+requirejs.register("browser/debug.js", function(module, exports, requirejs){
 
 module.exports = function(type){
   return function(){
@@ -57,11 +57,11 @@ module.exports = function(type){
 };
 }); // module: browser/debug.js
 
-require.register("browser/diff.js", function(module, exports, require){
+requirejs.register("browser/diff.js", function(module, exports, requirejs){
 
 }); // module: browser/diff.js
 
-require.register("browser/events.js", function(module, exports, require){
+requirejs.register("browser/events.js", function(module, exports, requirejs){
 
 /**
  * Module exports.
@@ -242,15 +242,15 @@ EventEmitter.prototype.emit = function (name) {
 };
 }); // module: browser/events.js
 
-require.register("browser/fs.js", function(module, exports, require){
+requirejs.register("browser/fs.js", function(module, exports, requirejs){
 
 }); // module: browser/fs.js
 
-require.register("browser/path.js", function(module, exports, require){
+requirejs.register("browser/path.js", function(module, exports, requirejs){
 
 }); // module: browser/path.js
 
-require.register("browser/progress.js", function(module, exports, require){
+requirejs.register("browser/progress.js", function(module, exports, requirejs){
 
 /**
  * Expose `Progress`.
@@ -379,7 +379,7 @@ Progress.prototype.draw = function(ctx){
 
 }); // module: browser/progress.js
 
-require.register("browser/tty.js", function(module, exports, require){
+requirejs.register("browser/tty.js", function(module, exports, requirejs){
 
 exports.isatty = function(){
   return true;
@@ -390,7 +390,7 @@ exports.getWindowSize = function(){
 };
 }); // module: browser/tty.js
 
-require.register("context.js", function(module, exports, require){
+requirejs.register("context.js", function(module, exports, requirejs){
 
 /**
  * Expose `Context`.
@@ -463,13 +463,13 @@ Context.prototype.inspect = function(){
 
 }); // module: context.js
 
-require.register("hook.js", function(module, exports, require){
+requirejs.register("hook.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Runnable = require('./runnable');
+var Runnable = requirejs('./runnable');
 
 /**
  * Expose `Hook`.
@@ -519,14 +519,14 @@ Hook.prototype.error = function(err){
 
 }); // module: hook.js
 
-require.register("interfaces/bdd.js", function(module, exports, require){
+requirejs.register("interfaces/bdd.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Suite = require('../suite')
-  , Test = require('../test');
+var Suite = requirejs('../suite')
+  , Test = requirejs('../test');
 
 /**
  * BDD-style interface:
@@ -548,7 +548,7 @@ var Suite = require('../suite')
 module.exports = function(suite){
   var suites = [suite];
 
-  suite.on('pre-require', function(context, file, mocha){
+  suite.on('pre-requirejs', function(context, file, mocha){
 
     /**
      * Execute before running tests.
@@ -656,14 +656,14 @@ module.exports = function(suite){
 
 }); // module: interfaces/bdd.js
 
-require.register("interfaces/exports.js", function(module, exports, require){
+requirejs.register("interfaces/exports.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Suite = require('../suite')
-  , Test = require('../test');
+var Suite = requirejs('../suite')
+  , Test = requirejs('../test');
 
 /**
  * TDD-style interface:
@@ -685,7 +685,7 @@ var Suite = require('../suite')
 module.exports = function(suite){
   var suites = [suite];
 
-  suite.on('require', visit);
+  suite.on('requirejs', visit);
 
   function visit(obj) {
     var suite;
@@ -719,23 +719,23 @@ module.exports = function(suite){
 };
 }); // module: interfaces/exports.js
 
-require.register("interfaces/index.js", function(module, exports, require){
+requirejs.register("interfaces/index.js", function(module, exports, requirejs){
 
-exports.bdd = require('./bdd');
-exports.tdd = require('./tdd');
-exports.qunit = require('./qunit');
-exports.exports = require('./exports');
+exports.bdd = requirejs('./bdd');
+exports.tdd = requirejs('./tdd');
+exports.qunit = requirejs('./qunit');
+exports.exports = requirejs('./exports');
 
 }); // module: interfaces/index.js
 
-require.register("interfaces/qunit.js", function(module, exports, require){
+requirejs.register("interfaces/qunit.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Suite = require('../suite')
-  , Test = require('../test');
+var Suite = requirejs('../suite')
+  , Test = requirejs('../test');
 
 /**
  * QUnit-style interface:
@@ -765,7 +765,7 @@ var Suite = require('../suite')
 module.exports = function(suite){
   var suites = [suite];
 
-  suite.on('pre-require', function(context){
+  suite.on('pre-requirejs', function(context){
 
     /**
      * Execute before running tests.
@@ -823,14 +823,14 @@ module.exports = function(suite){
 
 }); // module: interfaces/qunit.js
 
-require.register("interfaces/tdd.js", function(module, exports, require){
+requirejs.register("interfaces/tdd.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Suite = require('../suite')
-  , Test = require('../test');
+var Suite = requirejs('../suite')
+  , Test = requirejs('../test');
 
 /**
  * TDD-style interface:
@@ -860,7 +860,7 @@ var Suite = require('../suite')
 module.exports = function(suite){
   var suites = [suite];
 
-  suite.on('pre-require', function(context, file, mocha){
+  suite.on('pre-requirejs', function(context, file, mocha){
 
     /**
      * Execute before each test case.
@@ -950,7 +950,7 @@ module.exports = function(suite){
 
 }); // module: interfaces/tdd.js
 
-require.register("mocha.js", function(module, exports, require){
+requirejs.register("mocha.js", function(module, exports, requirejs){
 /*!
  * mocha
  * Copyright(c) 2011 TJ Holowaychuk <tj@vision-media.ca>
@@ -961,8 +961,8 @@ require.register("mocha.js", function(module, exports, require){
  * Module dependencies.
  */
 
-var path = require('browser/path')
-  , utils = require('./utils');
+var path = requirejs('browser/path')
+  , utils = requirejs('./utils');
 
 /**
  * Expose `Mocha`.
@@ -975,14 +975,14 @@ exports = module.exports = Mocha;
  */
 
 exports.utils = utils;
-exports.interfaces = require('./interfaces');
-exports.reporters = require('./reporters');
-exports.Runnable = require('./runnable');
-exports.Context = require('./context');
-exports.Runner = require('./runner');
-exports.Suite = require('./suite');
-exports.Hook = require('./hook');
-exports.Test = require('./test');
+exports.interfaces = requirejs('./interfaces');
+exports.reporters = requirejs('./reporters');
+exports.Runnable = requirejs('./runnable');
+exports.Context = requirejs('./context');
+exports.Runner = requirejs('./runner');
+exports.Suite = requirejs('./suite');
+exports.Hook = requirejs('./hook');
+exports.Test = requirejs('./test');
 
 /**
  * Return image `name` path.
@@ -1050,9 +1050,9 @@ Mocha.prototype.reporter = function(reporter){
   } else {
     reporter = reporter || 'dot';
     try {
-      this._reporter = require('./reporters/' + reporter);
+      this._reporter = requirejs('./reporters/' + reporter);
     } catch (err) {
-      this._reporter = require(reporter);
+      this._reporter = requirejs(reporter);
     }
     if (!this._reporter) throw new Error('invalid reporter "' + reporter + '"');
   }
@@ -1086,9 +1086,9 @@ Mocha.prototype.loadFiles = function(fn){
   var pending = this.files.length;
   this.files.forEach(function(file){
     file = path.resolve(file);
-    suite.emit('pre-require', global, file, self);
-    suite.emit('require', require(file), file, self);
-    suite.emit('post-require', global, file, self);
+    suite.emit('pre-requirejs', global, file, self);
+    suite.emit('requirejs', requirejs(file), file, self);
+    suite.emit('post-requirejs', global, file, self);
     --pending || (fn && fn());
   });
 };
@@ -1100,7 +1100,7 @@ Mocha.prototype.loadFiles = function(fn){
  */
 
 Mocha.prototype._growl = function(runner, reporter) {
-  var notify = require('growl');
+  var notify = requirejs('growl');
 
   runner.on('end', function(){
     var stats = reporter.stats;
@@ -1255,7 +1255,7 @@ Mocha.prototype.run = function(fn){
 
 }); // module: mocha.js
 
-require.register("ms.js", function(module, exports, require){
+requirejs.register("ms.js", function(module, exports, requirejs){
 
 /**
  * Helpers.
@@ -1339,15 +1339,15 @@ function format(ms) {
 }
 }); // module: ms.js
 
-require.register("reporters/base.js", function(module, exports, require){
+requirejs.register("reporters/base.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var tty = require('browser/tty')
-  , diff = require('browser/diff')
-  , ms = require('../ms');
+var tty = requirejs('browser/tty')
+  , diff = requirejs('browser/diff')
+  , ms = requirejs('../ms');
 
 /**
  * Save timer references to avoid Sinon interfering (see GH-237).
@@ -1724,14 +1724,14 @@ function colorLines(name, str) {
 
 }); // module: reporters/base.js
 
-require.register("reporters/doc.js", function(module, exports, require){
+requirejs.register("reporters/doc.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
-  , utils = require('../utils');
+var Base = requirejs('./base')
+  , utils = requirejs('../utils');
 
 /**
  * Expose `Doc`.
@@ -1784,13 +1784,13 @@ function Doc(runner) {
 
 }); // module: reporters/doc.js
 
-require.register("reporters/dot.js", function(module, exports, require){
+requirejs.register("reporters/dot.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , color = Base.color;
 
 /**
@@ -1851,14 +1851,14 @@ Dot.prototype.constructor = Dot;
 
 }); // module: reporters/dot.js
 
-require.register("reporters/html-cov.js", function(module, exports, require){
+requirejs.register("reporters/html-cov.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var JSONCov = require('./json-cov')
-  , fs = require('browser/fs');
+var JSONCov = requirejs('./json-cov')
+  , fs = requirejs('browser/fs');
 
 /**
  * Expose `HTMLCov`.
@@ -1874,7 +1874,7 @@ exports = module.exports = HTMLCov;
  */
 
 function HTMLCov(runner) {
-  var jade = require('jade')
+  var jade = requirejs('jade')
     , file = __dirname + '/templates/coverage.jade'
     , str = fs.readFileSync(file, 'utf8')
     , fn = jade.compile(str, { filename: file })
@@ -1905,15 +1905,15 @@ function coverageClass(n) {
 }
 }); // module: reporters/html-cov.js
 
-require.register("reporters/html.js", function(module, exports, require){
+requirejs.register("reporters/html.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
-  , utils = require('../utils')
-  , Progress = require('../browser/progress')
+var Base = requirejs('./base')
+  , utils = requirejs('../utils')
+  , Progress = requirejs('../browser/progress')
   , escape = utils.escape;
 
 /**
@@ -2164,36 +2164,36 @@ function on(el, event, fn) {
 
 }); // module: reporters/html.js
 
-require.register("reporters/index.js", function(module, exports, require){
+requirejs.register("reporters/index.js", function(module, exports, requirejs){
 
-exports.Base = require('./base');
-exports.Dot = require('./dot');
-exports.Doc = require('./doc');
-exports.TAP = require('./tap');
-exports.JSON = require('./json');
-exports.HTML = require('./html');
-exports.List = require('./list');
-exports.Min = require('./min');
-exports.Spec = require('./spec');
-exports.Nyan = require('./nyan');
-exports.XUnit = require('./xunit');
-exports.Markdown = require('./markdown');
-exports.Progress = require('./progress');
-exports.Landing = require('./landing');
-exports.JSONCov = require('./json-cov');
-exports.HTMLCov = require('./html-cov');
-exports.JSONStream = require('./json-stream');
-exports.Teamcity = require('./teamcity');
+exports.Base = requirejs('./base');
+exports.Dot = requirejs('./dot');
+exports.Doc = requirejs('./doc');
+exports.TAP = requirejs('./tap');
+exports.JSON = requirejs('./json');
+exports.HTML = requirejs('./html');
+exports.List = requirejs('./list');
+exports.Min = requirejs('./min');
+exports.Spec = requirejs('./spec');
+exports.Nyan = requirejs('./nyan');
+exports.XUnit = requirejs('./xunit');
+exports.Markdown = requirejs('./markdown');
+exports.Progress = requirejs('./progress');
+exports.Landing = requirejs('./landing');
+exports.JSONCov = requirejs('./json-cov');
+exports.HTMLCov = requirejs('./html-cov');
+exports.JSONStream = requirejs('./json-stream');
+exports.Teamcity = requirejs('./teamcity');
 
 }); // module: reporters/index.js
 
-require.register("reporters/json-cov.js", function(module, exports, require){
+requirejs.register("reporters/json-cov.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base');
+var Base = requirejs('./base');
 
 /**
  * Expose `JSONCov`.
@@ -2344,13 +2344,13 @@ function clean(test) {
 
 }); // module: reporters/json-cov.js
 
-require.register("reporters/json-stream.js", function(module, exports, require){
+requirejs.register("reporters/json-stream.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , color = Base.color;
 
 /**
@@ -2408,13 +2408,13 @@ function clean(test) {
 }
 }); // module: reporters/json-stream.js
 
-require.register("reporters/json.js", function(module, exports, require){
+requirejs.register("reporters/json.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , cursor = Base.cursor
   , color = Base.color;
 
@@ -2481,13 +2481,13 @@ function clean(test) {
 }
 }); // module: reporters/json.js
 
-require.register("reporters/landing.js", function(module, exports, require){
+requirejs.register("reporters/landing.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , cursor = Base.cursor
   , color = Base.color;
 
@@ -2583,13 +2583,13 @@ Landing.prototype.constructor = Landing;
 
 }); // module: reporters/landing.js
 
-require.register("reporters/list.js", function(module, exports, require){
+requirejs.register("reporters/list.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , cursor = Base.cursor
   , color = Base.color;
 
@@ -2653,13 +2653,13 @@ List.prototype.constructor = List;
 
 }); // module: reporters/list.js
 
-require.register("reporters/markdown.js", function(module, exports, require){
+requirejs.register("reporters/markdown.js", function(module, exports, requirejs){
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
-  , utils = require('../utils');
+var Base = requirejs('./base')
+  , utils = requirejs('../utils');
 
 /**
  * Expose `Markdown`.
@@ -2748,13 +2748,13 @@ function Markdown(runner) {
 }
 }); // module: reporters/markdown.js
 
-require.register("reporters/min.js", function(module, exports, require){
+requirejs.register("reporters/min.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base');
+var Base = requirejs('./base');
 
 /**
  * Expose `Min`.
@@ -2791,13 +2791,13 @@ Min.prototype.constructor = Min;
 
 }); // module: reporters/min.js
 
-require.register("reporters/nyan.js", function(module, exports, require){
+requirejs.register("reporters/nyan.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , color = Base.color;
 
 /**
@@ -3056,13 +3056,13 @@ NyanCat.prototype.constructor = NyanCat;
 
 }); // module: reporters/nyan.js
 
-require.register("reporters/progress.js", function(module, exports, require){
+requirejs.register("reporters/progress.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , cursor = Base.cursor
   , color = Base.color;
 
@@ -3148,13 +3148,13 @@ Progress.prototype.constructor = Progress;
 
 }); // module: reporters/progress.js
 
-require.register("reporters/spec.js", function(module, exports, require){
+requirejs.register("reporters/spec.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , cursor = Base.cursor
   , color = Base.color;
 
@@ -3241,13 +3241,13 @@ Spec.prototype.constructor = Spec;
 
 }); // module: reporters/spec.js
 
-require.register("reporters/tap.js", function(module, exports, require){
+requirejs.register("reporters/tap.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
+var Base = requirejs('./base')
   , cursor = Base.cursor
   , color = Base.color;
 
@@ -3318,13 +3318,13 @@ function title(test) {
 
 }); // module: reporters/tap.js
 
-require.register("reporters/teamcity.js", function(module, exports, require){
+requirejs.register("reporters/teamcity.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base');
+var Base = requirejs('./base');
 
 /**
  * Expose `Teamcity`.
@@ -3387,14 +3387,14 @@ function escape(str) {
 
 }); // module: reporters/teamcity.js
 
-require.register("reporters/xunit.js", function(module, exports, require){
+requirejs.register("reporters/xunit.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Base = require('./base')
-  , utils = require('../utils')
+var Base = requirejs('./base')
+  , utils = requirejs('../utils')
   , escape = utils.escape;
 
 /**
@@ -3508,15 +3508,15 @@ function cdata(str) {
 
 }); // module: reporters/xunit.js
 
-require.register("runnable.js", function(module, exports, require){
+requirejs.register("runnable.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var EventEmitter = require('browser/events').EventEmitter
-  , debug = require('browser/debug')('mocha:runnable')
-  , milliseconds = require('./ms');
+var EventEmitter = requirejs('browser/events').EventEmitter
+  , debug = requirejs('browser/debug')('mocha:runnable')
+  , milliseconds = requirejs('./ms');
 
 /**
  * Save timer references to avoid Sinon interfering (see GH-237).
@@ -3733,16 +3733,16 @@ Runnable.prototype.run = function(fn){
 
 }); // module: runnable.js
 
-require.register("runner.js", function(module, exports, require){
+requirejs.register("runner.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var EventEmitter = require('browser/events').EventEmitter
-  , debug = require('browser/debug')('mocha:runner')
-  , Test = require('./test')
-  , utils = require('./utils')
+var EventEmitter = requirejs('browser/events').EventEmitter
+  , debug = requirejs('browser/debug')('mocha:runner')
+  , Test = requirejs('./test')
+  , utils = requirejs('./utils')
   , filter = utils.filter
   , keys = utils.keys
   , noop = function(){};
@@ -4272,17 +4272,17 @@ function filterLeaks(ok, globals) {
 
 }); // module: runner.js
 
-require.register("suite.js", function(module, exports, require){
+requirejs.register("suite.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var EventEmitter = require('browser/events').EventEmitter
-  , debug = require('browser/debug')('mocha:suite')
-  , milliseconds = require('./ms')
-  , utils = require('./utils')
-  , Hook = require('./hook');
+var EventEmitter = requirejs('browser/events').EventEmitter
+  , debug = requirejs('browser/debug')('mocha:suite')
+  , milliseconds = requirejs('./ms')
+  , utils = requirejs('./utils')
+  , Hook = requirejs('./hook');
 
 /**
  * Expose `Suite`.
@@ -4574,13 +4574,13 @@ Suite.prototype.eachTest = function(fn){
 
 }); // module: suite.js
 
-require.register("test.js", function(module, exports, require){
+requirejs.register("test.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var Runnable = require('./runnable');
+var Runnable = requirejs('./runnable');
 
 /**
  * Expose `Test`.
@@ -4612,16 +4612,16 @@ Test.prototype.constructor = Test;
 
 }); // module: test.js
 
-require.register("utils.js", function(module, exports, require){
+requirejs.register("utils.js", function(module, exports, requirejs){
 
 /**
  * Module dependencies.
  */
 
-var fs = require('browser/fs')
-  , path = require('browser/path')
+var fs = requirejs('browser/fs')
+  , path = requirejs('browser/path')
   , join = path.join
-  , debug = require('browser/debug')('mocha:watch');
+  , debug = requirejs('browser/debug')('mocha:watch');
 
 /**
  * Ignored directories.
@@ -4968,7 +4968,7 @@ process.on = function(e, fn){
    * Expose mocha.
    */
 
-  var Mocha = window.Mocha = require('mocha'),
+  var Mocha = window.Mocha = requirejs('mocha'),
       mocha = window.mocha = new Mocha({ reporter: 'html' });
 
   /**
@@ -4978,7 +4978,7 @@ process.on = function(e, fn){
 
   mocha.ui = function(ui){
     Mocha.prototype.ui.call(this, ui);
-    this.suite.emit('pre-require', window, null, this);
+    this.suite.emit('pre-requirejs', window, null, this);
     return this;
   };
 

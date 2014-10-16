@@ -5,8 +5,8 @@
  * https://github.com/jeromegn/Backbone.localStorage
  */
 (function (root, factory) {
-   if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("lodash"), require("backbone"));
+   if (typeof exports === 'object' && typeof requirejs === 'function') {
+     module.exports = factory(requirejs("lodash"), requirejs("backbone"));
    } else if (typeof define === "function" && define.amd) {
       // AMD. Register as an anonymous module.
       define(["lodash","backbone"], function(_, Backbone) {
