@@ -13,6 +13,9 @@ define(
         'views/map/Map',
         'views/map/PartyMembers',
         'views/map/EntityInfo'
+
+        // TODO: pass in game state somehow - map, char create, etc.
+        // 
     ], function viewMap(
         d3, backbone, marionette, 
         logger, events,
@@ -130,8 +133,12 @@ define(
 
         hideEntityInfo: function hideEntityInfo(){
             $('#map-wrapper').off('click', this.hideEntityInfo);
-            this.regionEntityInfo.$el.removeClass('box-shadow');
-            this.regionEntityInfo.$el.addClass('off-screen');
+            if(this.regionEntityInfo.$el){
+                if(!this.regionEntityInfo.$el.hasClass('off-screen')){
+                    this.regionEntityInfo.$el.removeClass('box-shadow');
+                    this.regionEntityInfo.$el.addClass('off-screen');
+                }
+            }
             return this;
         },
 
@@ -139,21 +146,21 @@ define(
         mapWrapperClick: function mapWrapperClick(){
             // if the map wrapper was clicked and the entity info window is
             // open, close the entity info
-            if(!this.regionEntityInfo.$el.hasClass('off-screen')){
-                return this.hideEntityInfo();
-            } else {
-                return this;
-            }
+            this.hideEntityInfo();
+            return this;
         },
 
         // ------------------------------
         // Keyboard shortcuts
         // ------------------------------
         keyEscapePressed: function(options){
-            if(!this.regionEntityInfo.$el.hasClass('off-screen')){
-                if(options.e){ options.e.preventDefault(); }
-                return this.hideEntityInfo();
-            }
+            // TODO: Do nothing if NOT on map
+            //
+            logger.log('map:containerMap', 'escape pressed');
+
+            if(options.e){ options.e.preventDefault(); }
+
+            this.hideEntityInfo();
         }
 
     });

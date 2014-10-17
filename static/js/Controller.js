@@ -152,7 +152,7 @@ define([
 
             if(!this.pageHome){
                 logger.log('Controller', 'creating new pageHome view');
-                this.pageHome = new PageHome({});
+                this.pageHome = new PageHome();
             }
 
             // Otherwise, show the homepage
@@ -162,13 +162,13 @@ define([
             return this;
         },
 
-
         // ------------------------------
         //
         // Game
         //
         // ------------------------------
         showGame: function controllerShowGame(options){
+            var self = this;
             options = options || {};
 
             logger.log('Controller', 'showGame() called');
@@ -188,7 +188,7 @@ define([
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
                 // NOT from pageCreateCharacter. Get from GAME model
-                playerEntityModels = [ this.pageCreateCharacter.model ];
+                playerEntityModels = [ this.pageHome.model ];
 
                 //// TODO: To load from localstorage
                 var modelGame = null;
@@ -208,7 +208,9 @@ define([
                 this.modelGame);
 
             this.currentRegion = this.pageGame;
-            this.regionMain.show(this.currentRegion);
+            requestAnimationFrame(function(){
+                self.regionMain.show(self.currentRegion);
+            });
 
             return this;
         }

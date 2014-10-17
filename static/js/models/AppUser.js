@@ -100,7 +100,11 @@ define(
 
                         // unset cookie
                         unsetCookie();
-                        self.set({isLoggedIn: false});
+                        //// Actual code
+                        //self.set({isLoggedIn: false});
+
+                        self.set({isLoggedIn: true});
+
                         self.trigger('initialFetchFromServer');
 
                         return self;

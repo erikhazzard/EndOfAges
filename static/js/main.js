@@ -128,6 +128,7 @@ requirejs([
     // log options
     logger.transports.get('Console').property({ showMeta: false });
     logger.options.groupsEnabled = [/pageHome/];
+    window.LOGGER = logger;
 
     //-----------------------------------
     //APP Config - Add router / controller

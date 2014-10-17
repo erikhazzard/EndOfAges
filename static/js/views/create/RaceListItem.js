@@ -37,6 +37,10 @@ define(
             if(this.model.attributes.disabled){
                 this.$el.addClass('disabled');
             }
+            this.$el.attr({
+                id: 'create-race-' + 
+                    this.model.attributes.sprite
+            });
 
             // Redelegate events on a timeout. 
             // TODO : Why doesn't this work without the timeout? It seems

@@ -17,6 +17,7 @@ define(
         // races
         'views/create/RaceList',
         'collections/Races',
+        'models/Race',
         'views/create/RaceViz',
 
         // classes
@@ -26,7 +27,9 @@ define(
         // abilities
         'views/create/AllAbilitiesList',
         'collections/Abilities',
-        'collections/AllAbilities'
+        'collections/AllAbilities',
+
+        'localForage',
 
     ], function viewPageHome(
         d3, backbone, marionette, 
@@ -35,6 +38,7 @@ define(
         Entity,
         RaceList,
         Races,
+        Race,
         RaceViz,
 
         ClassList,
@@ -42,13 +46,17 @@ define(
 
         AllAbilityList,
         Abilities,
-        AllAbilities
+        AllAbilities,
+
+        localForage
     ){
 
     // CONFIG
     // ----------------------------------
     var ORIGINAL_BASE_DELAY = 1000;
     var baseDelay = ORIGINAL_BASE_DELAY;
+
+    var HOME_DATA_KEY = 'game:createCharacter:initialState';
 
     // total number of abilities user can have
     var MAX_ABILITIES = 4;
@@ -120,7 +128,6 @@ define(
             // keep track of selected abilities 
             // --------------------------
             this.selectedAbilities = new Abilities();
-            window.s = this.selectedAbilities; 
 
             // UTILITY
             // --------------------------
@@ -172,15 +179,75 @@ define(
                 });
             });
 
+
+            // Local Forage - fetching data
+            // --------------------------
+
+            // NOTE: If this is initialized with state data (i.e., the user
+            // already created their character), skip all the intro stuff
+            // and allow player to just change things
+            if(options.initialState){
+                // TODO: Fill in selections and skip steps
+                this.setupInitialDataAndSkip( options.initialState );
+
+            } else {
+                window.f = localForage;
+                localForage.getItem(HOME_DATA_KEY, 
+                function loadedLocalData(stateData){
+                    logger.log('pageHome:loadLocalData', 
+                        'loaded data from local store: ', {
+                            data: stateData
+                    });
+
+                    // turn to object and call setup initial data
+                    self.setupInitialDataAndSkip( JSON.parse(stateData) );
+                });
+            }
+
             return this;
         },
         
+        // ------------------------------
+        //  initial data setup - skip everything
+        // ------------------------------
+        setupInitialDataAndSkip: function( data ){
+            logger.log('pageHome:setupInitialDataAndSkip', 
+                'called - filling in data and skipping steps', {
+                    data: data
+                });
+
+            // set delay / animations to immediate
+            ORIGINAL_BASE_DELAY = 1;
+            
+            // set pages completed based on data
+            if(data.name){
+                this.pagesCompleted[1] = true;
+            }
+
+            // setup model
+            this.model.set({
+                name: data.name
+            });
+
+            // trigger click events
+            this.raceClicked({
+                model: new Race(data.race),
+                $el: $('#create-race-' + data.race.sprite)
+            });
+            
+            // TODO: cancel all animations and immediately allow player to 
+            // continue
+            $('#create-name').val(data.name);
+        },
+
         // ------------------------------
         // cleanup
         // ------------------------------
         onBeforeClose: function close(){
             logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
+
             $(window).unbind();
+
             return this;
         },
 
@@ -244,6 +311,7 @@ define(
         // ------------------------------
         setupPageturn: function setupPageturn(){
             // Initializes the pageTurn animation library
+            // TODO: Use https://github.com/codrops/BookBlock instead of turn.js
             //
             var self = this;
             this.curStep = 1;
@@ -277,7 +345,7 @@ define(
                 //      is final)
                 logger.log('pageHome:pageNext', 'curStep ' + self.curStep);
 
-                if(self.curStep < 3){
+                if(self.curStep < 4){
                     logger.log('pageHome', '\t showing next page');
                     e.preventDefault();
                     self.curStep++;
@@ -298,8 +366,12 @@ define(
                             // Show it (don't setup)
                             self.showPage3(); 
                         }
-                    }
+                    } else if(self.curStep === 3){
+                        logger.log('pageHome:pageNext', 
+                            'showing page 4...');
+                        // TODO: : setup page 4...
 
+                    }
                 }
             }
             function pagePrevious(e){
@@ -379,10 +451,26 @@ define(
 
             // arrows
             $('#arrow-right').click(function(e){
-                logger.log('pageHome:arrowClick', 'arrow-right clicked');
+                logger.log('pageHome:arrowClick', 'arrow-right clicked'); 
+
+                // TODO: REMOVE THIS - only for dev
                 if(
-                    (self.curStep === 1 && self.pagesCompleted[2]) || 
                     (self.curStep === 2 && self.pagesCompleted[4])
+                ){
+                    return setTimeout(function(){
+                        requestAnimationFrame(function(){
+                            return self.finishCreateProcess(); 
+                        });
+                    }, 30);
+                }
+
+                if(
+                    // step 1 to step 2
+                    (self.curStep === 1 && self.pagesCompleted[2]) || 
+                    // step 2 to step 3 
+                    // TODO - THIS IS FOR DEVELOPMENT, have another page
+                    // REMOVE false
+                    (false || self.curStep === 2 && self.pagesCompleted[4])
                 ){
                     return pageNext(e);
                 }
@@ -461,30 +549,38 @@ define(
                         $name.addClass('animated fadeInLeft');
                         $name.attr('placeholder', '');
 
-                        // Fade in "name text"
-                        async.eachSeries(['N','Na','Nam','Name'], 
-                        function(val, cb){
-                            $name.attr('placeholder', val);
+                        // don't fuck with the placeholder if the name is already set
+                        // from initial data
+                        if(!self.model.attributes.name){
+                            // Fade in "name text"
+                            async.eachSeries(['N','Na','Nam','Name'], 
+                            function(val, cb){
+                                $name.attr('placeholder', val);
 
-                            setTimeout(function(){
-                                cb();
-                            }, baseDelay * 0.8);
-                        }, function allDone (){ 
-                            logger.log('pageHome', '\t\t pulsating name : entetedText: %O',
-                                enteredText);
+                                setTimeout(function(){
+                                    cb();
+                                }, baseDelay * 0.8);
+                            }, function allDone (){ 
+                                logger.log('pageHome', '\t\t pulsating name : entetedText: %O',
+                                    enteredText);
 
-                            // remove fade in left class to prevent it triggering later
-                            $name.removeClass('fadeInLeft');
+                                // remove fade in left class to prevent it triggering later
+                                $name.removeClass('fadeInLeft');
 
-                            //// No longer pulsating
-                            if(!enteredText){
-                                $name.removeClass();
-                                self.step1$namePulse = setTimeout(function(){
-                                    logger.log('pageHome', '\t\t adding pulsate : %O');
-                                    $name.addClass('animated-subtle pulse-subtle infinite');
-                                }, 1800);
-                            }
-                        });
+                                //// No longer pulsating
+                                if(!enteredText){
+                                    $name.removeClass();
+                                    self.step1$namePulse = setTimeout(function(){
+                                        logger.log('pageHome', '\t\t adding pulsate : %O');
+                                        $name.addClass('animated-subtle pulse-subtle infinite');
+                                    }, 1800);
+                                }
+                            });
+                        } else {
+                            // setup page 2 (if it hasn't been setup yet)
+                            // the username already exists at this point
+                            self.setupPage2();
+                        }
                     }
 
                 }, baseDelay / 2);
@@ -533,6 +629,13 @@ define(
                 self.model.set({ name: name });
                 self.$cachedEls.page5name.html(name);
             });
+
+            // if the username already exists, set up next page
+            if(self.model.attributes.name){
+                self.step1WriterCallback();
+                self.page1Writer.trigger('finish');
+                self.setupPage2();
+            }
 
             return this;
         },
@@ -840,7 +943,7 @@ define(
 
             // hide the right arrow ONLY if the player hasn't selected their
             // abilities
-            if(this.pagesCompleted[4] !== 4){ 
+            if(this.pagesCompleted[3] !== true){ 
                 self.$cachedEls.nextStepArrow.addClass('fadeOut');
             }
 
@@ -866,6 +969,11 @@ define(
                 logger.log('views/PageCreateCharacter', '[x] class disabled');
                 return this;
             }
+
+            // show the next step icons
+            self.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
+            self.$cachedEls.nextStepArrow.addClass('animated fadeIn');
+            self.$cachedEls.nextStepArrow.removeClass('fadeOut');
 
             // done with class page
             this.pagesCompleted[3] = true;
@@ -1066,10 +1174,57 @@ define(
                     options.$el.addClass('selected');
                     this.changeToCustomClass();
                 }
-
             } 
+        },
 
+        // ==============================
+        //
+        // ALL FINISHED
+        // 
+        // ==============================
+        finishCreateProcess: function finishCreateProcess(){
+            // Called when the creation process is completely finished.
+            //
+            // TODO: show an in app prompt
+            logger.log('pageHome', 'Finished! : %O',
+                this.model);
+
+            // remove page turn 
+            this.$pages.turn('disable', true);
+            this.$pages.remove();
+
+            // setup model with abilities
+            // TODO: ensure things aren't stuck around in memory
+            this.model.set({
+                abilities: new Abilities(
+                    this.selectedAbilities.models
+                )
+            });
+
+            // STORE data
+            // TODO: store a clone of this entity model. 
+            // currently, only save change properties. it's a bit hacky
+            var dataToSet = JSON.stringify({
+                name: this.model.attributes.name,
+                race: this.model.attributes.race,
+                abilities: this.selectedAbilities.toJSON()
+            });
+            logger.log('pageHome', 'setting local data: ', {
+                data: dataToSet
+            });
+
+            localForage.setItem(HOME_DATA_KEY, dataToSet);
+
+            // TODO: Clean up book, do some cool animation?
+
+            // TODO: only trigger if prompt is true
+            // If done, show the game and pass in the entities
+            requestAnimationFrame(function(){
+                events.trigger('controller:showGame');
+            });
+            return this;
         }
+
     });
 
     return PageHome;
