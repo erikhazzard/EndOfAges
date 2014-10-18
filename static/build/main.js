@@ -4974,6 +4974,9 @@ define(
             // Create a new entity model for character create
             this.model = new Entity({});
 
+            // loaded from localstore
+            this.initialData = null;
+
             // Setup races and collection
             this.races = new Races();
             this.raceListView = new RaceList({
@@ -4990,7 +4993,6 @@ define(
             this.allAbilitiesListView = {};
 
             this.allAbilities = new AllAbilities([], {
-
                 callback: function(err, collection){
                     self.allAbilitiesListView = new AllAbilityList({
                         collection: self.allAbilities
@@ -5000,8 +5002,25 @@ define(
                     'callback called, set up allAbilitiesListView', {
                         list: self.allAbilitiesListView
                     });
-                }
 
+
+                    // setup *abilities* here, so they will be setup by the time
+                    // the abilities page fades in
+                    setTimeout(function(){requestAnimationFrame(function(){
+                        self.regionAllAbilitiesList.show(self.allAbilitiesListView);
+
+                        requestAnimationFrame(function(){
+                            logger.log('pageHome:setupAllAbilities',
+                                'allAbilitiesListView is setup!');
+
+                            self.isAbilitiesListSetup = true;
+
+                            if(self.callbackAfterAbilityListSetup){
+                                self.callbackAfterAbilityListSetup();
+                            }
+                        });
+                    });}, 105);
+                }
             });
 
             // --------------------------
@@ -5097,17 +5116,25 @@ define(
             return this;
         },
         
-        // ------------------------------
+        // ==============================
+        //
         //  initial data setup - skip everything
-        // ------------------------------
+        //
+        // ==============================
         setupInitialDataAndSkip: function( data ){
             logger.log('pageHome:setupInitialDataAndSkip', 
                 'called - filling in data and skipping steps', {
                     data: data
                 });
 
+            if(!data){
+                logger.log('pageHome:setupInitialDataAndSkip', '[x] no data');
+                return false;
+            }
+
             // set delay / animations to immediate
             ORIGINAL_BASE_DELAY = 1;
+            baseDelay = 1;
             
             // set pages completed based on data
             if(data.name){
@@ -5124,15 +5151,29 @@ define(
                 model: new Race(data.race),
                 $el: $('#create-race-' + data.race.sprite)
             });
+
+            if(self.$raceWrapper){
+                self.$raceWrapper.velocity({ opacity: 1 }, { duration: 100 });
+            }
+
+            // set selected class and abilities
+            // --------------------------
+            if(data.className){
+                $('#' + data.className).addClass('selected');
+            }
+
+            this.initialData = data;
             
             // TODO: cancel all animations and immediately allow player to 
             // continue
             $('#create-name').val(data.name);
         },
 
-        // ------------------------------
+        // ==============================
+        //
         // cleanup
-        // ------------------------------
+        //
+        // ==============================
         onBeforeClose: function close(){
             logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
 
@@ -5256,10 +5297,21 @@ define(
                             // Show it (don't setup)
                             self.showPage3(); 
                         }
+
                     } else if(self.curStep === 3){
                         logger.log('pageHome:pageNext', 
-                            'showing page 4...');
-                        // TODO: : setup page 4...
+                            'showing step 3, page 5/6...');
+
+                        // initial setup or show of page 3 (step 4 - templates)
+                        if(self.pagesCompleted[5] !== true){
+                            logger.log('pageHome:pageNext', 'setting up page 5...');
+                            self.setupPage5(); 
+
+                        } else {
+                            logger.log('pageHome:pageNext', 'showing page 5');
+                            // Show it (don't setup)
+                            self.showPage5(); 
+                        }
 
                     }
                 }
@@ -5334,7 +5386,9 @@ define(
                         self.page1Writer.trigger('finish');
                         self.setupPage2();
 
-                        setTimeout(function(){ baseDelay = ORIGINAL_BASE_DELAY; }, 200);
+                        setTimeout(function(){ 
+                            baseDelay = ORIGINAL_BASE_DELAY; 
+                        }, ORIGINAL_BASE_DELAY * 0.2);
                     }
                 }
             });
@@ -5343,24 +5397,13 @@ define(
             $('#arrow-right').click(function(e){
                 logger.log('pageHome:arrowClick', 'arrow-right clicked'); 
 
-                // TODO: REMOVE THIS - only for dev
-                if(
-                    (self.curStep === 2 && self.pagesCompleted[4])
-                ){
-                    return setTimeout(function(){
-                        requestAnimationFrame(function(){
-                            return self.finishCreateProcess(); 
-                        });
-                    }, 30);
-                }
-
                 if(
                     // step 1 to step 2
                     (self.curStep === 1 && self.pagesCompleted[2]) || 
                     // step 2 to step 3 
                     // TODO - THIS IS FOR DEVELOPMENT, have another page
                     // REMOVE false
-                    (false || self.curStep === 2 && self.pagesCompleted[4])
+                    (self.curStep === 2 && self.pagesCompleted[4])
                 ){
                     return pageNext(e);
                 }
@@ -5463,7 +5506,7 @@ define(
                                     self.step1$namePulse = setTimeout(function(){
                                         logger.log('pageHome', '\t\t adding pulsate : %O');
                                         $name.addClass('animated-subtle pulse-subtle infinite');
-                                    }, 1800);
+                                    }, baseDelay * 1.8);
                                 }
                             });
                         } else {
@@ -5541,12 +5584,6 @@ define(
             if(self.page2SetupCalled){ return false; }
             self.page2SetupCalled = true;
 
-            // setup *abilities* here, so they will be setup by the time
-            // the abilities page fades in
-            setTimeout(function(){requestAnimationFrame(function(){
-                self.regionAllAbilitiesList.show(self.allAbilitiesListView);
-            });}, 105);
-
             logger.log('pageHome', 'setupPage2() called');
 
             this.pagesCompleted[1] = true;
@@ -5561,10 +5598,17 @@ define(
             $raceHeader.addClass('animated fadeInDown');
 
             // then show the selection
-            setTimeout(function(){
-                $raceWrapper.velocity({ opacity: 1 });
-                $raceWrapper.addClass('animated fadeInUp');
-            }, baseDelay * 0.8);
+            if(ORIGINAL_BASE_DELAY > 1){
+                setTimeout(function(){
+                    logger.log('pageHome:setupPage2', 'setup page 2 with delay');
+
+                    $raceWrapper.velocity({ opacity: 1 });
+                    $raceWrapper.addClass('animated fadeInUp');
+                }, baseDelay * 0.8);
+            } else {
+                logger.log('pageHome:setupPage2', 'setup page 2 with no delay');
+                $raceWrapper.velocity({ opacity: 1 }, { duration: 100 });
+            }
 
             // remove the animated classes so page switches don't re-trigger
             // transitions
@@ -5609,7 +5653,7 @@ define(
                     self.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
                     self.$cachedEls.nextStepArrow.addClass('animated fadeIn');
                 });
-            }, 40);
+            }, ORIGINAL_BASE_DELAY * 0.04);
             
             // If the same race was clicked, do nothing
             if(this._previousRaceSelected === options.model.attributes.name){
@@ -5646,8 +5690,8 @@ define(
                     setTimeout(function(){
                         self.$raceViz.css({ opacity: 1 });
                         self.$raceViz.removeClass('fadeIn');
-                    }, 800);
-                }, 200);
+                    }, ORIGINAL_BASE_DELAY * 0.8);
+                }, ORIGINAL_BASE_DELAY * 0.2);
                 
             } else {
                 // otherwise, update the data
@@ -5783,30 +5827,60 @@ define(
             // setup the fade ins
             var $classWrapper = $('#create-classes-wrapper');
 
+            function finishWordWriter(){
+                // When the text has come in, show the lists
+
+                // Show classes when done
+                $('#region-create-classes').velocity({ opacity: 1 });
+                $('#region-create-classes')
+                    .addClass('animated fadeInTop');
+
+                // SHOW SELECTED ABILITIES
+                setTimeout(function(){requestAnimationFrame(function(){
+                    $('#create-selected-abilities-wrapper').addClass('visible');
+                });}, ORIGINAL_BASE_DELAY * 0.5);
+
+                // if there is existing data, set the initial selection
+                window.i = self.initialData;
+                if(self.initialData && self.initialData.className){
+                    setTimeout(function(){
+                        requestAnimationFrame(function setupInitialClassData(){
+                            $('#' + self.initialData.className).click();
+
+                            // set selected abilities (if custom)
+                            // NOTE: this is ugly and hacky.
+                            if(self.initialData.className === 'create-race-custom'){
+
+                                // manually select abilities 
+                                setTimeout(function(){requestAnimationFrame(function(){
+                                    _.each(self.initialData.abilities, function(ability){
+                                        $('#create-all-ability-' + ability.id).click();
+                                    });
+                                });}, 20);
+                            }
+                        });
+                    }, 380);
+                }
+            }
+
             // then show the selection
             setTimeout(function(){
                 $classWrapper.velocity({ opacity: 1 });
 
                 setTimeout(function(){requestAnimationFrame(function(){
                     $('#create-classes-description').removeClass('opacity-zero');
-                    $('#create-classes-description').wordWriter({
-                        finalCss: { opacity: 0.8 },
 
-                        callback: function(){
-                            // Show classes when done
-                            $('#region-create-classes').velocity({ opacity: 1 });
-                            $('#region-create-classes')
-                                .addClass('animated fadeInTop');
-
-                            // SHOW SELECTED ABILITIES
-                            setTimeout(function(){requestAnimationFrame(function(){
-                                $('#create-selected-abilities-wrapper').addClass('visible');
-                            });}, 500);
-                        }
-                    });
+                    if(ORIGINAL_BASE_DELAY > 10){
+                        $('#create-classes-description').wordWriter({
+                            finalCss: { opacity: 0.8 },
+                            callback: finishWordWriter 
+                        });
+                    } else {
+                        finishWordWriter();
+                    }
 
                     self.page3canClickClass = true;
-                });}, 200);
+                });}, baseDelay * 0.2);
 
             }, baseDelay * 0.8);
 
@@ -6069,6 +6143,33 @@ define(
 
         // ==============================
         //
+        // Page 5 - Final steps, confirm
+        //
+        // ==============================
+        setupPage5: function setupPage4(){
+            logger.log('pageHome:setupPage5', 'setting up page 5');
+            var self = this;
+
+            if(self.page5SetupCalled){ return false; }
+            self.page5SetupCalled = true;
+
+            // set immediately, no further action required
+            this.pagesCompleted[5] = true;
+
+            return this.showPage5();
+        },
+
+        showPage5: function showPage5(){
+            var self = this;
+
+            // hide next arrow
+            self.$cachedEls.nextStepArrow.addClass('animated fadeOut');
+
+            // setup final variables
+        },
+
+        // ==============================
+        //
         // ALL FINISHED
         // 
         // ==============================
@@ -6079,10 +6180,6 @@ define(
             logger.log('pageHome', 'Finished! : %O',
                 this.model);
 
-            // remove page turn 
-            this.$pages.turn('disable', true);
-            this.$pages.remove();
-
             // setup model with abilities
             // TODO: ensure things aren't stuck around in memory
             this.model.set({
@@ -6091,21 +6188,30 @@ define(
                 )
             });
 
+            window.m = this.model;
+
             // STORE data
             // TODO: store a clone of this entity model. 
             // currently, only save change properties. it's a bit hacky
-            var dataToSet = JSON.stringify({
+            var dataToSet = {
                 name: this.model.attributes.name,
                 race: this.model.attributes.race,
+                className: $('#region-create-classes .selected').attr('id'),
                 abilities: this.selectedAbilities.toJSON()
-            });
+            };
             logger.log('pageHome', 'setting local data: ', {
                 data: dataToSet
             });
 
+            dataToSet = JSON.stringify(dataToSet);
+
             localForage.setItem(HOME_DATA_KEY, dataToSet);
 
             // TODO: Clean up book, do some cool animation?
+
+            // remove page turn 
+            this.$pages.turn('disable', true);
+            this.$pages.remove();
 
             // TODO: only trigger if prompt is true
             // If done, show the game and pass in the entities
