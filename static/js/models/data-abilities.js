@@ -246,44 +246,52 @@ define(
             }
         },
         // ------------------------------
-        // Damage - Arcane
+        // Damage - Spells
         // ------------------------------
         {
-            name: 'Magic Missle',
-            id: 'magicMissle',
-            effectId: 'magicMissle',
+            name: 'Magic Shield',
+            id: 'magicshield',
+            effectId: 'magicshield',
+            description: "A shield of magic which increases your armor, magic resistence, and maximum health",
             castTime: 2,
             timeCost: 2,
-            validTargets: ['enemy'],
+            validTargets: ['player'],
             type: 'magic',
-            element: {light: 0.7, fire: 0.3},
-            damage: 15
-        },
+            element: 'light',
+            
+            heal: 5,
 
-        // ------------------------------
-        // Damage - Fire
-        // ------------------------------
-        {
-            name: 'Flamelick',
-            id: 'flamelick',
-            effectId: 'flamelick',
-            castTime: 3,
-            timeCost: 3,
-            validTargets: ['enemy'],
-            type: 'magic',
-            element: 'fire',
-            damage: 10
+            buffDuration: 5,
+
+            buffEffects: { 
+                armor: 10,
+                magicResist: 10,
+                maxHealth: 10
+            }
         },
         {
-            name: 'Fireball',
-            id: 'fireball',
-            effectId: 'fireball',
-            castTime: 4,
-            timeCost: 4,
+            name: 'Fire Comet',
+            id: 'firecomet',
+            description: "A magical comet of fire reigns down on a single enemy, dleaing massive fire damage",
+            effectId: 'firecomet',
+            castTime: 5,
+            timeCost: 5,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'fire',
-            damage: 40
+            damage: 50
+        },
+        {
+            name: 'Ice Spear',
+            id: 'icespear',
+            effectId: 'icespear',
+            description: "A quick direct damage spell which deals water damage to a single enemy",
+            castTime: 5,
+            timeCost: 5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'fire',
+            damage: 50
         },
 
         // ==============================
@@ -384,9 +392,9 @@ define(
         // Other effects
         // ------------------------------
         {
-            name: 'Freeze Time',
-            id: 'freezeTime',
-            description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
+            name: 'Suspend',
+            id: 'suspend',
+            description: "Temporarily prevents a single enemy's timer from regenerating",
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
@@ -405,7 +413,7 @@ define(
         {
             name: 'Stun',
             id: 'stun',
-            description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
+            description: "Temporarily prevents an enemy from using abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
@@ -426,7 +434,7 @@ define(
         {
             name: 'Comatose',
             id: 'comatose',
-            description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
+            description: "Temporarily prevents enemies from using abilities and regenerating time",
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
@@ -435,7 +443,6 @@ define(
             element: 'light',
 
             damage: 1,
-            // TODO: Deal damage based on entity's timer value
 
             buffDuration: 8,
             // to prevent ability usage, set the time to be greater than the

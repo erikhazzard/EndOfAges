@@ -1171,6 +1171,16 @@ define(
                     // reset html
                     self.step4ResetAbilityDescription();
                 });
+
+                el.on('click', function(){
+                    // remove selected ability
+                    if(self.selectedAbilities.models[i]){
+                        self.abilityClicked({
+                            $el: $('#create-all-ability-' + self.selectedAbilities.models[i].id),
+                            model: self.selectedAbilities.models[i]
+                        });
+                    }
+                });
             });
 
             logger.log('pageHome:setupPage4', 'setting up page 4');

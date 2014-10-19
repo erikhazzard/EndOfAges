@@ -69,7 +69,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'magicMissle', 'flamelick', 'fireball'
+                'magicshield', 'icespear', 'firecomet'
             ]
         })
     ];
