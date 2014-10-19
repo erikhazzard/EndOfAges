@@ -717,6 +717,9 @@
   position: fixed;
   right: 0;
   top: 0; }
+  #home .interaction-font {
+    font-size: 1.2em;
+    padding-left: 2px; }
   #home * {
     cursor: default; }
   #home .interaction, #home #create-name, #home .item {
@@ -965,6 +968,12 @@
       width: 58px;
       right: 0;
       left: 0; }
+  #home #book-page-final-data h2 {
+    text-align: center; }
+  #home #book-page-final-data p {
+    margin-bottom: 1em; }
+  #home #book-page-final-confirm h2 {
+    text-align: center; }
   #home .opacity-zero div, #home .opacity-zero .disabled,
   #home .opacity-zero img, #home .opacity-zero .race-name {
     cursor: default !important; }
@@ -1089,5 +1098,9 @@ svg {
   animation: preload 1.8s ease-out;
   animation-direction: alternate;
   animation-iteration-count: infinite; }
+
+.interaction-font {
+  font-family: "Shadows Into Light", cursive;
+  font-weight: bold; }
 
 /*# sourceMappingURL=main.css.map */

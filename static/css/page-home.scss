@@ -12,6 +12,11 @@
     right: 0;
     top: 0;
 
+    .interaction-font {
+        font-size: 1.2em;
+        padding-left: 2px;
+    }
+
     // set cursor to default, do not show the text selection cursor
     * {
         cursor: default;
@@ -89,7 +94,8 @@
     @import "create/page-race";
     @import "create/page-classes";
     @import "create/page-abilities";
-
+    @import "create/page-final-data";
+    @import "create/page-final-confirm";
 
     .opacity-zero div, .opacity-zero .disabled, 
     .opacity-zero img, .opacity-zero .race-name {

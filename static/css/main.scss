@@ -13,6 +13,7 @@ $header-font: 'IM Fell English', san-serif;
 
 // OLD ONE: (Alisen dislikes):: $input-font: 'Nothing You Could Do', cursive;
 $input-font: "Shadows Into Light", cursive;
+$interaction-font: "Shadows Into Light", cursive;
 
 // --------------------------------------
 //
@@ -136,4 +137,10 @@ svg {
     animation: preload 1.8s ease-out;
     animation-direction: alternate;
     animation-iteration-count: infinite;
+}
+
+
+.interaction-font {
+    font-family: $interaction-font;
+    font-weight: bold;
 }

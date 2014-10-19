@@ -1,16 +1,41 @@
 {{// Template (abilities) }}
 <script id='template-create-final-data-page' type='text/template'>
-    <h2 id='create-final-data'>
-        <%= name %>
+    <h2 id='create-final-data-header'>
+        Prologe
     </h2>
 
     <div class='create-final-data-story'>
-        <%= name %>
-        <%= race.attributes.name %>
-        <%= className %> 
+    <p>
+        My name was 
+        <span class='interaction-font'><%= name %></span>. I was a
 
+        <%= ["forceful", "mighty", "vigorous", "dominant", "capable"][Math.random() * 5 | 0] %> and powerful 
+
+        <span class='interaction-font'><%= race.attributes.name %></span>.
+    </p>
+
+    <p>
+        <% if(className.toLowerCase() === "custom"){ %>
+            I chose a <span class='interaction-font'>custom</span> path, not fitting a sterotypical mold. I was the template which countless others tried to imitate.
+
+        <% } else if(className.toLowerCase() === "assassin"){ %>
+            Stalking in shadows, stealth my only companion, I was an <span class='interaction-font'><%= className %></span>. The most deadly of them all.
+
+        <% } else if(className.toLowerCase() === "ranger"){ %>
+            An unmatched master of the natural world, I was a <span class='interaction-font'><%= className %></span>.
+            
+        <% } else { %>
+            I followed the path of a <span class='interaction-font'><%= className %></span>. While others shared my skills, I was unique.  
+        <% } %>
+
+    </p>
+
+    <p>
+        ABILITIES: <br />
         <% _.each(selectedAbilities, function(ability){ %>
             :<%= ability.attributes.name %>:
         <% }) %>
+    </p>
+
     </div>
 </script>

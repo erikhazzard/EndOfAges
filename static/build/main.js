@@ -5326,14 +5326,14 @@ define(
                         }
 
                     } else if(self.curStep === 3){
+                        // GO TO LAST STEP
                         logger.log('pageHome:pageNext', 
                             'showing step 3, page 5/6...');
 
                         // initial setup or show of page 3 (step 4 - templates)
                         if(self.pagesCompleted[5] !== true){
-                            logger.log('pageHome:pageNext', 'setting up page 5...');
+                            logger.log('pageHome:pageNext', 'setting up page 5');
                             self.setupPage5(); 
-
                         } else {
                             logger.log('pageHome:pageNext', 'showing page 5');
                             // Show it (don't setup)
@@ -5395,6 +5395,15 @@ define(
                         (self.curStep === 2 && self.pagesCompleted[4])
                     ){
                         logger.log('pageHome:pageTurn:keyPress', 'going forward');
+
+                        // only go to next page if models are set up
+                        if(self.curStep === 2 && 
+                        self.selectedAbilities.models && 
+                        self.selectedAbilities.models.length < 1){
+                            logger.log('pageHome:pageNext', '[x] cannot continue, no selected models');
+                            return false;
+                        }
+
                         pageNext(e);
 
                     } else {
@@ -6019,8 +6028,6 @@ define(
             // empty the currently selected abilities
             this.selectedAbilities.reset();
 
-            self.selectedAbilities.reset();
-
             // select abilities from model list
             _.each(options.model.attributes.abilities, function(id){
                 $('#create-all-ability-' + id).addClass('selected');
@@ -6225,9 +6232,22 @@ define(
 
         showPage5: function showPage5(){
             var self = this;
+            logger.log('pageHome:showPage5', 'showing page 5', {
+                selectedAbilityModels: this.selectedAbilities.models
+            });
 
             // hide next arrow
             self.$cachedEls.nextStepArrow.addClass('animated fadeOut');
+
+            if(this.selectedAbilities.models){
+                logger.log('pageHome:showPage5', 
+                    'setting model with selected abilities');
+                this.model.set({
+                    abilities: new Abilities(
+                        this.selectedAbilities.models
+                    )
+                });
+            }
 
             // setup final variables
             // update template
