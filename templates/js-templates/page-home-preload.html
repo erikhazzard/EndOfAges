@@ -40,14 +40,21 @@
 
             <div id='book-page-final' class='page-left hidden'>
                 <div class='inner'>
-                    <h2 id='create-final-name'>Finalize - Name here</h2>
+                    {{ include create/page-final-data.html }}
                 </div>
             </div>
 
 
             <div id='book-page-abilities' class='page-right hidden'>
                 <div class='inner'>
-                    <h2>Begin Journey</h2>
+                    <div id='create-book-page-final-confirm' 
+                    class='opacity-zero'>
+                        <h2>Chapter 1</h2>     
+
+                        <div id='create-book-final-start-button'>
+                            <h2>Begin Journey</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
 

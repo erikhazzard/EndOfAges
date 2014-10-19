@@ -1,0 +1,16 @@
+{{// Template (abilities) }}
+<script id='template-create-final-data-page' type='text/template'>
+    <h2 id='create-final-data'>
+        <%= name %>
+    </h2>
+
+    <div class='create-final-data-story'>
+        <%= name %>
+        <%= race.attributes.name %>
+        <%= className %> 
+
+        <% _.each(selectedAbilities, function(ability){ %>
+            :<%= ability.attributes.name %>:
+        <% }) %>
+    </div>
+</script>

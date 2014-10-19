@@ -965,6 +965,9 @@
       width: 58px;
       right: 0;
       left: 0; }
+  #home .opacity-zero div, #home .opacity-zero .disabled,
+  #home .opacity-zero img, #home .opacity-zero .race-name {
+    cursor: default !important; }
   #home #arrow-right, #home #arrow-left {
     cursor: pointer !important;
     height: 142px;
@@ -975,6 +978,9 @@
     top: 230px;
     width: 73px;
     z-index: 100; }
+  #home #arrow-right.fadeOut, #home #arrow-right.fadeOut .arrow,
+  #home #arrow-left.fadeOut, #home #arrow-left.fadeOut .arrow {
+    cursor: default !important; }
   #home #arrow-left {
     left: -38px;
     right: auto; }
