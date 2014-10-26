@@ -2412,7 +2412,12 @@ define(
                     //  all effects should be wrapped in a svg element with id of
                     //  `effect-spellName`, and the wrapper should have no attributes
                     function renderEffect(){
+                        if($('#effect-' + selectedAbility.attributes.effectId).length < 1){
+                            logger.log('Battle:renderEffect', 'no effect found, returning');
+                            return false;
+                        }
                         var $effect = d3.sticker('#effect-' + selectedAbility.attributes.effectId);
+
                         // append it the ability effects group
                         $effect = $effect(self.$abilityEffects);
 

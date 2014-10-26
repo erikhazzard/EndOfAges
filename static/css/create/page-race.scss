@@ -106,7 +106,7 @@
     .race-list-item:hover, .list-item:hover {
         background: $BACKGROUND-INTERACTION-LIGHT; 
         padding-left: 20px;
-        opacity: 0.7;
+        opacity: 0.75;
     }
     .race-list-item.selected, .list-item.selected {
         background: $BACKGROUND-INTERACTION; 
@@ -142,5 +142,6 @@
         opacity: 0.3;
     }
     .race-list-item.selected .race-name { opacity: 1; }
+    .list-item:hover .list-item-name { color: #343434; }
     .list-item.selected .list-item-name { opacity: 1; }
 }

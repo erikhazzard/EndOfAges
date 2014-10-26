@@ -15,6 +15,41 @@
             <% } %>
         </span>
     </div>
+        
+    <% if(!disabled){ %>
+        <div class='ability-list-item-meta-wrapper'>
+            <% if(spellType === 'damage' || damage){ %>
+                <div class='ability-label damage'>
+                    D<br />M<br />G
+                </div>
+            <% } %>
+
+            <% if(spellType === 'heal' || heal){ %>
+                <div class='ability-label heal'>
+                    H<br />E<br />A<br />L
+                </div>
+            <% } %>
+
+            <% if(spellType === 'buff' || (buffDuration && (validTargets === 'player' || validTargets.indexOf('player') > -1))){ %>
+                <div class='ability-label buff'>
+                    B<br />U<br />F<br />F
+                </div>
+            <% } %>
+
+            <% if(spellType === 'debuff' || (buffDuration && (validTargets === 'enemy' || validTargets.indexOf('enemy') > -1))){ %>
+                <div class='ability-label debuff'>
+                    D<br />B<br />U<br />F
+                </div>
+            <% } %>
+
+            <% if(spellType === 'util'){ %>
+                <div class='ability-label util'>
+                    U<br />T<br />I<br />L
+                </div>
+            <% } %>
+
+        </div>
+    <% } %>
 </script>
 
 {{// Abilities description }}

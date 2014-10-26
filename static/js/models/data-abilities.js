@@ -400,6 +400,7 @@ define(
             timeCost: 0.5,
             validTargets: ['enemy'],
             type: 'magic',
+            spellType: 'util',
             element: 'light',
 
             buffDuration: 8,
@@ -419,6 +420,7 @@ define(
             timeCost: 0.5,
             validTargets: ['enemy'],
             type: 'magic',
+            spellType: 'util',
             element: 'light',
 
             buffDuration: 8,
@@ -441,6 +443,7 @@ define(
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
+            spellType: 'util',
 
             damage: 1,
 

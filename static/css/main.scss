@@ -8,8 +8,9 @@ $highlight-green: #1bc812;
 
 $opacity-transition-time: 0.3s;
 
-$main-font: 'Lustria', serif;
-$header-font: 'IM Fell English', san-serif;
+$main-font: 'Lustria', Tahoma, serif;
+$header-font: 'IM Fell English', Tahoma, sans-serif;
+$mono-font: 'Ubuntu Mono', monospace, sans-serif;
 
 // OLD ONE: (Alisen dislikes):: $input-font: 'Nothing You Could Do', cursive;
 $input-font: "Shadows Into Light", cursive;
@@ -143,4 +144,17 @@ svg {
 .interaction-font {
     font-family: $interaction-font;
     font-weight: bold;
+}
+
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.1);
+    width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.2);
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.4);
 }

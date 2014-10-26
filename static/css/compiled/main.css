@@ -885,7 +885,7 @@
     #home #region-create-races .race-list-item:hover, #home #region-create-races .list-item:hover, #home .interaction-list .race-list-item:hover, #home .interaction-list .list-item:hover {
       background: rgba(235, 235, 235, 0.15);
       padding-left: 20px;
-      opacity: 0.7; }
+      opacity: 0.75; }
     #home #region-create-races .race-list-item.selected, #home #region-create-races .list-item.selected, #home .interaction-list .race-list-item.selected, #home .interaction-list .list-item.selected {
       background: rgba(235, 235, 235, 0.35);
       color: #ffffff;
@@ -915,6 +915,8 @@
       opacity: 0.3; }
     #home #region-create-races .race-list-item.selected .race-name, #home .interaction-list .race-list-item.selected .race-name {
       opacity: 1; }
+    #home #region-create-races .list-item:hover .list-item-name, #home .interaction-list .list-item:hover .list-item-name {
+      color: #343434; }
     #home #region-create-races .list-item.selected .list-item-name, #home .interaction-list .list-item.selected .list-item-name {
       opacity: 1; }
   #home #book-page-classes h2 {
@@ -923,14 +925,28 @@
     height: 280px; }
   #home #book-page-abilities h2 {
     text-align: center; }
+  #home #book-page-abilities .interaction-list .list-item {
+    opacity: 1; }
+  #home #book-page-abilities .interaction-list .item {
+    opacity: 0.5; }
+  #home #book-page-abilities .list-item:hover .item {
+    opacity: 0.7; }
+  #home #book-page-abilities .list-item.selected .item {
+    opacity: 1; }
   #home #book-page-abilities #region-create-all-abilities-list {
-    height: 270px; }
+    height: 248px; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item {
+      height: 38px;
       padding-bottom: 2px;
-      padding-top: 2px; }
+      padding-top: 4px;
+      position: relative; }
       #home #book-page-abilities #region-create-all-abilities-list .list-item img {
         height: 30px;
         width: 30px; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item.selected {
+      height: 38px;
+      padding-bottom: 2px;
+      padding-top: 0px; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item .list-item-name {
       font-size: 0.9em; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected .list-item-name {
@@ -968,6 +984,47 @@
       width: 58px;
       right: 0;
       left: 0; }
+  #home .ability-list-item-meta-wrapper {
+    bottom: 0;
+    font-family: "Ubuntu Mono", monospace, sans-serif;
+    font-size: 14px;
+    position: absolute;
+    right: 60px;
+    top: 0; }
+    #home .ability-list-item-meta-wrapper .ability-label {
+      background: #232323;
+      bottom: 0;
+      cursor: pointer;
+      color: #f0f0f0;
+      font-size: 8px;
+      height: 100%;
+      line-height: 8px;
+      opacity: 0.3;
+      padding: 2px 2px 0 2px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 8px; }
+    #home .ability-list-item-meta-wrapper .ability-label.damage {
+      background: #cc3333;
+      padding-top: 5px;
+      left: 0; }
+    #home .ability-list-item-meta-wrapper .ability-label.debuff {
+      background: #944E20;
+      left: 8px; }
+    #home .ability-list-item-meta-wrapper .ability-label.heal {
+      background: #22cc22;
+      left: 16px; }
+    #home .ability-list-item-meta-wrapper .ability-label.buff {
+      background: #2288CC;
+      left: 24px; }
+    #home .ability-list-item-meta-wrapper .ability-label.util {
+      background: #9B2584;
+      left: 32px; }
+  #home .list-item:hover .ability-list-item-meta-wrapper .ability-label {
+    opacity: 0.6; }
+  #home .list-item.selected .ability-list-item-meta-wrapper .ability-label {
+    opacity: 1; }
   #home #book-page-final-data h2 {
     text-align: center; }
   #home #book-page-final-data p {
@@ -1024,7 +1081,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 17px;
-  font-family: "Lustria", serif;
+  font-family: "Lustria", Tahoma, serif;
   color: #000;
   overflow: hidden; }
 
@@ -1044,7 +1101,7 @@ a:hover {
   color: #0b6cea; }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "IM Fell English", san-serif; }
+  font-family: "IM Fell English", Tahoma, sans-serif; }
 
 svg {
   -moz-user-select: none;
@@ -1102,5 +1159,16 @@ svg {
 .interaction-font {
   font-family: "Shadows Into Light", cursive;
   font-weight: bold; }
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  width: 7px; }
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 0 1px rgba(255, 255, 255, 0.4); }
 
 /*# sourceMappingURL=main.css.map */

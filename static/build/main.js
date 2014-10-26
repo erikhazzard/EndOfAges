@@ -1343,13 +1343,16 @@ define(
                 name: 'Magic Missle',
                 id: 'magicMissle',
 
+                // spell type (for labels)
+                spellType: '', // or heal, debuff, buff, util, etc
+
                 // Keep track of buffs / effects that affect the ability object
                 activeEffects: [],
 
                 // ID of the effect element
-                effectId: null,
+                effectId: 'placeHolder',
                 // sprite for icon itself
-                sprite: null,
+                sprite: '',
 
                 description: 'PLACEHOLDER TEXT :::::::::::',
 
@@ -4528,6 +4531,7 @@ define(
             timeCost: 0.5,
             validTargets: ['enemy'],
             type: 'magic',
+            spellType: 'util',
             element: 'light',
 
             buffDuration: 8,
@@ -4547,6 +4551,7 @@ define(
             timeCost: 0.5,
             validTargets: ['enemy'],
             type: 'magic',
+            spellType: 'util',
             element: 'light',
 
             buffDuration: 8,
@@ -4569,6 +4574,7 @@ define(
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
+            spellType: 'util',
 
             damage: 1,
 
@@ -5279,7 +5285,7 @@ define(
                 acceleration: true,
                 page: 2,
                 gradients: !$.isTouch,
-                duration: 1300,
+                duration: 700,
                 elevation: 250,
                 when: {
                     // ------------------
@@ -5401,6 +5407,7 @@ define(
                         self.selectedAbilities.models && 
                         self.selectedAbilities.models.length < 1){
                             logger.log('pageHome:pageNext', '[x] cannot continue, no selected models');
+                            self.handleInvalidAbilitySelection();
                             return false;
                         }
 
@@ -5447,6 +5454,15 @@ define(
                     // REMOVE false
                     (self.curStep === 2 && self.pagesCompleted[4])
                 ){
+                    // only go to next page if models are set up
+                    if(self.curStep === 2 && 
+                    self.selectedAbilities.models && 
+                    self.selectedAbilities.models.length < 1){
+                        logger.log('pageHome:pageNext', '[x] cannot continue, no selected models');
+                        self.handleInvalidAbilitySelection();
+                        return false;
+                    }
+
                     return pageNext(e);
                 }
             });
@@ -6101,6 +6117,11 @@ define(
             $('#create-abilities-wrapper').velocity({ opacity: 1 });
             $('#region-create-all-abilities-list').velocity({ opacity: 1 });
 
+            setTimeout(function(){requestAnimationFrame(function(){
+                $('#region-create-all-abilities-list').removeClass('opacity-zero');
+                $('#create-abilities-wrapper').removeClass('opacity-zero');
+            });}, 100);
+
             self.page4canClickAbility = true;
 
             // TODO: set this after all abilities selected
@@ -6200,6 +6221,13 @@ define(
                     this.changeToCustomClass();
                 }
             } 
+        },
+
+        handleInvalidAbilitySelection: function handleInvalidAbilitySelection(){
+            // called when not enough abilities are selected
+            // TODO: MAJOR: This....
+            alert('NOT ENOUGH ABILITIES SELECTED');
+            return this;
         },
 
         // ==============================
@@ -10716,7 +10744,12 @@ define(
                     //  all effects should be wrapped in a svg element with id of
                     //  `effect-spellName`, and the wrapper should have no attributes
                     function renderEffect(){
+                        if($('#effect-' + selectedAbility.attributes.effectId).length < 1){
+                            logger.log('Battle:renderEffect', 'no effect found, returning');
+                            return false;
+                        }
                         var $effect = d3.sticker('#effect-' + selectedAbility.attributes.effectId);
+
                         // append it the ability effects group
                         $effect = $effect(self.$abilityEffects);
 
@@ -11158,10 +11191,12 @@ define(
 define(
     'views/DevTools',[ 
         'd3', 'backbone', 'marionette',
-        'logger', 'events'
+        'logger', 'events',
+        'localForage',
     ], function viewPageHome(
         d3, backbone, marionette, 
-        logger, events
+        logger, events,
+        localForage
     ){
 
     var DevTools = Backbone.Marionette.Layout.extend({
@@ -11197,6 +11232,8 @@ define(
                 window.localStorage.removeItem(localStorage.key(0));
             }
             logger.log('views/DevTools', 'all done: %O', window.localStorage);
+
+            localForage.clear();
             return this;
         },
 

@@ -8,10 +8,12 @@
 define(
     [ 
         'd3', 'backbone', 'marionette',
-        'logger', 'events'
+        'logger', 'events',
+        'localForage',
     ], function viewPageHome(
         d3, backbone, marionette, 
-        logger, events
+        logger, events,
+        localForage
     ){
 
     var DevTools = Backbone.Marionette.Layout.extend({
@@ -47,6 +49,8 @@ define(
                 window.localStorage.removeItem(localStorage.key(0));
             }
             logger.log('views/DevTools', 'all done: %O', window.localStorage);
+
+            localForage.clear();
             return this;
         },
 

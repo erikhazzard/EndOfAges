@@ -3,14 +3,29 @@
         text-align: center;
     }
 
+    .interaction-list .list-item {
+        opacity: 1;
+    }
+    .interaction-list .item {
+        opacity: 0.5;
+    }
+    .list-item:hover .item { 
+        opacity: 0.7;
+    }
+    .list-item.selected .item {
+        opacity: 1;
+    }
+
     #create-abilities-wrapper {
     }
     #region-create-all-abilities-list {
-        height: 270px;
+        height: 248px;
 
         .list-item {
+            height: 38px;
             padding-bottom: 2px;
-            padding-top: 2px;
+            padding-top: 4px;
+            position: relative;
 
             img {
                 height: 30px;
@@ -18,12 +33,18 @@
             }
         }
 
+        .list-item.selected { 
+            height: 38px;
+            padding-bottom: 2px;
+            padding-top: 0px;
+        }
+
         .list-item .list-item-name {
             font-size: 0.9em;
         }
         .list-item.selected .list-item-name {
             font-size: 0.9em;
-        }
+        }    
     }
 }
 
@@ -68,4 +89,70 @@
             left: 0;
         }
     }
+}
+
+
+// ------------------------------
+// ABILITY Item Labels
+// ------------------------------
+$ability-label-width: 8px;
+
+.ability-list-item-meta-wrapper {
+    bottom: 0;
+    font-family: $mono-font;
+    font-size: 14px;
+    position: absolute;
+    right: 20px + ($ability-label-width * 5); // num labels - 5
+    top: 0;
+
+    .ability-label {
+        //@include transform(rotate(-90deg));
+        //writing-mode: tb-rl;
+
+        background: #232323;
+        bottom: 0;
+        cursor: pointer;
+        color: #f0f0f0;
+        font-size: 8px;
+        height: 100%;
+        line-height: 8px;
+        opacity: 0.3;
+        padding: 2px 2px 0 2px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: $ability-label-width;
+    }
+
+
+    // ability types types
+    .ability-label.damage {
+        background: #cc3333;
+        padding-top: 5px;
+        left: 0;
+    }
+    .ability-label.debuff{
+        background: #944E20;
+        left: $ability-label-width * 1;
+    }
+    .ability-label.heal{
+        background: #22cc22;
+        left: $ability-label-width * 2;
+    }
+    .ability-label.buff {
+        background: #2288CC;
+        left: $ability-label-width * 3;
+    }
+    .ability-label.util {
+        background: #9B2584;
+        left: $ability-label-width * 4;
+    }
+}
+
+// selected / hover labels
+.list-item:hover .ability-list-item-meta-wrapper .ability-label {
+    opacity: 0.6;
+}
+.list-item.selected .ability-list-item-meta-wrapper .ability-label {
+    opacity: 1;
 }
