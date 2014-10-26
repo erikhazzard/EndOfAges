@@ -619,6 +619,10 @@ define(
                     $paragraphName.addClass('animated fadeInUp');
                 });
 
+                setTimeout(function(){
+                    $paragraphName.removeClass('animated fadeInUp');
+                }, 1000);
+
                 // Show the name input box
                 if(self.step1nameTimeout){
                     clearTimeout(self.step1nameTimeout);
@@ -729,6 +733,11 @@ define(
                 self.page1Writer.trigger('finish');
                 self.setupPage2();
             }
+
+            // remove the animated fade class
+            setTimeout(function(){
+                $($paragraph[0]).removeClass('animated ' + animation);
+            },900);
 
             return this;
         },
