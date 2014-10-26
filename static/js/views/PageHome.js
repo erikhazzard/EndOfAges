@@ -381,9 +381,12 @@ define(
                 display: 'double',
                 acceleration: true,
                 page: 2,
-                gradients: !$.isTouch,
-                duration: 700,
-                elevation: 250,
+                //gradients: !$.isTouch,
+                gradients: false,
+                duration: 600,
+                elevation: 100,
+                turnCorners: '',
+
                 when: {
                     // ------------------
                     //
@@ -397,6 +400,14 @@ define(
                     }
                 }
             });
+
+            self.$pages.bind('start', 
+                function (event, pageObject, corner){
+                    if (corner == 'tl' || corner == 'tr' || corner == 'bl' || corner == 'br'){
+                        event.preventDefault();
+                    }
+                }
+            );
 
             function pageNext(e){
                 // Called to show the next page. This is state based, as
@@ -1445,6 +1456,10 @@ define(
                 )
             });
 
+            $('#arrow-right').off();
+            $('#arrow-left').off();
+
+
             // STORE data
             // TODO: store a clone of this entity model. 
             // currently, only save change properties. it's a bit hacky
@@ -1466,7 +1481,10 @@ define(
 
             // remove page turn 
             this.$pages.turn('disable', true);
-            this.$pages.remove();
+
+            ////this.$pages.remove();
+            
+            this.$pages.turn('destroy').remove();
 
             // TODO: only trigger if prompt is true
             // If done, show the game and pass in the entities

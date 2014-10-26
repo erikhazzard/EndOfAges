@@ -19,7 +19,7 @@ requirejs.config({
         localForage: 'lib/localForage.min',
 
         velocity: 'lib/jquery.velocity',
-        pageTurn: 'lib/turn',
+        pageTurn: 'lib/turn.min',
 
         backbone: 'lib/backbone',
         localstorage: 'lib/backbone.localstorage',
