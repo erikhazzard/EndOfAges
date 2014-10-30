@@ -2,4 +2,28 @@
     h2 {
         text-align: center;
     }
+
+    #create-book-final-start-button {
+        border-bottom: 1px solid $COLOR-INTERACTION-BORDER;
+        border-top: 1px solid $COLOR-INTERACTION-BORDER;
+        background: $COLOR-INTERACTION;
+        color: $COLOR-INTERACTION-TEXT;
+        cursor: pointer;
+        margin-left: 11px;
+        margin-top: 7.5em;
+        padding-bottom: 1px;
+        text-align: center;
+        width: 94%;
+
+        h2 { 
+            @include transition("all 0.3s");
+            cursor: pointer;
+            text-shadow: 0 0 0 #ffffff, 0 0 0 #ffffff;
+        }
+    }
+
+    #create-book-final-start-button:hover h2 {
+        text-shadow: 1px 1px 0 #ffffff, 0 0 19px #ffffff;
+        padding-left: 10px;
+    }
 }
