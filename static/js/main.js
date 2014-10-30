@@ -127,7 +127,7 @@ requirejs([
     
     // log options
     logger.transports.get('Console').property({ showMeta: false });
-    logger.options.groupsEnabled = [/pageHome/];
+    logger.options.groupsEnabled = [/pageHome/, /analytics/];
     window.LOGGER = logger;
 
     //-----------------------------------

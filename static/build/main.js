@@ -3642,6 +3642,27 @@ define(
 
 // ===========================================================================
 //
+// analytics.js
+//
+//  analytics util function for sending analytics data to server
+//
+// ===========================================================================
+define('analytics',[
+    'jquery', 'logger'
+], function($, logger){
+    var analytics = {};
+
+    analytics.log = function analyticsLog( options ){
+        // DO STUFF
+        logger.log('analytics', 'called with', options);
+        return true;
+    };
+
+    return analytics;
+});
+
+// ===========================================================================
+//
 // Race List Item
 //
 // ItemView for race item
@@ -4934,6 +4955,7 @@ define(
 define(
     'views/PageHome',[ 
         'd3', 'backbone', 'marionette',
+        'analytics',
         'logger', 'events',
         'async',
         'models/Entity',
@@ -4957,6 +4979,7 @@ define(
 
     ], function viewPageHome(
         d3, backbone, marionette, 
+        analytics,
         logger, events,
         async,
         Entity,
@@ -4984,6 +5007,7 @@ define(
 
     // total number of abilities user can have
     var MAX_ABILITIES = 4;
+    var START_DATE; // set when page is initialized
 
     // View 
     // ----------------------------------
@@ -5004,6 +5028,15 @@ define(
             // initialize:
             var self = this;
             logger.log('pageHome', 'initialize() called');
+            START_DATE = new Date();
+
+            analytics.log({
+                type: 'create',
+                step: 0,
+                message: 'initailize called',
+                page: 'pageHome',
+                time: START_DATE
+            });
 
             // Create a new entity model for character create
             this.model = new Entity({});
@@ -5229,7 +5262,13 @@ define(
         // ==============================
         onBeforeClose: function close(){
             logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
+
+            // ensure we unbind everything
             $('#create-book-final-start-button').off();
+            $('#create-name').off();
+            $('#arrow-right').off();
+            $('#arrow-left').off();
+            _.each(this.$selectedAbilitiesEls, function(el, i){ el.off(); });
 
             $(window).unbind();
 
@@ -5309,7 +5348,6 @@ define(
                 gradients: false,
                 duration: 600,
                 elevation: 100,
-                turnCorners: '',
 
                 when: {
                     // ------------------
@@ -5325,13 +5363,16 @@ define(
                 }
             });
 
+            //disable page peel
             self.$pages.bind('start', 
                 function (event, pageObject, corner){
                     if (corner == 'tl' || corner == 'tr' || corner == 'bl' || corner == 'br'){
                         event.preventDefault();
-                    }
+                    } 
                 }
             );
+
+            self.$pages.turn('disable', true);
 
             function pageNext(e){
                 // Called to show the next page. This is state based, as
@@ -5339,7 +5380,10 @@ define(
                 // NOTE: Here, "step" means the set of of pages (step 1 is
                 //      title / race, step 2 is templates / abilities, step 3
                 //      is final)
+
                 logger.log('pageHome:pageNext', 'curStep ' + self.curStep);
+
+                self.$pages.turn('disable', false);
 
                 if(self.curStep < 4){
                     logger.log('pageHome', '\t showing next page');
@@ -5380,11 +5424,16 @@ define(
 
                     }
                 }
+
+                self.$pages.turn('disable', true);
             }
+
             function pagePrevious(e){
                 // Called to show the previous page
                 logger.log('pageHome:pagePrevious', 'curStep ' + self.curStep);
 
+                self.$pages.turn('disable', false);
+                
                 if(self.curStep > 1){
                     logger.log('pageHome', '\t showing previous page');
                     e.preventDefault();
@@ -5405,6 +5454,9 @@ define(
                         self.showPage3();
                     }
                 }
+
+                // disable again
+                self.$pages.turn('disable', true);
             }
 
             // store functions for page turning
@@ -5416,14 +5468,35 @@ define(
             $(window).bind('keydown', function(e){
                 // Don't let pages go below 2 (we don't have a cover page) and
                 // don't let it go above the number of pages we have
+                //
+                // NOTE: This is really hacky, should be same logic as
+                // right / left arrow click
                 logger.log('pageHome:pageTurn:keyPress', 
                     'key pressed : ' + e.keyCode + ' | curStep : ' + 
                     self.curStep);
 
+                var now = new Date();
+
                 // Left Arrow
                 if (e.keyCode === 37) {
                     logger.log('pageHome:pageTurn:keyPress', 'going back');
-                    pagePrevious(e);
+                    if(self.curStep > 1){
+                        analytics.log({
+                            message: 'left key pressed! ' + 
+                                'step : ' + self.curStep + ' to ' + (self.curStep - 1),
+                            type: 'create:changeStep',
+                            from: self.curStep, 
+                            step: self.curStep,
+                            to: self.curStep-1,
+                            method: 'keyPress',
+                            delta: (now - START_DATE) / 1000,
+                            date: now
+                        });
+                        pagePrevious(e);
+                    } else {
+                        logger.log('pageHome:pageTurn:keyPress', 
+                            'cannot go back');
+                    }
 
                 // Right Arrow
                 } else if (e.keyCode === 39) {
@@ -5442,6 +5515,17 @@ define(
                             self.handleInvalidAbilitySelection();
                             return false;
                         }
+
+                        analytics.log({
+                            message: 'right key pressed! ' + 
+                                'step : ' + self.curStep + ' to ' + (self.curStep + 1),
+                            type: 'create:changeStep',
+                            from: self.curStep, 
+                            to: self.curStep+1,
+                            method: 'keyPress',
+                            delta: (now - START_DATE) / 1000,
+                            date: now
+                        });
 
                         pageNext(e);
 
@@ -5462,6 +5546,15 @@ define(
                         // finish step 1
                         baseDelay = 1;
 
+                        analytics.log({
+                            type: 'create:skipIntro', 
+                            message: (e.keyCode === 27 ? 'escape' : 'enter') +
+                                ' key pressed on step 1', 
+                            delta: (now - START_DATE) / 1000,
+                            step: self.curStep,
+                            date: now
+                        });
+
                         self.step1DidPressEscape = true;
                         self.step1WriterCallback();
                         self.page1Writer.trigger('finish');
@@ -5475,8 +5568,28 @@ define(
             });
 
             // arrows
-            $('#arrow-right').click(function(e){
+            var $arrowRight = $('#arrow-right');
+            $arrowRight.click(function(e){
                 logger.log('pageHome:arrowClick', 'arrow-right clicked'); 
+                var now = new Date();
+
+                // if the arrow is NOT visible, do nothing
+                if($arrowRight.hasClass('fadeOut') || $arrowRight.css('opacity') < 0.01){
+                    logger.log('pageHome:arrowClick', 'clicked but arrow is hidden');
+                    return false;
+                }
+
+                analytics.log({
+                    message: 'arrow-right button clicked! ' + 
+                        'step : ' + self.curStep + ' to ' + (self.curStep + 1),
+                    type: 'create:changeStep',
+                    from: self.curStep, 
+                    step: self.curStep,
+                    to: self.curStep+1,
+                    method: 'click',
+                    delta: (now - START_DATE) / 1000,
+                    date: now
+                });
 
                 if(
                     // step 1 to step 2
@@ -5497,8 +5610,28 @@ define(
 
                     return pageNext(e);
                 }
+
             });
-            $('#arrow-left').click(function(e){
+
+            var $arrowLeft = $('#arrow-left');
+            $arrowLeft.click(function(e){
+                if($arrowLeft.hasClass('fadeOut') || $arrowLeft.css('opacity') < 0.01){
+                    logger.log('pageHome:arrowClick', 'clicked but arrow is hidden');
+                    return false;
+                }
+
+                var now = new Date();
+                analytics.log({
+                    message: 'arrow-left button clicked! ' + 
+                        'step : ' + self.curStep + ' to ' + (self.curStep - 1),
+                    type: 'create:changeStep',
+                    from: self.curStep, 
+                    step: self.curStep,
+                    to: self.curStep-1,
+                    method: 'click',
+                    delta: (now - START_DATE) / 1000,
+                    date: now
+                });
                 logger.log('pageHome:arrowClick', 'arrow-left clicked');
                 return pagePrevious(e);
             });
@@ -5625,6 +5758,15 @@ define(
             // Remove the pulsating effect when user clicks input
             $name.focus(function (){ 
                 logger.log('pageHome', '\t name focused');
+
+                var now = new Date();
+                analytics.log({
+                    message: 'name input box focused',
+                    type: 'create:nameFocus',
+                    step: self.curStep,
+                    delta: (now - START_DATE) / 1000,
+                    date: now
+                });
                 //// No longer pulsating
                 clearTimeout(self.step1$namePulse);
                 $name.removeClass('pulse-subtle infinite'); 
@@ -6289,13 +6431,6 @@ define(
                 $('#create-name').val(this.model.attributes.name);
             }
 
-            // add event listener for final start button
-            $('#create-book-final-start-button').on('click', function(){
-                logger.log('pageHome', 'final start button clicked');
-                self.finishCreateProcess();
-            });
-
-
             return this.showPage5();
         },
 
@@ -6351,8 +6486,16 @@ define(
                 // Already been completed, show things immediately
                 $finalDataWrapper.removeClass('opacity-zero');
                 finishShowingFinalData();
-
             }
+
+            // Finish create process when continue is clicked....
+            // add event listener for final start button
+            $('#create-book-final-start-button').off();
+            $('#create-book-final-start-button').on('click', function(){
+                logger.log('pageHome', 'final start button clicked');
+                self.finishCreateProcess();
+            });
+
 
             // set immediately, no further action required
             this.pagesCompleted[5] = true;
@@ -6369,6 +6512,7 @@ define(
             // Called when the creation process is completely finished.
             //
             // TODO: show an in app prompt
+            var self = this;
             logger.log('pageHome', 'Finished! : %O',
                 this.model);
 
@@ -6379,10 +6523,6 @@ define(
                     this.selectedAbilities.models
                 )
             });
-
-            $('#arrow-right').off();
-            $('#arrow-left').off();
-
 
             // STORE data
             // TODO: store a clone of this entity model. 
@@ -6397,18 +6537,26 @@ define(
                 data: dataToSet
             });
 
+            var now = new Date();
+            analytics.log({
+                message: 'finish create process',
+                type: 'create:finish',
+                step: self.curStep,
+                delta: (now - START_DATE) / 1000,
+                date: now,
+                entity: dataToSet
+            });
+
+            // Setup the data locally
             dataToSet = JSON.stringify(dataToSet);
-
             localForage.setItem(HOME_DATA_KEY, dataToSet);
-
-            // TODO: Clean up book, do some cool animation?
 
             // remove page turn 
             this.$pages.turn('disable', true);
-
-            ////this.$pages.remove();
-            
             this.$pages.turn('destroy').remove();
+
+            // TODO: Clean up book, do some cool animation?
+
 
             // TODO: only trigger if prompt is true
             // If done, show the game and pass in the entities
@@ -11695,7 +11843,7 @@ requirejs([
     
     // log options
     logger.transports.get('Console').property({ showMeta: false });
-    logger.options.groupsEnabled = [/pageHome/];
+    logger.options.groupsEnabled = [/pageHome/, /analytics/];
     window.LOGGER = logger;
 
     //-----------------------------------
