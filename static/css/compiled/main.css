@@ -953,6 +953,31 @@
       font-size: 0.9em; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected .list-item-name {
       font-size: 0.9em; }
+  #home #book-page-abilities #create-abilities-filter-wrapper {
+    margin-top: 4px;
+    position: relative; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
+      background: #343434;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      color: #ffffff;
+      display: block;
+      font-family: "IM Fell English", Tahoma, sans-serif;
+      font-weight: bold;
+      font-size: 9px;
+      float: left;
+      margin-right: 2px;
+      text-align: center;
+      width: 65px; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage {
+      background: #E34949; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff {
+      background: #4988B2; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-debuff {
+      background: #944E20; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-heal {
+      background: #56A64C; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-utility {
+      background: #DDEB4C; }
   #home #book-pages #create-selected-abilities-wrapper {
     -webkit-transition: opacity 0.6s;
     -moz-transition: opacity 0.6s;
@@ -1017,7 +1042,6 @@
       width: 8px;
       color: transparent !important; }
     #home .ability-list-item-meta-wrapper .ability-label.damage {
-      background: #cc3333;
       background: #E34949;
       padding-top: 5px;
       left: 0; }
