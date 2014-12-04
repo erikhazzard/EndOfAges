@@ -999,13 +999,18 @@
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-utility {
       background: #DDEB4C; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
-      -webkit-transition: opacity 0.2s;
-      -moz-transition: opacity 0.2s;
-      -o-transition: opacity 0.2s;
-      transition: opacity 0.2s; }
+      -webkit-transition: opacity 0.2s, box-shadow 0.2s;
+      -moz-transition: opacity 0.2s, box-shadow 0.2s;
+      -o-transition: opacity 0.2s, box-shadow 0.2s;
+      transition: opacity 0.2s, box-shadow 0.2s; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover {
+      box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px #E34949, 1px 1px 14px #E34949; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive {
       cursor: pointer;
       opacity: 0.2; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive.hover {
+      opacity: 0.5;
+      box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px rgba(235, 235, 235, 0.9), 1px 1px 14px rgba(235, 235, 235, 0.9); }
   #home #book-pages #create-selected-abilities-wrapper {
     -webkit-transition: opacity 0.6s;
     -moz-transition: opacity 0.6s;

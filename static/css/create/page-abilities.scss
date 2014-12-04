@@ -92,11 +92,19 @@
         .label-filter-utility { background: $COLOR-ABILITY-UTIL; }
 
         .label-filter {
-            @include transition("opacity 0.2s");
+            @include transition("opacity 0.2s, box-shadow 0.2s");
+        }
+        .label-filter.hover {
+            box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
         }
         .label-filter.inactive {
             cursor: pointer;
             opacity: 0.2
+        }
+
+        .label-filter.inactive.hover {
+            opacity: 0.5;
+            box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-INTERACTION, 1px 1px 14px $COLOR-INTERACTION;
         }
     }
 }

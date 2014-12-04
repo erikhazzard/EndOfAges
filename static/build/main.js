@@ -5898,7 +5898,12 @@ define(
 
             // if a disabled race was clicked, do nothing
             if(options.model.attributes.disabled){
-                logger.log('views/PageCreateCharacter', '[x] race disabled');
+                logger.log('pageHome', '[x] race disabled');
+                $('.item', options.$el).addClass('shake shake-constant');
+                setTimeout(function(){
+                    $('.item', options.$el).removeClass('shake shake-constant');
+                }, 200);
+
                 return this;
             }
 
@@ -6199,7 +6204,7 @@ define(
 
             // if a disabled class was clicked, do nothing
             if(options.model.attributes.disabled){
-                logger.log('views/PageCreateCharacter', '[x] class disabled');
+                logger.log('pageHome', '[x] class disabled');
                 return this;
             }
 
@@ -6363,12 +6368,14 @@ define(
             // --------------------------
             $filters.on('mouseenter', function(el, i){
                 var spellType = $(el.target).attr('data');
+                $(el.target).addClass('hover');
                 self.$step4abilityDescription.html(
                     $('#template-create-abilities-filter-info-' + spellType).html()
                 );
             });
             $filters.on('mouseleave', function(el, i){
                 var spellType = $(el.target).attr('data');
+                $(el.target).removeClass('hover');
                 self.$step4abilityDescription.empty();
             });
 
