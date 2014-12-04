@@ -1372,19 +1372,19 @@ define(
                 self.$abilitiesListItemsByType[curSpellType] = $('#region-create-all-abilities-list .' + curSpellType);
             });
 
+            // Add click behaviour to toggle which abilities are shown
+            // --------------------------
             $filters.on('click', function(el, i){
                 logger.log('pageHome:pageAbilities:filter:clicked', 
                     'filter clicked: %o', el);
 
                 var clickedSpellType = $(el.target).attr('data');
                 $(el.target).toggleClass('inactive');
+
                 self.abilitiesFilterActive[clickedSpellType] = !self.abilitiesFilterActive[clickedSpellType];
 
-                // Show / hide based on selected filters
-                // TODO: We have to check each item to ensure that we show
-                // hide properly if the element has MUTLIPLE spell types
-                //
-                // Method 1 = Hide all that match, then show all that match
+                // Show / hide based on selected filters. Hide all that match, 
+                // then show all that match
                 _.each(self.abilitiesFilterActive, function(isActive, type){
                     if(!isActive){
                         self.$abilitiesListItemsByType[type]
@@ -1397,7 +1397,19 @@ define(
                             .removeClass('hide-from-list');
                     }
                 });
+            });
 
+            // Add hover behavior to show info about filter
+            // --------------------------
+            $filters.on('mouseenter', function(el, i){
+                var spellType = $(el.target).attr('data');
+                self.$step4abilityDescription.html(
+                    $('#template-create-abilities-filter-info-' + spellType).html()
+                );
+            });
+            $filters.on('mouseleave', function(el, i){
+                var spellType = $(el.target).attr('data');
+                self.$step4abilityDescription.empty();
             });
 
             return this.showPage4();
