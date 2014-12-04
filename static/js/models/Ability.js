@@ -30,7 +30,7 @@ define(
                 id: 'magicMissle',
 
                 // spell type (for labels)
-                spellType: '', // or heal, debuff, buff, util, etc
+                spellTypes: [], // or heal, debuff, buff, util, etc
 
                 // Keep track of buffs / effects that affect the ability object
                 activeEffects: [],

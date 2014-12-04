@@ -18,32 +18,32 @@
         
     <% if(!disabled){ %>
         <div class='ability-list-item-meta-wrapper'>
-            <% if(spellType === 'damage' || damage){ %>
+            <% if(spellTypes.indexOf('damage') > -1){ %>
                 <div class='ability-label damage'>
                     D<br />M<br />G
                 </div>
             <% } %>
 
-            <% if(spellType === 'heal' || heal){ %>
+            <% if(spellTypes.indexOf('heal') > -1){ %>
                 <div class='ability-label heal'>
                     H<br />E<br />A<br />L
                 </div>
             <% } %>
 
-            <% if(spellType === 'buff' || (buffDuration && (validTargets === 'player' || validTargets.indexOf('player') > -1))){ %>
+            <% if(spellTypes.indexOf('buff') > -1){ %>
                 <div class='ability-label buff'>
                     B<br />U<br />F<br />F
                 </div>
             <% } %>
 
-            <% if(spellType === 'debuff' || (buffDuration && (validTargets === 'enemy' || validTargets.indexOf('enemy') > -1))){ %>
+            <% if(spellTypes.indexOf('debuff') > -1){ %>
                 <div class='ability-label debuff'>
                     D<br />B<br />U<br />F
                 </div>
             <% } %>
 
-            <% if(spellType === 'util'){ %>
-                <div class='ability-label util'>
+            <% if(spellTypes.indexOf('utility') > -1){ %>
+                <div class='ability-label utility'>
                     U<br />T<br />I<br />L
                 </div>
             <% } %>

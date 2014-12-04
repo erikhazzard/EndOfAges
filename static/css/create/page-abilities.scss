@@ -33,10 +33,27 @@
             }
         }
 
+        .list-item { @include transition("all 0.2s"); }
+
+        .list-item.hide-from-list, 
+        .list-item.hide-from-list.selected, 
+        {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
         .list-item.selected { 
+            cursor: alias;
             height: 38px;
             padding-bottom: 2px;
-            padding-top: 0px;
+            padding-top: 0px; 
+
+            span { cursor: alias; }
+            img { cursor: alias; }
+            div { cursor: alias; }
+
         }
 
         .list-item .list-item-name {
@@ -56,12 +73,14 @@
             background: #343434;
             border: 1px solid rgba(255,255,255,0.7);
             color: #ffffff;
+            cursor: alias;
             display: block;
             font-family: $header-font;
             font-weight:bold;
-            font-size: 9px;
+            font-size: 10px;
             float: left;
             margin-right: 2px;
+            padding: 6px 0;
             text-align: center;
             width: 65px;
         }
@@ -71,6 +90,14 @@
         .label-filter-debuff { background: $COLOR-ABILITY-DEBUFF; }
         .label-filter-heal { background: $COLOR-ABILITY-HEAL; }
         .label-filter-utility { background: $COLOR-ABILITY-UTIL; }
+
+        .label-filter {
+            @include transition("opacity 0.2s");
+        }
+        .label-filter.inactive {
+            cursor: pointer;
+            opacity: 0.2
+        }
     }
 }
 
@@ -86,8 +113,14 @@
 
 
         h3 { 
+            @include transition("background 0.15s");
+            background: none;
+            padding: 4px 0;
             margin-bottom: 6px;
             text-align: center;
+        }
+        h3.flash {
+            background: rgba(255,255,255,0.7);
         }
 
         .selected-hotkey {
@@ -106,6 +139,7 @@
         left: 50px;
     }
     .create-selected-abilities-item {
+        @include transition("box-shadow 0.1s");
         border: 1px solid rgba(255,255,255,0.5);
         background: rgba(40,40,40,0.07);
         color: #ffffff;
@@ -126,6 +160,9 @@
             right: 0;
             left: 0;
         }
+    }
+    .create-selected-abilities-item.hover {
+        box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px $COLOR-ABILITY-DAMAGE, 1px 1px 20px $COLOR-ABILITY-DAMAGE;
     }
 }
 
@@ -183,7 +220,7 @@ $ability-label-width: 8px;
         background: $COLOR-ABILITY-BUFF;
         left: $ability-label-width * 3;
     }
-    .ability-label.util {
+    .ability-label.utility {
         background: $COLOR-ABILITY-UTIL;
         left: $ability-label-width * 4;
     }

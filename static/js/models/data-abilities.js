@@ -10,10 +10,6 @@ define(
     [ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
         events, logger, Ability, Timer
     ){
-    // TODO: think of structure.
-    // Maybe instead of damage and heal, `amount` is used, and a separate
-    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
-    // DoT, buff, etc. type spell
     logger.log('models/data-abilities', 'Creating abilities');
 
     // Here be abilities. This would be loaded in a DB and entities would
@@ -28,6 +24,7 @@ define(
         {
             name: 'Stab',
             id: 'stab',
+            spellTypes: ['damage'],
             description: 'A quick stabbing attack which deals a small amount of damage',
             effectId: 'placeHolder',
             sprite: 'stab',
@@ -43,6 +40,7 @@ define(
         {
             name: 'Backstab',
             id: 'backstab',
+            spellTypes: ['damage'],
             description: 'A powerful attack which will do additional damage based on previous attacks',
             effectId: 'placeHolder',
             sprite: 'backstab',
@@ -92,10 +90,30 @@ define(
 
             }
         },
+        {
+            name: 'Suspend',
+            id: 'suspend',
+            spellTypes: ['utility'],
+            description: "Temporarily prevents a single enemy's timer from regenerating",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
 
+            buffDuration: 8,
+            buffEffects: { 
+                timerFactor: -1.0,
+
+                abilities: {
+                }
+            }
+        },
         {
             name: 'Cripple',
             id: 'cripple',
+            spellTypes: ['debuff'],
             description: "Cripple weakens an enemy, lowering their attack and defense",
             effectId: 'placeHolder',
             sprite: 'cripple',
@@ -117,6 +135,7 @@ define(
         {
             name: 'Assassinate',
             id: 'assassinate',
+            spellTypes: ['damage'],
             description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
             effectId: 'placeHolder',
             sprite: 'assassinate',
@@ -161,6 +180,7 @@ define(
         {
             name: 'Haste',
             id: 'haste',
+            spellTypes: ['buff'],
             description: "Increases your timer speed by 20%",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -181,6 +201,7 @@ define(
         {
             name: 'Minor Healing',
             id: 'minorHealing',
+            spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
@@ -197,6 +218,7 @@ define(
         {
             name: 'Dark Blade',
             id: 'darkblade',
+            spellTypes: ['damage'],
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'placeHolder',
             castTime: 3,
@@ -214,6 +236,7 @@ define(
         {
             name: 'Death Touch',
             id: 'deathtouch',
+            spellTypes: ['damage'],
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
             effectId: 'placeHolder',
             castTime: 1,
@@ -251,6 +274,7 @@ define(
         {
             name: 'Magic Shield',
             id: 'magicshield',
+            spellTypes: ['buff'],
             effectId: 'magicshield',
             description: "A shield of magic which increases your armor, magic resistence, and maximum health",
             castTime: 2,
@@ -272,6 +296,7 @@ define(
         {
             name: 'Fire Comet',
             id: 'firecomet',
+            spellTypes: ['damage'],
             description: "A magical comet of fire reigns down on a single enemy, dleaing massive fire damage",
             effectId: 'firecomet',
             castTime: 5,
@@ -284,6 +309,7 @@ define(
         {
             name: 'Ice Spear',
             id: 'icespear',
+            spellTypes: ['damage'],
             effectId: 'icespear',
             description: "A quick direct damage spell which deals water damage to a single enemy",
             castTime: 5,
@@ -302,6 +328,7 @@ define(
         {
             name: 'Heal',
             id: 'heal',
+            spellTypes: ['heal'],
             effectId: 'heal',
             castTime: 5.5,
             timeCost: 5.5,
@@ -313,6 +340,7 @@ define(
         {
             name: 'Smite',
             id: 'smite',
+            spellTypes: ['damage', 'heal'],
             effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
@@ -326,6 +354,7 @@ define(
         {
             name: 'Virtue',
             id: 'virtue',
+            spellTypes: ['buff', 'heal'],
             description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -356,6 +385,7 @@ define(
         {
             name: 'Judgement',
             id: 'judgement',
+            spellTypes: ['damage'],
             effectId: 'placeHolder',
             castTime: 5,
             timeCost: 1,
@@ -392,35 +422,15 @@ define(
         // Other effects
         // ------------------------------
         {
-            name: 'Suspend',
-            id: 'suspend',
-            description: "Temporarily prevents a single enemy's timer from regenerating",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            spellType: 'util',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: -1.0,
-
-                abilities: {
-                }
-            }
-        },
-        {
             name: 'Stun',
             id: 'stun',
+            spellTypes: ['utility'],
             description: "Temporarily prevents an enemy from using abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
             validTargets: ['enemy'],
             type: 'magic',
-            spellType: 'util',
             element: 'light',
 
             buffDuration: 8,
@@ -436,6 +446,7 @@ define(
         {
             name: 'Comatose',
             id: 'comatose',
+            spellTypes: ['utility'],
             description: "Temporarily prevents enemies from using abilities and regenerating time",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -443,7 +454,6 @@ define(
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
-            spellType: 'util',
 
             damage: 1,
 

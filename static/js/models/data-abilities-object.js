@@ -1,6 +1,7 @@
 // ===========================================================================
 //
 // data-abilities
+// NOTE: DEPRECATED
 //
 //      TODO: should be loaded from server and abilities should load on a per
 //      entity level
@@ -10,10 +11,6 @@ define(
     [ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
         events, logger, Ability, Timer
     ){
-    // TODO: think of structure.
-    // Maybe instead of damage and heal, `amount` is used, and a separate
-    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
-    // DoT, buff, etc. type spell
     logger.log('models/data-abilities', 'Creating abilities');
 
     // Here be abilities. This would be loaded in a DB and entities would
@@ -27,6 +24,7 @@ define(
         // ==============================
         stab: new Ability({
             name: 'Stab',
+            spellTypes: ['damage'],
             description: 'A quick stabbing attack which deals a small amount of damage',
             effectId: 'placeHolder',
             sprite: 'stab',
@@ -41,6 +39,7 @@ define(
         }),
         backstab: new Ability({
             name: 'Backstab',
+            spellTypes: ['damage'],
             description: 'A powerful attack which will do additional damage if the enemy has recently been stabbed',
             effectId: 'placeHolder',
             sprite: 'backstab',
@@ -93,6 +92,7 @@ define(
 
         cripple: new Ability({
             name: 'Cripple',
+            spellTypes: ['debuff'],
             description: "Cripple weakens an enemy, lowering their attack and defense",
             effectId: 'placeHolder',
             sprite: 'cripple',
@@ -113,6 +113,7 @@ define(
 
         assassinate: new Ability({
             name: 'Assassinate',
+            spellTypes: ['damage'],
             description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
             effectId: 'placeHolder',
             sprite: 'assassinate',
@@ -160,6 +161,7 @@ define(
         // ------------------------------
         'magicmissle': new Ability({
             name: 'Magic Missle',
+            spellTypes: ['damage'],
             effectId: 'magicMissle',
             castTime: 2,
             timeCost: 2,
@@ -174,6 +176,7 @@ define(
         // ------------------------------
         'flamelick': new Ability({
             name: 'Flamelick',
+            spellTypes: ['damage'],
             effectId: 'flamelick',
             castTime: 3,
             timeCost: 3,
@@ -184,6 +187,7 @@ define(
         }),
         'fireball': new Ability({
             name: 'Fireball',
+            spellTypes: ['damage'],
             effectId: 'fireball',
             castTime: 4,
             timeCost: 4,
@@ -198,6 +202,7 @@ define(
         // ------------------------------
         'trivialhealing': new Ability({
             name: 'Trivial Healing',
+            spellTypes: ['heal'],
             effectId: 'trivialHealing',
             castTime: 3,
             timeCost: 3,
@@ -208,6 +213,7 @@ define(
         }),
         'minorhealing': new Ability({
             name: 'Minor Healing',
+            spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
@@ -224,6 +230,7 @@ define(
         // ==============================
         heal: new Ability({
             name: 'Heal',
+            spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 5.5,
             timeCost: 5.5,
@@ -234,6 +241,7 @@ define(
         }),
         smite: new Ability({
             name: 'Smite',
+            spellTypes: ['damage', 'heal'],
             effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
@@ -246,6 +254,7 @@ define(
         }),
         virtue: new Ability({
             name: 'Virtue',
+            spellTypes: ['heal', 'buff'],
             description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -275,6 +284,7 @@ define(
         // TODO:  Have truedamage be a side effect in the default damage func
         judgement: new Ability({
             name: 'Judgement',
+            spellTypes: ['damage'],
             effectId: 'placeHolder',
             castTime: 5,
             timeCost: 1,
@@ -312,6 +322,7 @@ define(
         // ==============================
         darkblade: new Ability({
             name: 'Dark Blade',
+            spellTypes: ['damage'],
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'placeHolder',
             castTime: 3,
@@ -328,6 +339,7 @@ define(
         // TODO: Have true damage be a part of the damage func
         deathtouch: new Ability({
             name: 'Death Touch',
+            spellTypes: ['damage'],
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
             effectId: 'placeHolder',
             castTime: 1,
@@ -365,6 +377,7 @@ define(
         // ------------------------------
         freezeTime: new Ability({
             name: 'Freeze Time',
+            spellTypes: ['util', 'debuff'],
             description: "Temporarily suspends an enemy's timer. Enemies can still use abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -383,6 +396,7 @@ define(
         }),
         stun: new Ability({
             name: 'Stun',
+            spellTypes: ['util', 'debuff'],
             description: "Temporarily prevents an enemy from using abilities. Timer continues to tick", 
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -403,6 +417,7 @@ define(
         }),
         comatose: new Ability({
             name: 'Comatose',
+            spellTypes: ['util', 'debuff'],
             description: "Temporarily prevents enemies from using abilities and gaining time. Deals damage based on enemy's timer",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -427,6 +442,7 @@ define(
         }),
         haste: new Ability({
             name: 'Haste',
+            spellTypes: ['util', 'buff'],
             description: "Increases your timer speed by 50%",
             effectId: 'placeHolder',
             castTime: 0.5,

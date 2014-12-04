@@ -1365,7 +1365,7 @@ define(
                 id: 'magicMissle',
 
                 // spell type (for labels)
-                spellType: '', // or heal, debuff, buff, util, etc
+                spellTypes: [], // or heal, debuff, buff, util, etc
 
                 // Keep track of buffs / effects that affect the ability object
                 activeEffects: [],
@@ -4183,10 +4183,6 @@ define(
     'models/data-abilities',[ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
         events, logger, Ability, Timer
     ){
-    // TODO: think of structure.
-    // Maybe instead of damage and heal, `amount` is used, and a separate
-    // attribute like `spellType` specifies if it's a Direct Damage, Heal,
-    // DoT, buff, etc. type spell
     logger.log('models/data-abilities', 'Creating abilities');
 
     // Here be abilities. This would be loaded in a DB and entities would
@@ -4201,6 +4197,7 @@ define(
         {
             name: 'Stab',
             id: 'stab',
+            spellTypes: ['damage'],
             description: 'A quick stabbing attack which deals a small amount of damage',
             effectId: 'placeHolder',
             sprite: 'stab',
@@ -4216,6 +4213,7 @@ define(
         {
             name: 'Backstab',
             id: 'backstab',
+            spellTypes: ['damage'],
             description: 'A powerful attack which will do additional damage based on previous attacks',
             effectId: 'placeHolder',
             sprite: 'backstab',
@@ -4265,10 +4263,30 @@ define(
 
             }
         },
+        {
+            name: 'Suspend',
+            id: 'suspend',
+            spellTypes: ['utility'],
+            description: "Temporarily prevents a single enemy's timer from regenerating",
+            effectId: 'placeHolder',
+            castTime: 0.5,
+            timeCost: 0.5,
+            validTargets: ['enemy'],
+            type: 'magic',
+            element: 'light',
 
+            buffDuration: 8,
+            buffEffects: { 
+                timerFactor: -1.0,
+
+                abilities: {
+                }
+            }
+        },
         {
             name: 'Cripple',
             id: 'cripple',
+            spellTypes: ['debuff'],
             description: "Cripple weakens an enemy, lowering their attack and defense",
             effectId: 'placeHolder',
             sprite: 'cripple',
@@ -4290,6 +4308,7 @@ define(
         {
             name: 'Assassinate',
             id: 'assassinate',
+            spellTypes: ['damage'],
             description: "An attack which deals tremendous damage, having a chance to kill the enemy the lower the enemy's health is",
             effectId: 'placeHolder',
             sprite: 'assassinate',
@@ -4334,6 +4353,7 @@ define(
         {
             name: 'Haste',
             id: 'haste',
+            spellTypes: ['buff'],
             description: "Increases your timer speed by 20%",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -4354,6 +4374,7 @@ define(
         {
             name: 'Minor Healing',
             id: 'minorHealing',
+            spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 3,
             timeCost: 3,
@@ -4370,6 +4391,7 @@ define(
         {
             name: 'Dark Blade',
             id: 'darkblade',
+            spellTypes: ['damage'],
             description: 'A physical attack that damages the enemy and returns a percentage of damage to you',
             effectId: 'placeHolder',
             castTime: 3,
@@ -4387,6 +4409,7 @@ define(
         {
             name: 'Death Touch',
             id: 'deathtouch',
+            spellTypes: ['damage'],
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
             effectId: 'placeHolder',
             castTime: 1,
@@ -4424,6 +4447,7 @@ define(
         {
             name: 'Magic Shield',
             id: 'magicshield',
+            spellTypes: ['buff'],
             effectId: 'magicshield',
             description: "A shield of magic which increases your armor, magic resistence, and maximum health",
             castTime: 2,
@@ -4445,6 +4469,7 @@ define(
         {
             name: 'Fire Comet',
             id: 'firecomet',
+            spellTypes: ['damage'],
             description: "A magical comet of fire reigns down on a single enemy, dleaing massive fire damage",
             effectId: 'firecomet',
             castTime: 5,
@@ -4457,6 +4482,7 @@ define(
         {
             name: 'Ice Spear',
             id: 'icespear',
+            spellTypes: ['damage'],
             effectId: 'icespear',
             description: "A quick direct damage spell which deals water damage to a single enemy",
             castTime: 5,
@@ -4475,6 +4501,7 @@ define(
         {
             name: 'Heal',
             id: 'heal',
+            spellTypes: ['heal'],
             effectId: 'heal',
             castTime: 5.5,
             timeCost: 5.5,
@@ -4486,6 +4513,7 @@ define(
         {
             name: 'Smite',
             id: 'smite',
+            spellTypes: ['damage', 'heal'],
             effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
@@ -4499,6 +4527,7 @@ define(
         {
             name: 'Virtue',
             id: 'virtue',
+            spellTypes: ['buff', 'heal'],
             description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -4529,6 +4558,7 @@ define(
         {
             name: 'Judgement',
             id: 'judgement',
+            spellTypes: ['damage'],
             effectId: 'placeHolder',
             castTime: 5,
             timeCost: 1,
@@ -4565,35 +4595,15 @@ define(
         // Other effects
         // ------------------------------
         {
-            name: 'Suspend',
-            id: 'suspend',
-            description: "Temporarily prevents a single enemy's timer from regenerating",
-            effectId: 'placeHolder',
-            castTime: 0.5,
-            timeCost: 0.5,
-            validTargets: ['enemy'],
-            type: 'magic',
-            spellType: 'util',
-            element: 'light',
-
-            buffDuration: 8,
-            buffEffects: { 
-                timerFactor: -1.0,
-
-                abilities: {
-                }
-            }
-        },
-        {
             name: 'Stun',
             id: 'stun',
+            spellTypes: ['utility'],
             description: "Temporarily prevents an enemy from using abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
             validTargets: ['enemy'],
             type: 'magic',
-            spellType: 'util',
             element: 'light',
 
             buffDuration: 8,
@@ -4609,6 +4619,7 @@ define(
         {
             name: 'Comatose',
             id: 'comatose',
+            spellTypes: ['utility'],
             description: "Temporarily prevents enemies from using abilities and regenerating time",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -4616,7 +4627,6 @@ define(
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
-            spellType: 'util',
 
             damage: 1,
 
@@ -4767,7 +4777,6 @@ define(
     ){
 
     var AllAbilityListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'list-item',
         template: '#template-create-all-abilities-list-item',
 
         events: {
@@ -4795,9 +4804,15 @@ define(
             var self = this;
 
             var sprite = this.model.get('effectId');
+
+            var classNames = 'list-item';
+            // update classNames based on model spell types
+            classNames += ' ' + this.model.attributes.spellTypes.join(' ');
+
             this.$el.attr({
                 id: 'create-all-ability-' + 
-                    this.model.attributes.id
+                    this.model.attributes.id,
+                'class': classNames
             });
 
             if(this.model.attributes.disabled){
@@ -5269,6 +5284,8 @@ define(
             $('#arrow-right').off();
             $('#arrow-left').off();
             _.each(this.$selectedAbilitiesEls, function(el, i){ el.off(); });
+
+            $('#create-abilities-filter-wrapper .label-filter').off();
 
             $(window).unbind();
 
@@ -6249,9 +6266,17 @@ define(
         setupPage4: function setupPage4 (){
             var self = this;
 
-            if(self.page4SetupCalled){ return false; }
+            if(self.page4SetupCalled){
+                // Only call once
+                logger.log('pageHome:setupPage4:called:returning', 
+                    '[x] setting up page 4 called, but was already called. returning');
+                return false;
+            }
+
+            logger.log('pageHome:setupPage4', 'setting up page 4');
             self.page4SetupCalled = true;
 
+            // setup selected ability elements ( on the left page )
             this.$selectedAbilitiesEls = [
                 $('#create-selected-abilities-1'),
                 $('#create-selected-abilities-2'),
@@ -6268,11 +6293,15 @@ define(
             _.each(this.$selectedAbilitiesEls, function(el, i){
                 el.on('mouseenter', function(){
                     self.step4UpdateDescription(self.selectedAbilities.models[i]);
+                    if(self.selectedAbilities.models[i]){
+                        $(el).addClass('hover');
+                    }
                 });
 
                 el.on('mouseleave', function(){
                     // reset html
                     self.step4ResetAbilityDescription();
+                    $(el).removeClass('hover');
                 });
 
                 el.on('click', function(){
@@ -6282,11 +6311,54 @@ define(
                             $el: $('#create-all-ability-' + self.selectedAbilities.models[i].id),
                             model: self.selectedAbilities.models[i]
                         });
+
+                        $(el).removeClass('hover');
                     }
                 });
             });
 
-            logger.log('pageHome:setupPage4', 'setting up page 4');
+            // Setup filter icons
+            var $filters = $('#create-abilities-filter-wrapper .label-filter');
+
+            // all filters are active by default
+            this.abilitiesFilterActive = {};
+            this.$abilitiesListItemsByType = {};
+
+            //NOTE: all ability items are rendered by now
+            _.each($filters, function(el, i){
+                var curSpellType = $(el).attr('data');
+
+                self.abilitiesFilterActive[curSpellType] = true;
+                self.$abilitiesListItemsByType[curSpellType] = $('#region-create-all-abilities-list .' + curSpellType);
+            });
+
+            $filters.on('click', function(el, i){
+                logger.log('pageHome:pageAbilities:filter:clicked', 
+                    'filter clicked: %o', el);
+
+                var clickedSpellType = $(el.target).attr('data');
+                $(el.target).toggleClass('inactive');
+                self.abilitiesFilterActive[clickedSpellType] = !self.abilitiesFilterActive[clickedSpellType];
+
+                // Show / hide based on selected filters
+                // TODO: We have to check each item to ensure that we show
+                // hide properly if the element has MUTLIPLE spell types
+                //
+                // Method 1 = Hide all that match, then show all that match
+                _.each(self.abilitiesFilterActive, function(isActive, type){
+                    if(!isActive){
+                        self.$abilitiesListItemsByType[type]
+                            .addClass('hide-from-list');
+                    }
+                });
+                _.each(self.abilitiesFilterActive, function(isActive, type){
+                    if(isActive){
+                        self.$abilitiesListItemsByType[type]
+                            .removeClass('hide-from-list');
+                    }
+                });
+
+            });
 
             return this.showPage4();
         },
@@ -6396,6 +6468,16 @@ define(
                     // some other effect
                     logger.log('pageHome:abilityClicked', 
                         'too many abilities selected, cannot add another');
+
+                    // add an indicator that the player has too many skills selected
+                    self.$abilitySelectedSkillsH3 = self.$abilitySelectedSkillsH3 || $('#selected-skills-h3');
+                    self.$abilitySelectedSkillsH3.addClass('flash');
+                    $('.item', options.$el).addClass('shake shake-constant');
+
+                    setTimeout(function(){
+                        self.$abilitySelectedSkillsH3.removeClass('flash');
+                        $('.item', options.$el).removeClass('shake shake-constant');
+                    }, 210);
 
                 } else {
                     // There is space for it, add it

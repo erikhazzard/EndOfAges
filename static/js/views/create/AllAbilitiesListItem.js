@@ -13,7 +13,6 @@ define(
     ){
 
     var AllAbilityListItem = Backbone.Marionette.ItemView.extend({
-        'className': 'list-item',
         template: '#template-create-all-abilities-list-item',
 
         events: {
@@ -41,9 +40,15 @@ define(
             var self = this;
 
             var sprite = this.model.get('effectId');
+
+            var classNames = 'list-item';
+            // update classNames based on model spell types
+            classNames += ' ' + this.model.attributes.spellTypes.join(' ');
+
             this.$el.attr({
                 id: 'create-all-ability-' + 
-                    this.model.attributes.id
+                    this.model.attributes.id,
+                'class': classNames
             });
 
             if(this.model.attributes.disabled){

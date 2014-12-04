@@ -945,10 +945,28 @@
       #home #book-page-abilities #region-create-all-abilities-list .list-item img {
         height: 30px;
         width: 30px; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item {
+      -webkit-transition: all 0.2s;
+      -moz-transition: all 0.2s;
+      -o-transition: all 0.2s;
+      transition: all 0.2s; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item.hide-from-list,
+    #home #book-page-abilities #region-create-all-abilities-list .list-item.hide-from-list.selected {
+      opacity: 0;
+      height: 0;
+      padding: 0;
+      margin: 0; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected {
+      cursor: alias;
       height: 38px;
       padding-bottom: 2px;
       padding-top: 0px; }
+      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected span {
+        cursor: alias; }
+      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected img {
+        cursor: alias; }
+      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected div {
+        cursor: alias; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item .list-item-name {
       font-size: 0.9em; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected .list-item-name {
@@ -960,12 +978,14 @@
       background: #343434;
       border: 1px solid rgba(255, 255, 255, 0.7);
       color: #ffffff;
+      cursor: alias;
       display: block;
       font-family: "IM Fell English", Tahoma, sans-serif;
       font-weight: bold;
-      font-size: 9px;
+      font-size: 10px;
       float: left;
       margin-right: 2px;
+      padding: 6px 0;
       text-align: center;
       width: 65px; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage {
@@ -978,6 +998,14 @@
       background: #56A64C; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-utility {
       background: #DDEB4C; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
+      -webkit-transition: opacity 0.2s;
+      -moz-transition: opacity 0.2s;
+      -o-transition: opacity 0.2s;
+      transition: opacity 0.2s; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive {
+      cursor: pointer;
+      opacity: 0.2; }
   #home #book-pages #create-selected-abilities-wrapper {
     -webkit-transition: opacity 0.6s;
     -moz-transition: opacity 0.6s;
@@ -989,8 +1017,16 @@
     left: 26px;
     right: 30px; }
     #home #book-pages #create-selected-abilities-wrapper h3 {
+      -webkit-transition: background 0.15s;
+      -moz-transition: background 0.15s;
+      -o-transition: background 0.15s;
+      transition: background 0.15s;
+      background: none;
+      padding: 4px 0;
       margin-bottom: 6px;
       text-align: center; }
+    #home #book-pages #create-selected-abilities-wrapper h3.flash {
+      background: rgba(255, 255, 255, 0.7); }
     #home #book-pages #create-selected-abilities-wrapper .selected-hotkey {
       position: absolute;
       left: 17px;
@@ -1002,6 +1038,10 @@
     position: relative;
     left: 50px; }
   #home #book-pages .create-selected-abilities-item {
+    -webkit-transition: box-shadow 0.1s;
+    -moz-transition: box-shadow 0.1s;
+    -o-transition: box-shadow 0.1s;
+    transition: box-shadow 0.1s;
     border: 1px solid rgba(255, 255, 255, 0.5);
     background: rgba(40, 40, 40, 0.07);
     color: #ffffff;
@@ -1019,6 +1059,8 @@
       width: 100%;
       right: 0;
       left: 0; }
+  #home #book-pages .create-selected-abilities-item.hover {
+    box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px #E34949, 1px 1px 20px #E34949; }
   #home .ability-list-item-meta-wrapper {
     bottom: 0;
     font-family: "Ubuntu Mono", monospace, sans-serif;
@@ -1054,7 +1096,7 @@
     #home .ability-list-item-meta-wrapper .ability-label.buff {
       background: #4988B2;
       left: 24px; }
-    #home .ability-list-item-meta-wrapper .ability-label.util {
+    #home .ability-list-item-meta-wrapper .ability-label.utility {
       background: #DDEB4C;
       left: 32px; }
   #home .list-item:hover .ability-list-item-meta-wrapper .ability-label {
