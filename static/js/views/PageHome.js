@@ -185,6 +185,7 @@ define(
 
             function removeImage( $el ){
                 $('img', $el).remove();
+                $el.addClass('empty-skill');
                 return;
             }
 
@@ -194,6 +195,7 @@ define(
                 var $el = self.$selectedAbilitiesEls[collection.indexOf(model)];
                 removeImage($el);
 
+                $el.removeClass('empty-skill');
                 $el.append(createAbilityIcon(model));
             });
 
@@ -202,13 +204,14 @@ define(
                 // element states. 
                 // TODO: Fix this, right now it's emptying everything to ensure 
                 //  selected abilities always match
-                _.each(self.$selectedAbilitiesEls, function(el){
+                _.each(self.$selectedAbilitiesEls, function(el,i){
                     removeImage(el);
                 });
 
                 // add back all the selected icons
                 _.each(collection.models, function(curModel, i){
                     self.$selectedAbilitiesEls[i].append(createAbilityIcon(curModel));
+                    self.$selectedAbilitiesEls[i].removeClass('empty-skill');
                 });
 
             });
@@ -567,7 +570,7 @@ define(
                         // only go to next page if models are set up
                         if(self.curStep === 2 && 
                         self.selectedAbilities.models && 
-                        self.selectedAbilities.models.length < 1){
+                        self.selectedAbilities.models.length < 4){
                             logger.log('pageHome:pageNext', '[x] cannot continue, no selected models');
                             self.handleInvalidAbilitySelection();
                             return false;
@@ -659,7 +662,7 @@ define(
                     // only go to next page if models are set up
                     if(self.curStep === 2 && 
                     self.selectedAbilities.models && 
-                    self.selectedAbilities.models.length < 1){
+                    self.selectedAbilities.models.length < 4){
                         logger.log('pageHome:pageNext', '[x] cannot continue, no selected models');
                         self.handleInvalidAbilitySelection();
                         return false;
@@ -1550,7 +1553,19 @@ define(
         handleInvalidAbilitySelection: function handleInvalidAbilitySelection(){
             // called when not enough abilities are selected
             // TODO: MAJOR: This....
-            alert('NOT ENOUGH ABILITIES SELECTED');
+            self.$abilitySelectedSkillsH3 = self.$abilitySelectedSkillsH3 || $('#selected-skills-h3');
+            self.$abilitySelectedSkillsH3.addClass('flash'); 
+
+            // TODO: shake hotkeys that don't have an ability
+            $('#create-selected-abilities-wrapper .empty-skill')
+                .addClass('shake shake-constant');
+
+            setTimeout(function(){
+                self.$abilitySelectedSkillsH3.removeClass('flash');
+                $('#create-selected-abilities-wrapper .empty-skill')
+                    .removeClass('shake shake-constant');
+            }, 210);
+        
             return this;
         },
 
