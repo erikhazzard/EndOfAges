@@ -973,7 +973,8 @@
       font-size: 0.9em; }
   #home #book-page-abilities #create-abilities-filter-wrapper {
     margin-top: 4px;
-    position: relative; }
+    position: relative;
+    /*// original colors (not so great on page)*/ }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
       background: #343434;
       border: 1px solid rgba(255, 255, 255, 0.7);
@@ -989,15 +990,15 @@
       text-align: center;
       width: 65px; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage {
-      background: #E34949; }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff {
-      background: #4988B2; }
+      background: rgba(255, 21, 21, 0.32); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-debuff {
-      background: #944E20; }
+      background: rgba(139, 83, 47, 0.37); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-heal {
-      background: #56A64C; }
+      background: rgba(25, 222, 0, 0.23); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff {
+      background: rgba(19, 149, 236, 0.25); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-utility {
-      background: #DDEB4C; }
+      background: rgba(213, 230, 29, 0.38); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
       -webkit-transition: opacity 0.2s, box-shadow 0.2s;
       -moz-transition: opacity 0.2s, box-shadow 0.2s;
