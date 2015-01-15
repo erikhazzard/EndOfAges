@@ -956,16 +956,16 @@
       height: 0;
       padding: 0;
       margin: 0; }
+    #home #book-page-abilities #region-create-all-abilities-list .list-item {
+      cursor: cell; }
+      #home #book-page-abilities #region-create-all-abilities-list .list-item span, #home #book-page-abilities #region-create-all-abilities-list .list-item img, #home #book-page-abilities #region-create-all-abilities-list .list-item div {
+        cursor: cell; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected {
       cursor: alias;
       height: 38px;
       padding-bottom: 2px;
       padding-top: 0px; }
-      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected span {
-        cursor: alias; }
-      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected img {
-        cursor: alias; }
-      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected div {
+      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected span, #home #book-page-abilities #region-create-all-abilities-list .list-item.selected img, #home #book-page-abilities #region-create-all-abilities-list .list-item.selected div {
         cursor: alias; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item .list-item-name {
       font-size: 0.9em; }
@@ -988,7 +988,7 @@
       margin-right: 2px;
       padding: 6px 0;
       text-align: center;
-      width: 65px; }
+      width: 82px; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage {
       background: rgba(255, 21, 21, 0.32); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-debuff {
@@ -997,8 +997,6 @@
       background: rgba(25, 222, 0, 0.23); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff {
       background: rgba(19, 149, 236, 0.25); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-utility {
-      background: rgba(213, 230, 29, 0.38); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
       -webkit-transition: opacity 0.2s, box-shadow 0.2s;
       -moz-transition: opacity 0.2s, box-shadow 0.2s;
@@ -1007,7 +1005,7 @@
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover {
       box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px #E34949, 1px 1px 14px #E34949; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive {
-      cursor: pointer;
+      cursor: cell;
       opacity: 0.2; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive.hover {
       opacity: 0.5;
@@ -1105,9 +1103,6 @@
     #home .ability-list-item-meta-wrapper .ability-label.buff {
       background: #4988B2;
       left: 24px; }
-    #home .ability-list-item-meta-wrapper .ability-label.utility {
-      background: #DDEB4C;
-      left: 32px; }
   #home .list-item:hover .ability-list-item-meta-wrapper .ability-label {
     opacity: 0.6; }
   #home .list-item.selected .ability-list-item-meta-wrapper .ability-label {

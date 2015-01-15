@@ -93,7 +93,7 @@ define(
         {
             name: 'Suspend',
             id: 'suspend',
-            spellTypes: ['utility'],
+            spellTypes: ['debuff'],
             description: "Temporarily prevents a single enemy's timer from regenerating",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -424,7 +424,7 @@ define(
         {
             name: 'Stun',
             id: 'stun',
-            spellTypes: ['utility'],
+            spellTypes: ['debuff'],
             description: "Temporarily prevents an enemy from using abilities",
             effectId: 'placeHolder',
             castTime: 0.5,
@@ -446,7 +446,7 @@ define(
         {
             name: 'Comatose',
             id: 'comatose',
-            spellTypes: ['utility'],
+            spellTypes: ['debuff'],
             description: "Temporarily prevents enemies from using abilities and regenerating time",
             effectId: 'placeHolder',
             castTime: 0.5,

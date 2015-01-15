@@ -2,6 +2,7 @@
  *
  * abilities
  *  data file containing all abilities
+ *  TODO: Is this used? Don't think so
  *
  *  ======================================================================== */
 define(
