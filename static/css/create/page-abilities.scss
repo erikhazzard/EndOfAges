@@ -124,35 +124,64 @@
             z-index: 10;
         }
 
-        // Updated colors NOTE: for old style, remove .bg class
-        .label-filter-damage .bg { background: rgba(255, 21, 21, 0.38); }
-        .label-filter-debuff .bg { background: rgba(139, 83, 47, 0.43); }
-        .label-filter-heal .bg { background: rgba(25, 222, 0, 0.33); }
-        .label-filter-buff .bg { background:rgba(19, 149, 236, 0.35); }
 
-
-        .label-filter {
-            @include transition("opacity 0.2s, transform 0.2s");
+        .label-filter, 
+        .label-filter .label-name,
+        .label-filter .bg {
+            //@include transition("opacity 0.2s, rotate 0.2s");
+            @include transition("background 0.2s, opacity 0.2s");
         }
-        .label-filter.hover {
+
+        .label-filter { 
             // OLD:
             //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
-            &.label-filter-damage .bg { background: rgba(255, 21, 21, 0.68); }
+            &.label-filter-damage .bg { 
+                //background: rgba(255, 21, 21, 0.63);
+                background: rgb(255, 21, 21);
+                opacity: 0.63
+            }
             &.label-filter-debuff .bg { background: rgba(139, 83, 47, 0.73); }
             &.label-filter-heal .bg { background: rgba(25, 222, 0, 0.63); }
             &.label-filter-buff .bg { background:rgba(19, 149, 236, 0.65); }
 
             .label-name {
-                @include transform(rotate(-14deg));
                 font-size: 1.1em;
             }
+
+            // give it a spin
+            // TODO: Start out as a spin?
+            .label-name {
+                @include transform(rotate(-14deg));
+            }
         }
+
+        // lighten BG when hover
+        .label-filter:hover { 
+            // OLD:
+            //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
+            &.label-filter-damage .bg { background: rgba(255, 21, 21, 0.53); }
+            &.label-filter-debuff .bg { background: rgba(139, 83, 47, 0.63); }
+            &.label-filter-heal .bg { background: rgba(25, 222, 0, 0.53); }
+            &.label-filter-buff .bg { background:rgba(19, 149, 236, 0.55); }
+        }
+
+        // on hover, rotate opposite
+        .label-filter:hover .label-name {
+            @include transform(rotate(0deg));
+        }
+
         .label-filter.inactive {
+            .label-name {
+                @include transform(rotate(0deg));
+            }
             cursor: cell;
-            opacity: 0.2
+            opacity: 0.31;
         }
 
         .label-filter.inactive.hover {
+            .label-name {
+                @include transform(rotate(-14deg));
+            }
             // OLD:
             //opacity: 0.5;
             //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-INTERACTION, 1px 1px 14px $COLOR-INTERACTION;

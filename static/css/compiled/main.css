@@ -1013,36 +1013,55 @@
       left: 0;
       text-shadow: 0 0 0.5px #343434;
       z-index: 10; }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage .bg {
-      background: rgba(255, 21, 21, 0.38); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-debuff .bg {
-      background: rgba(139, 83, 47, 0.43); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-heal .bg {
-      background: rgba(25, 222, 0, 0.33); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff .bg {
-      background: rgba(19, 149, 236, 0.35); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
-      -webkit-transition: opacity 0.2s, transform 0.2s;
-      -moz-transition: opacity 0.2s, transform 0.2s;
-      -o-transition: opacity 0.2s, transform 0.2s;
-      transition: opacity 0.2s, transform 0.2s; }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-damage .bg {
-      background: rgba(255, 21, 21, 0.68); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-debuff .bg {
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter,
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter .label-name,
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter .bg {
+      -webkit-transition: background 0.2s, opacity 0.2s;
+      -moz-transition: background 0.2s, opacity 0.2s;
+      -o-transition: background 0.2s, opacity 0.2s;
+      transition: background 0.2s, opacity 0.2s; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.label-filter-damage .bg {
+      background: #ff1515;
+      opacity: 0.63; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.label-filter-debuff .bg {
       background: rgba(139, 83, 47, 0.73); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-heal .bg {
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.label-filter-heal .bg {
       background: rgba(25, 222, 0, 0.63); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-buff .bg {
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.label-filter-buff .bg {
       background: rgba(19, 149, 236, 0.65); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover .label-name {
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter .label-name {
+      font-size: 1.1em; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter .label-name {
       -webkit-transform: rotate(-14deg);
       -moz-transform: rotate(-14deg);
       -o-transform: rotate(-14deg);
-      transform: rotate(-14deg);
-      font-size: 1.1em; }
+      transform: rotate(-14deg); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:hover.label-filter-damage .bg {
+      background: rgba(255, 21, 21, 0.53); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:hover.label-filter-debuff .bg {
+      background: rgba(139, 83, 47, 0.63); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:hover.label-filter-heal .bg {
+      background: rgba(25, 222, 0, 0.53); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:hover.label-filter-buff .bg {
+      background: rgba(19, 149, 236, 0.55); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:hover .label-name {
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive {
       cursor: cell;
-      opacity: 0.2; }
+      opacity: 0.31; }
+      #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive .label-name {
+        -webkit-transform: rotate(0deg);
+        -moz-transform: rotate(0deg);
+        -o-transform: rotate(0deg);
+        transform: rotate(0deg); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive.hover .label-name {
+      -webkit-transform: rotate(-14deg);
+      -moz-transform: rotate(-14deg);
+      -o-transform: rotate(-14deg);
+      transform: rotate(-14deg); }
   #home #book-pages #create-selected-abilities-wrapper {
     -webkit-transition: opacity 0.6s;
     -moz-transition: opacity 0.6s;

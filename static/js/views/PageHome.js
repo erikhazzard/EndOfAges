@@ -1534,19 +1534,20 @@ define(
                 // no, the model was NOT selected. Add it IF there is enough
                 // room in the selected abilities array
                 if(this.selectedAbilities.models.length >= MAX_ABILITIES){
-                    // If there are too many abilities selected, do a shake or
-                    // some other effect
+                    // If there are too many abilities selected, do a shake
                     logger.log('pageHome:abilityClicked', 
                         'too many abilities selected, cannot add another');
 
                     // add an indicator that the player has too many skills selected
                     self.$abilitySelectedSkillsH3 = self.$abilitySelectedSkillsH3 || $('#selected-skills-h3');
                     self.$abilitySelectedSkillsH3.addClass('flash');
+                    $('#create-selected-abilities-wrapper').addClass('shake shake-constant');
                     $('.item', options.$el).addClass('shake shake-constant');
 
                     setTimeout(function(){
                         self.$abilitySelectedSkillsH3.removeClass('flash');
                         $('.item', options.$el).removeClass('shake shake-constant');
+                        $('#create-selected-abilities-wrapper').removeClass('shake shake-constant');
                     }, 210);
 
                 } else {
