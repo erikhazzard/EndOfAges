@@ -1386,8 +1386,12 @@ define(
                 logger.log('pageHome:pageAbilities:filter:clicked', 
                     'filter clicked: %o', el);
 
-                var clickedSpellType = $(el.target).attr('data');
-                $(el.target).toggleClass('inactive');
+                // note: must use parent() since the child element that got 
+                // clicked takes up the entire DOM element
+                var $parent = $(el.target).parent();
+                
+                var clickedSpellType = $parent.attr('data');
+                $parent.toggleClass('inactive');
 
                 self.abilitiesFilterActive[clickedSpellType] = !self.abilitiesFilterActive[clickedSpellType];
 
@@ -1410,15 +1414,19 @@ define(
             // Add hover behavior to show info about filter
             // --------------------------
             $filters.on('mouseenter', function(el, i){
-                var spellType = $(el.target).attr('data');
-                $(el.target).addClass('hover');
+                var $parent = $(el.target).parent();
+                var spellType = $parent.attr('data');
+                $parent.addClass('hover');
+
                 self.$step4abilityDescription.html(
                     $('#template-create-abilities-filter-info-' + spellType).html()
                 );
             });
             $filters.on('mouseleave', function(el, i){
-                var spellType = $(el.target).attr('data');
-                $(el.target).removeClass('hover');
+                var $parent = $(el.target).parent();
+                var spellType = $parent.attr('data');
+                $parent.removeClass('hover');
+
                 self.$step4abilityDescription.empty();
             });
 

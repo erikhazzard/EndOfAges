@@ -24,6 +24,7 @@
 @mixin transform($transformation) {
     -webkit-transform: $transformation;
     -moz-transform: $transformation;
+    -o-transform: $transformation;
     transform: $transformation;
 }
 

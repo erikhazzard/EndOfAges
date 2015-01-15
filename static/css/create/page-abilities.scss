@@ -70,9 +70,9 @@
         margin-top: 4px;
         position: relative;
 
+        // OLD
         .label-filter {
-            background: #343434;
-            border: 1px solid rgba(255,255,255,0.7);
+            background: none;
             color: #ffffff;
             cursor: alias;
             display: block;
@@ -80,12 +80,19 @@
             font-weight:bold;
             font-size: 10px;
             float: left;
+            height: 30px;
             margin-right: 2px;
             padding: 6px 0;
+            position: relative;
             text-align: center;
-
             width: 82px;
         }
+
+        //// appearance - OLD
+        //.label-filter {
+        //    background: #343434;
+        //    border: 1px solid rgba(255,255,255,0.7);
+        //}
 
         /*// original colors (not so great on page)*/
         //.label-filter-damage { background: $COLOR-ABILITY-DAMAGE; }
@@ -94,17 +101,51 @@
         //.label-filter-heal { background: $COLOR-ABILITY-HEAL; }
 
 
-        // Updated colors
-        .label-filter-damage { background: rgba(255, 21, 21, 0.32); }
-        .label-filter-debuff { background: rgba(139, 83, 47, 0.37); }
-        .label-filter-heal { background: rgba(25, 222, 0, 0.23); }
-        .label-filter-buff { background:rgba(19, 149, 236, 0.25); }
+        .bg, .label-name { cursor: inherit; }
+
+        // NEW : filtered BG
+        .label-filter .bg {
+            background: rgba(255, 21, 21, 0.52);
+            border-radius: 4px;
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+
+            -webkit-filter: url('#filter-map');
+            z-index: 1;
+        }
+
+        .label-name {
+            padding: 6px 0 0 0;
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+
+            //text-decoration: underline;
+            text-shadow: 0 0 0.5px #343434;
+            z-index: 10;
+        }
+
+        // Updated colors NOTE: for old style, remove .bg class
+        .label-filter-damage .bg { background: rgba(255, 21, 21, 0.38); }
+        .label-filter-debuff .bg { background: rgba(139, 83, 47, 0.43); }
+        .label-filter-heal .bg { background: rgba(25, 222, 0, 0.33); }
+        .label-filter-buff .bg { background:rgba(19, 149, 236, 0.35); }
+
 
         .label-filter {
-            @include transition("opacity 0.2s, box-shadow 0.2s");
+            @include transition("opacity 0.2s, transform 0.2s");
         }
         .label-filter.hover {
-            box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
+            // OLD:
+            //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
+            &.label-filter-damage .bg { background: rgba(255, 21, 21, 0.68); }
+            &.label-filter-debuff .bg { background: rgba(139, 83, 47, 0.73); }
+            &.label-filter-heal .bg { background: rgba(25, 222, 0, 0.63); }
+            &.label-filter-buff .bg { background:rgba(19, 149, 236, 0.65); }
+
+            .label-name {
+                @include transform(rotate(-14deg));
+                font-size: 1.1em;
+            }
         }
         .label-filter.inactive {
             cursor: cell;
@@ -112,8 +153,9 @@
         }
 
         .label-filter.inactive.hover {
-            opacity: 0.5;
-            box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-INTERACTION, 1px 1px 14px $COLOR-INTERACTION;
+            // OLD:
+            //opacity: 0.5;
+            //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-INTERACTION, 1px 1px 14px $COLOR-INTERACTION;
         }
     }
 }

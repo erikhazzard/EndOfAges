@@ -70,6 +70,7 @@
 #region-map-entity-info.off-screen {
   -webkit-transform: translate(-300px, 0);
   -moz-transform: translate(-300px, 0);
+  -o-transform: translate(-300px, 0);
   transform: translate(-300px, 0); }
 
 #region-map-entity-info {
@@ -83,6 +84,7 @@
   perspective: 1000px;
   -webkit-transform: translate(200px, 0);
   -moz-transform: translate(200px, 0);
+  -o-transform: translate(200px, 0);
   transform: translate(200px, 0);
   background: #78482B;
   border-right: 1px solid #343434;
@@ -976,8 +978,7 @@
     position: relative;
     /*// original colors (not so great on page)*/ }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
-      background: #343434;
-      border: 1px solid rgba(255, 255, 255, 0.7);
+      background: none;
       color: #ffffff;
       cursor: alias;
       display: block;
@@ -985,31 +986,63 @@
       font-weight: bold;
       font-size: 10px;
       float: left;
+      height: 30px;
       margin-right: 2px;
       padding: 6px 0;
+      position: relative;
       text-align: center;
       width: 82px; }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage {
-      background: rgba(255, 21, 21, 0.32); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-debuff {
-      background: rgba(139, 83, 47, 0.37); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-heal {
-      background: rgba(25, 222, 0, 0.23); }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff {
-      background: rgba(19, 149, 236, 0.25); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .bg, #home #book-page-abilities #create-abilities-filter-wrapper .label-name {
+      cursor: inherit; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter .bg {
+      background: rgba(255, 21, 21, 0.52);
+      border-radius: 4px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      -webkit-filter: url("#filter-map");
+      z-index: 1; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-name {
+      padding: 6px 0 0 0;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      text-shadow: 0 0 0.5px #343434;
+      z-index: 10; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-damage .bg {
+      background: rgba(255, 21, 21, 0.38); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-debuff .bg {
+      background: rgba(139, 83, 47, 0.43); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-heal .bg {
+      background: rgba(25, 222, 0, 0.33); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter-buff .bg {
+      background: rgba(19, 149, 236, 0.35); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter {
-      -webkit-transition: opacity 0.2s, box-shadow 0.2s;
-      -moz-transition: opacity 0.2s, box-shadow 0.2s;
-      -o-transition: opacity 0.2s, box-shadow 0.2s;
-      transition: opacity 0.2s, box-shadow 0.2s; }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover {
-      box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px #E34949, 1px 1px 14px #E34949; }
+      -webkit-transition: opacity 0.2s, transform 0.2s;
+      -moz-transition: opacity 0.2s, transform 0.2s;
+      -o-transition: opacity 0.2s, transform 0.2s;
+      transition: opacity 0.2s, transform 0.2s; }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-damage .bg {
+      background: rgba(255, 21, 21, 0.68); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-debuff .bg {
+      background: rgba(139, 83, 47, 0.73); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-heal .bg {
+      background: rgba(25, 222, 0, 0.63); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover.label-filter-buff .bg {
+      background: rgba(19, 149, 236, 0.65); }
+    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.hover .label-name {
+      -webkit-transform: rotate(-14deg);
+      -moz-transform: rotate(-14deg);
+      -o-transform: rotate(-14deg);
+      transform: rotate(-14deg);
+      font-size: 1.1em; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive {
       cursor: cell;
       opacity: 0.2; }
-    #home #book-page-abilities #create-abilities-filter-wrapper .label-filter.inactive.hover {
-      opacity: 0.5;
-      box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px rgba(235, 235, 235, 0.9), 1px 1px 14px rgba(235, 235, 235, 0.9); }
   #home #book-pages #create-selected-abilities-wrapper {
     -webkit-transition: opacity 0.6s;
     -moz-transition: opacity 0.6s;
