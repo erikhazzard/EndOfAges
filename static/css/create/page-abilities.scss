@@ -68,6 +68,7 @@
     // Filter Labels
     #create-abilities-filter-wrapper {
         margin-top: 4px;
+        margin-bottom: 8px;
         position: relative;
 
         // OLD
@@ -80,12 +81,32 @@
             font-weight:bold;
             font-size: 10px;
             float: left;
-            height: 30px;
-            margin-right: 2px;
+            height: 34px;
+            margin-right: 7px;
             padding: 6px 0;
             position: relative;
             text-align: center;
-            width: 82px;
+            width: 77px;
+        }
+
+        .label-filter:nth-child(1) {
+            height: 35px;
+            margin-right: 6px;
+            width: 86px;
+        }
+        .label-filter:nth-child(2) {
+            height: 32px;
+            margin-right: 6px;
+            width: 80px;
+        }
+        .label-filter:nth-child(3) {
+            margin-right: 5px;
+            width: 76px;
+        }
+        .label-filter:nth-child(4) {
+            height: 34px;
+            margin-right: 0;
+            width: 76px;
         }
 
         //// appearance - OLD
@@ -114,11 +135,18 @@
             z-index: 1;
         }
 
+        .label-filter:nth-child(1) .bg ,
+        .label-filter:nth-child(3) .bg {
+            -webkit-filter: url('#filter-map-more-turbulence');
+        }
+
         .label-name {
+            color: #e0e0e0;
             padding: 6px 0 0 0;
             position: absolute;
             top: 0; right: 0; bottom: 0; left: 0;
 
+            font-family: $interaction-font;
             //text-decoration: underline;
             text-shadow: 0 0 0.5px #343434;
             z-index: 10;
@@ -136,22 +164,29 @@
             // OLD:
             //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
             &.label-filter-damage .bg { 
-                //background: rgba(255, 21, 21, 0.63);
-                background: rgb(255, 21, 21);
-                opacity: 0.63
+                background: #8F2929;
+                background: #8B4D4D;
             }
-            &.label-filter-debuff .bg { background: rgba(139, 83, 47, 0.73); }
-            &.label-filter-heal .bg { background: rgba(25, 222, 0, 0.63); }
-            &.label-filter-buff .bg { background:rgba(19, 149, 236, 0.65); }
+            &.label-filter-debuff .bg { 
+                background: #66543c;
+            }
+            &.label-filter-heal .bg { 
+                background: #547650;
+            }
+            &.label-filter-buff .bg { 
+                background: #3D5D7C;
+            }
 
             .label-name {
-                font-size: 1.1em;
+                font-size: 1.6em;
+                letter-spacing: 0.5px;
             }
 
             // give it a spin
             // TODO: Start out as a spin?
             .label-name {
-                @include transform(rotate(-14deg));
+                //@include transform(rotate(-14deg));
+            @include transform(rotate(0deg));
             }
         }
 
@@ -159,23 +194,30 @@
         .label-filter:hover { 
             // OLD:
             //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
-            &.label-filter-damage .bg { background: rgba(255, 21, 21, 0.53); }
-            &.label-filter-debuff .bg { background: rgba(139, 83, 47, 0.63); }
-            &.label-filter-heal .bg { background: rgba(25, 222, 0, 0.53); }
-            &.label-filter-buff .bg { background:rgba(19, 149, 236, 0.55); }
+            &.label-filter-damage .bg {  
+            }
+            &.label-filter-debuff .bg {  
+            }
+            &.label-filter-heal .bg {  
+            }
+            &.label-filter-buff .bg {  
+            }
         }
 
         // on hover, rotate opposite
         .label-filter:hover .label-name {
-            @include transform(rotate(0deg));
+            //@include transform(rotate(0deg));
+            @include transform(rotate(-14deg));
         }
 
         .label-filter.inactive {
             .label-name {
                 @include transform(rotate(0deg));
+                font-size: 1.1em;
+                margin-top: 4px;
             }
             cursor: cell;
-            opacity: 0.31;
+            opacity: 0.27;
         }
 
         .label-filter.inactive.hover {
@@ -244,6 +286,7 @@
 
 
         img {
+            @include noSelect();
             cursor: alias;
             position: absolute;
             height: 100%;
