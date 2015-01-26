@@ -949,24 +949,10 @@
   #home #book-page-abilities #region-create-all-abilities-list {
     height: 248px; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item {
-      height: 38px;
-      padding-bottom: 2px;
-      padding-top: 4px;
-      position: relative; }
-      #home #book-page-abilities #region-create-all-abilities-list .list-item img {
-        height: 30px;
-        width: 30px; }
-    #home #book-page-abilities #region-create-all-abilities-list .list-item {
       -webkit-transition: all 0.2s;
       -moz-transition: all 0.2s;
       -o-transition: all 0.2s;
       transition: all 0.2s; }
-    #home #book-page-abilities #region-create-all-abilities-list .list-item.hide-from-list,
-    #home #book-page-abilities #region-create-all-abilities-list .list-item.hide-from-list.selected {
-      opacity: 0;
-      height: 0;
-      padding: 0;
-      margin: 0; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item {
       cursor: cell; }
       #home #book-page-abilities #region-create-all-abilities-list .list-item span, #home #book-page-abilities #region-create-all-abilities-list .list-item img, #home #book-page-abilities #region-create-all-abilities-list .list-item div {
@@ -1193,6 +1179,32 @@
     opacity: 0.6; }
   #home .list-item.selected .ability-list-item-meta-wrapper .ability-label {
     opacity: 1; }
+  #home #region-create-all-abilities-list .all-ability-list {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    overflow: auto;
+    overflow-x: hidden; }
+    #home #region-create-all-abilities-list .all-ability-list .list-item {
+      height: 40px;
+      float: left;
+      margin: 4px;
+      padding: 4px;
+      position: relative;
+      width: 40px; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item img {
+        border: 3px solid transparent;
+        height: 40px;
+        width: 40px; }
+    #home #region-create-all-abilities-list .all-ability-list .list-item.selected {
+      background: none; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item.selected img {
+        border: 3px solid rgba(0, 0, 0, 0.5); }
+    #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list,
+    #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list.selected {
+      opacity: 0.1; }
   #home #book-page-final-data h2 {
     text-align: center; }
   #home #book-page-final-data p {

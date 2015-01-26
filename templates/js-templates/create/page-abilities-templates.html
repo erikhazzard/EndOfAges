@@ -6,42 +6,13 @@
         <% } else { %>
             <img src='/static/img/abilities/<%= id %>.svg' class='class-image' height='46' width='46' />
         <% } %>
-
-        <span class='list-item-name'>
-            <% if(disabled){ %>
-                Undiscovered
-            <% } else { %>
-                <%= name %>
-            <% } %>
-        </span>
     </div>
         
     <% if(!disabled){ %>
         <div class='ability-list-item-meta-wrapper'>
             <% if(spellTypes.indexOf('damage') > -1){ %>
-                <div class='ability-label damage'>
-                    D<br />M<br />G
-                </div>
+                <!-- <div class='ability-label damage'></div> -->
             <% } %>
-
-            <% if(spellTypes.indexOf('heal') > -1){ %>
-                <div class='ability-label heal'>
-                    H<br />E<br />A<br />L
-                </div>
-            <% } %>
-
-            <% if(spellTypes.indexOf('buff') > -1){ %>
-                <div class='ability-label buff'>
-                    B<br />U<br />F<br />F
-                </div>
-            <% } %>
-
-            <% if(spellTypes.indexOf('debuff') > -1){ %>
-                <div class='ability-label debuff'>
-                    D<br />B<br />U<br />F
-                </div>
-            <% } %>
-
         </div>
     <% } %>
 </script>
@@ -54,14 +25,14 @@
 
 {{// Filter Descriptions }}
 <script id='template-create-abilities-filter-info-damage' type='text/template'>
-    Damage
+    <strong>Damage</strong>: Abilities that decrease an enemy's health
 </script>
 <script id='template-create-abilities-filter-info-debuff' type='text/template'>
-    Debuff
+    <strong>Debuff</strong>: Abilities that weaken an enemy, making your opponent easier to defeat
 </script>
 <script id='template-create-abilities-filter-info-heal' type='text/template'>
-    Heal
+    <strong>Heal</strong>: Abilities that restore your own health, kepeing you alive
 </script>
 <script id='template-create-abilities-filter-info-buff' type='text/template'>
-    Buff
+    <strong>Buff</strong>: Abilities that strengthen you, making you harder to kill
 </script>

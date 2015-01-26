@@ -31,10 +31,16 @@
     </p>
 
     <p>
-        ABILITIES: <br />
-        <% _.each(selectedAbilities, function(ability){ %>
-            :<%= ability.attributes.name %>:
-        <% }) %>
+        <h2>Abilities</h2>
+        From an early age, I was a skill in the art of 
+        <span class='interaction-font'><%= selectedAbilities[0].attributes.name %></span>. 
+        Over time, I trained hard and mastered the art of 
+        <span class='interaction-font'><%= selectedAbilities[1].attributes.name %></span> and 
+        <span class='interaction-font'><%= selectedAbilities[2].attributes.name %></span>.
+
+        The last years I have spent practicing  
+        <span class='interaction-font'><%= selectedAbilities[3].attributes.name %></span>, and compared
+        to me there is truly no equal.
     </p>
 
     </div>

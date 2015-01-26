@@ -204,11 +204,25 @@ define(
             spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 3,
+            description: "A quick ability that restores a minor amount of health",
             timeCost: 3,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
             heal: 15
+        },
+        {
+            name: 'Heal',
+            id: 'heal',
+            description: "This ability provides a greater degree of healing at the expense of a longer usage time",
+            spellTypes: ['heal'],
+            effectId: 'heal',
+            castTime: 5.5,
+            timeCost: 5.5,
+            validTargets: ['player'],
+            type: 'magic',
+            element: 'light',
+            heal: 20
         },
         // ==============================
         // 
@@ -326,21 +340,10 @@ define(
         //
         // ==============================
         {
-            name: 'Heal',
-            id: 'heal',
-            spellTypes: ['heal'],
-            effectId: 'heal',
-            castTime: 5.5,
-            timeCost: 5.5,
-            validTargets: ['player'],
-            type: 'magic',
-            element: 'light',
-            heal: 20
-        },
-        {
             name: 'Smite',
             id: 'smite',
             spellTypes: ['damage', 'heal'],
+            description: "Using the force of divine power, you smite your foes with the element of light, damaging them while healing yourself to a small degree.",
             effectId: 'placeHolder',
             castTime: 1,
             timeCost: 1,
@@ -348,7 +351,7 @@ define(
             type: 'magic',
             element: 'light',
             damage: 10,
-            heal: 5,
+            heal: 3,
             healTarget: 'source'
         },
         {
@@ -387,7 +390,8 @@ define(
             id: 'judgement',
             spellTypes: ['damage'],
             effectId: 'placeHolder',
-            castTime: 5,
+            description: "At the expense of a long casting time, this ability decreases your enemy's health by 10%",
+            castTime: 6,
             timeCost: 1,
             validTargets: ['enemy'],
             type: 'magic',
