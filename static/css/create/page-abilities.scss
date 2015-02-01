@@ -9,9 +9,6 @@
     .interaction-list .item {
         opacity: 0.5;
     }
-    .list-item:hover .item { 
-        opacity: 0.7;
-    }
     .list-item.selected .item {
         opacity: 1;
     }
@@ -22,19 +19,6 @@
         height: 248px;
 
         .list-item { @include transition("all 0.2s"); }
-
-        .list-item{ 
-            cursor: cell;
-            span, img, div { cursor: cell; }
-        }
-
-        .list-item.selected { 
-            cursor: alias;
-            height: 38px;
-            padding-bottom: 2px;
-            padding-top: 0px; 
-            span, img, div { cursor: alias; }
-        }
 
         .list-item .list-item-name {
             font-size: 0.9em;
@@ -356,22 +340,46 @@ $ability-label-width: 8px;
     .list-item {
         height: $ability-icon-size;
         float: left;
-        margin: 4px;
+        margin: 4px 3px;
         padding: 4px;
         position: relative;
         width: $ability-icon-size;
 
+        cursor: cell;
+        span, img, div { cursor: cell; }
+
         img {
-            border: 3px solid rgba(0,0,0,0);
+            border: 2px solid rgba(0,0,0,0);
+            border-radius: 2px;
             height: $ability-icon-size;
             width: $ability-icon-size;
         }
     }
 
+    .list-item:hover .item { 
+        opacity: 0.7;
+        box-shadow: 0 0 3px #ffffff;
+    }
+
     .list-item.selected {
         background: none;
+        cursor: alias;
+        padding-bottom: 2px;
+        padding-top: 0px; 
+        span, img, div { cursor: alias; }
+
         img {
-            border: 3px solid rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,.9);
+            box-shadow: 0 0 12px #343434;
+            border-radius: 2px;
+        }
+    }
+    .list-item.selected:hover .item { 
+        opacity: 1;
+        cursor: alias;
+        span, img, div { cursor: alias; }
+        img {
+            box-shadow: 0 0 12px #dd2222;
         }
     }
 

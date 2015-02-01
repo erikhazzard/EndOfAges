@@ -942,8 +942,6 @@
     opacity: 1; }
   #home #book-page-abilities .interaction-list .item {
     opacity: 0.5; }
-  #home #book-page-abilities .list-item:hover .item {
-    opacity: 0.7; }
   #home #book-page-abilities .list-item.selected .item {
     opacity: 1; }
   #home #book-page-abilities #region-create-all-abilities-list {
@@ -953,17 +951,6 @@
       -moz-transition: all 0.2s;
       -o-transition: all 0.2s;
       transition: all 0.2s; }
-    #home #book-page-abilities #region-create-all-abilities-list .list-item {
-      cursor: cell; }
-      #home #book-page-abilities #region-create-all-abilities-list .list-item span, #home #book-page-abilities #region-create-all-abilities-list .list-item img, #home #book-page-abilities #region-create-all-abilities-list .list-item div {
-        cursor: cell; }
-    #home #book-page-abilities #region-create-all-abilities-list .list-item.selected {
-      cursor: alias;
-      height: 38px;
-      padding-bottom: 2px;
-      padding-top: 0px; }
-      #home #book-page-abilities #region-create-all-abilities-list .list-item.selected span, #home #book-page-abilities #region-create-all-abilities-list .list-item.selected img, #home #book-page-abilities #region-create-all-abilities-list .list-item.selected div {
-        cursor: alias; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item .list-item-name {
       font-size: 0.9em; }
     #home #book-page-abilities #region-create-all-abilities-list .list-item.selected .list-item-name {
@@ -1190,18 +1177,39 @@
     #home #region-create-all-abilities-list .all-ability-list .list-item {
       height: 40px;
       float: left;
-      margin: 4px;
+      margin: 4px 3px;
       padding: 4px;
       position: relative;
-      width: 40px; }
+      width: 40px;
+      cursor: cell; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item span, #home #region-create-all-abilities-list .all-ability-list .list-item img, #home #region-create-all-abilities-list .all-ability-list .list-item div {
+        cursor: cell; }
       #home #region-create-all-abilities-list .all-ability-list .list-item img {
-        border: 3px solid transparent;
+        border: 2px solid transparent;
+        border-radius: 2px;
         height: 40px;
         width: 40px; }
+    #home #region-create-all-abilities-list .all-ability-list .list-item:hover .item {
+      opacity: 0.7;
+      box-shadow: 0 0 3px #ffffff; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.selected {
-      background: none; }
+      background: none;
+      cursor: alias;
+      padding-bottom: 2px;
+      padding-top: 0px; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item.selected span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected div {
+        cursor: alias; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected img {
-        border: 3px solid rgba(0, 0, 0, 0.5); }
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 12px #343434;
+        border-radius: 2px; }
+    #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item {
+      opacity: 1;
+      cursor: alias; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item div {
+        cursor: alias; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item img {
+        box-shadow: 0 0 12px #dd2222; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list,
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list.selected {
       opacity: 0.1; }
