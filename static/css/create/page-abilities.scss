@@ -357,6 +357,7 @@ $ability-label-width: 8px;
         }
 
         // timer bar
+        // VERTICAL
         .ability-timer-bar {
             background: #000000;
             border: 2px solid #ffffff;
@@ -373,6 +374,28 @@ $ability-label-width: 8px;
                 left: 0;
                 position: absolute;
                 right: 0;
+            }
+        }
+
+        // HORIZONTAL
+        .ability-timer-bar {
+            background: #000000;
+            border: 2px solid #ffffff;
+            bottom: -4px;
+            left: 0;
+            height: 6px;
+            position: absolute;
+            right: 0;
+            top: auto;
+            width: 100%;
+            z-index: 10;
+
+            .inner-bar {
+                background: #ffffff;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
             }
         }
     
