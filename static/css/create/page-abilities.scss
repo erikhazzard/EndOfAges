@@ -335,13 +335,13 @@ $ability-label-width: 8px;
     overflow: auto;
     overflow-x: hidden;
 
-    $ability-icon-size: 40px;
-    
+    $ability-icon-size: 42px;
+
     .list-item {
         height: $ability-icon-size;
         float: left;
-        margin: 4px 3px;
-        padding: 4px;
+        margin: 4px 9px 4px 3px;
+        padding: 0px;
         position: relative;
         width: $ability-icon-size;
 
@@ -350,10 +350,32 @@ $ability-label-width: 8px;
 
         img {
             border: 2px solid rgba(0,0,0,0);
+            border: 2px solid #ffffff;
             border-radius: 2px;
             height: $ability-icon-size;
             width: $ability-icon-size;
         }
+
+        // timer bar
+        .ability-timer-bar {
+            background: #000000;
+            border: 2px solid #ffffff;
+            bottom: 0;
+            position: absolute;
+            right: -5px;
+            top: 0px;
+            width: 7px;
+            z-index: 10;
+
+            .inner-bar {
+                background: #ffffff;
+                bottom: 0;
+                left: 0;
+                position: absolute;
+                right: 0;
+            }
+        }
+    
     }
 
     .list-item:hover .item { 
@@ -364,8 +386,8 @@ $ability-label-width: 8px;
     .list-item.selected {
         background: none;
         cursor: alias;
-        padding-bottom: 2px;
-        padding-top: 0px; 
+        //padding-bottom: 2px;
+        //padding-top: 0px; 
         span, img, div { cursor: alias; }
 
         img {

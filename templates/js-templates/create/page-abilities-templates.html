@@ -6,6 +6,10 @@
         <% } else { %>
             <img src='/static/img/abilities/<%= id %>.svg' class='class-image' height='46' width='46' />
         <% } %>
+        <div class='ability-timer-bar'>
+            <!-- TODO: Replace with actual value -->
+            <div class='inner-bar' style='height: <%= Math.random() * 100 | 0 %>%;'></div>
+        </div>
     </div>
         
     <% if(!disabled){ %>
