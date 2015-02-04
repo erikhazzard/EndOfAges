@@ -194,16 +194,26 @@
     }
 }
 
-#book-pages {
+#book-wrapper {
     // Selected abilities
     #create-selected-abilities-wrapper {
         @include transition("opacity 0.6s");
         bottom: 30px;
+        // Show on page 2
+        display: none;
         opacity: 0;
         padding-bottom: 10px;
         position: absolute;
         left: 26px;
         right: 30px;
+
+        // for newer, absolute position
+        // why do we need to put this outside the view hierarchy? well, because
+        //  hovering over class list triggers a dang repaint on the entire
+        //  page
+        left: 64px;
+        right: 0;
+        width: 361px;
 
 
         h3 { 
@@ -236,6 +246,7 @@
     }
     .create-selected-abilities-item {
         @include transition("box-shadow 0.1s");
+
         border: 1px solid rgba(255,255,255,0.5);
         background: rgba(40,40,40,0.07);
         color: #ffffff;
@@ -250,6 +261,7 @@
 
         img {
             @include noSelect();
+            @include filter(url(#filter-wavy-ability-icon));
             cursor: alias;
             position: absolute;
             height: 100%;
@@ -262,6 +274,7 @@
         box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px $COLOR-ABILITY-DAMAGE, 1px 1px 20px $COLOR-ABILITY-DAMAGE;
     }
 }
+#book-wrapper.step-2 #create-selected-abilities-wrapper { display: block; }
 
 
 // ------------------------------
@@ -335,7 +348,7 @@ $ability-label-width: 8px;
     overflow: auto;
     overflow-x: hidden;
 
-    $ability-icon-size: 42px;
+    $ability-icon-size: 43px;
 
     .list-item {
         height: $ability-icon-size;
@@ -349,11 +362,11 @@ $ability-label-width: 8px;
         span, img, div { cursor: cell; }
 
         img {
-            border: 2px solid rgba(0,0,0,0);
-            border: 2px solid #ffffff;
+            border: 3px solid #000000;
             border-radius: 2px;
             height: $ability-icon-size;
             width: $ability-icon-size;
+            @include filter(url(#filter-wavy-ability-icon));
         }
 
         // timer bar
@@ -379,7 +392,7 @@ $ability-label-width: 8px;
 
         // HORIZONTAL
         .ability-timer-bar {
-            background: #000000;
+            background: #ffffff;
             border: 2px solid #ffffff;
             bottom: -4px;
             left: 0;
@@ -391,7 +404,7 @@ $ability-label-width: 8px;
             z-index: 10;
 
             .inner-bar {
-                background: #ffffff;
+                background: #000000;
                 left: 0;
                 position: absolute;
                 right: 0;
@@ -402,8 +415,8 @@ $ability-label-width: 8px;
     }
 
     .list-item:hover .item { 
-        opacity: 0.7;
-        box-shadow: 0 0 3px #ffffff;
+        opacity: 0.85;
+        box-shadow: 0 0 1px #ffffff, 0 0 7px #ffffff, 0 0 60px #ffffff;
     }
 
     .list-item.selected {
@@ -412,19 +425,19 @@ $ability-label-width: 8px;
         //padding-bottom: 2px;
         //padding-top: 0px; 
         span, img, div { cursor: alias; }
+        box-shadow: 0 0 12px #343434;
 
         img {
-            border: 2px solid rgba(255,255,255,.9);
-            box-shadow: 0 0 12px #343434;
+            border: 2px solid rgba(255,255,255,.95);
             border-radius: 2px;
         }
     }
     .list-item.selected:hover .item { 
         opacity: 1;
         cursor: alias;
+        box-shadow: 0 0 12px #dd2222;
         span, img, div { cursor: alias; }
         img {
-            box-shadow: 0 0 12px #dd2222;
         }
     }
 

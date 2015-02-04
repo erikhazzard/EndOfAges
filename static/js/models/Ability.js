@@ -27,7 +27,10 @@ define(
         defaults: function(){
             return {
                 name: 'Magic Missle',
-                id: 'magicMissle',
+
+                // ID used to identify the ability as well as the name of the
+                // icon file
+                id: 'magic-missle',
 
                 // spell type (for labels)
                 spellTypes: [], // or heal, debuff, buff, util, etc
@@ -119,7 +122,7 @@ define(
                 // Damage Over Time (DOT) properties
                 // ticks: number of times to do the effect
                 ticks: 0,
-                // time between each tick
+                // time between each tick (seconds)
                 tickDuration: 1,
 
                 // Heal

@@ -346,6 +346,9 @@ define(
             var self = this;
             logger.log('pageHome', 'onShow called');
 
+
+            this.$bookWrapper = $('#book-wrapper');
+
             // setup races
             this.regionRaceList.show(this.raceListView);
             this.regionClassList.show(this.classListView);
@@ -444,6 +447,10 @@ define(
                 logger.log('pageHome:pageNext', 'curStep ' + self.curStep);
 
                 self.$pages.turn('disable', false);
+                    
+                setTimeout(function(){
+                    self.setBookWrapperStep(self.curStep);
+                }, 300);
 
                 if(self.curStep < 4){
                     logger.log('pageHome', '\t showing next page');
@@ -493,6 +500,9 @@ define(
                 logger.log('pageHome:pagePrevious', 'curStep ' + self.curStep);
 
                 self.$pages.turn('disable', false);
+                setTimeout(function(){
+                    self.setBookWrapperStep(self.curStep);
+                }, 150);
                 
                 if(self.curStep > 1){
                     logger.log('pageHome', '\t showing previous page');
@@ -697,11 +707,18 @@ define(
             });
         },
 
-        // ==============================
+        setBookWrapperStep: function setBookWrapperStep ( step ){
+            // remove other step classes
+            this.$bookWrapper.removeClass('step-1 step-2 step-3');
+            this.$bookWrapper.addClass('step-' + step);
+            return this;
+        },
+
+        // ===================================================================
         //
         // Page 1  - Title
         // 
-        // ==============================
+        // ===================================================================
         setupPage1: function setupStep1(){
             // Sets up flow for the title page
             //
@@ -1083,6 +1100,7 @@ define(
         // ------------------------------
         showPage2: function showPage2(){
             var self = this;
+
             self.$cachedEls.nextStepArrow.removeClass('fadeOut');
             self.$cachedEls.nextStepArrow.addClass('fadeIn');
 
@@ -1212,8 +1230,6 @@ define(
             logger.log('pageHome:setupPage3', 'showPage3() (classes) called: ', {
                 page3Complete: this.pagesCompleted[3]
             });
-
-            this.cleanupPage2();
 
             clearTimeout(this.page2arrowPulseTimeout);
             clearTimeout(this.page3arrowPulseTimeout);

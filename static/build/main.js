@@ -1362,7 +1362,10 @@ define(
         defaults: function(){
             return {
                 name: 'Magic Missle',
-                id: 'magicMissle',
+
+                // ID used to identify the ability as well as the name of the
+                // icon file
+                id: 'magic-missle',
 
                 // spell type (for labels)
                 spellTypes: [], // or heal, debuff, buff, util, etc
@@ -1454,7 +1457,7 @@ define(
                 // Damage Over Time (DOT) properties
                 // ticks: number of times to do the effect
                 ticks: 0,
-                // time between each tick
+                // time between each tick (seconds)
                 tickDuration: 1,
 
                 // Heal
@@ -4178,6 +4181,8 @@ define(
 //      TODO: should be loaded from server and abilities should load on a per
 //      entity level
 //
+// PROPERTIES: id: used to get the icon (e.g., `magic-shielding`.svg)
+//
 // ===========================================================================
 define(
     'models/data-abilities',[ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
@@ -4373,7 +4378,7 @@ define(
         // ------------------------------
         {
             name: 'Minor Healing',
-            id: 'minorHealing',
+            id: 'minor-healing',
             spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 3,
@@ -4403,6 +4408,7 @@ define(
         //
         // ==============================
         {
+            // TODO::::: return percentage of damage
             name: 'Dark Blade',
             id: 'darkblade',
             spellTypes: ['damage'],
@@ -4455,12 +4461,30 @@ define(
                 }, delay);
             }
         },
+
+        {
+            name: 'Poisoned Stab',
+            id: 'poisoned-stab',
+            spellTypes: ['damage'],
+            description: 'A piercing attack that deals poison (dark) damage over time',
+            effectId: 'placeHolder',
+            castTime: 3.5,
+            timeCost: 4.5,
+            castDuration: 0.1,
+            validTargets: ['enemy'],
+            type: {'physical': 1.0},
+            element: 'dark',
+            damage: 3,
+            ticks: 3,
+            tickDuration: 2
+        },
+
         // ------------------------------
         // Damage - Spells
         // ------------------------------
         {
             name: 'Magic Shield',
-            id: 'magicshield',
+            id: 'magic-shield',
             spellTypes: ['buff'],
             effectId: 'magicshield',
             description: "A shield of magic which increases your armor, magic resistence, and maximum health",
@@ -5310,6 +5334,9 @@ define(
             var self = this;
             logger.log('pageHome', 'onShow called');
 
+
+            this.$bookWrapper = $('#book-wrapper');
+
             // setup races
             this.regionRaceList.show(this.raceListView);
             this.regionClassList.show(this.classListView);
@@ -5408,6 +5435,10 @@ define(
                 logger.log('pageHome:pageNext', 'curStep ' + self.curStep);
 
                 self.$pages.turn('disable', false);
+                    
+                setTimeout(function(){
+                    self.setBookWrapperStep(self.curStep);
+                }, 300);
 
                 if(self.curStep < 4){
                     logger.log('pageHome', '\t showing next page');
@@ -5457,6 +5488,9 @@ define(
                 logger.log('pageHome:pagePrevious', 'curStep ' + self.curStep);
 
                 self.$pages.turn('disable', false);
+                setTimeout(function(){
+                    self.setBookWrapperStep(self.curStep);
+                }, 150);
                 
                 if(self.curStep > 1){
                     logger.log('pageHome', '\t showing previous page');
@@ -5661,11 +5695,18 @@ define(
             });
         },
 
-        // ==============================
+        setBookWrapperStep: function setBookWrapperStep ( step ){
+            // remove other step classes
+            this.$bookWrapper.removeClass('step-1 step-2 step-3');
+            this.$bookWrapper.addClass('step-' + step);
+            return this;
+        },
+
+        // ===================================================================
         //
         // Page 1  - Title
         // 
-        // ==============================
+        // ===================================================================
         setupPage1: function setupStep1(){
             // Sets up flow for the title page
             //
@@ -6047,6 +6088,7 @@ define(
         // ------------------------------
         showPage2: function showPage2(){
             var self = this;
+
             self.$cachedEls.nextStepArrow.removeClass('fadeOut');
             self.$cachedEls.nextStepArrow.addClass('fadeIn');
 
@@ -6176,8 +6218,6 @@ define(
             logger.log('pageHome:setupPage3', 'showPage3() (classes) called: ', {
                 page3Complete: this.pagesCompleted[3]
             });
-
-            this.cleanupPage2();
 
             clearTimeout(this.page2arrowPulseTimeout);
             clearTimeout(this.page3arrowPulseTimeout);

@@ -1060,18 +1060,22 @@
       -moz-transform: rotate(-14deg);
       -o-transform: rotate(-14deg);
       transform: rotate(-14deg); }
-  #home #book-pages #create-selected-abilities-wrapper {
+  #home #book-wrapper #create-selected-abilities-wrapper {
     -webkit-transition: opacity 0.6s;
     -moz-transition: opacity 0.6s;
     -o-transition: opacity 0.6s;
     transition: opacity 0.6s;
     bottom: 30px;
+    display: none;
     opacity: 0;
     padding-bottom: 10px;
     position: absolute;
     left: 26px;
-    right: 30px; }
-    #home #book-pages #create-selected-abilities-wrapper h3 {
+    right: 30px;
+    left: 64px;
+    right: 0;
+    width: 361px; }
+    #home #book-wrapper #create-selected-abilities-wrapper h3 {
       -webkit-transition: background 0.15s;
       -moz-transition: background 0.15s;
       -o-transition: background 0.15s;
@@ -1082,19 +1086,19 @@
       margin-bottom: 6px;
       margin-top: 0;
       text-align: center; }
-    #home #book-pages #create-selected-abilities-wrapper h3.flash {
+    #home #book-wrapper #create-selected-abilities-wrapper h3.flash {
       background: rgba(255, 255, 255, 0.7); }
-    #home #book-pages #create-selected-abilities-wrapper .selected-hotkey {
+    #home #book-wrapper #create-selected-abilities-wrapper .selected-hotkey {
       position: absolute;
       left: 17px;
       top: 15px;
       opacity: 0.7; }
-  #home #book-pages #create-selected-abilities-wrapper.visible {
+  #home #book-wrapper #create-selected-abilities-wrapper.visible {
     opacity: 1; }
-  #home #book-pages #create-selected-abilities {
+  #home #book-wrapper #create-selected-abilities {
     position: relative;
     left: 50px; }
-  #home #book-pages .create-selected-abilities-item {
+  #home #book-wrapper .create-selected-abilities-item {
     -webkit-transition: box-shadow 0.1s;
     -moz-transition: box-shadow 0.1s;
     -o-transition: box-shadow 0.1s;
@@ -1109,7 +1113,7 @@
     width: 54px;
     box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff;
     text-shadow: 0 0 1px #343434, 1px 1px 0 #343434, 0 0 2px #343434; }
-    #home #book-pages .create-selected-abilities-item img {
+    #home #book-wrapper .create-selected-abilities-item img {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       -khtml-user-select: none;
@@ -1119,14 +1123,19 @@
       user-drag: none;
       -moz-user-select: none;
       -webkit-user-drag: none;
+      -webkit-filter: url(#filter-wavy-ability-icon);
+      -moz-filter: url(#filter-wavy-ability-icon);
+      filter: url(#filter-wavy-ability-icon);
       cursor: alias;
       position: absolute;
       height: 100%;
       width: 100%;
       right: 0;
       left: 0; }
-  #home #book-pages .create-selected-abilities-item.hover {
+  #home #book-wrapper .create-selected-abilities-item.hover {
     box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px #BE3434, 1px 1px 20px #BE3434; }
+  #home #book-wrapper.step-2 #create-selected-abilities-wrapper {
+    display: block; }
   #home .ability-list-item-meta-wrapper {
     bottom: 0;
     font-family: "Ubuntu Mono", monospace, sans-serif;
@@ -1175,21 +1184,23 @@
     overflow: auto;
     overflow-x: hidden; }
     #home #region-create-all-abilities-list .all-ability-list .list-item {
-      height: 42px;
+      height: 43px;
       float: left;
       margin: 4px 9px 4px 3px;
       padding: 0px;
       position: relative;
-      width: 42px;
+      width: 43px;
       cursor: cell; }
       #home #region-create-all-abilities-list .all-ability-list .list-item span, #home #region-create-all-abilities-list .all-ability-list .list-item img, #home #region-create-all-abilities-list .all-ability-list .list-item div {
         cursor: cell; }
       #home #region-create-all-abilities-list .all-ability-list .list-item img {
-        border: 2px solid transparent;
-        border: 2px solid #ffffff;
+        border: 3px solid #000000;
         border-radius: 2px;
-        height: 42px;
-        width: 42px; }
+        height: 43px;
+        width: 43px;
+        -webkit-filter: url(#filter-wavy-ability-icon);
+        -moz-filter: url(#filter-wavy-ability-icon);
+        filter: url(#filter-wavy-ability-icon); }
       #home #region-create-all-abilities-list .all-ability-list .list-item .ability-timer-bar {
         background: #000000;
         border: 2px solid #ffffff;
@@ -1206,7 +1217,7 @@
           position: absolute;
           right: 0; }
       #home #region-create-all-abilities-list .all-ability-list .list-item .ability-timer-bar {
-        background: #000000;
+        background: #ffffff;
         border: 2px solid #ffffff;
         bottom: -4px;
         left: 0;
@@ -1217,30 +1228,29 @@
         width: 100%;
         z-index: 10; }
         #home #region-create-all-abilities-list .all-ability-list .list-item .ability-timer-bar .inner-bar {
-          background: #ffffff;
+          background: #000000;
           left: 0;
           position: absolute;
           right: 0;
           top: 0; }
     #home #region-create-all-abilities-list .all-ability-list .list-item:hover .item {
-      opacity: 0.7;
-      box-shadow: 0 0 3px #ffffff; }
+      opacity: 0.85;
+      box-shadow: 0 0 1px #ffffff, 0 0 7px #ffffff, 0 0 60px #ffffff; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.selected {
       background: none;
-      cursor: alias; }
+      cursor: alias;
+      box-shadow: 0 0 12px #343434; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected div {
         cursor: alias; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected img {
-        border: 2px solid rgba(255, 255, 255, 0.9);
-        box-shadow: 0 0 12px #343434;
+        border: 2px solid rgba(255, 255, 255, 0.95);
         border-radius: 2px; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item {
       opacity: 1;
-      cursor: alias; }
+      cursor: alias;
+      box-shadow: 0 0 12px #dd2222; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item div {
         cursor: alias; }
-      #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item img {
-        box-shadow: 0 0 12px #dd2222; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list,
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list.selected {
       opacity: 0.1; }

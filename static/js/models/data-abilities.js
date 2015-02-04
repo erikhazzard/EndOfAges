@@ -5,6 +5,8 @@
 //      TODO: should be loaded from server and abilities should load on a per
 //      entity level
 //
+// PROPERTIES: id: used to get the icon (e.g., `magic-shielding`.svg)
+//
 // ===========================================================================
 define(
     [ 'events', 'logger', 'models/Ability', 'util/Timer' ], function(
@@ -200,7 +202,7 @@ define(
         // ------------------------------
         {
             name: 'Minor Healing',
-            id: 'minorHealing',
+            id: 'minor-healing',
             spellTypes: ['heal'],
             effectId: 'minorHealing',
             castTime: 3,
@@ -230,6 +232,7 @@ define(
         //
         // ==============================
         {
+            // TODO::::: return percentage of damage
             name: 'Dark Blade',
             id: 'darkblade',
             spellTypes: ['damage'],
@@ -282,12 +285,30 @@ define(
                 }, delay);
             }
         },
+
+        {
+            name: 'Poisoned Stab',
+            id: 'poisoned-stab',
+            spellTypes: ['damage'],
+            description: 'A piercing attack that deals poison (dark) damage over time',
+            effectId: 'placeHolder',
+            castTime: 3.5,
+            timeCost: 4.5,
+            castDuration: 0.1,
+            validTargets: ['enemy'],
+            type: {'physical': 1.0},
+            element: 'dark',
+            damage: 3,
+            ticks: 3,
+            tickDuration: 2
+        },
+
         // ------------------------------
         // Damage - Spells
         // ------------------------------
         {
             name: 'Magic Shield',
-            id: 'magicshield',
+            id: 'magic-shield',
             spellTypes: ['buff'],
             effectId: 'magicshield',
             description: "A shield of magic which increases your armor, magic resistence, and maximum health",

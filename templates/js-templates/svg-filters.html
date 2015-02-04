@@ -42,6 +42,14 @@ xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
             <feTurbulence result="result91" baseFrequency="0.04" type="turbulence" seed="0" numOctaves="3" id="feTurbulence5437" />
             <feDisplacementMap in2="result91" scale="6.6" xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" id="feDisplacementMap5439" />    
         </filter>
+        <filter id="filter-wavy-ability-icon" color-interpolation-filters="sRGB">
+            <feTurbulence result="resultwl" baseFrequency="0.025" 
+                type="turbulence" seed="0" numOctaves="3" 
+                id="feTurbulencewl" />
+            <feDisplacementMap in2="resultwl" scale="3.6" 
+                xChannelSelector="R" yChannelSelector="G" 
+                in="SourceGraphic" id="feDisplacementMapwl" />
+        </filter>
 
         <filter id="filter-drop-shadow">
             <feGaussianBlur in="SourceAlpha" stdDeviation="1.2"/>
