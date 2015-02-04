@@ -5435,10 +5435,9 @@ define(
                 logger.log('pageHome:pageNext', 'curStep ' + self.curStep);
 
                 self.$pages.turn('disable', false);
-                    
-                setTimeout(function(){
-                    self.setBookWrapperStep(self.curStep);
-                }, 300);
+
+                // set the book wrapper's class
+                self.setBookWrapperStep(self.curStep+1);
 
                 if(self.curStep < 4){
                     logger.log('pageHome', '\t showing next page');
@@ -5480,6 +5479,7 @@ define(
                     }
                 }
 
+                // disable animation
                 self.$pages.turn('disable', true);
             }
 
@@ -5488,9 +5488,8 @@ define(
                 logger.log('pageHome:pagePrevious', 'curStep ' + self.curStep);
 
                 self.$pages.turn('disable', false);
-                setTimeout(function(){
-                    self.setBookWrapperStep(self.curStep);
-                }, 150);
+                // set the book wrapper's class
+                self.setBookWrapperStep(self.curStep-1);
                 
                 if(self.curStep > 1){
                     logger.log('pageHome', '\t showing previous page');
@@ -5516,6 +5515,8 @@ define(
                 // disable again
                 self.$pages.turn('disable', true);
             }
+
+
 
             // store functions for page turning
             this.pageNext = pageNext;
@@ -6241,7 +6242,7 @@ define(
 
         classClicked: function classClicked (options){
             // when clicking on a calling / class, show the ability list
-            logger.log('pageHome', 'classClicked() passed options: %O',
+            logger.log('pageHome:classClicked', 'classClicked() passed options: %O',
                 options);
             var self = this;
 
@@ -6251,26 +6252,25 @@ define(
 
             // if a disabled class was clicked, do nothing
             if(options.model.attributes.disabled){
-                logger.log('pageHome', '[x] class disabled');
+                logger.log('pageHome:classClicked', '[x] class disabled');
                 return this;
             }
 
-            // show the next step icons
-            self.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
-            self.$cachedEls.nextStepArrow.addClass('animated fadeIn');
-            self.$cachedEls.nextStepArrow.removeClass('fadeOut');
+            // ensure no reclicks - is set to true once we're all done here
+            self.page3canClickClass = false;
 
             // done with class page
-            this.pagesCompleted[3] = true;
+            self.pagesCompleted[3] = true;
 
             // If the same class was clicked, do nothing
-            if(this._previousClassSelected === options.model.attributes.name){
-                logger.log('pageHome', '[x] same class selected, doing nothing');
+            if(self._previousClassSelected === options.model.attributes.name){
+                logger.log('pageHome:classClicked', '[x] same class selected, doing nothing');
+                self.page3canClickClass = true;
                 return false;
             }
 
             // store state
-            this._previousClassSelected = options.model.attributes.name;
+            self._previousClassSelected = options.model.attributes.name;
 
             // remove selected class from other entity selections
             // --------------------------
@@ -6280,34 +6280,48 @@ define(
             // add selected class to selected entity
             options.$el.addClass('selected');
 
-            this.setupPage4();
+            // doo all the side effects after the next animation frame
+            requestAnimationFrame(function(){
 
-            // --------------------------
-            // Select abilities
-            // --------------------------
-            if(!this.$step4AbilityListItems){
-                this.$step4AbilityListItems = $('#region-create-all-abilities-list .list-item');
-            }
-            if(!this.$step4AbilityList){
-                this.$step4AbilityList = $('#region-create-all-abilities-list');
-            }
+                self.page3canClickClass = true;
 
-            this.$step4AbilityListItems.removeClass('selected');
-            // empty the currently selected abilities
-            this.selectedAbilities.reset();
+                // show the next step icons
+                self.$cachedEls.nextStepArrow.velocity({ opacity: 1 });
+                self.$cachedEls.nextStepArrow.addClass('animated fadeIn');
+                self.$cachedEls.nextStepArrow.removeClass('fadeOut');
 
-            // select abilities from model list
-            _.each(options.model.attributes.abilities, function(id){
-                $('#create-all-ability-' + id).addClass('selected');
+                self.setupPage4();
 
-                // add model
-                var ability = self.allAbilities.findWhere({
-                    id: id
+                // --------------------------
+                // Select abilities
+                // --------------------------
+                if(!self.$step4AbilityListItems){
+                    self.$step4AbilityListItems = $('#region-create-all-abilities-list .list-item');
+                }
+                if(!self.$step4AbilityList){
+                    self.$step4AbilityList = $('#region-create-all-abilities-list');
+                }
+
+                self.$step4AbilityListItems.removeClass('selected');
+                // empty the currently selected abilities
+                self.selectedAbilities.reset();
+
+                // select abilities from model list
+                requestAnimationFrame(function(){
+                    _.each(options.model.attributes.abilities, function(id){
+                        $('#create-all-ability-' + id).addClass('selected');
+
+                        // add model
+                        var ability = self.allAbilities.findWhere({
+                            id: id
+                        });
+                        self.selectedAbilities.add(ability);
+                    });
                 });
-                self.selectedAbilities.add(ability);
+
             });
 
-            return this;
+            return self;
         },
 
         // =================================================================
@@ -6524,6 +6538,7 @@ define(
             var self = this;
 
             if(!self.page4canClickAbility){
+                logger.log('pageHome:abilityClicked', '[x] cannot click, returning false');
                 return false;
             }
 
@@ -6565,6 +6580,9 @@ define(
 
         handleInvalidAbilitySelection: function handleInvalidAbilitySelection(){
             // called when not enough abilities are selected
+            logger.log('pageHome:handleInvalidAbilitySelection', 
+                'called');
+            
             // TODO: MAJOR: This....
             self.$abilitySelectedSkillsH3 = self.$abilitySelectedSkillsH3 || $('#selected-skills-h3');
             self.$abilitySelectedSkillsH3.addClass('flash'); 
@@ -6576,6 +6594,8 @@ define(
             setTimeout(function(){
                 self.$abilitySelectedSkillsH3.removeClass('flash');
                 $('#create-selected-abilities-wrapper .empty-skill')
+                    .removeClass('shake shake-constant');
+                $('#create-selected-abilities-wrapper .create-selected-abilities-item')
                     .removeClass('shake shake-constant');
             }, 210);
         
