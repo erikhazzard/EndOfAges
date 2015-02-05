@@ -2089,6 +2089,14 @@ define(
     var Abilities = Backbone.Collection.extend({
         model: Ability,
 
+        // DATA config
+        dataConfig : {
+            maxCastTime: 6,
+            maxTimeCost: 6,
+            maxDamage: 40,
+            maxHeal: 40
+        },
+
         initialize: function(models, options){
             logger.log('collections:Abilities', 'initialize() called with:', {
                 models: models,
@@ -4469,7 +4477,7 @@ define(
             description: 'A piercing attack that deals poison (dark) damage over time',
             effectId: 'placeHolder',
             castTime: 3.5,
-            timeCost: 4.5,
+            timeCost: 3.5,
             castDuration: 0.1,
             validTargets: ['enemy'],
             type: {'physical': 1.0},
@@ -4799,9 +4807,11 @@ define(
 // ===========================================================================
 define(
     'views/create/AllAbilitiesListItem',[ 
-        'd3', 'logger', 'events'
+        'd3', 'logger', 'events',
+        'collections/Abilities'
     ], function viewAllAbilityListItem(
-        d3, logger, events
+        d3, logger, events,
+        Abilities
     ){
 
     var AllAbilityListItem = Backbone.Marionette.ItemView.extend({
@@ -4818,7 +4828,8 @@ define(
             return _.extend({ 
                 cid: this.model.cid,
                 sprite: this.model.attributes.sprite || null,
-                disabled: false
+                disabled: false,
+                data: Abilities.prototype.dataConfig
             }, this.model.toJSON());
         },
 
@@ -5165,7 +5176,7 @@ define(
                 return $('<img />')
                     .attr({
                         src:'/static/img/abilities/' + model.attributes.id + '.svg',
-                        'class': 'class-image',
+                        'class': 'ability-icon',
                         height: '60',
                         width: '60'
                     });
@@ -6480,24 +6491,36 @@ define(
             // Updates the description based on passed in model
             // TODO: Flesh this out
             var self = this;
+
             logger.log('pageHome:step4UpdateDescription', 
             'called with model', {
                 model: model
             });
 
-            // provide a default description if none is available in the
-            // model
-            var attrs = {description: '', name: ''};
+            // do it after a small delay so we don't mess up other hover effects
+            requestAnimationFrame(function(){
+                // provide a default description if none is available in the
+                // model
+                var attrs = {
+                    description: '', name: '',
+                    data: Abilities.prototype.dataConfig
+                };
 
-            if(model && model.attributes && model.attributes.description){
-                attrs = model.attributes;
-            }
+                if(model && model.attributes && model.attributes.description){
+                    attrs = model.attributes;
+                }
 
-            if(this.$step4abilityDescription){
-                this.$step4abilityDescription.html( 
-                    this.$step4templateDescription( attrs )
-                );
-            }
+                attrs.data = Abilities.prototype.dataConfig;
+
+                if(self.$step4abilityDescription){
+                    self.$step4abilityDescription.html( 
+                        self.$step4templateDescription( attrs )
+                    );
+
+                    // TODO: Could add in d3 stuff here
+                }
+
+            });
 
             return this;
         },
@@ -6525,9 +6548,18 @@ define(
         // ------------------------------
         allAbilityMouseenter: function allAbilityMouseenter (options){
             this.step4UpdateDescription(options.model);
+
+            // TODO: If we want to add a class on hover do it here but also
+            // remove it on fiter buttons and selected ability icons
+            this.$step4AbilityListItems.removeClass('description-shown');
+            $('#create-all-ability-' + options.model.id).addClass('description-shown');
             return this;
         }, 
+
         allAbilityMouseleave: function allAbilityMouseleave (options){
+            // TODO: QUESTION: Should we do nothing on mouseleave?
+            return this;
+
             this.step4ResetAbilityDescription();
             return this;
         }, 

@@ -7,9 +7,11 @@
 // ===========================================================================
 define(
     [ 
-        'd3', 'logger', 'events'
+        'd3', 'logger', 'events',
+        'collections/Abilities'
     ], function viewAllAbilityListItem(
-        d3, logger, events
+        d3, logger, events,
+        Abilities
     ){
 
     var AllAbilityListItem = Backbone.Marionette.ItemView.extend({
@@ -26,7 +28,8 @@ define(
             return _.extend({ 
                 cid: this.model.cid,
                 sprite: this.model.attributes.sprite || null,
-                disabled: false
+                disabled: false,
+                data: Abilities.prototype.dataConfig
             }, this.model.toJSON());
         },
 

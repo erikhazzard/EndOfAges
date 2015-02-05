@@ -105,6 +105,14 @@ svg {
 .center { display: table; margin: auto; }
 
 // --------------------------------------
+// Ability icon
+// --------------------------------------
+.ability-icon {
+    @include noSelect();
+    @include filter(url(#filter-wavy-ability-icon));
+}
+
+// --------------------------------------
 //
 // Animation related
 //

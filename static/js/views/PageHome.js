@@ -177,7 +177,7 @@ define(
                 return $('<img />')
                     .attr({
                         src:'/static/img/abilities/' + model.attributes.id + '.svg',
-                        'class': 'class-image',
+                        'class': 'ability-icon',
                         height: '60',
                         width: '60'
                     });
@@ -1492,24 +1492,36 @@ define(
             // Updates the description based on passed in model
             // TODO: Flesh this out
             var self = this;
+
             logger.log('pageHome:step4UpdateDescription', 
             'called with model', {
                 model: model
             });
 
-            // provide a default description if none is available in the
-            // model
-            var attrs = {description: '', name: ''};
+            // do it after a small delay so we don't mess up other hover effects
+            requestAnimationFrame(function(){
+                // provide a default description if none is available in the
+                // model
+                var attrs = {
+                    description: '', name: '',
+                    data: Abilities.prototype.dataConfig
+                };
 
-            if(model && model.attributes && model.attributes.description){
-                attrs = model.attributes;
-            }
+                if(model && model.attributes && model.attributes.description){
+                    attrs = model.attributes;
+                }
 
-            if(this.$step4abilityDescription){
-                this.$step4abilityDescription.html( 
-                    this.$step4templateDescription( attrs )
-                );
-            }
+                attrs.data = Abilities.prototype.dataConfig;
+
+                if(self.$step4abilityDescription){
+                    self.$step4abilityDescription.html( 
+                        self.$step4templateDescription( attrs )
+                    );
+
+                    // TODO: Could add in d3 stuff here
+                }
+
+            });
 
             return this;
         },
@@ -1537,9 +1549,18 @@ define(
         // ------------------------------
         allAbilityMouseenter: function allAbilityMouseenter (options){
             this.step4UpdateDescription(options.model);
+
+            // TODO: If we want to add a class on hover do it here but also
+            // remove it on fiter buttons and selected ability icons
+            this.$step4AbilityListItems.removeClass('description-shown');
+            $('#create-all-ability-' + options.model.id).addClass('description-shown');
             return this;
         }, 
+
         allAbilityMouseleave: function allAbilityMouseleave (options){
+            // TODO: QUESTION: Should we do nothing on mouseleave?
+            return this;
+
             this.step4ResetAbilityDescription();
             return this;
         }, 

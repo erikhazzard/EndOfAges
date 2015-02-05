@@ -293,7 +293,7 @@ define(
             description: 'A piercing attack that deals poison (dark) damage over time',
             effectId: 'placeHolder',
             castTime: 3.5,
-            timeCost: 4.5,
+            timeCost: 3.5,
             castDuration: 0.1,
             validTargets: ['enemy'],
             type: {'physical': 1.0},

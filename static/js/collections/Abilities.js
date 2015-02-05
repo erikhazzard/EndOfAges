@@ -16,6 +16,14 @@ define(
     var Abilities = Backbone.Collection.extend({
         model: Ability,
 
+        // DATA config
+        dataConfig : {
+            maxCastTime: 6,
+            maxTimeCost: 6,
+            maxDamage: 40,
+            maxHeal: 40
+        },
+
         initialize: function(models, options){
             logger.log('collections:Abilities', 'initialize() called with:', {
                 models: models,

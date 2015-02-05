@@ -2,20 +2,16 @@
 <script id='template-create-all-abilities-list-item' type='text/template'>
     <div class='item <% if(disabled){ %>disabled<% } %>' data-template-cid='<%= cid %>'>
         <% if(disabled){ %>
-            <img src='/static/img/abilities/disabled.svg' class='class-image' height='46' width='46' />
+            <img src='/static/img/abilities/disabled.svg' class='ability-icon' height='46' width='46' />
         <% } else { %>
-            <img src='/static/img/abilities/<%= id %>.svg' class='class-image' height='46' width='46' />
+            <img src='/static/img/abilities/<%= id %>.svg' class='ability-icon' height='46' width='46' />
         <% } %>
+
         <div class='ability-timer-bar'>
-            <!-- TODO: Replace with actual value -->
-
-            <!-- VERTICAL -->
-            <!--
-            <div class='inner-bar' style='height: <%= Math.random() * 100 | 0 %>%;'></div>
-            -->
-
             <!-- HORIZONTAL -->
-            <div class='inner-bar' style='width: <%= Math.random() * 100 | 0 %>%;'></div>
+            <div class='inner-bar' 
+                style='width: <%= (castTime / data.maxCastTime) * 100 | 0 %>%;'>
+            </div>
         </div>
     </div>
         
@@ -26,12 +22,6 @@
             <% } %>
         </div>
     <% } %>
-</script>
-
-{{// Abilities description }}
-<script id='template-create-abilities-item-info' type='text/template'>
-    <strong><%= name %></strong>
-    <%= description %>
 </script>
 
 {{// Filter Descriptions }}
@@ -46,4 +36,31 @@
 </script>
 <script id='template-create-abilities-filter-info-buff' type='text/template'>
     <strong>Buff</strong>: Abilities that strengthen you, making you harder to kill
+</script>
+
+
+{{// Abilities description }}
+<script id='template-create-abilities-item-info' type='text/template'>
+    <div class='header'>
+        <img src='/static/img/abilities/<%= id %>.svg' 
+            class='ability-icon' />
+        <strong><%= name %></strong>
+
+        <div class='cast-time-meta'>
+            Cast Time: 
+        </div>
+        <div class='cast-time-value'>
+            <%= castTime %>
+        </div>
+        <div class='ability-timer-bar'>
+            <!-- HORIZONTAL -->
+            <div class='inner-bar' 
+                style='width: <%= (castTime / data.maxCastTime) * 100 | 0 %>%;'>
+            </div>
+        </div>
+    </div>
+
+    <div class='description-text'>
+        <%= description %>
+    </div>
 </script>

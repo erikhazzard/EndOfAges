@@ -7,17 +7,23 @@
         opacity: 1;
     }
     .interaction-list .item {
-        opacity: 0.5;
+        opacity: 0.35;
     }
     .list-item.selected .item {
         opacity: 1;
     }
 
     #create-abilities-wrapper {
+        -webkit-overflow-scrolling: touch;
+        margin-top: -4px;
     }
     #region-create-all-abilities-list {
-        height: 248px;
+        height: 227px;
+        overflow: none;
 
+        .all-ability-list{ 
+            overflow-y: scroll;
+        }
         .list-item { @include transition("all 0.2s"); }
 
         .list-item .list-item-name {
@@ -195,6 +201,56 @@
 }
 
 #book-wrapper {
+
+    // timer bar
+    // VERTICAL
+    .damage-amount-bar {
+        background: #000000;
+        border: 2px solid #ffffff;
+        bottom: 0;
+        position: absolute;
+        right: -5px;
+        top: 0px;
+        width: 7px;
+        z-index: 10;
+
+        .inner-bar {
+            background: #ffffff;
+            bottom: 0;
+            left: 0;
+            position: absolute;
+            right: 0;
+        }
+    }
+
+    // HORIZONTAL
+    .ability-timer-bar {
+        background: #ffffff;
+        border: 2px solid #ffffff;
+        bottom: -4px;
+        left: 0;
+        height: 6px;
+        position: absolute;
+        right: 0;
+        top: auto;
+        width: 100%;
+        z-index: 10;
+
+        .inner-bar {
+            bottom: 0;
+            background: #000000;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+        .inner-bar { -webkit-filter: url(#filter-wavy-ability-icon); }
+    }
+
+    //.description-shown {
+    //    box-shadow: 0 0 2px #336699, 0 0 6px #336699;
+    //}
+
     // Selected abilities
     #create-selected-abilities-wrapper {
         @include transition("opacity 0.6s");
@@ -244,10 +300,14 @@
         position: relative;
         left: 50px;
     }
+    .create-selected-abilities-item.empty-skill {
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff;
+    }
+
     .create-selected-abilities-item {
         @include transition("box-shadow 0.1s");
 
-        border: 1px solid rgba(255,255,255,0.5);
         background: rgba(40,40,40,0.07);
         color: #ffffff;
         float: left;
@@ -255,13 +315,11 @@
         margin: 0 1% 0;
         position: relative;
         width: 54px;
-        box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff;
         text-shadow: 0 0 1px #343434, 1px 1px 0 #343434, 0 0 2px #343434;
 
 
         img {
-            @include noSelect();
-            @include filter(url(#filter-wavy-ability-icon));
+            border: 2px solid #ffffff;
             cursor: alias;
             position: absolute;
             height: 100%;
@@ -277,83 +335,23 @@
 #book-wrapper.step-2 #create-selected-abilities-wrapper { display: block; }
 
 
-// ------------------------------
-// ABILITY Item Labels
-// ------------------------------
-$ability-label-width: 8px;
-
-.ability-list-item-meta-wrapper {
-    bottom: 0;
-    font-family: $mono-font;
-    font-size: 14px;
-    position: absolute;
-    right: 20px + ($ability-label-width * 5); // num labels - 5
-    top: 0;
-
-    .ability-label {
-        //@include transform(rotate(-90deg));
-        //writing-mode: tb-rl;
-
-        background: #232323;
-        bottom: 0;
-        cursor: pointer;
-        color: #f0f0f0;
-        font-size: 8px;
-        height: 100%;
-        line-height: 8px;
-        opacity: 0.3;
-        padding: 2px 2px 0 2px;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: $ability-label-width;
-
-        // COLOR: Hide
-        color: rgba(0,0,0,0) !important;
-    }
-
-    // ability types types
-    .ability-label.damage {
-        background: $COLOR-ABILITY-DAMAGE;
-        padding-top: 5px;
-        left: 0;
-    }
-    .ability-label.debuff{
-        background: $COLOR-ABILITY-DEBUFF;
-        left: $ability-label-width * 1;
-    }
-    .ability-label.heal{
-        background: $COLOR-ABILITY-HEAL;
-        left: $ability-label-width * 2;
-    }
-    .ability-label.buff {
-        background: $COLOR-ABILITY-BUFF;
-        left: $ability-label-width * 3;
-    }
-}
-
-// selected / hover labels
-.list-item:hover .ability-list-item-meta-wrapper .ability-label {
-    opacity: 0.6;
-}
-.list-item.selected .ability-list-item-meta-wrapper .ability-label {
-    opacity: 1;
-}
 
 // --------------------------------------
+//
 // NEW STLYE FOR ABILITIES
+//
 // --------------------------------------
 #region-create-all-abilities-list .all-ability-list {
     bottom: 0; left: 0; position: absolute; right: 0; top: 0;
     overflow: auto;
     overflow-x: hidden;
 
-    $ability-icon-size: 43px;
+    $ability-icon-size: 42px;
 
     .list-item {
         height: $ability-icon-size;
         float: left;
-        margin: 4px 9px 4px 3px;
+        margin: 4px 6px 10px 5px;
         padding: 0px;
         position: relative;
         width: $ability-icon-size;
@@ -362,55 +360,15 @@ $ability-label-width: 8px;
         span, img, div { cursor: cell; }
 
         img {
+            @include noSelect();
             border: 3px solid #000000;
             border-radius: 2px;
             height: $ability-icon-size;
             width: $ability-icon-size;
-            @include filter(url(#filter-wavy-ability-icon));
+            filter: none;
         }
 
-        // timer bar
-        // VERTICAL
-        .ability-timer-bar {
-            background: #000000;
-            border: 2px solid #ffffff;
-            bottom: 0;
-            position: absolute;
-            right: -5px;
-            top: 0px;
-            width: 7px;
-            z-index: 10;
-
-            .inner-bar {
-                background: #ffffff;
-                bottom: 0;
-                left: 0;
-                position: absolute;
-                right: 0;
-            }
-        }
-
-        // HORIZONTAL
-        .ability-timer-bar {
-            background: #ffffff;
-            border: 2px solid #ffffff;
-            bottom: -4px;
-            left: 0;
-            height: 6px;
-            position: absolute;
-            right: 0;
-            top: auto;
-            width: 100%;
-            z-index: 10;
-
-            .inner-bar {
-                background: #000000;
-                left: 0;
-                position: absolute;
-                right: 0;
-                top: 0;
-            }
-        }
+        // NOTE: Ability timer bar is defined elsewhere
     
     }
 
@@ -445,5 +403,52 @@ $ability-label-width: 8px;
     .list-item.hide-from-list.selected, 
     {
         opacity: 0.1;
+    }
+}
+
+// ======================================
+//
+// Description
+//
+// ======================================
+#create-all-abilities-description {
+    .header { 
+        position: relative;
+    }
+
+    .description-text {
+        font-size: 0.9em;
+    }
+    .ability-icon {
+        border: 2px solid #ffffff;
+        height: 34px;
+        width: 34px;
+    }
+
+    .cast-time-meta {
+        font-size: 0.7em;
+        left: 220px;
+        opacity: 0.7;
+        position: absolute;
+        top: 3px;
+    }
+    .cast-time-value{
+        font-size: 0.7em;
+        font-weight: bold;
+        opacity: 1;
+        position: absolute;
+        right: 6px;
+        top: 3px;
+    }
+
+    .ability-timer-bar {
+        background: rgba(255,255,255,0.42);
+        border: 2px solid rgba(255,255,255,0.4);
+        bottom: 6px;
+        left: 220px;
+        width: auto;
+        right: 6px;
+
+        .inner-bar { -webkit-filter: url(#filter-wavy-ability-icon); }
     }
 }
