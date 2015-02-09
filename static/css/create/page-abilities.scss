@@ -199,6 +199,12 @@
     }
 }
 
+
+// ======================================
+//
+// Selected abilities and other general skill related create stuff
+//
+// ======================================
 #book-wrapper {
 
     // timer bar
@@ -409,7 +415,7 @@
 
     .list-item.selected {
         .item { 
-            background: #96D7D7;
+            background: $BACKGROUND-INTERACTION-SELECTED;
         }
         cursor: alias;
         //padding-bottom: 2px;
@@ -443,6 +449,9 @@
         background: #dd2222 !important;
         opacity: 0.2 !important; 
     }
+
+    // Selected text
+    .selected-text { display: none; }
 
 }
 

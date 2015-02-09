@@ -900,8 +900,8 @@
       padding-left: 20px;
       opacity: 0.75; }
     #home #region-create-races .race-list-item.selected, #home #region-create-races .list-item.selected, #home .interaction-list .race-list-item.selected, #home .interaction-list .list-item.selected {
-      background: rgba(125, 249, 249, 0.45);
-      box-shadow: 0 0 2px #DDFFFD, 0 0 20px #66C8DE, 0 0 30px #74C6D5;
+      background: rgba(229, 197, 71, 0.45);
+      box-shadow: 0 0 2px #dedcac, 0 0 20px #ebe88c, 0 0 30px #d2bb52;
       color: #ffffff;
       padding-left: 40px;
       font-family: "Shadows Into Light", cursive;
@@ -1082,8 +1082,8 @@
       position: absolute;
       right: 0; }
   #home #book-wrapper .selected .ability-timer-bar {
-    background: #5EF0F0;
-    border: 2px solid #5EF0F0; }
+    background: #D1C56C;
+    border: 2px solid #D1C56C; }
   #home #book-wrapper .list-item:hover .ability-timer-bar {
     background: #ffffff;
     border: 2px solid #ffffff; }
@@ -1166,8 +1166,8 @@
     width: 54px;
     text-shadow: 0 0 1px #343434, 1px 1px 0 #343434, 0 0 2px #343434; }
     #home #book-wrapper .create-selected-abilities-item img {
-      box-shadow: 0 0 1px #ffffff, 0 0 4px #5EF0F0, 0 0 20px #5EF0F0;
-      border: 3px solid #5EF0F0;
+      box-shadow: 0 0 1px #ffffff, 0 0 4px #D1C56C, 0 0 20px #D1C56C;
+      border: 3px solid #D1C56C;
       cursor: alias;
       position: absolute;
       height: 100%;
@@ -1225,14 +1225,14 @@
         border: 2px solid #ffffff; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.selected {
       cursor: alias;
-      box-shadow: 0 0 2px #003984, 0 0 22px #5EF0F0; }
+      box-shadow: 0 0 2px #003984, 0 0 22px #D1C56C; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected .item {
-        background: #96D7D7; }
+        background: rgba(229, 197, 71, 0.45); }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected div {
         cursor: alias; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected img {
         border-radius: 2px;
-        border: 3px solid #5EF0F0; }
+        border: 3px solid #D1C56C; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item {
       opacity: 1;
       cursor: alias;
@@ -1240,13 +1240,15 @@
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item div {
         cursor: alias; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected:hover .item img {
-        border: 3px solid #5EF0F0; }
+        border: 3px solid #D1C56C; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list,
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list.selected {
       opacity: 0.1; }
     #home #region-create-all-abilities-list .all-ability-list .list-item .too-many-selected {
       background: #dd2222 !important;
       opacity: 0.2 !important; }
+    #home #region-create-all-abilities-list .all-ability-list .selected-text {
+      display: none; }
   #home #create-all-abilities-description .header {
     position: relative; }
   #home #create-all-abilities-description .description-text {
