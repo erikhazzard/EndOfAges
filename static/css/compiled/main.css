@@ -1112,7 +1112,7 @@
     -moz-transition: opacity 0.6s;
     -o-transition: opacity 0.6s;
     transition: opacity 0.6s;
-    bottom: 36px;
+    bottom: 46px;
     display: none;
     opacity: 0;
     padding-bottom: 10px;
@@ -1130,26 +1130,33 @@
       background: none;
       padding: 4px 0;
       padding-top: 6px;
-      margin-bottom: 6px;
+      margin-bottom: 2px;
       margin-top: 0;
       text-align: center; }
     #home #book-wrapper #create-selected-abilities-wrapper h3.flash {
       background: rgba(255, 255, 255, 0.7); }
     #home #book-wrapper #create-selected-abilities-wrapper .selected-hotkey {
+      bottom: -16px;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: bold;
       position: absolute;
-      left: 17px;
-      top: 15px;
-      opacity: 0.7; }
+      z-index: 1000;
+      text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000; }
+    #home #book-wrapper #create-selected-abilities-wrapper .selected-hotkey.q {
+      left: 22px; }
+    #home #book-wrapper #create-selected-abilities-wrapper .selected-hotkey.w {
+      left: 81px; }
+    #home #book-wrapper #create-selected-abilities-wrapper .selected-hotkey.e {
+      left: 147px; }
+    #home #book-wrapper #create-selected-abilities-wrapper .selected-hotkey.r {
+      left: 208px; }
   #home #book-wrapper #create-selected-abilities-wrapper.visible {
     opacity: 1; }
   #home #book-wrapper #create-selected-abilities {
     position: relative;
     left: 50px; }
   #home #book-wrapper .create-selected-abilities-item {
-    -webkit-transition: box-shadow 0.1s;
-    -moz-transition: box-shadow 0.1s;
-    -o-transition: box-shadow 0.1s;
-    transition: box-shadow 0.1s;
     background: rgba(40, 40, 40, 0.07);
     color: #ffffff;
     float: left;
@@ -1170,8 +1177,8 @@
   #home #book-wrapper .create-selected-abilities-item.empty-skill {
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff; }
-  #home #book-wrapper .create-selected-abilities-item.hover {
-    box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px #8B4D4D, 1px 1px 20px #8B4D4D; }
+  #home #book-wrapper .create-selected-abilities-item.hover img {
+    box-shadow: 0 0 1px #343434, inset 0px 0px 4px #343434, 0 0 18px #aa2222, 1px 1px 20px #aa2222; }
   #home #book-wrapper.step-2 #create-selected-abilities-wrapper {
     display: block; }
   #home #region-create-all-abilities-list .all-ability-list {
@@ -1183,6 +1190,7 @@
     overflow: auto;
     overflow-x: hidden; }
     #home #region-create-all-abilities-list .all-ability-list .list-item {
+      background: none;
       height: 42px;
       float: left;
       margin: 4px 6px 10px 5px;
@@ -1209,17 +1217,17 @@
         filter: none; }
       #home #region-create-all-abilities-list .all-ability-list .list-item .item {
         background: none; }
-    #home #region-create-all-abilities-list .all-ability-list .list-item:hover {
-      background: #ffffff; }
-      #home #region-create-all-abilities-list .all-ability-list .list-item:hover .item {
-        opacity: 0.85;
-        box-shadow: 0 0 1px #ffffff, 0 0 16px #ffffff; }
-        #home #region-create-all-abilities-list .all-ability-list .list-item:hover .item img {
-          border: 2px solid #ffffff; }
+    #home #region-create-all-abilities-list .all-ability-list .list-item:hover .item {
+      background: #ffffff;
+      opacity: 0.85;
+      box-shadow: 0 0 1px #ffffff, 0 0 16px #ffffff; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item:hover .item img {
+        border: 2px solid #ffffff; }
     #home #region-create-all-abilities-list .all-ability-list .list-item.selected {
-      background: #96D7D7;
       cursor: alias;
       box-shadow: 0 0 2px #003984, 0 0 22px #5EF0F0; }
+      #home #region-create-all-abilities-list .all-ability-list .list-item.selected .item {
+        background: #96D7D7; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected span, #home #region-create-all-abilities-list .all-ability-list .list-item.selected img, #home #region-create-all-abilities-list .all-ability-list .list-item.selected div {
         cursor: alias; }
       #home #region-create-all-abilities-list .all-ability-list .list-item.selected img {
@@ -1236,6 +1244,9 @@
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list,
     #home #region-create-all-abilities-list .all-ability-list .list-item.hide-from-list.selected {
       opacity: 0.1; }
+    #home #region-create-all-abilities-list .all-ability-list .list-item .too-many-selected {
+      background: #dd2222 !important;
+      opacity: 0.2 !important; }
   #home #create-all-abilities-description .header {
     position: relative; }
   #home #create-all-abilities-description .description-text {

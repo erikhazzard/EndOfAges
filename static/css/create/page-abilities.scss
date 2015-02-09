@@ -264,7 +264,7 @@
     // Selected abilities
     #create-selected-abilities-wrapper {
         @include transition("opacity 0.6s");
-        bottom: 36px;
+        bottom: 46px;
         // Show on page 2
         display: none;
         opacity: 0;
@@ -287,7 +287,7 @@
             background: none;
             padding: 4px 0;
             padding-top: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
             margin-top: 0;
             text-align: center;
         }
@@ -296,11 +296,18 @@
         }
 
         .selected-hotkey {
+            bottom: -16px;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: bold;
             position: absolute;
-            left: 17px;
-            top: 15px;
-            opacity: 0.7;
+            z-index: 1000;
+            text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
         }
+        .selected-hotkey.q { left: 22px; }
+        .selected-hotkey.w { left: 81px; }
+        .selected-hotkey.e { left: 147px; }
+        .selected-hotkey.r { left: 208px; }
     }
     #create-selected-abilities-wrapper.visible {
         opacity: 1;
@@ -312,7 +319,8 @@
     }
 
     .create-selected-abilities-item {
-        @include transition("box-shadow 0.1s");
+        //// this is too slow...
+        //@include transition("box-shadow 0.1s");
 
         background: rgba(40,40,40,0.07);
         color: #ffffff;
@@ -343,8 +351,8 @@
         box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff;
     }
 
-    .create-selected-abilities-item.hover {
-        box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px $COLOR-ABILITY-DAMAGE, 1px 1px 20px $COLOR-ABILITY-DAMAGE;
+    .create-selected-abilities-item.hover img{
+        box-shadow: 0 0 1px #343434, inset 0px 0px 4px #343434, 0 0 18px #aa2222, 1px 1px 20px #aa2222;
     }
 }
 #book-wrapper.step-2 #create-selected-abilities-wrapper { display: block; }
@@ -364,6 +372,7 @@
     $ability-icon-size: 42px;
 
     .list-item {
+        background: none;
         height: $ability-icon-size;
         float: left;
         margin: 4px 6px 10px 5px;
@@ -390,8 +399,8 @@
     }
 
     .list-item:hover {
-        background: #ffffff;
-        .item { 
+        .item {  
+            background: #ffffff;
             opacity: 0.85;
             box-shadow: 0 0 1px #ffffff, 0 0 16px #ffffff;
             img { border: 2px solid #ffffff; }
@@ -399,7 +408,9 @@
     }
 
     .list-item.selected {
-        background: #96D7D7;
+        .item { 
+            background: #96D7D7;
+        }
         cursor: alias;
         //padding-bottom: 2px;
         //padding-top: 0px; 
@@ -427,6 +438,12 @@
     {
         opacity: 0.1;
     }
+
+    .list-item .too-many-selected { 
+        background: #dd2222 !important;
+        opacity: 0.2 !important; 
+    }
+
 }
 
 // ======================================

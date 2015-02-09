@@ -1555,8 +1555,10 @@ define(
 
             // TODO: If we want to add a class on hover do it here but also
             // remove it on fiter buttons and selected ability icons
-            this.$step4AbilityListItems.removeClass('description-shown');
-            $('#create-all-ability-' + options.model.id).addClass('description-shown');
+            if(this.$step4AbilityListItems){
+                this.$step4AbilityListItems.removeClass('description-shown');
+                $('#create-all-ability-' + options.model.id).addClass('description-shown');
+            }
             return this;
         }, 
 
@@ -1597,13 +1599,18 @@ define(
                     self.$abilitySelectedSkillsH3 = self.$abilitySelectedSkillsH3 || $('#selected-skills-h3');
                     self.$abilitySelectedSkillsH3.addClass('flash');
                     $('#create-selected-abilities-wrapper').addClass('shake shake-constant');
+
+                    //// shake ability (NOTE: Fucks up other els that have filters
                     $('.item', options.$el).addClass('shake shake-constant');
 
-                    setTimeout(function(){
+                    setTimeout(function(){requestAnimationFrame(function(){
                         self.$abilitySelectedSkillsH3.removeClass('flash');
+
+                        //// adjust clicked ability
                         $('.item', options.$el).removeClass('shake shake-constant');
+
                         $('#create-selected-abilities-wrapper').removeClass('shake shake-constant');
-                    }, 210);
+                    });}, 220);
 
                 } else {
                     // There is space for it, add it
@@ -1615,11 +1622,12 @@ define(
         },
 
         handleInvalidAbilitySelection: function handleInvalidAbilitySelection(){
-            // called when not enough abilities are selected
+            // called when not enough abilities are selected and you try to
+            // go to the next page
             logger.log('pageHome:handleInvalidAbilitySelection', 
                 'called');
             
-            // TODO: MAJOR: This....
+            // TODO: MAJOR: This....make it look better
             self.$abilitySelectedSkillsH3 = self.$abilitySelectedSkillsH3 || $('#selected-skills-h3');
             self.$abilitySelectedSkillsH3.addClass('flash'); 
 
