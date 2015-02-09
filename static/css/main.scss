@@ -149,11 +149,22 @@ svg {
 }
 
 
+
+// --------------------------------------
+//
+// interaction
+//
+// --------------------------------------
 .interaction-font {
     font-family: $interaction-font;
     font-weight: bold;
 }
 
+// --------------------------------------
+//
+// scroll bars
+//
+// --------------------------------------
 ::-webkit-scrollbar {
     -webkit-appearance: none;
     background: rgba(255,255,255,0.1);

@@ -111,6 +111,7 @@
     .race-list-item.selected, .list-item.selected {
         background: $BACKGROUND-INTERACTION-SELECTED; 
         box-shadow: $BOX-SHADOW-INTERACTION-SELECTED;
+
         color: #ffffff;
         padding-left: 40px;
         font-family: $input-font;
@@ -136,7 +137,10 @@
         opacity: 0.6;
     }
 
-    .race-list-item img, .list-item img { cursor: pointer; }
+    .race-list-item img, .list-item img { 
+        -webkit-filter: url(#filter-wavy-ability-icon);
+        cursor: pointer;
+    }
     .race-name, .list-item-name { 
         color: $COLOR-INTERACTION-TEXT;
         cursor: pointer; 
