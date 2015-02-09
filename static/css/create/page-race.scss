@@ -109,7 +109,8 @@
         opacity: 0.75;
     }
     .race-list-item.selected, .list-item.selected {
-        background: $BACKGROUND-INTERACTION; 
+        background: $BACKGROUND-INTERACTION-SELECTED; 
+        box-shadow: $BOX-SHADOW-INTERACTION-SELECTED;
         color: #ffffff;
         padding-left: 40px;
         font-family: $input-font;

@@ -41,6 +41,7 @@
 
 {{// Abilities description }}
 <script id='template-create-abilities-item-info' type='text/template'>
+<% if(id !== ''){ %>
     <div class='header'>
         <img src='/static/img/abilities/<%= id %>.svg' 
             class='ability-icon' />
@@ -63,4 +64,5 @@
     <div class='description-text'>
         <%= description %>
     </div>
+<% } %>
 </script>

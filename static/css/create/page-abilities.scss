@@ -7,7 +7,7 @@
         opacity: 1;
     }
     .interaction-list .item {
-        opacity: 0.35;
+        opacity: 1;
     }
     .list-item.selected .item {
         opacity: 1;
@@ -133,17 +133,16 @@
             // OLD:
             //box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 12px $COLOR-ABILITY-DAMAGE, 1px 1px 14px $COLOR-ABILITY-DAMAGE;
             &.label-filter-damage .bg { 
-                background: #8F2929;
-                background: #8B4D4D;
+                background: $COLOR-ABILITY-DAMAGE;
             }
             &.label-filter-debuff .bg { 
-                background: #66543c;
+                background: $COLOR-ABILITY-DEBUFF;
             }
             &.label-filter-heal .bg { 
-                background: #547650;
+                background: $COLOR-ABILITY-HEAL;
             }
             &.label-filter-buff .bg { 
-                background: #3D5D7C;
+                background: $COLOR-ABILITY-BUFF;
             }
 
             .label-name {
@@ -224,11 +223,22 @@
     }
 
     // HORIZONTAL
-    .ability-timer-bar {
+    .selected .ability-timer-bar {
+        background: $COLOR-INTERACTION-SELECTED;
+        border: 2px solid $COLOR-INTERACTION-SELECTED;
+    }
+
+    .list-item:hover .ability-timer-bar {
         background: #ffffff;
         border: 2px solid #ffffff;
+    }
+
+    .ability-timer-bar {
+        background: #d0d0d0;
+        border: 2px solid #d0d0d0;
+
         bottom: -4px;
-        left: 0;
+        left: 1px;
         height: 6px;
         position: absolute;
         right: 0;
@@ -300,10 +310,6 @@
         position: relative;
         left: 50px;
     }
-    .create-selected-abilities-item.empty-skill {
-        border: 1px solid rgba(255,255,255,0.5);
-        box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff;
-    }
 
     .create-selected-abilities-item {
         @include transition("box-shadow 0.1s");
@@ -319,7 +325,10 @@
 
 
         img {
-            border: 2px solid #ffffff;
+        //box-shadow: $BOX-SHADOW-INTERACTION-SELECTED;
+        box-shadow: 0 0 1px #ffffff, 0 0 4px $COLOR-INTERACTION-SELECTED, 0 0 20px $COLOR-INTERACTION-SELECTED;
+
+            border: 3px solid $COLOR-INTERACTION-SELECTED;
             cursor: alias;
             position: absolute;
             height: 100%;
@@ -328,6 +337,12 @@
             left: 0;
         }
     }
+
+    .create-selected-abilities-item.empty-skill {
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff;
+    }
+
     .create-selected-abilities-item.hover {
         box-shadow: 0 0 2px #343434, inset 0px 0px 4px #343434, inset 0 0 2px #ffffff, 0 0 18px $COLOR-ABILITY-DAMAGE, 1px 1px 20px $COLOR-ABILITY-DAMAGE;
     }
@@ -368,34 +383,42 @@
             filter: none;
         }
 
+        .item { background: none; }
+
         // NOTE: Ability timer bar is defined elsewhere
     
     }
 
-    .list-item:hover .item { 
-        opacity: 0.85;
-        box-shadow: 0 0 1px #ffffff, 0 0 7px #ffffff, 0 0 60px #ffffff;
+    .list-item:hover {
+        background: #ffffff;
+        .item { 
+            opacity: 0.85;
+            box-shadow: 0 0 1px #ffffff, 0 0 16px #ffffff;
+            img { border: 2px solid #ffffff; }
+        }
     }
 
     .list-item.selected {
-        background: none;
+        background: #96D7D7;
         cursor: alias;
         //padding-bottom: 2px;
         //padding-top: 0px; 
         span, img, div { cursor: alias; }
-        box-shadow: 0 0 12px #343434;
+        box-shadow: 0 0 2px #003984, 0 0 22px $COLOR-INTERACTION-SELECTED;
 
         img {
-            border: 2px solid rgba(255,255,255,.95);
             border-radius: 2px;
+            border: 3px solid $COLOR-INTERACTION-SELECTED;
         }
     }
+
     .list-item.selected:hover .item { 
         opacity: 1;
         cursor: alias;
         box-shadow: 0 0 12px #dd2222;
         span, img, div { cursor: alias; }
         img {
+            border: 3px solid $COLOR-INTERACTION-SELECTED;
         }
     }
 
@@ -451,4 +474,5 @@
 
         .inner-bar { -webkit-filter: url(#filter-wavy-ability-icon); }
     }
+
 }

@@ -116,11 +116,11 @@ define(
             name: 'Cripple',
             id: 'cripple',
             spellTypes: ['debuff'],
-            description: "Cripple weakens an enemy, lowering their attack and defense",
+            description: "Cripple weakens an enemy, lowering their defense",
             effectId: 'placeHolder',
             sprite: 'cripple',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 1,
+            timeCost: 1,
             damage: 0,
             validTargets: ['enemy'],
             type: 'magic',
@@ -129,8 +129,7 @@ define(
             buffDuration: 8,
             // TODO : scale effect
             buffEffects: { 
-                armor: -10,
-                attack: -10
+                armor: -15
             }
         },
 

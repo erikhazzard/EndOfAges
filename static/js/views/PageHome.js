@@ -1321,13 +1321,15 @@ define(
                 // select abilities from model list
                 requestAnimationFrame(function(){
                     _.each(options.model.attributes.abilities, function(id){
-                        $('#create-all-ability-' + id).addClass('selected');
+                        requestAnimationFrame(function(){
+                            $('#create-all-ability-' + id).addClass('selected');
 
-                        // add model
-                        var ability = self.allAbilities.findWhere({
-                            id: id
+                            // add model
+                            var ability = self.allAbilities.findWhere({
+                                id: id
+                            });
+                            self.selectedAbilities.add(ability);
                         });
-                        self.selectedAbilities.add(ability);
                     });
                 });
 
@@ -1504,6 +1506,7 @@ define(
                 // model
                 var attrs = {
                     description: '', name: '',
+                    id: '', castTime: '',
                     data: Abilities.prototype.dataConfig
                 };
 
