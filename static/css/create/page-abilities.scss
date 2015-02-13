@@ -392,9 +392,10 @@
         cursor: cell;
         span, img, div { cursor: cell; }
 
+        // list item image
         img {
             @include noSelect();
-            border: 3px solid #000000;
+            //border: 3px solid #000000;
             border-radius: 2px;
             height: $ability-icon-size;
             width: $ability-icon-size;
