@@ -338,15 +338,14 @@
         text-shadow: 0 0 1px #343434, 1px 1px 0 #343434, 0 0 2px #343434;
 
 
+        // selected hotkey icons
         img {
-        //box-shadow: $BOX-SHADOW-INTERACTION-SELECTED;
         box-shadow: 0 0 1px #ffffff, 0 0 4px $COLOR-INTERACTION-SELECTED, 0 0 20px $COLOR-INTERACTION-SELECTED;
-        border-image: linear-gradient(to bottom, rgba(255,255,255, 0.8), $COLOR-INTERACTION-SELECTED) 10% 10%;
-        -webkit-border-image: -webkit-linear-gradient($COLOR-INTERACTION-SELECTED, rgba(255,255,255, 0.8)) 9% 100%;
-        -webkit-border-image: -webkit-linear-gradient($COLOR-INTERACTION-SELECTED, rgba(255,255,255, 0.8));
+        box-shadow: $BOX-SHADOW-INTERACTION-SELECTED;
+            border: 3px solid $COLOR-INTERACTION-SELECTED;
+        border-image: linear-gradient(#ffffff, $COLOR-INTERACTION-SELECTED) 43% stretch;
         
             background: $COLOR-INTERACTION-SELECTED;
-            border: 3px solid $COLOR-INTERACTION-SELECTED;
             cursor: alias;
             position: absolute;
             height: 100%;
@@ -425,11 +424,15 @@
         //padding-bottom: 2px;
         //padding-top: 0px; 
         span, img, div { cursor: alias; }
-        box-shadow: 0 0 2px #003984, 0 0 22px $COLOR-INTERACTION-SELECTED;
+
+        box-shadow: 0 0 2px #000000, 0 0 22px $COLOR-INTERACTION-SELECTED;
+        box-shadow: $BOX-SHADOW-INTERACTION-SELECTED;
 
         img {
             border-radius: 2px;
             border: 3px solid $COLOR-INTERACTION-SELECTED;
+
+            border-image: linear-gradient(#ffffff, $COLOR-INTERACTION-SELECTED) 38% stretch;
         }
     }
 
