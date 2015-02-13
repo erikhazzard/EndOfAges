@@ -229,20 +229,9 @@
     }
 
     // HORIZONTAL
-    .selected .ability-timer-bar {
-        background: $COLOR-INTERACTION-SELECTED;
-        border: 2px solid $COLOR-INTERACTION-SELECTED;
-    }
-
-    .list-item:hover .ability-timer-bar {
-        background: #ffffff;
-        border: 2px solid #ffffff;
-    }
-
     .ability-timer-bar {
         background: #d0d0d0;
         border: 2px solid #d0d0d0;
-
         bottom: -4px;
         left: 1px;
         height: 6px;
@@ -252,6 +241,9 @@
         width: 100%;
         z-index: 10;
 
+        background: #331816;
+        border: 2px solid #331816;
+
         .inner-bar {
             bottom: 0;
             background: #000000;
@@ -259,13 +251,31 @@
             position: absolute;
             right: 0;
             top: 0;
+
+            background: #efefef;
         }
         .inner-bar { -webkit-filter: url(#filter-wavy-ability-icon); }
     }
 
-    //.description-shown {
-    //    box-shadow: 0 0 2px #336699, 0 0 6px #336699;
-    //}
+    .selected .ability-timer-bar,  .selected.list-item:hover .ability-timer-bar{
+        background: $COLOR-INTERACTION-SELECTED;
+        border: 2px solid $COLOR-INTERACTION-SELECTED;
+
+        // TEAL TWEAKS
+        background: #97F5F5;
+        border: 2px solid #97F5F5;
+        .inner-bar { background: #000000; }
+    }
+
+    .list-item:hover .ability-timer-bar {
+        background: #ffffff;
+        border: 2px solid #ffffff;
+        .inner-bar { background: #000000; }
+    }
+
+    // Style if an ability item is having its description shown
+    .description-shown {
+    }
 
     // Selected abilities
     #create-selected-abilities-wrapper {
@@ -395,7 +405,7 @@
         // list item image
         img {
             @include noSelect();
-            //border: 3px solid #000000;
+            border: 3px solid #331816;
             border-radius: 2px;
             height: $ability-icon-size;
             width: $ability-icon-size;
@@ -413,7 +423,9 @@
             background: #ffffff;
             opacity: 0.85;
             box-shadow: 0 0 1px #ffffff, 0 0 16px #ffffff;
-            img { border: 2px solid #ffffff; }
+            img { 
+                border: 2px solid #ffffff;
+            }
         }
     }
 
@@ -432,7 +444,6 @@
         img {
             border-radius: 2px;
             border: 3px solid $COLOR-INTERACTION-SELECTED;
-
             border-image: linear-gradient(#ffffff, $COLOR-INTERACTION-SELECTED) 38% stretch;
         }
     }
@@ -444,6 +455,7 @@
         span, img, div { cursor: alias; }
         img {
             border: 3px solid $COLOR-INTERACTION-SELECTED;
+            border-image: linear-gradient(#ffffff, $COLOR-INTERACTION-SELECTED) 38% stretch;
         }
     }
 
@@ -498,15 +510,22 @@
         top: 3px;
     }
 
+    // bar in description
     .ability-timer-bar {
-        background: rgba(255,255,255,0.42);
-        border: 2px solid rgba(255,255,255,0.4);
+
+        background: rgba(67, 34, 32, 1);
+        border: 3px solid rgba(67, 34, 32, 1);
+        border-radius: 3px;
         bottom: 6px;
+        height: 10px;
         left: 220px;
         width: auto;
         right: 6px;
 
-        .inner-bar { -webkit-filter: url(#filter-wavy-ability-icon); }
+        .inner-bar { 
+            -webkit-filter: url(#filter-wavy-ability-icon);
+            background: #efefef; 
+        }
     }
 
 }

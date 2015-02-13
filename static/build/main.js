@@ -1391,12 +1391,6 @@ define(
                 //
                 // Measured in seconds
                 castTime: 1,
-
-                // castDuration - measured in seconds
-                // how long the spell takes to cast - how long between the source
-                // entity using the spell and the target entity receiving the effect
-                castDuration: 0.5,
-
                 // How much this ability costs in time units. Normally, this
                 // is the same as the cast time. THIS property is subtracted from
                 // the entity's timer.
@@ -1406,6 +1400,11 @@ define(
                 //
                 // Measured in seconds
                 timeCost: null, // By default, will be set to castTime
+
+                // castDuration - measured in seconds
+                // how long the spell takes to cast - how long between the source
+                // entity using the spell and the target entity receiving the effect
+                castDuration: 0.5,
 
                 // How long (in seconds) the user must wait before using the
                 // ability again
@@ -4380,6 +4379,25 @@ define(
             }
         },
 
+        // Ranger
+        // ------------------------------
+        {
+            name: 'Multi Shot',
+            id: 'multi-shot',
+            spellTypes: ['damage'],
+            description: "An attack which fires multiple arrows at a single enemy",
+            effectId: 'placeHolder',
+            castTime: 3.2,
+            timeCost: 3.2,
+            castDuration: 0.1,
+            validTargets: ['enemy'],
+            type: {'physical': 1.0},
+            element: 'light',
+            damage: 5,
+            ticks: 2,
+            tickDuration: 0.27
+        },
+
         // ------------------------------
         // Healing - Light
         // ------------------------------
@@ -4731,7 +4749,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'stab', 'haste', 'cripple', 'assassinate'
+                'multi-shot', 'stab', 'haste', 'minor-healing'
             ]
         }),
 
@@ -4753,7 +4771,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'magicshield', 'icespear', 'firecomet'
+                'magic-shield', 'icespear', 'firecomet'
             ]
         })
     ];
@@ -5316,7 +5334,7 @@ define(
         // cleanup
         //
         // ==============================
-        onBeforeClose: function close(){
+        onBeforeClose: function onBeforeClose(){
             logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
 
             // ensure we unbind everything

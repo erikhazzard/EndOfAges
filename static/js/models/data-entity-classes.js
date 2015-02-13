@@ -47,7 +47,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'stab', 'haste', 'cripple', 'assassinate'
+                'multi-shot', 'stab', 'haste', 'minor-healing'
             ]
         }),
 
@@ -69,7 +69,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'magicshield', 'icespear', 'firecomet'
+                'magic-shield', 'icespear', 'firecomet'
             ]
         })
     ];

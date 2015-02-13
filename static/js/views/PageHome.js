@@ -318,7 +318,7 @@ define(
         // cleanup
         //
         // ==============================
-        onBeforeClose: function close(){
+        onBeforeClose: function onBeforeClose(){
             logger.log('pageHome:onBeforeClose', 'called, cleaning up stuff');
 
             // ensure we unbind everything

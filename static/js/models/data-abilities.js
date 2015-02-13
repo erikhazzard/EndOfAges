@@ -196,6 +196,25 @@ define(
             }
         },
 
+        // Ranger
+        // ------------------------------
+        {
+            name: 'Multi Shot',
+            id: 'multi-shot',
+            spellTypes: ['damage'],
+            description: "An attack which fires multiple arrows at a single enemy",
+            effectId: 'placeHolder',
+            castTime: 3.2,
+            timeCost: 3.2,
+            castDuration: 0.1,
+            validTargets: ['enemy'],
+            type: {'physical': 1.0},
+            element: 'light',
+            damage: 5,
+            ticks: 2,
+            tickDuration: 0.27
+        },
+
         // ------------------------------
         // Healing - Light
         // ------------------------------

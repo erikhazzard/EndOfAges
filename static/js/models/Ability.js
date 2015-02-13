@@ -56,12 +56,6 @@ define(
                 //
                 // Measured in seconds
                 castTime: 1,
-
-                // castDuration - measured in seconds
-                // how long the spell takes to cast - how long between the source
-                // entity using the spell and the target entity receiving the effect
-                castDuration: 0.5,
-
                 // How much this ability costs in time units. Normally, this
                 // is the same as the cast time. THIS property is subtracted from
                 // the entity's timer.
@@ -71,6 +65,11 @@ define(
                 //
                 // Measured in seconds
                 timeCost: null, // By default, will be set to castTime
+
+                // castDuration - measured in seconds
+                // how long the spell takes to cast - how long between the source
+                // entity using the spell and the target entity receiving the effect
+                castDuration: 0.5,
 
                 // How long (in seconds) the user must wait before using the
                 // ability again
