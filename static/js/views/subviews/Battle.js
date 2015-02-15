@@ -2277,6 +2277,7 @@ define(
 
             // check that target is valid (either enemy or player)
             if( invalidTarget ||
+                !target || 
                 // check if target is dead
                 ( !target.get('isAlive') && validTarget.indexOf('dead') === -1 )
             ){

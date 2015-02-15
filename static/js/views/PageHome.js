@@ -246,6 +246,10 @@ define(
                 });
             }
 
+            // ============================
+            // TODO: DEV: SKIP BOOK
+            // ============================
+
             return this;
         },
         
@@ -285,13 +289,15 @@ define(
             });
 
             // trigger click events
-            this.raceClicked({
-                model: new Race(data.race),
-                $el: $('#create-race-' + data.race.sprite)
-            });
+            if(data.race){
+                this.raceClicked({
+                    model: new Race(data.race),
+                    $el: $('#create-race-' + data.race.sprite)
+                });
 
-            if(self.$raceWrapper){
-                self.$raceWrapper.velocity({ opacity: 1 }, { duration: 100 });
+                if(self.$raceWrapper){
+                    self.$raceWrapper.velocity({ opacity: 1 }, { duration: 100 });
+                }
             }
 
             // set selected class and abilities

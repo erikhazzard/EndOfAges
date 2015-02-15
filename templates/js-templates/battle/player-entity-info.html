@@ -4,14 +4,6 @@
     <div class='entity'>
         <h4><%= name %></h4>
     </div>
-    <div class='active-effecs'>
-        <% _.each(activeEffects, function(effect){ %>
-            <div class='active-effect'>
-                <%= JSON.stringify(effect) %>
-            </div>
-        <% }); %>
-    </div>
-
     Health: <div class='health-wrapper'></div>
 
     <div class='health-bar-wrapper'>
@@ -27,6 +19,20 @@
     Magic Power: <%= attributes.get('magicPower') %> 
     <br />
     Magic Resist: <%= attributes.get('magicResist') %> 
+
+    <h4>Active Effects</h4>
+    <div class='active-effecs'>
+        <% _.each(activeEffects, function(effect){ %>
+            <div class='active-effect'>
+                <img src='/static/img/abilities/<%= effect.id %>.svg' class='ability-icon' 
+                    height='46' width='46' />
+                <!--
+                <%= JSON.stringify(effect) %>
+                -->
+            </div>
+        <% }); %>
+    </div>
+
     
 </script>
 

@@ -44,11 +44,13 @@
     #region-battle-player-entities-info {
         cursor: pointer;
         
-        .entity-selected {
-            border: 4px solid #ffffff;
-            box-shadow: inset 0 0 2px #343434;
-            padding: 0 0 0 10px;
-        }
+        // NOTE: Don't need this since there's only ever currently one 
+        // player entity
+        /*.entity-selected {*/
+            /*border: 4px solid #ffffff;*/
+            /*box-shadow: inset 0 0 2px #343434;*/
+            /*padding: 0 0 0 10px;*/
+        /*}*/
 
         // Individual entity item
         .selectedEntityInfoWrapper {

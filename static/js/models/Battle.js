@@ -113,7 +113,7 @@ define(
             // TODO: make this more smarter, depending on player levels, etc.
             var entity;
             var abilities = new Abilities();
-            abilities.add([new Ability(dataAbilities.fireball)]);
+            abilities.add([new Ability(dataAbilities.haste)]);
 
             // generate new entity
             entity = new Entity({

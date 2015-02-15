@@ -535,11 +535,12 @@
     top: 8px;
     right: 12px; }
 .game-battle-wrapper #region-battle-player-entities-info {
-  cursor: pointer; }
-  .game-battle-wrapper #region-battle-player-entities-info .entity-selected {
-    border: 4px solid #ffffff;
-    box-shadow: inset 0 0 2px #343434;
-    padding: 0 0 0 10px; }
+  cursor: pointer;
+  /*.entity-selected {*/
+  /*border: 4px solid #ffffff;*/
+  /*box-shadow: inset 0 0 2px #343434;*/
+  /*padding: 0 0 0 10px;*/
+  /*}*/ }
   .game-battle-wrapper #region-battle-player-entities-info .selectedEntityInfoWrapper {
     cursor: pointer; }
 
@@ -1464,6 +1465,16 @@ svg {
   animation: preload 1.8s ease-out;
   animation-direction: alternate;
   animation-iteration-count: infinite; }
+
+@-webkit-keyframes selection-update {
+  0% {
+    box-shadow: 0 0 2px #343434; }
+  100% {
+    box-shadow: 0 0 40px #343434; } }
+.item-selected-animation {
+  -webkit-animation: selection-update 1.8s ease-out;
+  -webkit-animation-direction: alternate;
+  -webkit-animation-iteration-count: infinite; }
 
 .interaction-font {
   font-family: "Shadows Into Light", cursive;

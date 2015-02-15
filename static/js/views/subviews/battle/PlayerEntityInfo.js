@@ -3,6 +3,13 @@
 // Battle - Entity info subview
 //      Entity battle related info (health, magic, timer, etc) 
 //
+//
+//
+//      TODO: Refactor, use subviews. Don't rerender the whole thing whenever
+//      a single data point changes
+//
+//
+//
 // ===========================================================================
 define(
     [ 
@@ -26,9 +33,11 @@ define(
             // Listen for changes to attributes.
             // TODO: break it out even more, have functions for each group of
             // changes
-            this.listenTo(this.model.get('attributes'), 'change', this.rerender);
+            //this.listenTo(this.model.get('attributes'), 'change', this.rerender);
             this.listenTo(this.model.get('attributes'), 'change:health', this.rerenderHealth);
             this.listenTo(this.model.get('attributes'), 'change:maxHealth', this.rerenderHealth);
+
+            this.listenTo(this.model.get('attributes'), 'change', this.rerender);
 
             // render components the first time this view renders
             //  subsequent renders happen on attribute change callbacks
@@ -49,11 +58,47 @@ define(
             logger.log('views/subviews/battle/SelectedEntityInfo', 
                 'onShow() called');
 
+            // subviews
+            this.updateActiveEffects();
+
+            return this;
+        },
+        rerender: function infoRerender(){
+            this.render();
+            this.onShow();
+            return this;
+        },
+
+        rerenderHealth: function healthRerender(){
+            // Update the health
+            if(!this.$health){ this.$health = $('.health-wrapper', this.$el); }
+
+            this.$health.html(
+                Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
+                    this.model.toJSON()    
+                )
+            );
+
+            return this;
+        },
+        
+        // ------------------------------
+        //
+        // BUFFS
+        //
+        // ------------------------------
+        updateActiveEffects: function updateActiveEffects(){
+            var self = this;
+            this.$activeEffectsEl = this.$activeEffectsEl || $('.active-effect', this.$el);
+
+            logger.log('PlayerEntityInfo:updateActiveEffects', 
+                'updateActiveEffects called', this.model);
+
             // Set the fade duration for all the active effects based on their
             // duration
             // The active effect elements are in order of the activeEffects
             //  array on the entity
-            _.each($('.active-effect', this.$el), function(el, i){
+            _.each(this.$activeEffectsEl, function(el, i){
                 var duration = self.model.attributes.activeEffects[i].get('buffDuration');
 
                 // Don't do anything for buffs that have no duration
@@ -79,28 +124,8 @@ define(
                     opacity: 0
                 }, duration, 'easeInSine');
             });
-
-            return this;
         },
 
-        rerender: function infoRerender(){
-            this.render();
-            this.onShow();
-            return this;
-        },
-
-        rerenderHealth: function healthRerender(){
-            // Update the health
-            if(!this.$health){ this.$health = $('.health-wrapper', this.$el); }
-
-            this.$health.html(
-                Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
-                    this.model.toJSON()    
-                )
-            );
-
-            return this;
-        },
 
         // ------------------------------
         //

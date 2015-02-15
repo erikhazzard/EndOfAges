@@ -149,6 +149,22 @@ svg {
 }
 
 
+@-webkit-keyframes selection-update { 
+    0% {
+        box-shadow: 0 0 2px #343434;
+    }
+    100% {
+        box-shadow: 0 0 40px #343434;
+    }
+}
+
+.item-selected-animation {
+    -webkit-animation: selection-update 1.8s ease-out;
+    -webkit-animation-direction: alternate;
+    -webkit-animation-iteration-count: infinite;
+}
+
+
 
 // --------------------------------------
 //

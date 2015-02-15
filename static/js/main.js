@@ -127,7 +127,10 @@ requirejs([
     
     // log options
     logger.transports.get('Console').property({ showMeta: false });
-    logger.options.groupsEnabled = [/pageHome/, /analytics/];
+    logger.options.groupsEnabled = [
+        /pageHome/, /analytics/,
+        /PlayerEntityInfo/
+    ];
     window.LOGGER = logger;
 
     //-----------------------------------
