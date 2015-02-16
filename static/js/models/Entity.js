@@ -778,6 +778,9 @@ define(
             var target = null;
             var targetIndex, targetGroup;
             var targets, model, len;
+            this._lastAIHandleCall = this._lastAIHandleCall || Date.now();
+
+            var canUseAbility = false;
 
             if(!ability){
                 // No ability already chosen? Select one at random
@@ -832,8 +835,9 @@ define(
                         i++;
                         if(i > 10){ break; }
                     }
-                    targetIndex = battle.get('playerEntities').indexOf(target), 
+                    targetIndex = battle.get('playerEntities').indexOf(target); 
                     targetGroup = 'player';
+                    canUseAbility = true;
 
                 } else if (ability.attributes.heal){
                     // TODO: Target self group
@@ -867,8 +871,9 @@ define(
                     target = models[targets[0].index];
 
                     // set the target index and group
-                    targetIndex = battle.get('enemyEntities').indexOf(target), 
+                    targetIndex = battle.get('enemyEntities').indexOf(target);
                     targetGroup = 'enemy';
+                    canUseAbility = true;
 
                 }
 
@@ -876,18 +881,21 @@ define(
                 // 2. trigger event to use ability
                 // ----------------------
                 // TODO: make sure this isn't used over and over
-                events.trigger('useAbility', {
-                    target: target,
-                    targetIndex: targetIndex,
-                    entityGroup: targetGroup,
+                if(canUseAbility && Date.now() - this._lastAIHandleCall > 100){
+                    events.trigger('useAbility', {
+                        target: target,
+                        targetIndex: targetIndex,
+                        entityGroup: targetGroup,
 
-                    sourceEntityIndex: battle.get('enemyEntities').indexOf(this),
-                    sourceEntityGroup: 'enemy',
-                    ability: ability
-                });
+                        sourceEntityIndex: battle.get('enemyEntities').indexOf(this),
+                        sourceEntityGroup: 'enemy',
+                        ability: ability
+                    });
 
-                // clear out desirect ability
-                this.set('desiredAbility', null);
+                    // clear out desirect ability
+                    this.set('desiredAbility', null);
+                    this._lastAIHandleCall = Date.now();
+                }
             }
 
             return this;

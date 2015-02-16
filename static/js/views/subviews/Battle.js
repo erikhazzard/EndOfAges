@@ -2299,7 +2299,7 @@ define(
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
             if(entityTime < selectedAbility.get('castTime')){
-                // >>>> CAN NOT use (timer not met)
+                //  CAN NOT use (timer not met)
                 // TODO: visual spell effect
                 // TODO: multiple targets 
                 logger.log("views/subviews/Battle", 
@@ -2309,7 +2309,7 @@ define(
                 return false;
 
             } else {
-               // >>>> CAN use (timer met)
+               // CAN use (timer met)
                 logger.log("views/subviews/Battle", 
                     "2. USING ability! Time: %O / %O", entityTime, 
                     selectedAbility.get('castTime'));

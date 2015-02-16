@@ -21,7 +21,9 @@ define(
         'models/Battle',
 
         'views/map/ContainerMap',
-        'views/subViews/Battle'
+        'views/subViews/Battle',
+        
+        'localForage'
 
     ], function viewPageGame(
         d3, backbone, marionette, 
@@ -29,7 +31,9 @@ define(
 
         Map, Battle,
         MapContainerView,
-        BattleView
+        BattleView,
+
+        localForage
     ){
 
     var PageGame = Backbone.Marionette.Layout.extend({
@@ -110,6 +114,9 @@ define(
                 '1. mapNodeClicked() called. Options: %O',
                 options);
             var self = this;
+
+            // TDOO: REMOVE THIS
+            localForage.setItem('dev:mapNode:clicked', options);
 
             // If the node instance was clicked and an instance is already 
             // active, do nothing

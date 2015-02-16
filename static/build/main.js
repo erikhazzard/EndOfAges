@@ -2975,6 +2975,9 @@ define(
             var target = null;
             var targetIndex, targetGroup;
             var targets, model, len;
+            this._lastAIHandleCall = this._lastAIHandleCall || Date.now();
+
+            var canUseAbility = false;
 
             if(!ability){
                 // No ability already chosen? Select one at random
@@ -3029,8 +3032,9 @@ define(
                         i++;
                         if(i > 10){ break; }
                     }
-                    targetIndex = battle.get('playerEntities').indexOf(target), 
+                    targetIndex = battle.get('playerEntities').indexOf(target); 
                     targetGroup = 'player';
+                    canUseAbility = true;
 
                 } else if (ability.attributes.heal){
                     // TODO: Target self group
@@ -3064,8 +3068,9 @@ define(
                     target = models[targets[0].index];
 
                     // set the target index and group
-                    targetIndex = battle.get('enemyEntities').indexOf(target), 
+                    targetIndex = battle.get('enemyEntities').indexOf(target);
                     targetGroup = 'enemy';
+                    canUseAbility = true;
 
                 }
 
@@ -3073,18 +3078,21 @@ define(
                 // 2. trigger event to use ability
                 // ----------------------
                 // TODO: make sure this isn't used over and over
-                events.trigger('useAbility', {
-                    target: target,
-                    targetIndex: targetIndex,
-                    entityGroup: targetGroup,
+                if(canUseAbility && Date.now() - this._lastAIHandleCall > 100){
+                    events.trigger('useAbility', {
+                        target: target,
+                        targetIndex: targetIndex,
+                        entityGroup: targetGroup,
 
-                    sourceEntityIndex: battle.get('enemyEntities').indexOf(this),
-                    sourceEntityGroup: 'enemy',
-                    ability: ability
-                });
+                        sourceEntityIndex: battle.get('enemyEntities').indexOf(this),
+                        sourceEntityGroup: 'enemy',
+                        ability: ability
+                    });
 
-                // clear out desirect ability
-                this.set('desiredAbility', null);
+                    // clear out desirect ability
+                    this.set('desiredAbility', null);
+                    this._lastAIHandleCall = Date.now();
+                }
             }
 
             return this;
@@ -11108,7 +11116,7 @@ define(
             // If the battle's timer is LESS than the castTime attribute, do 
             // nothing
             if(entityTime < selectedAbility.get('castTime')){
-                // >>>> CAN NOT use (timer not met)
+                //  CAN NOT use (timer not met)
                 // TODO: visual spell effect
                 // TODO: multiple targets 
                 logger.log("views/subviews/Battle", 
@@ -11118,7 +11126,7 @@ define(
                 return false;
 
             } else {
-               // >>>> CAN use (timer met)
+               // CAN use (timer met)
                 logger.log("views/subviews/Battle", 
                     "2. USING ability! Time: %O / %O", entityTime, 
                     selectedAbility.get('castTime'));
@@ -11450,7 +11458,9 @@ define(
         'models/Battle',
 
         'views/map/ContainerMap',
-        'views/subViews/Battle'
+        'views/subViews/Battle',
+        
+        'localForage'
 
     ], function viewPageGame(
         d3, backbone, marionette, 
@@ -11458,7 +11468,9 @@ define(
 
         Map, Battle,
         MapContainerView,
-        BattleView
+        BattleView,
+
+        localForage
     ){
 
     var PageGame = Backbone.Marionette.Layout.extend({
@@ -11539,6 +11551,9 @@ define(
                 '1. mapNodeClicked() called. Options: %O',
                 options);
             var self = this;
+
+            // TDOO: REMOVE THIS
+            localForage.setItem('dev:mapNode:clicked', options);
 
             // If the node instance was clicked and an instance is already 
             // active, do nothing
@@ -12112,6 +12127,7 @@ requirejs([
     ){
 
     window.d3 = d3;
+    window.localForage = localForage;
 
     // Allows multiple modals 
     if (!$.support.transition) { $.fn.transition = $.fn.animate; }
@@ -12125,10 +12141,13 @@ requirejs([
     
     // log options
     logger.transports.get('Console').property({ showMeta: false });
+
     logger.options.groupsEnabled = [
         /pageHome/, /analytics/,
         /PlayerEntityInfo/
     ];
+    logger.options.groupsEnabled = true;
+
     window.LOGGER = logger;
 
     //-----------------------------------
