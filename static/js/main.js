@@ -115,6 +115,7 @@ requirejs([
 
     window.d3 = d3;
     window.localForage = localForage;
+    window.EVENTS = events;
 
     // Allows multiple modals 
     if (!$.support.transition) { $.fn.transition = $.fn.animate; }
@@ -133,6 +134,7 @@ requirejs([
         /pageHome/, /analytics/,
         /PlayerEntityInfo/
     ];
+    logger.options.groupsDisabled = [/pageHome/, /allAbilitiesListItem/];
     logger.options.groupsEnabled = true;
 
     window.LOGGER = logger;

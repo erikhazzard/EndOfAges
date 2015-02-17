@@ -82,6 +82,31 @@ define(
         initialize: function initialize(options){
             // initialize:
             var self = this;
+
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // ==========================
+            // TODO: REMOVE THIS : DEV 
+            // SKIP CREATE
+            // ==========================
+            return localForage.getItem('game:createCharacter:initialState', function(d){ EVENTS.trigger('controller:showGame', {dataToCreateGameModel: JSON.parse(d) }); });
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+
             logger.log('pageHome', 'initialize() called');
             START_DATE = new Date();
 

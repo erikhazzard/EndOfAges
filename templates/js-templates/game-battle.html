@@ -6,9 +6,10 @@
 <script id='template-game-battle' type='text/template'>
     {{ // Left side - selected entity, abilities, etc. }}
     <div id='battle-left-wrapper'>
-        <!-- Entity info -->
-        <div id='region-battle-player-entities-info'></div>
-
+        <div id='battle-left-wrapper-inner'>
+            <!-- Entity info -->
+            <div id='region-battle-player-entities-info'></div>
+        </div>
     </div>
 
     {{// Middle - battle, chat }}
@@ -37,17 +38,20 @@
 
     {{// Right - intended target, options }}
     <div id='battle-right-wrapper'>
-        <!-- Hover Intended Target info -->
-        <div id='region-battle-intended-target-wrapper'></div>
+        <div id='battle-right-wrapper-inner'>
 
-        <div id='battle-meta-options'>
-            <button class='finish-instance btn btn-large'>Finish</button>
-            <br />
-            <button class='btn-pause btn btn-large'>Pause</button>
-            <br />
+            <!-- Hover Intended Target info -->
+            <div id='region-battle-intended-target-wrapper'></div>
 
-            {{// Dev: show state }}
-            State: <span class='state'></span> 
+            <div id='battle-meta-options'>
+                <button class='finish-instance btn btn-large'>Finish</button>
+                <br />
+                <button class='btn-pause btn btn-large'>Pause</button>
+                <br />
+
+                {{// Dev: show state }}
+                State: <span class='state'></span> 
+            </div>
         </div>
     </div>
 </script>

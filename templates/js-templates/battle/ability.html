@@ -2,7 +2,17 @@
 <script id='template-game-battle-ability' type='text/template'>
     {{// This template shows the abilities for the currently selected entity }}
     <div class='ability-item'>
-        <h4><%= name %></h4>
-        <%= ['q','w','e','r'][index] %>
+
+        <div class='ability-icon-wrapper'>
+            <img src='/static/img/abilities/<%= id %>.svg' 
+                class='ability-icon2' 
+                height='50' width='50' />
+            <div class='ability-icon-overlay'></div>
+            <canvas height=52 width=52 class='ability-icon-canvas'></canvas>
+        </div>
+
+    </div>
+    <div class='hotkey-title hotkey-<%= ['Q','W','E','R'][index] %>'>
+        <%= ['Q','W','E','R'][index] %>
     </div>
 </script>

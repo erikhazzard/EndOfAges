@@ -1,7 +1,8 @@
 $ui-left-side-width: 200px;
 $ui-right-side-width: 200px;
-$ui-log-height: 100px;
+$ui-log-height: 115px;
 
 @import "battle/battle-svg";
-@import "battle/player-party";
+@import "battle/battle-sidebars";
+@import "battle/battle-abilities";
 @import "battle/main";

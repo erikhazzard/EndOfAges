@@ -39,6 +39,14 @@ define(
 
             this.listenTo(this.model.get('attributes'), 'change', this.rerender);
 
+            // TODO: :::::::::::: THIS
+            // Update active effects when they get changed
+            this.listenTo(
+                this.model, 
+                'change:activeEffects', 
+                this.updateActiveEffects
+            );
+
             // render components the first time this view renders
             //  subsequent renders happen on attribute change callbacks
             this.listenToOnce(this, 'render', this.rerenderHealth);
@@ -56,8 +64,10 @@ define(
         onShow: function infoOnShow(){
             var self = this;
             logger.log('views/subviews/battle/SelectedEntityInfo', 
-                'onShow() called');
+            'onShow() called');
 
+            // TODO: Render subviews? Should we have subviews, or just manually
+            // manage it ourselves here?
             // subviews
             this.updateActiveEffects();
 

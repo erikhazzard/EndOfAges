@@ -40,6 +40,10 @@ define(
             this.index = options.index;
 
             // TODO: use a hotkey configuration instead of hardcoding
+            //
+            // TODO: This should really be handled in Battle, most likely, not
+            // here...
+            //
             var key = [ 'q', 'w', 'e', 'r'][this.index];
             // do the same thing, but also if user holds shift
             var keyShift = [ 'shift+q', 'shift+w', 'shift+e', 'shift+r'][this.index];
@@ -72,6 +76,10 @@ define(
             if(this.model.attributes.validTargets.indexOf('player') > -1){
                 this.$el.addClass('player');
             }
+
+            this.$abilityIconOverlay = $('.ability-icon-overlay', this.$el);
+            this.$abilityIconCanvas = $('.ability-icon-canvas', this.$el);
+
             return this;
         },
 
@@ -111,18 +119,22 @@ define(
                     var canBeUsed = options.canBeUsed;
 
                     // Can the ability be used? If not, add the use-invalid class
-                    if(!canBeUsed){
-                        // Can NOT be used
-                        self.$el.addClass('use-invalid');
-                        self.$el.focus();
-                        setTimeout(function(){
-                            self.$el.removeClass('use-invalid');
-                        }, 100);
-                    } else {
+                    if(canBeUsed){
                         // CAN use
-                        // add class
-                        self.$el.addClass('use');
-                        self.$el.focus();
+                        self.$abilityIconOverlay.addClass('used-success');
+                        setTimeout(function(){
+                            self.$abilityIconOverlay.removeClass('used-success');
+                        },140);
+
+                    } else {
+                        // Can NOT be used
+                        self.$abilityIconOverlay.addClass('used-invalid');
+                        self.$abilityIconOverlay.addClass('invalid');
+                        self.$el.addClass('shake shake-constant');
+                        setTimeout(function(){
+                            self.$abilityIconOverlay.removeClass('used-invalid');
+                            self.$el.removeClass('shake shake-constant');
+                        },140);
                     }
                 }
             });

@@ -12,9 +12,12 @@ define([
     'backbone', 'marionette', 'logger', 'events', 
     'models/appUser-object',
     'models/Game',
+    'models/Race',
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
+
+    'collections/Abilities',
 
     // TODO: remove, only for dev
     'views/DevTools'
@@ -23,11 +26,14 @@ define([
         Backbone, Marionette, logger, events,
         appUser,
         Game,
+        Race,
         Entity,
 
         // include views here
         PageHome,
         PageGame,
+
+        Abilities,
 
         // TODO: remove once out of dev
         DevTools
@@ -173,6 +179,8 @@ define([
 
             logger.log('Controller', 'showGame() called');
 
+            // TODO: Do we need this??!?!? Players should be able to play while
+            // not logged in...
             if(!appUser.get('isLoggedIn')){ 
                 logger.log('Controller', 'not logged in, returning false');
                 return false;
@@ -182,8 +190,21 @@ define([
             if(!this.pageGame){
                 logger.log('Controller', 'creating new pageGame view');
             }
-
             var playerEntityModels = [];
+
+            // Check for options
+            // --------------------------
+            if(options.dataToCreateGameModel){
+                // if data from create is passed in, use it. This assumes
+                // data is passed in as a raw JSON object, not game models
+                this.modelGame = new Game({}, {
+                    models: [ new Entity({
+                        abilities: new Abilities( options.dataToCreateGameModel.abilities ),
+                        name: options.dataToCreateGameModel.name,
+                        race: new Race( options.dataToCreateGameModel.race )
+                    }) ]
+                });
+            }
 
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models

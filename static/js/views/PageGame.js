@@ -115,9 +115,6 @@ define(
                 options);
             var self = this;
 
-            // TDOO: REMOVE THIS
-            localForage.setItem('dev:mapNode:clicked', options);
-
             // If the node instance was clicked and an instance is already 
             // active, do nothing
             if(this.model.get('activeNodeInstance') !== null){

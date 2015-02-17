@@ -5106,6 +5106,31 @@ define(
         initialize: function initialize(options){
             // initialize:
             var self = this;
+
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // ==========================
+            // TODO: REMOVE THIS : DEV 
+            // SKIP CREATE
+            // ==========================
+            return localForage.getItem('game:createCharacter:initialState', function(d){ EVENTS.trigger('controller:showGame', {dataToCreateGameModel: JSON.parse(d) }); });
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+            // XXXXXXXXXXXXXXXXXXXXXXXXXX
+
             logger.log('pageHome', 'initialize() called');
             START_DATE = new Date();
 
@@ -8125,6 +8150,10 @@ define(
             this.index = options.index;
 
             // TODO: use a hotkey configuration instead of hardcoding
+            //
+            // TODO: This should really be handled in Battle, most likely, not
+            // here...
+            //
             var key = [ 'q', 'w', 'e', 'r'][this.index];
             // do the same thing, but also if user holds shift
             var keyShift = [ 'shift+q', 'shift+w', 'shift+e', 'shift+r'][this.index];
@@ -8157,6 +8186,10 @@ define(
             if(this.model.attributes.validTargets.indexOf('player') > -1){
                 this.$el.addClass('player');
             }
+
+            this.$abilityIconOverlay = $('.ability-icon-overlay', this.$el);
+            this.$abilityIconCanvas = $('.ability-icon-canvas', this.$el);
+
             return this;
         },
 
@@ -8196,18 +8229,22 @@ define(
                     var canBeUsed = options.canBeUsed;
 
                     // Can the ability be used? If not, add the use-invalid class
-                    if(!canBeUsed){
-                        // Can NOT be used
-                        self.$el.addClass('use-invalid');
-                        self.$el.focus();
-                        setTimeout(function(){
-                            self.$el.removeClass('use-invalid');
-                        }, 100);
-                    } else {
+                    if(canBeUsed){
                         // CAN use
-                        // add class
-                        self.$el.addClass('use');
-                        self.$el.focus();
+                        self.$abilityIconOverlay.addClass('used-success');
+                        setTimeout(function(){
+                            self.$abilityIconOverlay.removeClass('used-success');
+                        },140);
+
+                    } else {
+                        // Can NOT be used
+                        self.$abilityIconOverlay.addClass('used-invalid');
+                        self.$abilityIconOverlay.addClass('invalid');
+                        self.$el.addClass('shake shake-constant');
+                        setTimeout(function(){
+                            self.$abilityIconOverlay.removeClass('used-invalid');
+                            self.$el.removeClass('shake shake-constant');
+                        },140);
                     }
                 }
             });
@@ -8371,6 +8408,14 @@ define(
 
             this.listenTo(this.model.get('attributes'), 'change', this.rerender);
 
+            // TODO: :::::::::::: THIS
+            // Update active effects when they get changed
+            this.listenTo(
+                this.model, 
+                'change:activeEffects', 
+                this.updateActiveEffects
+            );
+
             // render components the first time this view renders
             //  subsequent renders happen on attribute change callbacks
             this.listenToOnce(this, 'render', this.rerenderHealth);
@@ -8388,8 +8433,10 @@ define(
         onShow: function infoOnShow(){
             var self = this;
             logger.log('views/subviews/battle/SelectedEntityInfo', 
-                'onShow() called');
+            'onShow() called');
 
+            // TODO: Render subviews? Should we have subviews, or just manually
+            // manage it ourselves here?
             // subviews
             this.updateActiveEffects();
 
@@ -11552,9 +11599,6 @@ define(
                 options);
             var self = this;
 
-            // TDOO: REMOVE THIS
-            localForage.setItem('dev:mapNode:clicked', options);
-
             // If the node instance was clicked and an instance is already 
             // active, do nothing
             if(this.model.get('activeNodeInstance') !== null){
@@ -11758,9 +11802,12 @@ define('Controller',[
     'backbone', 'marionette', 'logger', 'events', 
     'models/appUser-object',
     'models/Game',
+    'models/Race',
     'models/Entity',
     'views/PageHome',
     'views/PageGame',
+
+    'collections/Abilities',
 
     // TODO: remove, only for dev
     'views/DevTools'
@@ -11769,11 +11816,14 @@ define('Controller',[
         Backbone, Marionette, logger, events,
         appUser,
         Game,
+        Race,
         Entity,
 
         // include views here
         PageHome,
         PageGame,
+
+        Abilities,
 
         // TODO: remove once out of dev
         DevTools
@@ -11919,6 +11969,8 @@ define('Controller',[
 
             logger.log('Controller', 'showGame() called');
 
+            // TODO: Do we need this??!?!? Players should be able to play while
+            // not logged in...
             if(!appUser.get('isLoggedIn')){ 
                 logger.log('Controller', 'not logged in, returning false');
                 return false;
@@ -11928,8 +11980,21 @@ define('Controller',[
             if(!this.pageGame){
                 logger.log('Controller', 'creating new pageGame view');
             }
-
             var playerEntityModels = [];
+
+            // Check for options
+            // --------------------------
+            if(options.dataToCreateGameModel){
+                // if data from create is passed in, use it. This assumes
+                // data is passed in as a raw JSON object, not game models
+                this.modelGame = new Game({}, {
+                    models: [ new Entity({
+                        abilities: new Abilities( options.dataToCreateGameModel.abilities ),
+                        name: options.dataToCreateGameModel.name,
+                        race: new Race( options.dataToCreateGameModel.race )
+                    }) ]
+                });
+            }
 
             if(!this.modelGame){
                 // TODO: handle creating game differently, load in models
@@ -12128,6 +12193,7 @@ requirejs([
 
     window.d3 = d3;
     window.localForage = localForage;
+    window.EVENTS = events;
 
     // Allows multiple modals 
     if (!$.support.transition) { $.fn.transition = $.fn.animate; }
@@ -12146,6 +12212,7 @@ requirejs([
         /pageHome/, /analytics/,
         /PlayerEntityInfo/
     ];
+    logger.options.groupsDisabled = [/pageHome/, /allAbilitiesListItem/];
     logger.options.groupsEnabled = true;
 
     window.LOGGER = logger;
