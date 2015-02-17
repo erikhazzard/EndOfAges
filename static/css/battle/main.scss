@@ -136,15 +136,22 @@
     color: #ffffff;
     position: absolute;
     text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
+    width: 240px;
     z-index: 99999;
 
     .message {
         @include transition("all 0.8s");
         @include transform(translate3d(0, 0, 0));
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
         opacity: 1;
     }
     .message.fade-animation {
         @include transform(translate3d(0, -70px, 0));
+        font-size: 0.7em;
+        padding-left: 20px;
         opacity: 0;
     }
 }

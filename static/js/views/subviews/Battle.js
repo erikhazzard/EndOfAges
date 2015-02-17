@@ -709,6 +709,7 @@ define(
             var ability = options.ability;
             var useCallback = options.useCallback;
             var $tmpEl;
+            this._lastAbilityActivateDate = this._lastAbilityActivateDate || Date.now() - 1000;
 
             logger.log('views/subviews/Battle', 
                 '1. handleAbilityActivated: %O', ability);
@@ -721,7 +722,15 @@ define(
             }
 
             // If there is no selected target, cannot use the ability
+            // --------------------------
             if(!this.selectedTarget){
+                // TODO: Should we check this? To disallow holding down button
+                if(Date.now() - this._lastAbilityActivateDate < 100){
+                    // Hit it TOO fast
+                    return false;
+                }
+                this._lastAbilityActivateDate = Date.now();
+
                 logger.log('views/subviews/Battle', 
                     '[x] cannot use ability, no selected target');
 
