@@ -779,6 +779,30 @@
     fill: #ababab !important;
     opacity: 0.6 !important; }
 
+#battle-info-message {
+  bottom: 215px;
+  left: 40%;
+  color: #ffffff;
+  position: absolute;
+  text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
+  z-index: 99999; }
+  #battle-info-message .message {
+    -webkit-transition: all 0.8s;
+    -moz-transition: all 0.8s;
+    -o-transition: all 0.8s;
+    transition: all 0.8s;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    opacity: 1; }
+  #battle-info-message .message.fade-animation {
+    -webkit-transform: translate3d(0, -70px, 0);
+    -moz-transform: translate3d(0, -70px, 0);
+    -o-transform: translate3d(0, -70px, 0);
+    transform: translate3d(0, -70px, 0);
+    opacity: 0; }
+
 #region-node-instance-wrapper {
   -webkit-transition: all 0.4s;
   -moz-transition: all 0.4s;

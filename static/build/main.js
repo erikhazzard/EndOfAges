@@ -8165,6 +8165,8 @@ define(
             // handle battle related events
             this.listenTo(events, 'ability:cancel', this.cancelAbility);
 
+            this.listenTo(this.model, 'abilityInvalidUse', this.abilityInvalidUse);
+
             this.listenTo(this.model, 'abilityActive', this.setAbilityActive);
             this.listenTo(this.model, 'abilityInactive', this.setAbilityInactive);
 
@@ -8203,6 +8205,18 @@ define(
         setAbilityInactive: function(){
             this.$el.removeClass('active');
             this.$el.addClass('inactive');
+        },
+
+
+        abilityInvalidUse: function(){
+            var self = this;
+            self.$abilityIconOverlay.addClass('used-invalid');
+            self.$abilityIconOverlay.addClass('invalid');
+            self.$el.addClass('shake shake-constant');
+            setTimeout(function(){
+                self.$abilityIconOverlay.removeClass('used-invalid');
+                self.$el.removeClass('shake shake-constant');
+            },140);
         },
 
         // ------------------------------
@@ -9569,8 +9583,10 @@ define(
             // 3. Player has an ability active already, but has NOT selected
             // a target. Player has tried to use a different ability
             //
+            var self = this;
             var ability = options.ability;
             var useCallback = options.useCallback;
+            var $tmpEl;
 
             logger.log('views/subviews/Battle', 
                 '1. handleAbilityActivated: %O', ability);
@@ -9586,6 +9602,20 @@ define(
             if(!this.selectedTarget){
                 logger.log('views/subviews/Battle', 
                     '[x] cannot use ability, no selected target');
+
+                this.$battleInfoMessage = this.$battleInfoMessage || $('#battle-info-message');
+                $tmpEl = $('<div class="message">No target selected!</div>');
+                this.$battleInfoMessage.append( $tmpEl );
+
+                ability.trigger('abilityInvalidUse');
+
+                setTimeout(function(){requestAnimationFrame(function(){
+                    $tmpEl.addClass('fade-animation');
+                    setTimeout(function(){requestAnimationFrame(function(){
+                        $tmpEl.remove();
+                    });}, 700);
+                });}, 20);
+
                 return false;
             }
             

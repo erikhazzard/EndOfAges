@@ -705,8 +705,10 @@ define(
             // 3. Player has an ability active already, but has NOT selected
             // a target. Player has tried to use a different ability
             //
+            var self = this;
             var ability = options.ability;
             var useCallback = options.useCallback;
+            var $tmpEl;
 
             logger.log('views/subviews/Battle', 
                 '1. handleAbilityActivated: %O', ability);
@@ -722,6 +724,20 @@ define(
             if(!this.selectedTarget){
                 logger.log('views/subviews/Battle', 
                     '[x] cannot use ability, no selected target');
+
+                this.$battleInfoMessage = this.$battleInfoMessage || $('#battle-info-message');
+                $tmpEl = $('<div class="message">No target selected!</div>');
+                this.$battleInfoMessage.append( $tmpEl );
+
+                ability.trigger('abilityInvalidUse');
+
+                setTimeout(function(){requestAnimationFrame(function(){
+                    $tmpEl.addClass('fade-animation');
+                    setTimeout(function(){requestAnimationFrame(function(){
+                        $tmpEl.remove();
+                    });}, 700);
+                });}, 20);
+
                 return false;
             }
             
