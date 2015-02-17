@@ -682,6 +682,8 @@ define(
             // This function sets the model's state to either 'ability' or
             // 'normal' (by means of calling cancelTarget())
             //
+            // NOTE: This is only triggered by a player
+            //
             // parameters: 
             //  options: {Object} with keys:
             //      ability: {Object} ability object
@@ -708,8 +710,6 @@ define(
             var self = this;
             var ability = options.ability;
             var useCallback = options.useCallback;
-            var $tmpEl;
-            this._lastAbilityActivateDate = this._lastAbilityActivateDate || Date.now() - 1000;
 
             logger.log('views/subviews/Battle', 
                 '1. handleAbilityActivated: %O', ability);
@@ -724,28 +724,11 @@ define(
             // If there is no selected target, cannot use the ability
             // --------------------------
             if(!this.selectedTarget){
-                // TODO: Should we check this? To disallow holding down button
-                if(Date.now() - this._lastAbilityActivateDate < 100){
-                    // Hit it TOO fast
-                    return false;
-                }
-                this._lastAbilityActivateDate = Date.now();
-
                 logger.log('views/subviews/Battle', 
                     '[x] cannot use ability, no selected target');
 
-                this.$battleInfoMessage = this.$battleInfoMessage || $('#battle-info-message');
-                $tmpEl = $('<div class="message">No target selected!</div>');
-                this.$battleInfoMessage.append( $tmpEl );
-
-                ability.trigger('abilityInvalidUse');
-
-                setTimeout(function(){requestAnimationFrame(function(){
-                    $tmpEl.addClass('fade-animation');
-                    setTimeout(function(){requestAnimationFrame(function(){
-                        $tmpEl.remove();
-                    });}, 700);
-                });}, 20);
+                // show message
+                self.showBattleInfoMessage("No target selected", ability);
 
                 return false;
             }
@@ -762,6 +745,9 @@ define(
                 logger.log('views/subviews/Battle', 
                     'handleAbilityActivated  : CANNOT be used : %O : %O',
                     entityTime, ability.get('castTime'));
+
+                // show message
+                self.showBattleInfoMessage("Cannot use yet", ability);
             }
 
             // store desired target
@@ -1882,6 +1868,40 @@ define(
             return this;
         },
 
+        showBattleInfoMessage: function showBattleInfoMessage( message, ability ){
+            // Adds a message to the info wrapper and show its then hides it
+            // Takes in a target message and an ability model 
+            this.$battleInfoMessage = this.$battleInfoMessage || $('#battle-info-message');
+
+            // Don't spam the mssage log
+            this._lastInfoMessageDate = this._lastInfoMessageDate || Date.now() - 1000;
+            if(Date.now() - this._lastInfoMessageDate < 120){
+                // Hit it TOO fast
+                return false;
+            }
+            this._lastInfoMessageDate = Date.now();
+
+            // Show message
+            var $tmpEl = $('<div class="message">' + message + '</div>');
+
+            if(ability){
+                ability.trigger('abilityInvalidUse');
+            }
+
+            var self = this;
+            requestAnimationFrame(function(){
+                self.$battleInfoMessage.append( $tmpEl );
+
+                // add fade animation then hide it
+                setTimeout(function(){requestAnimationFrame(function(){
+                    $tmpEl.addClass('fade-animation');
+                    setTimeout(function(){requestAnimationFrame(function(){
+                        $tmpEl.remove();
+                    });}, 700);
+                });}, 10);
+            });
+        },
+
         // =====================================================================
         //
         // Select Entity
@@ -2317,6 +2337,12 @@ define(
                 events.trigger('battle:useAbility:invalidTarget', {
                     ability: selectedAbility    
                 });
+
+                // Show invalid target message IF the player used it (NOT the AI)
+                if(playerUsedAbility){
+                    // Show invalid target message
+                    self.showBattleInfoMessage("Invalid Target", selectedAbility);
+                }
 
                 return false; 
             }
