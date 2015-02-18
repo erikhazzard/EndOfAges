@@ -3,117 +3,182 @@
 // Ability
 //
 // --------------------------------------
-#region-battle-ability-wrapper {
-    $battle-ability-icon-size: 78px;
+.game-battle-wrapper {
     $battle-ability-icon-margin: 10px;
     $battle-ability-icon-padding: 12px;
+    $battle-ability-container-width: 370px;
 
-    @include noSelect();
-    left: 0;
-    position: absolute;
-    bottom: $ui-log-height + 20;
-    height: $battle-ability-icon-size; 
-    right: 0;
-    z-index: 100;
+    $battle-ability-icon-size: 78px;
+    $battle-target-bar-height: 22px;
+    $battle-timer-bar-height: 22px;
 
-    .ability-list-wrapper {
-        @include noSelect();
-        background: url(../../img/ui/battle/ability-bar-bg.png);
+    #battle-meta-actions-wrapper {
+        bottom: $ui-log-height + 6;
+        display: table;
+        height: $battle-ability-icon-size + $battle-target-bar-height; 
         left: 0;
+        margin: 0 auto;
         position: absolute;
         right: 0;
+        width: $battle-ability-container-width;
+        z-index: 2000;
+    }
+
+    // --------------------------------------
+    //
+    // Info Message
+    //
+    // --------------------------------------
+    #battle-info-message {
+        left: 20%;
+        color: #ffffff;
+        position: absolute;
+        text-align: center;
+        text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
         top: 0;
+        width: 170px;
+        z-index: 99999;
 
-        display: table;
-        margin: 0 auto;
-        height: 80px;
-        width: 370px;
-
-        .ability-item-wrapper {
-            background: url(../../img/ui/battle/icon-bg.png);
-            border: none;
-            cursor: pointer;
-            height: $battle-ability-icon-size;
-            position: relative;
-            float: left;
-            margin: 0 0 0 $battle-ability-icon-margin;
-            width: $battle-ability-icon-size;
-          
-        }
-        .ability-item-wrapper:first-child { 
-            margin-left: $battle-ability-icon-margin + 3;
-        }
-
-
-        .ability-icon-wrapper {
-            @include noSelect();
-            bottom: $battle-ability-icon-padding;
+        .message {
+            @include transition("all 0.8s");
+            @include transform(translate3d(0, 0, 0));
             position: absolute;
-            left: $battle-ability-icon-padding + 2;
-            top: $battle-ability-icon-padding + 2;
-            right: $battle-ability-icon-padding;
-            background: #321715;
-
-            img {
-                @include noSelect();
-            }
-        
-            .ability-icon-overlay {
-                bottom: 0; position: absolute; left: -2px; right: 0; top: -2px;
-                opacity: 0;
-                @include transition('opacity 0.04s');
-            }
-            .ability-icon-canvas {
-                bottom: 0; position: absolute; left: 0; right: -2px; top: -2px;
-            }
-
-            .ability-icon-overlay.used-success {
-                background: $BACKGROUND-INTERACTION-SELECTED;
-                opacity: 1;
-            }
-            .ability-icon-overlay.used-invalid {
-                background: rgba(0,0,0,0.7);
-                opacity: 1;
-            }
-        }
-
-        .hotkey-title {
-            color: #ffffff;
-            font-weight: bold;
-            position: absolute;
-            bottom: -6px;
-            left: ($battle-ability-icon-size / 2) - 8;
-            font-size: 0.8em;
-            text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
-            z-index: 100;
-        }
-
-        // Blocker when entity is dead
-        .entity-dead {
-            background: #343434;
-            bottom: 0;
             left: 0;
-            opacity: 0.7;
+            right: 0;
+            bottom: 0;
+            opacity: 1;
+        }
+        .message.fade-animation {
+            @include transform(translate3d(0, -70px, 0));
+            font-size: 0.7em;
+            opacity: 0;
+        }
+    }
+
+    // --------------------------------------
+    //
+    // Target
+    //
+    // --------------------------------------
+    #battle-interaction-target-bar {
+        border: 1px solid $COLOR-INTERACTION-SELECTED;
+        color: #f0f0f0;
+        height: $battle-target-bar-height; 
+        left: 0;
+        right: 0;
+        position: absolute;
+        bottom: $battle-ability-icon-size + 4;
+    }
+
+
+
+    // --------------------------------------
+    //
+    // Abilities
+    //
+    // --------------------------------------
+    #region-battle-ability-wrapper {
+
+        @include noSelect();
+        left: 0;
+        position: absolute;
+        bottom: 0;
+        height: $battle-ability-icon-size; 
+        right: 0;
+        z-index: 100;
+
+        .ability-list-wrapper {
+            @include noSelect();
+            background: url(../../img/ui/battle/ability-bar-bg.png);
+            left: 0;
             position: absolute;
             right: 0;
             top: 0;
-            z-index: 999;
-        }
+            height: 80px;
 
-        .ability-item-wrapper.inactive {
-        }
-        .ability-item-wrapper.use-invalid {
-        }
-        .ability-item-wrapper.use {
-        }
+            .ability-item-wrapper {
+                background: url(../../img/ui/battle/icon-bg.png);
+                border: none;
+                cursor: pointer;
+                height: $battle-ability-icon-size;
+                position: relative;
+                float: left;
+                margin: 0 0 0 $battle-ability-icon-margin;
+                width: $battle-ability-icon-size;
+              
+            }
+            .ability-item-wrapper:first-child { 
+                margin-left: $battle-ability-icon-margin + 3;
+            }
 
-        .ability-item-wrapper.enemy .ability-item {
-        }
-        .ability-item-wrapper.player .ability-item {
-        }
 
+            .ability-icon-wrapper {
+                @include noSelect();
+                bottom: $battle-ability-icon-padding;
+                position: absolute;
+                left: $battle-ability-icon-padding + 2;
+                top: $battle-ability-icon-padding + 2;
+                right: $battle-ability-icon-padding;
+                background: #321715;
+
+                img {
+                    @include noSelect();
+                }
+            
+                .ability-icon-overlay {
+                    bottom: 0; position: absolute; left: -2px; right: 0; top: -2px;
+                    opacity: 0;
+                    @include transition('opacity 0.04s');
+                }
+                .ability-icon-canvas {
+                    bottom: 0; position: absolute; left: 0; right: -2px; top: -2px;
+                }
+
+                .ability-icon-overlay.used-success {
+                    background: $BACKGROUND-INTERACTION-SELECTED;
+                    opacity: 1;
+                }
+                .ability-icon-overlay.used-invalid {
+                    background: rgba(0,0,0,0.7);
+                    opacity: 1;
+                }
+            }
+
+            .hotkey-title {
+                color: #ffffff;
+                font-weight: bold;
+                position: absolute;
+                bottom: -6px;
+                left: ($battle-ability-icon-size / 2) - 8;
+                font-size: 0.8em;
+                text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
+                z-index: 100;
+            }
+
+            // Blocker when entity is dead
+            .entity-dead {
+                background: #343434;
+                bottom: 0;
+                left: 0;
+                opacity: 0.7;
+                position: absolute;
+                right: 0;
+                top: 0;
+                z-index: 999;
+            }
+
+            .ability-item-wrapper.inactive {
+            }
+            .ability-item-wrapper.use-invalid {
+            }
+            .ability-item-wrapper.use {
+            }
+
+            .ability-item-wrapper.enemy .ability-item {
+            }
+            .ability-item-wrapper.player .ability-item {
+            }
+
+        }
     }
 }
-
-
-

@@ -10,19 +10,31 @@
     0% {
         opacity: 0.5;
         fill-opacity: 0.2;
+        stroke-width: 2px;
     }
     100% {
         opacity: 1;
         fill-opacity: 1;
+        stroke-width: 5px;
     }
 }
 
 @include keyframes(targetHoverInactive) {
     0% {
         opacity: 0.6;
+        stroke-width: 2px;
     }
     100% {
-        opacity: 0.8;
+        opacity: 0.9;
+        stroke-width: 5px;
+    }
+}
+@include keyframes(targetHoverSelectedInactive) {
+    0% {
+        stroke-width: 2px;
+    }
+    100% {
+        stroke-width: 4px;
     }
 }
 
@@ -34,15 +46,23 @@
         cursor: pointer
     }
 
+    // circle bg indicator
     // ----------------------------------
-    // indicator
+    .entity-bg-selection {
+        fill: #f0f0f0;
+        stroke: #ffffff;
+        stroke-width: 2px;
+    }
+
+    // ----------------------------------
+    // target ring indicator
     // ----------------------------------
     .target-indicator {
         opacity: 0;
-        fill: #343434;
+        fill: #f0f0f0;
         fill-opacity: 0.5;
         stroke: #ffffff;
-        stroke-opacity: 0.5;
+        stroke-opacity: 0.8;
         stroke-width: 2px;
     }
 
@@ -61,22 +81,26 @@
         @include transition("stroke-width 0.5s");
     }
     .entity-selected .target-indicator {
+        // SELECTED - NON HOVER
         // entity is selected
+        @include animation(targetHoverSelectedInactive 0.4s infinite alternate);
         opacity: 1;
-        fill: #505050;
-        fill-opacity: 0.8;
-        stroke: #ffffff;
-        stroke-opacity: 0.6;
-        stroke-width: 2px;
+        fill: $COLOR-INTERACTION-SELECTED;
+        fill-opacity: 0.6;
+        stroke: $COLOR-INTERACTION-SELECTED;
+        stroke-opacity: 1;
+        stroke-width: 1px;
     }
+    
     .entity-selected.entity-hover .target-indicator {
+        // SELECTED - HOVER
         // entity is selected and user is hovering over them
         @include animation(targetHoverInactive 0.2s infinite alternate);
         opacity: 1;
-        fill: #505050;
+        fill: $COLOR-INTERACTION-SELECTED;
         fill-opacity: 0.8;
-        stroke: #ffffff;
-        stroke-opacity: 0.6;
+        stroke: $COLOR-INTERACTION-SELECTED;
+        stroke-opacity: 1;
         stroke-width: 5px;
     }
 
@@ -96,7 +120,7 @@
         @include animation(targetHoverInactive 0.4s infinite alternate);
 
         circle {
-            fill: #a0a0a0;
+            fill: #ffffff;
             fill-opacity: 1;
         }
     }

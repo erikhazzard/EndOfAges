@@ -21,6 +21,7 @@ define([
             'q','w','e','r',
             'shift+q','shift+w','shift+e','shift+r',
             'h','j','k','l',
+            '`', 'shift+`', '~', 'shift+~',
             '1', '2', '3', '4', '5', '6',
             'shift+1', 'shift+2', 'shift+3', 'shift+4', 'shift+5', 'shift+6',
             'backspace',

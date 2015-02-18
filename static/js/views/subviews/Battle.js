@@ -193,7 +193,7 @@ define(
             // --------------------------
             this.listenTo(events, 'keyPress:tab', this.handleKeyChangeSelectedEntity);
             this.listenTo(events, 'keyPress:shift+tab', this.handleKeyChangeSelectedEntity);
-            _.each([1,2,3,4,6,7,8,9], function eachKey(key){
+            _.each([1,2,3,4,6,7,8,9,'`'], function eachKey(key){
                 // NOTE: these also set the active key pressed button
                 self.listenTo(events, 'keyPress:' + key, self.handleKeyChangeSelectedEntity);
                 self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyChangeSelectedEntity);
@@ -730,6 +730,8 @@ define(
                 // show message
                 self.showBattleInfoMessage("No target selected", ability);
 
+                self.highlightValidEntityTargetRing( ability );
+
                 return false;
             }
             
@@ -961,62 +963,53 @@ define(
             if(options.e){ options.e.preventDefault(); }
             var key = options.key;
 
-            var numPlayerEntities = this.model.get('playerEntities').models.length;
+            var numEnemyEntities = this.model.get('enemyEntities').models.length;
             var curIndex = this.selectedEntityIndex;
+            var targetGroup = 'enemy';
+
             var newIndex = 0;
 
             // update the currently selected entity
-            if(key === 'tab'){
-                // tab goes down the list
-                newIndex = curIndex + 1;
+            if(key === '`'){
+                newIndex = 0;
+                targetGroup = 'player';
 
-                // loop around
-                if(newIndex >= numPlayerEntities){ 
-                    newIndex = 0;
-                }
+            } else if(key === 'tab'){
+                // Tab will switch to player
+                newIndex = 0;
+                targetGroup = 'player';
+
             } else if(key === 'shift+tab'){
                 // tab goes down the list
-                newIndex = curIndex - 1;
+                newIndex = 0;
 
-                // loop around
-                if(newIndex < 0){
-                    newIndex = numPlayerEntities - 1;
-                }
             } else if(key.match(/[0123456789]/)){
                 // get index from key, start at 1 (not 0), so subtract 1 to
                 // the new index
-                newIndex = parseInt(key,10) - 1;
+                if(key.match(/shift/)){
+                    targetGroup = 'player';
+                }
+
+                newIndex = parseInt(key.replace(/shift+/, ''),10) - 1;
 
                 if(newIndex < 0){
                     newIndex = 0;
-                } else if(newIndex >= numPlayerEntities){
+                } else if(newIndex >= numEnemyEntities){
                     // outside of bounds, get last entity
-                    newIndex = numPlayerEntities - 1;
+                    newIndex = numEnemyEntities - 1;
                 }
 
             }
 
             // Update selected entity by index
             // --------------------------
-            this.setSelectedEntity({index: newIndex});
+            logger.log('views/subviews/Battle', 'new index: ' + newIndex);
 
-            // update the target based on the selected entity's target
-            var entityDesiredTarget = this.selectedEntity.get('desiredTarget');
-
-            logger.log('views/subviews/Battle', 
-                'updated selected entity: %O | desiredTarget for new entity : %O',
-                this.selectedEntity, entityDesiredTarget);
-
-            // update the currently selected target based on the selected entity
-            if(entityDesiredTarget){
-                this.selectTarget(
-                    entityDesiredTarget.group, 
-                    entityDesiredTarget.index
-                );
-            } else {
-                // no valid target
-                this.selectTarget(null, null);
-            }
+            // select the entity
+            this.selectEntity({
+                entityGroup: targetGroup,
+                index: newIndex
+            });
 
             return this;
         },
@@ -1236,7 +1229,6 @@ define(
                 // Whenever interaction happens with it, select or hover the 
                 // entity
                 function entityClickedInteraction(d,i){
-                    // if the 
                     return self.selectEntity({index: i, entityGroup: entityGroup});
                 }
 
@@ -1300,12 +1292,14 @@ define(
                 //  to click / tap it
                 groupsWrapper.append('rect')
                     .attr({
+                        'class': 'entity-interaction-rect',
                         opacity: 0,
-                        x: -entityWidth, y: -15,
+                        x: (entityGroup === 'player') ? entityWidth/4 : -entityWidth, 
+                        y: -15,
                         width: entityWidth + 150,
                         height: entityHeight + 25
                     });
-        
+
                 // setup the individual player groups. This group is transformed
                 // left / right when a player selects an entity. All other entity
                 // specific visuals are contained in this group
@@ -1323,6 +1317,21 @@ define(
                         ry: 15,
                         rx: entityWidth/1.5
                     });
+
+                // append interaction / UI circle (for flashing on invalid target, etc.)
+                // NOTE: This is a copy of the targetting rect, essentially. 
+                // Used to flash without modifying the target ellipse 
+                groups.append('ellipse')
+                    .attr({
+                        'class': 'entity-bg-selection',
+                        opacity: 0,
+                        cy: entityHeight/1.2,
+                        cx: entityWidth/1.9,
+                        ry: 15,
+                        rx: entityWidth/1.5
+                    }).style({ opacity: 0, 'fill-opacity': 0 });
+        
+
 
                 // --------------------------
                 // PLAYER SPRITE / image
@@ -1868,6 +1877,32 @@ define(
             return this;
         },
 
+        highlightValidEntityTargetRing: function highlightValidEntityTargetRing( ability ){
+            // Takes in an ability and highlights the valid targets
+            //
+            if(!ability){ 
+                logger.log('battle:highlightValidEntityTargetRing',
+                    'no ability passed in');
+                return false;
+            }
+
+            var targetFlashSelection;
+
+            // if it's a damage ability, set the group to enemy
+            if(ability.attributes.validTargets === 'enemy' ||
+            ability.attributes.validTargets.indexOf('enemy') !== -1){
+                targetFlashSelection = '.entity-group-wrapper.enemy .entity-bg-selection';
+            } else {
+                targetFlashSelection = '.entity-group-wrapper.player .entity-bg-selection';
+            }
+
+            // highlight either player or enemy
+            d3.selectAll(targetFlashSelection)
+                .transition().duration(150)
+                .style({ opacity: 0.7, 'fill-opacity': 0.5 })
+                    .transition().duration(150).style({ opacity: 0, 'fill-opacity': 0 });
+        },
+
         showBattleInfoMessage: function showBattleInfoMessage( message, ability ){
             // Adds a message to the info wrapper and show its then hides it
             // Takes in a target message and an ability model 
@@ -1932,6 +1967,13 @@ define(
             // entity type function based on the passed in entityGroup
             options = options || {};
             logger.log("views/subviews/Battle", 'selectEntity() called with options : %O', options);
+
+            // Update target bar info
+            // TODO: make this a view that updates
+            this.$uiInteractionTargetBar = this.$uiInteractionTargetBar || $('#battle-interaction-target-bar');
+            this.$uiInteractionTargetBar.html(
+                this.model.get(options.entityGroup + 'Entities').models[options.index].get('name')
+            );
 
             if(options.entityGroup === 'player'){
                 // Select player enemy
@@ -2297,7 +2339,7 @@ define(
             // check that selected ability is an ability
             if(!selectedAbility){
                 logger.log("views/subviews/Battle", 
-                    "x. useAbility(): CANNOT use, invalid ability");
+                    "x. useAbility(): CANNOT use, invalid ABILITY");
                 return false;
             }
 
@@ -2330,7 +2372,7 @@ define(
                 // Cannot use because the entity group of the intended target 
                 // is not valid
                 logger.log("views/subviews/Battle", 
-                    "x. useAbility(): CANNOT use, invalid target | target %O",
+                    "x. useAbility(): CANNOT use, invalid TARGET | target %O",
                     target);
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
@@ -2342,6 +2384,9 @@ define(
                 if(playerUsedAbility){
                     // Show invalid target message
                     self.showBattleInfoMessage("Invalid Target", selectedAbility);
+
+                    // HIGHLIGHT the entities that ARE valid
+                    self.highlightValidEntityTargetRing(selectedAbility);
                 }
 
                 return false; 
