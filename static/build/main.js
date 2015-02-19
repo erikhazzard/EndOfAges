@@ -5120,7 +5120,7 @@ define(
             //// TODO: REMOVE THIS : DEV 
             //// SKIP CREATE
             //// ==========================
-            //return localForage.getItem('game:createCharacter:initialState', function(d){ EVENTS.trigger('controller:showGame', {dataToCreateGameModel: JSON.parse(d) }); });
+            return localForage.getItem('game:createCharacter:initialState', function(d){ EVENTS.trigger('controller:showGame', {dataToCreateGameModel: JSON.parse(d) }); });
             //// XXXXXXXXXXXXXXXXXXXXXXXXXX
             //// XXXXXXXXXXXXXXXXXXXXXXXXXX
             //// XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -6977,16 +6977,16 @@ define(
             var abilities = new Abilities();
 
             //// LEGIT Abilities
-            abilities.add([
-                new Ability(dataAbilities[1]),
-                new Ability(dataAbilities[3]),
-                new Ability(dataAbilities[7])
-            ]);
+            //abilities.add([
+                //new Ability(dataAbilities[1]),
+                //new Ability(dataAbilities[3]),
+                //new Ability(dataAbilities[7])
+            //]);
             
             //// suspend
-            //abilities.add([
-                //new Ability(dataAbilities[2])
-            //]);
+            abilities.add([
+                new Ability(dataAbilities[2])
+            ]);
 
             // generate new entity
             entity = new Entity({
