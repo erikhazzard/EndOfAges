@@ -30,12 +30,12 @@
     //
     // --------------------------------------
     #battle-info-message {
-        left: 20%;
+        left: 28%;
         color: #ffffff;
         position: absolute;
         text-align: center;
         text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
-        top: 0;
+        top: -10px;
         width: 170px;
         z-index: 99999;
 
@@ -61,13 +61,45 @@
     //
     // --------------------------------------
     #battle-interaction-target-bar {
+
         border: 1px solid $COLOR-INTERACTION-SELECTED;
+        bottom: $battle-ability-icon-size + 4;
         color: #f0f0f0;
+        font-size: 0.8em;
         height: $battle-target-bar-height; 
         left: 0;
-        right: 0;
         position: absolute;
-        bottom: $battle-ability-icon-size + 4;
+        right: 0;
+        text-align: center;
+    }
+
+    #battle-interaction-target-bar.player {
+        box-shadow: 0 0 20px #33C6DD;
+    }
+    #battle-interaction-target-bar.enemy {
+        box-shadow: 0 0 20px #dd2222;
+        border: 1px solid #ff0000;
+    }
+    
+    #battle-interaction-target-bar-fill {
+        @include transition('width 0.20s');
+        background: #cc2222;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        width: 0;
+        top: 0;
+        z-index: 10;
+    }
+
+    #battle-interaction-target-bar-name {
+        color: #ffffff;
+        left: 0;
+        position: absolute;
+        right: 0;
+        text-align: center;
+        text-shadow: 0 1px 0 #343434, 0 0 2px #343434;
+        z-index: 100;
     }
 
 

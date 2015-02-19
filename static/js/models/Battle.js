@@ -14,7 +14,7 @@ define(
 
         'collections/Abilities',
         'models/Ability',
-        'data/abilities'
+        'models/data-abilities'
         // TODO : remove this, get from server
         ,'models/data-races'
     ], function MapModel(
@@ -113,7 +113,18 @@ define(
             // TODO: make this more smarter, depending on player levels, etc.
             var entity;
             var abilities = new Abilities();
-            abilities.add([new Ability(dataAbilities.haste)]);
+
+            //// LEGIT Abilities
+            abilities.add([
+                new Ability(dataAbilities[1]),
+                new Ability(dataAbilities[3]),
+                new Ability(dataAbilities[7])
+            ]);
+            
+            //// suspend
+            //abilities.add([
+                //new Ability(dataAbilities[2])
+            //]);
 
             // generate new entity
             entity = new Entity({
@@ -124,8 +135,8 @@ define(
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
-                armor: Math.random() * -20,
-                attack: Math.random() * -20,
+                armor: Math.random() * -40,
+                attack: Math.random() * -80,
                 magicResist:  Math.random() * -20,
                 magicPower: Math.random() * -20
             });

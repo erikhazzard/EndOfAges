@@ -136,7 +136,7 @@ define(
             options = options || {};
             this.gameModel = options.gameModel;
 
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '1. initialize() called. Model: %O : Game Model: %O', 
                 this.model, this.gameModel); 
 
@@ -249,7 +249,7 @@ define(
         onBeforeClose: function close(){
             // Called when the view is closed. Unbind global window / doc events
             var self = this;
-            logger.log('views/subviews/Battle', 'onBeforeClose() called');
+            logger.log('views:subViews:Battle', 'onBeforeClose() called');
 
             // remove mouse wheel listener
             $(window).off('mousewheel', this.handleMouseWheelProxy);
@@ -496,7 +496,7 @@ define(
         _pause: function _pause(){
             // PAUSE
             // ----------------------
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '1. togglePause(): PAUSING');
 
             // Show pause message
@@ -530,7 +530,7 @@ define(
             // Called to pause the game state and animations
             //
             var self = this;
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '1. togglePause(): UNPAUSING');
 
             // resume all timers
@@ -591,7 +591,7 @@ define(
         // ==============================
         selectedAbilityChange: function selectedAbilityChange(model, ability){
             // When the player's selected ability changes, change the SVG wrapper
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '1. abilityChange(): ability changed to %O', ability);
             var type = '';
             var validTargets = ''; 
@@ -624,7 +624,7 @@ define(
         stateChange: function stateChange(model,state){
             // Called when the model state changes
             var self = this;
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '1. stateChange(): model state changed to: ' + state);
 
             // remove all classes
@@ -711,12 +711,12 @@ define(
             var ability = options.ability;
             var useCallback = options.useCallback;
 
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '1. handleAbilityActivated: %O', ability);
 
             // Do nothing if game is paused
             if(this.model.get('state') === 'pause'){
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     '[x] game paused, returning');
                 return false;
             }
@@ -724,7 +724,7 @@ define(
             // If there is no selected target, cannot use the ability
             // --------------------------
             if(!this.selectedTarget){
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     '[x] cannot use ability, no selected target');
 
                 // show message
@@ -738,13 +738,14 @@ define(
             var canBeUsed = false;
 
             // Check usage based on timer
+            // TODO: Check castTime based on entity model??
             var entityTime = this.playerEntityTimers[this.selectedEntityIndex];
             if(entityTime >= ability.get('castTime')){
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     'handleAbilityActivated  : CAN be used');
                 canBeUsed = true;
             } else {
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     'handleAbilityActivated  : CANNOT be used : %O : %O',
                     entityTime, ability.get('castTime'));
 
@@ -758,7 +759,7 @@ define(
             // Use ability if it can be used
             // --------------------------
             if(canBeUsed && desiredTarget && desiredTarget.model){
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     '\t ability CAN be used and DOES have a target');
                 this.model.set({selectedAbility: ability},{silent:false});
                 this.useAbility({
@@ -769,7 +770,7 @@ define(
 
             } else if (canBeUsed) {
                 // The ability CAN be used
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     '\t ability CAN be used, setting selected ability. NO target');
 
                 // Set the selected ability
@@ -783,7 +784,7 @@ define(
                 // TODO: Highlight group of possible targets based on ability
                 // options.ability.get('validTargets') bla bla bla
             } else {
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     '\t ability can NOT be used');
             }
 
@@ -810,7 +811,7 @@ define(
             //
             // TODO: Handle changing the selected entity
             var self = this;
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 'handleKeyUpdateTarget() called : %O', options);
 
             // disable page scrolling with up / down arrow key
@@ -824,7 +825,7 @@ define(
             // using 1 - n, shift + 1 - n, and clicking / selecting an entity
             if(this.model.get('state') === 'ability' &&
                 key.match(/[0-9]+/) === null){
-                logger.log('views/subviews/Battle', 
+                logger.log('views:subViews:Battle', 
                     '\t [x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
                 return false;
             }
@@ -843,7 +844,7 @@ define(
                 targetGroup = this.selectedEntity.attributes.desiredTarget.group;
             }
 
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 '\t selectedEntity : %O ( %O ) | targetIndex : %O | targetGroup : %O', 
                 this.selectedEntity,
                 this.selectedEntity.attributes.desiredTarget,
@@ -891,7 +892,7 @@ define(
                 } else { 
                     // when the user is not in ability mode, do nothing when
                     // 1 - n key is pressed
-                    logger.log('views/subviews/Battle', 
+                    logger.log('views:subViews:Battle', 
                         '\t [x] 1-n key pressed not in ability mode, returning');
                     return false;
                 }
@@ -939,7 +940,7 @@ define(
             // --------------------------
             // 2. Got target entity, select it
             // --------------------------
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 ' got key press : ' + key + 
                 ' : entityGroup: ' + targetGroup +
                 ' : Selecting entity: ' + targetIndex);
@@ -956,7 +957,7 @@ define(
         handleKeyChangeSelectedEntity: function handleKeyChangeSelectedEntity(options){
             // Changes the currently selected entity. Can either tab (or shift
             // tab) to cycle through entities, or press the number keys
-            logger.log('views/subviews/Battle',
+            logger.log('views:subViews:Battle',
                 'handleKeyChangeSelectedEntity(): called with %O', options);
 
             // prevent default key behavior 
@@ -1003,7 +1004,7 @@ define(
 
             // Update selected entity by index
             // --------------------------
-            logger.log('views/subviews/Battle', 'new index: ' + newIndex);
+            logger.log('views:subViews:Battle', 'new index: ' + newIndex);
 
             // select the entity
             this.selectEntity({
@@ -1020,7 +1021,7 @@ define(
             options.e.preventDefault();
 
             var key = options.key;
-            logger.log('views/subviews/Battle', '1. got key press : ' + key);
+            logger.log('views:subViews:Battle', '1. got key press : ' + key);
 
             //If in pause, switch back
             if(this.model.get('state') === 'pause'){
@@ -1060,7 +1061,7 @@ define(
         // ------------------------------
         cancelTarget: function cancelTarget(){
             // removes any selected targets, return to default state
-            logger.log('views/subviews/Battle', 
+            logger.log('views:subViews:Battle', 
                 'cancelTarget() called, changing state');
 
             // clear out selected ability
@@ -1094,7 +1095,7 @@ define(
         // =====================================================================
         onShow: function battleOnShow(){
             // Render the scene
-            logger.log('views/subviews/Battle', '1. onShow() called');
+            logger.log('views:subViews:Battle', '1. onShow() called');
             var self = this;
 
             // TODO: remove timer el for dev
@@ -1123,7 +1124,7 @@ define(
             this.playerEntityModels = this.model.get('playerEntities').models;
 
             // Show player entities info
-            logger.log("views/subviews/Battle", "\t showing player entity info");
+            logger.log("views:subViews:Battle", "\t showing player entity info");
             this.entityInfoCollectionView = new EntityInfoCollectionView({
                 collection: this.model.get('playerEntities')
             });
@@ -1161,7 +1162,7 @@ define(
             // --------------------------
             // setup groups
             // --------------------------
-            logger.log('views/subviews/Battle', '2. setting up groups');
+            logger.log('views:subViews:Battle', '2. setting up groups');
             var background = wrapper.append('g')
                 .attr({ 'class': 'background' });
 
@@ -1196,7 +1197,7 @@ define(
             // --------------------------
             // setup background
             // --------------------------
-            logger.log('views/subviews/Battle', '3. setting up backdrop');
+            logger.log('views:subViews:Battle', '3. setting up backdrop');
             // TODO: use different background images
             var backgroundImage = background.append('image')
                 .attr({
@@ -1206,7 +1207,7 @@ define(
                     height: '100%', width: '100%'
                 });
 
-            logger.log('views/subviews/Battle', '4. setting up entities');
+            logger.log('views:subViews:Battle', '4. setting up entities');
 
             // ==========================
             //
@@ -1550,7 +1551,7 @@ define(
                 }
                 i++;
             }
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "selected first living entity: index: " + i);
 
             // select first living player
@@ -1606,13 +1607,49 @@ define(
             return this;
         },
 
+        // ===================================================================
+        //
+        // ON ABILITY USE Effects
+        //
+        // ===================================================================
         // ------------------------------
         //
         // Buff effect
         //
         // ------------------------------
-        showEffectOnActiveEffectChange: function showEffectChange(options){
-            console.log("active effect change : ", options);
+        showEffectOnActiveEffectChange: function showEffectOnActiveEffectChange(options){
+            logger.log("views:subViews:Battle:showEffectOnActiveEffectChange", 
+            "called %o", options);
+            var self = this;
+
+            // Reset timer bar
+            this.startTimerAnimation({
+                index: options.index,
+                entityGroup: options.entityGroup
+            });
+
+            // Wiggle 
+            if(options.entityModel.attributes.isAlive){
+                // reset transition
+                d3.select(this[options.entityGroup + 'EntitySprites'][0][options.index])
+                    .interrupt().transition('shakeY');
+
+                // initiate the wiggle 
+                requestAnimationFrame(function(){
+                    // initiate the wiggle 
+                    d3.select(self[options.entityGroup + 'EntitySprites'][0][options.index])
+                        .attr({
+                            // wiggle the entity left / right or up / down depending
+                            // if the ability has negative or positive damage
+                            y: -14
+                        })
+                        .transition('shakeY')
+                        .duration(520)
+                        .ease('elastic')
+                            .attr({ y: 0 });
+                });
+            }
+
             return this;
         },
 
@@ -1621,7 +1658,7 @@ define(
         // Text effect
         //
         // ------------------------------
-        showEffectOnHealthChange: function showTextEffect(options){
+        showEffectOnHealthChange: function showEffectOnHealthChange(options){
             // This is called whenever any entity's health is changed.
             // Text will appear, along with the screen flashing
             //
@@ -1630,7 +1667,7 @@ define(
             // options:
             //      model: {Object} the `attributes` model of the entity model
             options = options || {};
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "1. showEffectOnHealthChange() : options: %O",
                 options); 
 
@@ -1682,9 +1719,9 @@ define(
                 }
                 
                 // do the flash
-                this.$healthEffectBlocker.transition().ease('elastic')
+                this.$healthEffectBlocker.transition('healthFlash').ease('elastic')
                     .style({ fill: fill, opacity: opacity })
-                    .transition()
+                    .transition('healthFlashFade')
                     .ease('elastic')
                         .style({ fill: '', opacity: 0 });
             }
@@ -1701,20 +1738,26 @@ define(
                 .range([ -10, -40 ]);
 
             if(entityModel.get('isAlive')){
-                // initiate the wiggle 
+                // cancel old transition
                 d3.select(self[entityGroup + 'EntitySprites'][0][index])
-                    .attr({
-                        // wiggle the entity left / right or up / down depending
-                        // if the ability has negative or positive damage
-                        x: difference < 0 ? intensityDamageScale(difference) : 0,
-                        y: difference > 0 ? intensityHealScale(difference) : 0
-                    })
-                    .transition()
-                    .duration(520)
-                    .ease('elastic')
+                    .interrupt().transition('shakeX');
+
+                // initiate the wiggle 
+                requestAnimationFrame(function(){
+                    d3.select(self[entityGroup + 'EntitySprites'][0][index])
                         .attr({
-                            x: 0, y: 0
-                        });
+                            // wiggle the entity left / right or up / down depending
+                            // if the ability has negative or positive damage
+                            x: difference < 0 ? intensityDamageScale(difference) : 0,
+                            y: difference > 0 ? intensityHealScale(difference) : 0
+                        })
+                        .transition('shakeX')
+                        .duration(520)
+                        .ease('elastic')
+                            .attr({
+                                x: 0, y: 0
+                            });
+                });
             }
 
             // Show text
@@ -1795,17 +1838,18 @@ define(
             // all timer bars on a per entity level
             //
             // Options: {Object}
-            //  value: {Number} Value to start the count at (must be calculated 
-            //      by caller based on the ability value and value left in timer
             //  index: {Number} index of entity
             //  entityGroup: {String} 'player' or 'enemy'
+            //  value: {Number} Value to start the count at (must be calculated 
+            //      by caller based on the ability value and value left in timer
+            //      If NOT passed in, will restart the animation. Useful for
+            //      time based effects, like stuns
             //
-            logger.log("views/subviews/Battle",
+            logger.log("views:subViews:Battle",
                 '1. startTimerAnimation: << started : %O', options);
 
             // check options
             options = options || {};
-            if(options.value === undefined){ options.value = 0; }
 
             var entityGroup = options.entityGroup;
 
@@ -1816,6 +1860,10 @@ define(
                 return false;
             }
 
+            // get time
+            // Allow value to be passed in to override default
+            var timeValue = options.value || this[entityGroup + 'EntityTimers'][options.index];
+
             // get bar from passed in index
             var bar = this[entityGroup + 'TimerBars'][0][options.index];
             var d3sel = d3.select(bar);
@@ -1823,14 +1871,14 @@ define(
             var targetModel = models[options.index];
 
             if(!targetModel.get('isAlive')){ 
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     "2. target model is not alive, not starting animation");
                 return false;
             }
 
             // get widths
             // --------------------------
-            var startWidth = this[options.entityGroup + 'EntityTimeScales'][options.index](options.value);
+            var startWidth = this[options.entityGroup + 'EntityTimeScales'][options.index](timeValue);
             startWidth = startWidth >= 0 ? startWidth: 0;
 
             // get bar width from the entity scale
@@ -1852,7 +1900,7 @@ define(
                     // 2. After bar is reset, transition to specified width
                     // must divide by the timerFactor
                     var duration = (
-                        (targetModel.attributes.attributes.attributes.timerLimit - options.value) / 
+                        (targetModel.attributes.attributes.attributes.timerLimit - timeValue) / 
                         targetModel.attributes.attributes.attributes.timerFactor) * 1000;
 
                     // keep track of duration and end width for pausing
@@ -1946,7 +1994,7 @@ define(
             // Called whenever the selectedEntity's desired target changes, will
             // update the target ring
             //
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 'updateSVGTargetDisplay() called : %O', arguments);
 
             // turn off all selected entities
@@ -1966,14 +2014,8 @@ define(
             // This is a proxy function that will call the corresponding select
             // entity type function based on the passed in entityGroup
             options = options || {};
-            logger.log("views/subviews/Battle", 'selectEntity() called with options : %O', options);
+            logger.log("views:subViews:Battle", 'selectEntity() called with options : %O', options);
 
-            // Update target bar info
-            // TODO: make this a view that updates
-            this.$uiInteractionTargetBar = this.$uiInteractionTargetBar || $('#battle-interaction-target-bar');
-            this.$uiInteractionTargetBar.html(
-                this.model.get(options.entityGroup + 'Entities').models[options.index].get('name')
-            );
 
             if(options.entityGroup === 'player'){
                 // Select player enemy
@@ -1991,7 +2033,7 @@ define(
             //
             // index: index of selected entity (matches with the order of
             //  playerEntities.models)
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 'selectPlayerEntity : selecting (or using an ability) on an entity controlled by the player. options : %O',
                 options);
             options = options || {};
@@ -2000,7 +2042,7 @@ define(
             var target = this.selectTarget('player', i);
 
             if(!target){
-                logger.warn("views/subviews/Battle : selectPlayerEntity() : no target entity %O", target);
+                logger.warn("views:subViews:Battle : selectPlayerEntity() : no target entity %O", target);
                 return false;
             }
 
@@ -2013,7 +2055,7 @@ define(
             };
 
             if(state === 'normal' || state === 'pause'){
-                logger.log("views/subviews/Battle", '\t setting entity target');
+                logger.log("views:subViews:Battle", '\t setting entity target');
 
                 if(this.selectedEntity){
                     // if there's a selected entity, update the desired target
@@ -2036,7 +2078,7 @@ define(
             } else if(this.model.get('state') === 'ability'){
                 // then, use the ability
                 // TODO: think of call structure
-                logger.log("views/subviews/Battle", '\t using ability');
+                logger.log("views:subViews:Battle", '\t using ability');
                 this.useAbility({
                     target: target, 
                     targetIndex: i, 
@@ -2055,13 +2097,13 @@ define(
             //
             options = options || {};
             var i = options.index;
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 'selectEnemyEntity called with options : %O', options);
             
             var target = this.selectTarget('enemy', i);
 
             if(!target){
-                logger.warn("views/subviews/Battle : selectEnemyEntity() : no target entity %O", target);
+                logger.warn("views:subViews:Battle : selectEnemyEntity() : no target entity %O", target);
                 return false;
             }
 
@@ -2072,7 +2114,7 @@ define(
             
             if(this.model.get('state') === 'normal'){
                 // TODO: show more info on enemy?
-                logger.log("views/subviews/Battle", 'setting entity target');
+                logger.log("views:subViews:Battle", 'setting entity target');
                 // set desired target info
                 //
                 // TODO: index and group should NOT be stored in here,
@@ -2089,7 +2131,7 @@ define(
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
                 // target and use the ability
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     'using ability on target %O', target);
 
                 // then, use the ability
@@ -2110,41 +2152,114 @@ define(
         // ------------------------------
         selectTarget: function selectTarget(group, i){
             // Sets the target based on the selected index in the model
-            logger.log("views/subviews/Battle", 
-                '1. selectTarget : group %O | i %O', group, i);
+            //  NOTE: Group can be null if the user is trying to clear out their
+            //  selection
+            //
+            var self = this;
 
+            // Set target
             var model = null;
             if(group){
                 model = this.model.get(group + 'Entities').models[i];
             }
+            logger.log("views:subViews:Battle:selectTarget", 
+                'selectTarget called: group %O | i %O | Model %O', group, i, model);
 
             // TODO: Update selectTarget when selectedEntity changes
             //  (in setSelectedEntity)
             this.selectedTarget = model;
-            logger.log("views/subviews/Battle", '\t selected target: %O', this.selectedTarget);
+            logger.log("views:subViews:Battle:selectTarget", '\t selected target: %O', this.selectedTarget);
+
+            // let everyone know the selected target changed
+            this.model.trigger('changeSelectedTarget', model);
 
             // update svg elements
             this.updateSVGTargetDisplay(group, i);
 
+            // TODO: Could go elsewhere and listen for changeSelectedTarget
             // TODO: restructure, prettify
             // update the target window
+            // --------------------------
             if(group && (i !== undefined)){
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle:selectTarget", 
                     '\t updating current target view : %O | %O', i, group);
                 this.setIntendedTarget({
                     index: i,
                     entityGroup: group
                 });
             } else {
-                logger.log("views/subviews/Battle", '\t clearing current target view');
+                logger.log("views:subViews:Battle:selectTarget", '\t clearing current target view');
                 this.clearIntendedTarget();
             }
+
+            // Target Bar
+            // --------------------------
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            // Update target bar info
+            // TODO: make this a view that updates
+            //
+            // If there is no model, clear out bar
+            if(this._previouslySelectedModel){
+                _.each(['change:health', 'change:maxHealth'], function(eventName){
+                    self.model.stopListening( 
+                        self._previouslySelectedModel.get('attributes'), 
+                        eventName
+                    );
+                });
+            }
+
+            this.$uiInteractionTargetBar = this.$uiInteractionTargetBar || $('#battle-interaction-target-bar');
+            this.$uiInteractionTargetBarFill = this.$uiInteractionTargetBarFill || $('#battle-interaction-target-bar-fill');
+            this.$uiInteractionTargetBarName = this.$uiInteractionTargetBarName || $('#battle-interaction-target-bar-name');
+            this.$uiInteractionTargetBarName.html( model ? model.get('name') : '');
+
+            this.$uiInteractionTargetBar.removeClass('player enemy');
+            if(group === 'player'){
+                this.$uiInteractionTargetBar.addClass('player');
+            } else if (group === 'enemy'){
+                this.$uiInteractionTargetBar.addClass('enemy');
+            }
+
+            if(model){
+                var targetVal = (
+                    (model.get('attributes').attributes.health / 
+                    model.get('attributes').attributes.maxHealth) * 100
+                ) + '%';
+                self.$uiInteractionTargetBarFill.css({ width: targetVal });
+
+                _.each(['change:health', 'change:maxHealth'], function(eventName){
+                    self.model.listenTo( 
+                        model.get('attributes'), 
+                        eventName, 
+                        function(d,health){
+                            // callback when target's health changes
+                            var targetVal = ((health / d.attributes.maxHealth) * 100) + '%';
+                            logger.log("views:subViews:Battle:selectTarget:changeHealth",
+                                "health changed: %o", {
+                                    health: health,
+                                    d: d,
+                                    maxHealth: d.attributes.maxHealth,
+                                    targetVal: targetVal
+                            });
+
+                            self.$uiInteractionTargetBarFill.css({ width: targetVal });
+                        }
+
+                    );
+                });
+
+                this._previouslySelectedModel = model;
+            }
+            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
             return this.selectedTarget;
         },
 
         setSelectedEntity: function setSelectedEntity(options){
             // Select an entity at passed in index in the normal state
+            //
+            // NOTE: This sets which abilities and entity the player has 
+            // control over
             // --------------------------
             // overview:
             //  -Get the entity model from the selection
@@ -2153,19 +2268,19 @@ define(
             //  -Move the entity forward
             //
             options = options || {};
-            logger.log("views/subviews/Battle", 'setSelectedEntity() called');
+            logger.log("views:subViews:Battle", 'setSelectedEntity() called');
             var i = options.index;
 
             // if the user selected the currently active entity, do nothing
             if(i === this.previouslySelectedEntityIndex){ 
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     '\t 0. entity selected: same entity selected, exiting : i : %O', i);
                 return false; 
             } 
 
             //1. get model based on selected element
             var model = this.model.get('playerEntities').models[i];
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "\t 1. entity selected: %O \n model: %O", i, model);
 
             // update the selected entity
@@ -2178,7 +2293,7 @@ define(
 
             // show abilities for this entity. Create new AbilityList view
             // --------------------------
-            logger.log("views/subviews/Battle", "\t 2. showing ability view");
+            logger.log("views:subViews:Battle", "\t 2. showing ability view");
             var abilityListView = new AbilityListView({
                 collection: model.get('abilities'),
                 entityModel: model
@@ -2188,7 +2303,7 @@ define(
             this.regionAbility.show(abilityListView);
 
             // move entity group forward
-            logger.log("views/subviews/Battle", "\t 3. moving entity");
+            logger.log("views:subViews:Battle", "\t 3. moving entity");
             var d3selection = d3.select(this.playerEntityGroups[0][i]);
             d3selection
                 .transition()
@@ -2208,7 +2323,7 @@ define(
             // Update the visible target
             // --------------------------
             if(model.attributes.desiredTarget){
-                logger.log("views/subviews/Battle", "\t updated selected target");
+                logger.log("views:subViews:Battle", "\t updated selected target");
                 this.selectTarget(
                     model.attributes.desiredTarget.group,
                     model.attributes.desiredTarget.index
@@ -2219,13 +2334,13 @@ define(
         },
 
         entityHoverStart: function entityHoverStart(options){
-            //logger.log("views/subviews/Battle", "entity hover start: %O : %O", d,i);
+            //logger.log("views:subViews:Battle", "entity hover start: %O : %O", d,i);
             this.setIntendedTarget(options);
 
             return this;
         },
         entityHoverEnd: function entityHoverEnd(options){
-            //logger.log("views/subviews/Battle", "entity hover end: %O : %O", d,i);
+            //logger.log("views:subViews:Battle", "entity hover end: %O : %O", d,i);
             this.clearIntendedTarget();
 
             return this;
@@ -2248,7 +2363,7 @@ define(
                 entityGroup: options.entityGroup
             };
 
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "1. setIntendedTarget : options: %O", options);
 
             var model = this.model.get(options.entityGroup + 'Entities')
@@ -2264,7 +2379,7 @@ define(
 
         clearIntendedTarget: function clearIntendedTarget(){
             // Clears out the intended target info window
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "1. clearIntendedTarget : previous target: %O", 
                 this.intendedTarget);
 
@@ -2331,14 +2446,14 @@ define(
             // Use the ability
             // --------------------------
             // Uses whatever the active ability is on the target
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "1. useAbility(): using ability: %O on %O",
                 selectedAbility, 
                 target);
 
             // check that selected ability is an ability
             if(!selectedAbility){
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     "x. useAbility(): CANNOT use, invalid ABILITY");
                 return false;
             }
@@ -2371,7 +2486,7 @@ define(
                 //
                 // Cannot use because the entity group of the intended target 
                 // is not valid
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     "x. useAbility(): CANNOT use, invalid TARGET | target %O",
                     target);
                 // don't cancel out the target, just let anyone listening know
@@ -2398,7 +2513,7 @@ define(
                 //  CAN NOT use (timer not met)
                 // TODO: visual spell effect
                 // TODO: multiple targets 
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     "2. CANNNOT use ability! Time: %O / %O", entityTime, 
                     selectedAbility.get('castTime'));
 
@@ -2406,7 +2521,7 @@ define(
 
             } else {
                // CAN use (timer met)
-                logger.log("views/subviews/Battle", 
+                logger.log("views:subViews:Battle", 
                     "2. USING ability! Time: %O / %O", entityTime, 
                     selectedAbility.get('castTime'));
 
@@ -2619,7 +2734,7 @@ define(
             //  model: {Object} entity object
             var self = this;
 
-            logger.log("views/subviews/Battle", 
+            logger.log("views:subViews:Battle", 
                 "1. entityDied() : options: %O", options);
 
             

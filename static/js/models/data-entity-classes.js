@@ -58,7 +58,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'darkblade', 'deathtouch', 'cripple'
+                'darkblade', 'deathtouch', 'cripple', 'poisoned-stab'
             ]
         }),
 
@@ -69,7 +69,7 @@ define(
             disabled: false,
             abilities: [
                 // array of effectId names
-                'magic-shield', 'icespear', 'firecomet'
+                'magic-shield', 'icespear', 'firecomet', 'heal'
             ]
         })
     ];

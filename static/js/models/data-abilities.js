@@ -100,7 +100,7 @@ define(
             effectId: 'placeHolder',
             castTime: 0.5,
             timeCost: 0.5,
-            validTargets: ['enemy'],
+            validTargets: ['enemy','player'],
             type: 'magic',
             element: 'light',
 
