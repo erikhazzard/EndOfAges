@@ -744,6 +744,7 @@ define(
                 logger.log('views:subViews:Battle', 
                     'handleAbilityActivated  : CAN be used');
                 canBeUsed = true;
+
             } else {
                 logger.log('views:subViews:Battle', 
                     'handleAbilityActivated  : CANNOT be used : %O : %O',
@@ -789,7 +790,14 @@ define(
             }
 
             // call the useCallback
-            if(useCallback){ useCallback(null, {canBeUsed: canBeUsed}); }
+            if(useCallback){ 
+                // let callback know timers should update
+                useCallback(null, {
+                    canBeUsed: canBeUsed,
+                    playerTimers: self.playerEntityTimers,
+                    ability: ability
+                }); 
+            }
 
             return this;
         },

@@ -54,6 +54,7 @@ define(
 
             // handle battle related events
             this.listenTo(events, 'ability:cancel', this.cancelAbility);
+            this.listenTo(events, 'ability:wasUsed', this.abilityWasUsed);
 
             this.listenTo(this.model, 'abilityInvalidUse', this.abilityInvalidUse);
 
@@ -81,7 +82,10 @@ define(
 
             this.$abilityIconOverlay = $('.ability-icon-overlay', this.$el);
             this.$abilityIconCanvas = $('.ability-icon-canvas', this.$el);
+            this.abilityIconCanvasCtx = this.$abilityIconCanvas[0].getContext('2d');
 
+            this.$el.removeClass('usable'); 
+            this.updateIconOverlay({});
             return this;
         },
 
@@ -97,6 +101,73 @@ define(
             this.$el.addClass('inactive');
         },
 
+        updateIconOverlay: function ( options ){     
+            // Updates the usable overlay for the icons
+            options = options || {};
+            clearTimeout( this.overlayTimeout );
+            console.log("<<<<<<<<<<<<<<<<< icon update");
+
+            var self = this;
+            var $el = this.$el;
+            var canvas = this.$abilityIconCanvas;
+            var ctx = this.abilityIconCanvasCtx;
+
+            var maxWidth = this.$abilityIconCanvas.width();
+            var fillStyle = 'rgba(20,20,20,0.97)';
+
+            // Draw background
+            ctx.fillStyle = fillStyle;
+            ctx.fillRect(0,0,0,maxWidth);
+            
+            var i = 0;
+            var timeLimit = +this.model.attributes.timeCost;
+
+            var playerTimer = 0;
+            if(options.playerTimers){ playerTimer = options.playerTimers[0]; }
+
+            // If the timer is >= the time limit, it means the player CAN
+            // use the ability and it's already full, so do nothing
+            if(playerTimer >= timeLimit){ 
+                return false;
+            }
+
+            var start = Date.now();
+            function drawOverlay(){requestAnimationFrame(function(){
+                // NOTE - we need to basically subtract playerTimer from this,
+                // but it doesn't quite work
+                var secs = ((Date.now() - start) / 1000);
+                secs = secs < 0 ? 0 : secs;
+                var targetWidth = (maxWidth * (secs / timeLimit));
+                i = targetWidth;
+                
+                if(i >= maxWidth){
+                    // All done
+                    return false;
+                }
+
+                // clear everything
+                ctx.clearRect(0,0,maxWidth,maxWidth);
+
+                // draw overlay
+                ctx.fillStyle = fillStyle;
+                ctx.fillRect(0,0,maxWidth,maxWidth);
+
+                // draw line
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, maxWidth);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "rgba(94, 240, 240, 1.0)";
+                ctx.stroke();
+
+                // clear visible area
+                ctx.clearRect(0,0,i,maxWidth);
+
+                self.overlayTimeout = setTimeout( drawOverlay, 16 );
+            }); }
+
+            drawOverlay();
+        },
 
         abilityInvalidUse: function(){
             var self = this;
@@ -109,8 +180,16 @@ define(
             },140);
         },
 
+        abilityWasUsed: function( options ){
+            // reset timer bars
+            this.updateIconOverlay( options );
+            return this;
+        },
+
         // ------------------------------
+        //
         // Use ability
+        //
         // ------------------------------
         useAbility: function(options){
             // Called when either the user clicks on the ability or presses the 
@@ -139,6 +218,9 @@ define(
                         setTimeout(function(){
                             self.$abilityIconOverlay.removeClass('used-success');
                         },140);
+
+                        // let other abilities know an ability was used
+                        events.trigger('ability:wasUsed', options);
 
                     } else {
                         // Can NOT be used

@@ -717,12 +717,10 @@ define(
             // only use filters if lowRes mode is not true
             if(CONFIG && !CONFIG.lowRes){
                 filter = 'url(#filter-map)';
-                // Firefox renders this filter effect in an extremely shitty way
-                // which completely kills the experience, so for FF don't use
-                // a filter
-                if(IS_FIREFOX){
-                    filter = '';
-                }
+                //// Firefox renders this filter effect in an extremely shitty way
+                //// which completely kills the experience, so for FF don't use
+                //// a filter
+                //if(IS_FIREFOX){ filter = ''; }
             }
 
             //var _duration = 1500;
@@ -746,6 +744,8 @@ define(
                     fill: '#000000',
                     opacity: 1
                 });
+
+                console.log(">>>>>>>>>>", filter);
 
             // update existing masks
             masks

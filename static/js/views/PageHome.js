@@ -95,7 +95,9 @@ define(
             //// TODO: REMOVE THIS : DEV 
             //// SKIP CREATE
             //// ==========================
-            return localForage.getItem('game:createCharacter:initialState', function(d){ EVENTS.trigger('controller:showGame', {dataToCreateGameModel: JSON.parse(d) }); });
+            return localForage.getItem('game:createCharacter:initialState', function(d){ 
+                EVENTS.trigger('controller:showGame', {dataToCreateGameModel: JSON.parse(d) }); 
+            });
             //// XXXXXXXXXXXXXXXXXXXXXXXXXX
             //// XXXXXXXXXXXXXXXXXXXXXXXXXX
             //// XXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -373,12 +375,15 @@ define(
         // ------------------------------
         onShow: function homeOnShow(){
             // When the view is rendered, set everything up
-            
             var self = this;
-            logger.log('pageHome', 'onShow called');
-
+            logger.log('pageHome:onShow', 'onShow called');
 
             this.$bookWrapper = $('#book-wrapper');
+
+            if(!this.raceListView || !this.regionRaceList){
+                logger.log('error:pageHome:onShow', 'no race list region exists');
+                return false;
+            }
 
             // setup races
             this.regionRaceList.show(this.raceListView);

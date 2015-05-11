@@ -100,13 +100,13 @@
             position: absolute;
             top: 0; right: 0; bottom: 0; left: 0;
 
-            -webkit-filter: url('#filter-map');
+            @include filter(url('#filter-map'));
             z-index: 1;
         }
 
         .label-filter:nth-child(1) .bg ,
         .label-filter:nth-child(3) .bg {
-            -webkit-filter: url('#filter-map-more-turbulence');
+            @include filter(url('#filter-map-more-turbulence'));
         }
 
         .label-name {
@@ -254,7 +254,9 @@
 
             background: #efefef;
         }
-        .inner-bar { -webkit-filter: url(#filter-wavy-ability-icon); }
+        .inner-bar { 
+            @include filter(url(#filter-wavy-ability-icon));
+        }
     }
 
     .selected .ability-timer-bar,  .selected.list-item:hover .ability-timer-bar{

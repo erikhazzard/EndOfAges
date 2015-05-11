@@ -1220,10 +1220,14 @@
       bottom: 0;
       left: 0;
       -webkit-filter: url("#filter-map");
+      -moz-filter: url("#filter-map");
+      filter: url("#filter-map");
       z-index: 1; }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:nth-child(1) .bg,
     #home #book-page-abilities #create-abilities-filter-wrapper .label-filter:nth-child(3) .bg {
-      -webkit-filter: url("#filter-map-more-turbulence"); }
+      -webkit-filter: url("#filter-map-more-turbulence");
+      -moz-filter: url("#filter-map-more-turbulence");
+      filter: url("#filter-map-more-turbulence"); }
     #home #book-page-abilities #create-abilities-filter-wrapper .label-name {
       color: #e0e0e0;
       padding: 6px 0 0 0;
@@ -1315,7 +1319,9 @@
       top: 0;
       background: #efefef; }
     #home #book-wrapper .ability-timer-bar .inner-bar {
-      -webkit-filter: url(#filter-wavy-ability-icon); }
+      -webkit-filter: url(#filter-wavy-ability-icon);
+      -moz-filter: url(#filter-wavy-ability-icon);
+      filter: url(#filter-wavy-ability-icon); }
   #home #book-wrapper .selected .ability-timer-bar, #home #book-wrapper .selected.list-item:hover .ability-timer-bar {
     background: #5EF0F0;
     border: 2px solid #5EF0F0;

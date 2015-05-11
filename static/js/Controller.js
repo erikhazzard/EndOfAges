@@ -163,7 +163,12 @@ define([
 
             // Otherwise, show the homepage
             this.currentRegion = this.pageHome;
-            this.regionMain.show(this.currentRegion);
+            if(this.currentRegion){
+                this.regionMain.show(this.currentRegion);
+
+            } else {
+                logger.log('warn:Controller', 'no current region');
+            }
 
             return this;
         },
