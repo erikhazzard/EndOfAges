@@ -5,6 +5,8 @@
 //
 //  Shows the available abilities for an entity
 //
+//  TODO: timerFactor (for haste / slow downs)
+//
 // ===========================================================================
 define(
     [ 
@@ -136,6 +138,8 @@ define(
                 // but it doesn't quite work
                 var secs = ((Date.now() - start) / 1000);
                 secs = secs < 0 ? 0 : secs;
+
+                // TODO: Add in timeFactor to this equation for haste / slow
                 var targetWidth = (maxWidth * (secs / timeLimit));
                 i = targetWidth;
                 
