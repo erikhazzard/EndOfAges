@@ -1340,8 +1340,6 @@ define(
                         rx: entityWidth/1.5
                     }).style({ opacity: 0, 'fill-opacity': 0 });
         
-
-
                 // --------------------------
                 // PLAYER SPRITE / image
                 // --------------------------
@@ -1372,7 +1370,10 @@ define(
                 // ----------------------
                 // Draw bars
                 var healthGroups = groups.append('g')
-                    .attr({ 'class': 'battle-entity-health ' + entityGroup });
+                    .attr({ 
+                        'class': 'battle-entity-health ' + entityGroup,
+                        'transform': 'translate(0, -10)'
+                    });
 
                 var healthBarHeight = 10;
                 // frame / border (TODO: Use image)
@@ -1380,7 +1381,7 @@ define(
                     .attr({
                         'class': 'health-bar-border ' + entityGroup,
                         x: 0,
-                        y: entityHeight + 5,
+                        y: 0,
                         width: entityWidth,
                         height: healthBarHeight
                     });
@@ -1390,7 +1391,7 @@ define(
                     .attr({
                         'class': 'health-bar ' + entityGroup,
                         x: 0,
-                        y: entityHeight + 5,
+                        y: 0,
                         height: healthBarHeight,
                         width: function healthSetWidth(d, i){
                             var model = self.model.get(
@@ -1438,7 +1439,7 @@ define(
                 var timerGroup = groups
                     .append('g').attr({ 
                         'class': 'entity-timer ' + entityGroup,
-                        'transform': 'translate(0, -10)'
+                        transform: 'translate(' + [0, entityHeight + 5] + ')'
                     });
 
                 // frame / border (TODO: Use image)

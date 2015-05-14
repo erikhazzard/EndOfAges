@@ -8192,7 +8192,6 @@ define(
             // Updates the usable overlay for the icons
             options = options || {};
             clearTimeout( this.overlayTimeout );
-            console.log("<<<<<<<<<<<<<<<<< icon update");
 
             var self = this;
             var $el = this.$el;
@@ -8204,7 +8203,7 @@ define(
 
             // Draw background
             ctx.fillStyle = fillStyle;
-            ctx.fillRect(0,0,0,maxWidth);
+            //ctx.fillRect(0,0,0,maxWidth);
             
             var i = 0;
             var timeLimit = +this.model.attributes.timeCost;
@@ -8302,8 +8301,11 @@ define(
                     if(canBeUsed){
                         // CAN use
                         self.$abilityIconOverlay.addClass('used-success');
+                        self.$el.addClass('animated shrink');
+
                         setTimeout(function(){
                             self.$abilityIconOverlay.removeClass('used-success');
+                            self.$el.removeClass('animated shrink');
                         },140);
 
                         // let other abilities know an ability was used
@@ -10277,8 +10279,6 @@ define(
                         rx: entityWidth/1.5
                     }).style({ opacity: 0, 'fill-opacity': 0 });
         
-
-
                 // --------------------------
                 // PLAYER SPRITE / image
                 // --------------------------
@@ -10309,7 +10309,10 @@ define(
                 // ----------------------
                 // Draw bars
                 var healthGroups = groups.append('g')
-                    .attr({ 'class': 'battle-entity-health ' + entityGroup });
+                    .attr({ 
+                        'class': 'battle-entity-health ' + entityGroup,
+                        'transform': 'translate(0, -10)'
+                    });
 
                 var healthBarHeight = 10;
                 // frame / border (TODO: Use image)
@@ -10317,7 +10320,7 @@ define(
                     .attr({
                         'class': 'health-bar-border ' + entityGroup,
                         x: 0,
-                        y: entityHeight + 5,
+                        y: 0,
                         width: entityWidth,
                         height: healthBarHeight
                     });
@@ -10327,7 +10330,7 @@ define(
                     .attr({
                         'class': 'health-bar ' + entityGroup,
                         x: 0,
-                        y: entityHeight + 5,
+                        y: 0,
                         height: healthBarHeight,
                         width: function healthSetWidth(d, i){
                             var model = self.model.get(
@@ -10375,7 +10378,7 @@ define(
                 var timerGroup = groups
                     .append('g').attr({ 
                         'class': 'entity-timer ' + entityGroup,
-                        'transform': 'translate(0, -10)'
+                        transform: 'translate(' + [0, entityHeight + 5] + ')'
                     });
 
                 // frame / border (TODO: Use image)

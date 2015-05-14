@@ -105,7 +105,6 @@ define(
             // Updates the usable overlay for the icons
             options = options || {};
             clearTimeout( this.overlayTimeout );
-            console.log("<<<<<<<<<<<<<<<<< icon update");
 
             var self = this;
             var $el = this.$el;
@@ -117,7 +116,7 @@ define(
 
             // Draw background
             ctx.fillStyle = fillStyle;
-            ctx.fillRect(0,0,0,maxWidth);
+            //ctx.fillRect(0,0,0,maxWidth);
             
             var i = 0;
             var timeLimit = +this.model.attributes.timeCost;
@@ -215,8 +214,11 @@ define(
                     if(canBeUsed){
                         // CAN use
                         self.$abilityIconOverlay.addClass('used-success');
+                        self.$el.addClass('animated shrink');
+
                         setTimeout(function(){
                             self.$abilityIconOverlay.removeClass('used-success');
+                            self.$el.removeClass('animated shrink');
                         },140);
 
                         // let other abilities know an ability was used
