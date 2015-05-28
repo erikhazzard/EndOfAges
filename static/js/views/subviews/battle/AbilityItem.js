@@ -97,7 +97,13 @@ define(
         setAbilityActive: function(){
             this.$el.removeClass('inactive');
             this.$el.addClass('active');
+            clearTimeout( this.overlayTimeout );
+            var canvas = this.$abilityIconCanvas;
+            var ctx = this.abilityIconCanvasCtx;
+            var maxWidth = this.$abilityIconCanvas.width();
+            ctx.clearRect(0, 0, 0, maxWidth);
         },
+
         setAbilityInactive: function(){
             this.$el.removeClass('active');
             this.$el.addClass('inactive');
@@ -126,23 +132,45 @@ define(
             var i = 0;
             var timeLimit = +this.model.attributes.timeCost;
 
-            var playerTimer = 0;
-            if(options.playerTimers){ playerTimer = options.playerTimers[0]; }
+            var entityTimer = 0;
+            if(window._BATTLE[options.selectedEntityGroup + 'EntityTimers']){
+                entityTimer = window._BATTLE[
+                    options.selectedEntityGroup + 'EntityTimers'][
+                    options.selectedEntityIndex
+                ];
+            }
 
             // If the timer is >= the time limit, it means the player CAN
             // use the ability and it's already full, so do nothing
-            if(playerTimer >= timeLimit){
+            if(entityTimer >= timeLimit){
                 logger.log('views:subviews:battle:AbilityItem:updateIconOverlay:canUse',
                 'playerTime exceeds ability timelimit %O', self.model);
                 return false;
             }
 
             var start = Date.now();
+
             function drawOverlay(){
-                var secs = playerTimer + ((Date.now() - start) / 1000);
+                // Draws the overlay over each icon
+
+                // get time factor (e.g., haste / slows). this is gnarly.
+                // we need to get the timerfactor for the
+                // currently select entity. we can't really just cache it
+                // because it may change during each tick (e.g., if the
+                // entity gets debuffed or buffed by another entity)
+                var timeFactor = 1;
+                if(window._BATTLE.model.attributes &&
+                    window._BATTLE.model.attributes[options.selectedEntityGroup + 'Entities']
+                ){
+                    timeFactor = window._BATTLE.model.attributes[
+                        options.selectedEntityGroup + 'Entities'].models[
+                        options.selectedEntityIndex
+                        ].attributes.attributes.attributes.timerFactor;
+                }
+
+                var secs = entityTimer + (((Date.now() - start) / 1000) * timeFactor);
                 secs = secs < 0 ? 0 : secs;
 
-                // TODO: Add in timeFactor to this equation for haste / slow
                 var targetWidth = (maxWidth * (secs / timeLimit));
                 i = targetWidth;
 
@@ -226,10 +254,13 @@ define(
                         'can be used, showing animation and triggering ability:wasUsed');
 
                         // let other abilities know an ability was used
+                        // ------------
                         events.trigger('ability:wasUsed', opts);
 
-                        // Avoid adding / removing classes too often
+                        // UI FEEDBACK
+                        // ------------
                         if(Date.now() - self._lastUseAbilityCallTime < 140){
+                            // Avoid adding / removing classes too often
                             return false;
                         }
                         self._lastUseAbilityCallTime = Date.now();

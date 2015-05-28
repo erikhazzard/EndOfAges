@@ -199,6 +199,9 @@
                 z-index: 999;
             }
 
+            .ability-item-wrapper.active .ability-icon-wrapper {
+                box-shadow: 0 0 10px #ffffff;
+            }
             .ability-item-wrapper.inactive {
                 opacity: 0.5;
             }

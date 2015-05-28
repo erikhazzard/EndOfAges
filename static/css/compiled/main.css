@@ -807,6 +807,8 @@
       right: 0;
       top: 0;
       z-index: 999; }
+    .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.active .ability-icon-wrapper {
+      box-shadow: 0 0 10px #ffffff; }
     .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.inactive {
       opacity: 0.5; }
 

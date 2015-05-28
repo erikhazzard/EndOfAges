@@ -192,7 +192,7 @@ define(
 
             buffDuration: 8,
             buffEffects: { 
-                timerFactor: 0.2
+                timerFactor: 0.8
             }
         },
 

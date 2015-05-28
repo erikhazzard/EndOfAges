@@ -109,6 +109,13 @@ define(
         return this;
     }
 
+    // hacky, but we need global refs to some things like player timers and
+    // entity models. A little shitty...there's a better way to do this,
+    // but we need fast read-only access in other components
+    window._BATTLE = {
+        model: {}
+    };
+
     // =======================================================================
     //
     // Battle view
@@ -193,7 +200,7 @@ define(
             // --------------------------
             this.listenTo(events, 'keyPress:tab', this.handleKeyChangeSelectedEntity);
             this.listenTo(events, 'keyPress:shift+tab', this.handleKeyChangeSelectedEntity);
-            _.each([1,2,3,4,6,7,8,9,'`'], function eachKey(key){
+            _.each([1, 2, 3, 4, 6, 7, 8, 9, '`'], function eachKey(key){
                 // NOTE: these also set the active key pressed button
                 self.listenTo(events, 'keyPress:' + key, self.handleKeyChangeSelectedEntity);
                 self.listenTo(events, 'keyPress:shift+' + key, self.handleKeyChangeSelectedEntity);
@@ -243,6 +250,8 @@ define(
                 model: this.model
             });
 
+            window._BATTLE.model = this.model;
+
             return this;
         },
 
@@ -250,6 +259,9 @@ define(
             // Called when the view is closed. Unbind global window / doc events
             var self = this;
             logger.log('views:subViews:Battle', 'onBeforeClose() called');
+
+            // remove references
+            window._BATTLE = {};
 
             // remove mouse wheel listener
             $(window).off('mousewheel', this.handleMouseWheelProxy);
@@ -279,11 +291,12 @@ define(
         },
         playerGroupDied: function playerGroupDied(options){
             // When the entire enemy group has died, you win
+            //
+            // TODO: Show victory screen
 
             // stop timer
             this.isTimerActive = false;
 
-            console.log(">>>>>>>>>>>>>>>> entity group died ", options);
             alert("You lose");
             return this;
         },
@@ -456,6 +469,8 @@ define(
 
                     }
                 });
+
+                window._BATTLE[entityGroup + 'EntityTimers'] = self[entityGroup + 'EntityTimers'];
             });
 
             return this;
@@ -707,16 +722,17 @@ define(
             // 3. Player has an ability active already, but has NOT selected
             // a target. Player has tried to use a different ability
             //
+            //
             var self = this;
             var ability = options.ability;
             var useCallback = options.useCallback;
 
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 '1. handleAbilityActivated: %O', ability);
 
             // Do nothing if game is paused
             if(this.model.get('state') === 'pause'){
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     '[x] game paused, returning');
                 return false;
             }
@@ -724,7 +740,7 @@ define(
             // If there is no selected target, cannot use the ability
             // --------------------------
             if(!this.selectedTarget){
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     '[x] cannot use ability, no selected target');
 
                 // show message
@@ -734,19 +750,19 @@ define(
 
                 return false;
             }
-            
+
             var canBeUsed = false;
 
             // Check usage based on timer
-            // TODO: Check castTime based on entity model??
-            var entityTime = this.playerEntityTimers[this.selectedEntityIndex];
+            var entityTime = this[this.selectedEntityGroup + 'EntityTimers'][this.selectedEntityIndex];
+
             if(entityTime >= ability.get('castTime')){
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     'handleAbilityActivated  : CAN be used');
                 canBeUsed = true;
 
             } else {
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     'handleAbilityActivated  : CANNOT be used : %O : %O',
                     entityTime, ability.get('castTime'));
 
@@ -760,22 +776,22 @@ define(
             // Use ability if it can be used
             // --------------------------
             if(canBeUsed && desiredTarget && desiredTarget.model){
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     '\t ability CAN be used and DOES have a target');
-                this.model.set({selectedAbility: ability},{silent:false});
+                this.model.set({selectedAbility: ability}, {silent: false});
                 this.useAbility({
                     target: desiredTarget.model,
-                    targetIndex: desiredTarget.index, 
+                    targetIndex: desiredTarget.index,
                     entityGroup: desiredTarget.group
                 });
 
             } else if (canBeUsed) {
                 // The ability CAN be used
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     '\t ability CAN be used, setting selected ability. NO target');
 
                 // Set the selected ability
-                this.model.set({selectedAbility: ability},{silent:false});
+                this.model.set({selectedAbility: ability}, {silent: false});
 
                 // change the state to ability. Now, when the user clicks on
                 // an entity, the ability will be used
@@ -785,18 +801,22 @@ define(
                 // TODO: Highlight group of possible targets based on ability
                 // options.ability.get('validTargets') bla bla bla
             } else {
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     '\t ability can NOT be used');
             }
 
             // call the useCallback
-            if(useCallback){ 
+            if(useCallback){
                 // let callback know timers should update
                 useCallback(null, {
                     canBeUsed: canBeUsed,
-                    playerTimers: self.playerEntityTimers,
-                    ability: ability
-                }); 
+                    // NOT NEEDED: playerTimers: self.playerEntityTimers,
+                    // NOTE: We don't need to pass in timers, as timers
+                    // are globally accessible
+                    ability: ability,
+                    selectedEntityIndex: this.selectedEntityIndex,
+                    selectedEntityGroup: this.selectedEntityGroup
+                });
             }
 
             return this;
@@ -2042,12 +2062,12 @@ define(
             //
             // index: index of selected entity (matches with the order of
             //  playerEntities.models)
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 'selectPlayerEntity : selecting (or using an ability) on an entity controlled by the player. options : %O',
                 options);
             options = options || {};
             var i = options.index;
-            
+
             var target = this.selectTarget('player', i);
 
             if(!target){
@@ -2069,7 +2089,7 @@ define(
                 if(this.selectedEntity){
                     // if there's a selected entity, update the desired target
                     // update the selected entity's target
-                    this.selectedEntity.set({ 
+                    this.selectedEntity.set({
                         desiredTarget: desiredTarget
                     }, { silent: true });
 
@@ -2089,8 +2109,8 @@ define(
                 // TODO: think of call structure
                 logger.log("views:subViews:Battle", '\t using ability');
                 this.useAbility({
-                    target: target, 
-                    targetIndex: i, 
+                    target: target,
+                    targetIndex: i,
                     entityGroup: 'player'
                 });
             }
