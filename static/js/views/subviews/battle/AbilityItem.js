@@ -98,10 +98,14 @@ define(
             this.$el.removeClass('inactive');
             this.$el.addClass('active');
             clearTimeout( this.overlayTimeout );
+
+            // clear out any overlay immediately
             var canvas = this.$abilityIconCanvas;
             var ctx = this.abilityIconCanvasCtx;
             var maxWidth = this.$abilityIconCanvas.width();
-            ctx.clearRect(0, 0, 0, maxWidth);
+            setTimeout(function(){requestAnimationFrame(function(){
+                ctx.clearRect(0, 0, maxWidth, maxWidth);
+            }); }, 20);
         },
 
         setAbilityInactive: function(){
@@ -171,7 +175,7 @@ define(
                 var secs = entityTimer + (((Date.now() - start) / 1000) * timeFactor);
                 secs = secs < 0 ? 0 : secs;
 
-                var targetWidth = (maxWidth * (secs / timeLimit));
+                var targetWidth = maxWidth * (secs / timeLimit);
                 i = targetWidth;
 
                 if(i >= maxWidth){
