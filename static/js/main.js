@@ -134,8 +134,11 @@ requirejs([
         /pageHome/, /analytics/,
         /PlayerEntityInfo/
     ];
-    logger.options.groupsDisabled = [/pageHome/, /allAbilitiesListItem/];
+
     logger.options.groupsEnabled = true;
+    logger.options.groupsEnabled = [
+        /views:subviews:battle:AbilityItem/
+    ];
 
     window.LOGGER = logger;
 

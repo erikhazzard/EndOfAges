@@ -8173,7 +8173,7 @@ define(
             this.$abilityIconCanvas = $('.ability-icon-canvas', this.$el);
             this.abilityIconCanvasCtx = this.$abilityIconCanvas[0].getContext('2d');
 
-            this.$el.removeClass('usable'); 
+            this.$el.removeClass('usable');
             this.updateIconOverlay({});
             return this;
         },
@@ -8190,10 +8190,13 @@ define(
             this.$el.addClass('inactive');
         },
 
-        updateIconOverlay: function ( options ){     
+        updateIconOverlay: function ( options ){
             // Updates the usable overlay for the icons
             options = options || {};
             clearTimeout( this.overlayTimeout );
+
+            logger.log('views:subviews:battle:AbilityItem:updateIconOverlay',
+            'called - updating overlay');
 
             var self = this;
             var $el = this.$el;
@@ -8206,7 +8209,7 @@ define(
             // Draw background
             ctx.fillStyle = fillStyle;
             //ctx.fillRect(0,0,0,maxWidth);
-            
+
             var i = 0;
             var timeLimit = +this.model.attributes.timeCost;
 
@@ -8215,32 +8218,33 @@ define(
 
             // If the timer is >= the time limit, it means the player CAN
             // use the ability and it's already full, so do nothing
-            if(playerTimer >= timeLimit){ 
+            if(playerTimer >= timeLimit){
+                logger.log('views:subviews:battle:AbilityItem:updateIconOverlay:canUse',
+                'playerTime exceeds ability timelimit %O', self.model);
                 return false;
             }
 
             var start = Date.now();
-            function drawOverlay(){requestAnimationFrame(function(){
-                // NOTE - we need to basically subtract playerTimer from this,
-                // but it doesn't quite work
-                var secs = ((Date.now() - start) / 1000);
+            function drawOverlay(){
+                var secs = playerTimer + ((Date.now() - start) / 1000);
                 secs = secs < 0 ? 0 : secs;
 
                 // TODO: Add in timeFactor to this equation for haste / slow
                 var targetWidth = (maxWidth * (secs / timeLimit));
                 i = targetWidth;
-                
+
                 if(i >= maxWidth){
-                    // All done
+                    logger.log('views:subviews:battle:AbilityItem:updateIconOverlay:loaded',
+                    'ability can be used %O | %O %O', self.model.attributes, i, maxWidth);
                     return false;
                 }
 
                 // clear everything
-                ctx.clearRect(0,0,maxWidth,maxWidth);
+                ctx.clearRect(0, 0, maxWidth, maxWidth);
 
                 // draw overlay
                 ctx.fillStyle = fillStyle;
-                ctx.fillRect(0,0,maxWidth,maxWidth);
+                ctx.fillRect(0, 0, maxWidth, maxWidth);
 
                 // draw line
                 ctx.beginPath();
@@ -8251,12 +8255,12 @@ define(
                 ctx.stroke();
 
                 // clear visible area
-                ctx.clearRect(0,0,i,maxWidth);
+                ctx.clearRect(0, 0, i, maxWidth);
 
-                self.overlayTimeout = setTimeout( drawOverlay, 16 );
-            }); }
+                self.overlayTimeout = setTimeout( drawOverlay );
+            }
 
-            drawOverlay();
+            requestAnimationFrame(drawOverlay);
         },
 
         abilityInvalidUse: function(){
@@ -8267,7 +8271,7 @@ define(
             setTimeout(function(){
                 self.$abilityIconOverlay.removeClass('used-invalid');
                 self.$el.removeClass('shake shake-constant');
-            },140);
+            }, 140);
         },
 
         abilityWasUsed: function( options ){
@@ -8282,48 +8286,69 @@ define(
         //
         // ------------------------------
         useAbility: function(options){
-            // Called when either the user clicks on the ability or presses the 
+            // Called when either the user clicks on the ability or presses the
             // hotkey. If the ability can't be used yet, do nothing
             // TODO: global timer? for each entity? pass in entity for this
             // ability?
             var self = this;
-            logger.log('views/subviews/battle/AbilityItem', 
-                'ability used! ' + this.model.get('name') + 
+            logger.log('views:subviews:battle:AbilityItem:useAbility',
+                'ability used! ' + this.model.get('name') +
                 ' | key pressed: ' + options.key);
-            
+
+            self._lastUseAbilityCallTime = Date.now();
 
             events.trigger('ability:activated', {
                 ability: this.model,
 
-                useCallback: function(err, options){
+                useCallback: function(err, opts){
                     // This callback is called immediately upon ability
                     // usage. If it can be used, color it green; otherwise,
                     // color it grey
-                    var canBeUsed = options.canBeUsed;
+                    var canBeUsed = opts.canBeUsed;
 
                     // Can the ability be used? If not, add the use-invalid class
                     if(canBeUsed){
                         // CAN use
+                        logger.log('views:subviews:battle:AbilityItem:useAbility:canUse',
+                        'can be used, showing animation and triggering ability:wasUsed');
+
+                        // let other abilities know an ability was used
+                        events.trigger('ability:wasUsed', opts);
+
+                        // Avoid adding / removing classes too often
+                        if(Date.now() - self._lastUseAbilityCallTime < 140){
+                            return false;
+                        }
+                        self._lastUseAbilityCallTime = Date.now();
+
+                        // update classes
                         self.$abilityIconOverlay.addClass('used-success');
                         self.$el.addClass('animated shrink');
 
                         setTimeout(function(){
                             self.$abilityIconOverlay.removeClass('used-success');
                             self.$el.removeClass('animated shrink');
-                        },140);
-
-                        // let other abilities know an ability was used
-                        events.trigger('ability:wasUsed', options);
+                        }, 140);
 
                     } else {
                         // Can NOT be used
+                        logger.log('views:subviews:battle:AbilityItem:useAbility:canNOTUse',
+                        'can NOT be used, showing animation and triggering ability:wasUsed');
+
+                        // Avoid adding / removing classes too often
+                        if(Date.now() - self._lastUseAbilityCallTime < 140){
+                            return false;
+                        }
+                        self._lastUseAbilityCallTime = Date.now();
+
                         self.$abilityIconOverlay.addClass('used-invalid');
                         self.$abilityIconOverlay.addClass('invalid');
                         self.$el.addClass('shake shake-constant');
+
                         setTimeout(function(){
                             self.$abilityIconOverlay.removeClass('used-invalid');
                             self.$el.removeClass('shake shake-constant');
-                        },140);
+                        }, 140);
                     }
                 }
             });
@@ -12516,8 +12541,11 @@ requirejs([
         /pageHome/, /analytics/,
         /PlayerEntityInfo/
     ];
-    logger.options.groupsDisabled = [/pageHome/, /allAbilitiesListItem/];
+
     logger.options.groupsEnabled = true;
+    logger.options.groupsEnabled = [
+        /views:subviews:battle:AbilityItem/
+    ];
 
     window.LOGGER = logger;
 

@@ -807,6 +807,8 @@
       right: 0;
       top: 0;
       z-index: 999; }
+    .game-battle-wrapper #region-battle-ability-wrapper .ability-list-wrapper .ability-item-wrapper.inactive {
+      opacity: 0.5; }
 
 .game-battle-wrapper {
   background: #343434 url("../../img/ui/map-empty-bg.png");
