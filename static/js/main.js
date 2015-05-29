@@ -126,7 +126,7 @@ requirejs([
     //INITIAL CONFIG
     //-----------------------------------
     //Configure log options (set app-wide) 
-    
+
     // log options
     logger.transports.get('Console').property({ showMeta: false });
 
