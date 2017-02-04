@@ -86,13 +86,13 @@ define(
                     .attr({
                         d: line, 
                         'class': 'to-remove destination-path-animated'
-                    });
+                    })
                     // TODO: This causes drastic hit on performance 
-                    //.call(animatePath);
+                    .call(animatePath);
             });
             this.listenTo(events, 'nodeHoverOff', function(options){
-                // if we want to ignore hover events
-                if(this._ignoreNodeHoverOff){ return false; }
+                //// if we want to ignore hover events
+                //// if(this._ignoreNodeHoverOff){ return false; }
 
                 // TODO: this doesn't remove all paths
                 self.paths.selectAll('.to-remove').transition()
@@ -744,8 +744,6 @@ define(
                     fill: '#000000',
                     opacity: 1
                 });
-
-                console.log(">>>>>>>>>>", filter);
 
             // update existing masks
             masks

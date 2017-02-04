@@ -1,6 +1,5 @@
 <script id='template-game-map-party-members' type='text/template'>
     <div class='inner'>
-        <h3>Party</h3>
         <div class='members'>
             <!-- party members html populate here -->
         </div>
@@ -8,7 +7,29 @@
 </script>
 
 <script id='template-game-map-party-member' type='text/template'>
-    <%= name %>
-    (<%= race.attributes.name %> )
-    <img src='/static/img/ui/party-member-divider-h.png' />
+    <div>
+        <h3><%= name %></h3>
+    </div>
+    <div>
+        <strong>Kills</strong> <%= model.attributes.kills %>
+        <br />
+        <strong>Race</strong> <%= model.attributes.race.attributes.name %> 
+        <br />
+        <strong>Health</strong> <%= model.attributes.attributes.attributes.maxHealth %>
+        <br />
+        <br />
+        <strong>Power</strong> <%= model.attributes.attributes.attributes.power %>
+        <br />
+        <strong>Defense</strong> <%= model.attributes.attributes.attributes.defense %>
+        <br />
+        <strong>Armor</strong> <%= model.attributes.attributes.attributes.armor %>
+        <br />
+        <strong>Magic Resist</strong> <%= model.attributes.attributes.attributes.magicResist %>
+        <br />
+        <strong>Magic Power</strong> <%= model.attributes.attributes.attributes.magicPower %>
+        <br />
+        <strong>Timer Limit</strong> <%= model.attributes.attributes.attributes.timerLimit %>sec
+        <br />
+        <strong>Timer Factor</strong> <%= model.attributes.attributes.attributes.timerFactor %>x
+    </div>
 </script>

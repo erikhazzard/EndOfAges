@@ -544,6 +544,10 @@ define(
                 logger.log('models/Entity', '[x] entity is dead');
                 return false; 
             }
+            if (window._BATTLE && window._BATTLE.isActive === false) {
+                logger.log('models/Entity', 'Battle is over!');
+                return false;
+            }
 
             var attrs = this.get('attributes');
 

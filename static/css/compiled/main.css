@@ -1,3 +1,24 @@
+/**
+$COLOR-INTERACTION-SELECTED: #D1C56C; // yellow 
+$BACKGROUND-INTERACTION-SELECTED: rgba(229, 197, 71, 0.45); // yellow
+$BOX-SHADOW-INTERACTION-SELECTED: 0 0 2px rgb(222, 220, 172), 0 0 20px rgb(235, 232, 140), 0 0 30px rgb(210, 187, 82); //yellow
+
+// for border gradient
+//-webkit-linear-gradient(rgba(255,255,255,0.9), rgba(116, 202, 207, 0.8)) 1 100%
+$COLOR-INTERACTION-SELECTED: #98c2b6; // teal / yellow light
+$BACKGROUND-INTERACTION-SELECTED: rgba(152,194,182, 0.85); // teal
+$BOX-SHADOW-INTERACTION-SELECTED: 0 0 2px #CAF9E5, 0 0 20px #49B9A2, 0 0 30px #67D3CE; // teal
+
+
+// NEW YELLOW 
+$COLOR-INTERACTION-SELECTED: #C89D3D;
+$BACKGROUND-INTERACTION-SELECTED: rgba(200, 184, 61, 0.22);
+$BOX-SHADOW-INTERACTION-SELECTED: 0 0 2px #FFFFFF, 0 0 20px #C89D3D, 0 0 30px #C89D3D;
+
+
+// TEAL
+$COLOR-INTERACTION-SELECTED: #98c2b6;
+*/
 .writer-wrapper {
   position: relative;
   width: 100%; }
@@ -57,15 +78,18 @@
     width: 100%; }
   #region-map-party-members h3 {
     color: #a69172;
-    font-size: 2.5em;
+    font-size: 1.3em;
     margin-right: 40px;
     font-variant: small-caps;
     text-align: center;
     text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 #000000, 1px 1px 0 #000000, 0 1px 0 #000000, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
   #region-map-party-members .member {
-    cursor: pointer; }
-  #region-map-party-members .member:hover {
-    background: rgba(255, 255, 255, 0.4); }
+    padding: 0 0 0 4px; }
+    #region-map-party-members .member strong {
+      display: inline-block;
+      font-size: 0.9em;
+      margin: 4px 10px 0 0;
+      width: 100px; }
 
 #region-map-entity-info.off-screen {
   -webkit-transform: translate(-300px, 0);
@@ -189,39 +213,54 @@
     opacity: 0.9;
     stroke-width: 6px; }
   #map .destination-path-dotted {
-    fill: #ffffff;
+    fill: none;
     stroke: #ffffff;
+    stroke: rgba(255, 255, 255, 0.5);
     opacity: 0.6;
     stroke-dasharray: 10px 4px;
     stroke-width: 7px; }
   #map .destination-path-animated {
     fill: none;
-    stroke: #343434;
-    stroke-width: 5px; }
+    stroke: #5EF0F0;
+    stroke-opacity: 0.5;
+    stroke-width: 9px; }
 
-#battle .effect-magicMissle path {
-  fill: #ffffff; }
-#battle .light path {
-  fill: #ffffff; }
-#battle .dark path {
-  fill: #343434;
-  stroke: #000000;
-  stroke-width: 0.05px; }
-#battle .fire path {
-  fill: #dd2222;
-  stroke: #aa0000;
-  stroke-width: 0.05px; }
-#battle .earth path {
-  fill: #44aa44;
-  fill: #118811; }
-#battle .air path {
-  fill: #d0d0d0;
-  fill-opacity: 0.6;
-  stroke: #a0a0a0;
-  stroke-opacity: 0.4;
-  stroke-width: 0.05px; }
-#battle .water path {
-  fill: #3333dd; }
+#battle {
+    /*
+    .effect-magicMissle path {
+        fill: #ffffff;
+    }
+
+    // Spell effects based on element
+    // TODO: Gradients
+    .light path {
+        fill: #ffffff;
+    }
+    .dark path {
+        fill: #343434;
+        stroke: #000000;
+        stroke-width: 0.05px;
+    }
+    .fire path {
+        fill: #dd2222;
+        stroke: #aa0000;
+        stroke-width: 0.05px;
+    }
+    .earth path {
+        fill: #44aa44;
+        fill: #118811;
+    }
+    .air path {
+        fill: #d0d0d0;
+        fill-opacity: 0.6;
+        stroke: #a0a0a0;
+        stroke-opacity: 0.4;
+        stroke-width: 0.05px;
+    }
+    .water path {
+        fill: #3333dd;
+    }
+    */ }
 
 #create-character-display-wrapper .ability-list {
   position: relative;
@@ -566,6 +605,13 @@
   top: 0;
   width: 200px;
   z-index: 200; }
+  .game-battle-wrapper #battle-left-wrapper h1, .game-battle-wrapper #battle-left-wrapper h2, .game-battle-wrapper #battle-left-wrapper h3, .game-battle-wrapper #battle-left-wrapper h4 {
+    color: #a69172;
+    font-size: 1.3em;
+    margin-right: 40px;
+    font-variant: small-caps;
+    text-align: center;
+    text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 #000000, 1px 1px 0 #000000, 0 1px 0 #000000, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
 .game-battle-wrapper #battle-left-wrapper-inner {
   position: absolute;
   bottom: 0;
@@ -609,6 +655,13 @@
   right: 0;
   top: 0;
   width: 200px; }
+  .game-battle-wrapper #battle-right-wrapper h1, .game-battle-wrapper #battle-right-wrapper h2, .game-battle-wrapper #battle-right-wrapper h3, .game-battle-wrapper #battle-right-wrapper h4 {
+    color: #5EF0F0;
+    font-size: 1.3em;
+    margin-left: 0;
+    font-variant: small-caps;
+    text-align: center;
+    text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 #000000, 1px 1px 0 #000000, 0 1px 0 #000000, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
 .game-battle-wrapper #battle-right-wrapper-inner {
   position: absolute;
   bottom: 0;

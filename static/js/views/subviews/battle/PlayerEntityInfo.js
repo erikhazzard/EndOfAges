@@ -13,7 +13,7 @@
 // ===========================================================================
 define(
     [ 
-        'd3', 'backbone', 'marionette', 'logger', 'events'
+    'd3', 'backbone', 'marionette', 'logger', 'events'
     ], function viewBattleAbility(
         d3, backbone, marionette, logger, events
     ){

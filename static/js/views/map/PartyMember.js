@@ -22,7 +22,7 @@ define(
             'click': 'memberClicked'
         },
         serializeData: function(){
-            return _.extend({ self: this.model }, this.model.toJSON());
+            return _.extend({ model: this.model, self: this.model }, this.model.toJSON());
         },
 
         memberClicked: function memberClicked(e){

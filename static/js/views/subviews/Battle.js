@@ -112,9 +112,15 @@ define(
     // hacky, but we need global refs to some things like player timers and
     // entity models. A little shitty...there's a better way to do this,
     // but we need fast read-only access in other components
-    window._BATTLE = {
-        model: {}
-    };
+    function getNewBattleObject () {
+        return {
+            model: {},
+            isActive: false,
+            stats: {}
+        };
+    }
+    window._BATTLE = getNewBattleObject();
+    window._BATTLE_HISTORY = window._BATTLE_HISTORY || [];
 
     // =======================================================================
     //
@@ -250,6 +256,7 @@ define(
                 model: this.model
             });
 
+            window._BATTLE = getNewBattleObject();
             window._BATTLE.model = this.model;
 
             return this;
@@ -261,6 +268,7 @@ define(
             logger.log('views:subViews:Battle', 'onBeforeClose() called');
 
             // remove references
+            window._BATTLE_HISTORY.push(window._BATTLE);
             window._BATTLE = {};
 
             // remove mouse wheel listener
@@ -279,25 +287,30 @@ define(
 
             // stop timer
             this.isTimerActive = false;
+            window._BATTLE.isActive = false;
+
+            // TODO: compile stats
 
             var reward = {
                 gold: this.model.get('rewardGold'),
                 exp: this.model.get('rewardExp')
             };
 
-            console.log("so win." + JSON.stringify(reward));
-            alert("You win");
+            console.log("you win." + JSON.stringify(reward));
+            // TODO: YOU WIN
+            // you win - show battle drop down
             return this;
         },
         playerGroupDied: function playerGroupDied(options){
-            // When the entire enemy group has died, you win
-            //
-            // TODO: Show victory screen
-
             // stop timer
             this.isTimerActive = false;
+            window._BATTLE.isActive = false;
 
-            alert("You lose");
+            // TODO: compile stats
+
+            console.log("you LOSE.");
+            // TODO: YOU LOSE
+            // you lose - show battle drop down
             return this;
         },
 
@@ -968,8 +981,8 @@ define(
             // --------------------------
             // 2. Got target entity, select it
             // --------------------------
-            logger.log('views:subViews:Battle', 
-                ' got key press : ' + key + 
+            logger.log('views:subViews:Battle',
+                ' got key press : ' + key +
                 ' : entityGroup: ' + targetGroup +
                 ' : Selecting entity: ' + targetIndex);
 
@@ -988,12 +1001,13 @@ define(
             logger.log('views:subViews:Battle',
                 'handleKeyChangeSelectedEntity(): called with %O', options);
 
-            // prevent default key behavior 
+            // prevent default key behavior
             if(options.e){ options.e.preventDefault(); }
             var key = options.key;
 
             var numEnemyEntities = this.model.get('enemyEntities').models.length;
-            var curIndex = this.selectedEntityIndex;
+            var numPlayerEntities = this.model.get('playerEntities').models.length;
+            var curIndex = this.selectedEntityIndex || numEnemyEntities;
             var targetGroup = 'enemy';
 
             var newIndex = 0;
@@ -1003,14 +1017,34 @@ define(
                 newIndex = 0;
                 targetGroup = 'player';
 
-            } else if(key === 'tab'){
-                // Tab will switch to player
+            } else if(key === 'tab' || key === 'shift+tab'){
+                // Tab switches between players and enemies
                 newIndex = 0;
                 targetGroup = 'player';
 
-            } else if(key === 'shift+tab'){
-                // tab goes down the list
-                newIndex = 0;
+                // TODO: Handle shift to go in opposite direction
+                if(this.selectedEntity.attributes.desiredTarget){
+                    // -----------------------
+                    // TODO: this does not work. ideally, tab should go through all entities and loop between players and enemies
+                    // -----------------------
+                    if(this.selectedEntity.attributes.desiredTarget.group === 'enemy'){
+                        if(curIndex + 1 > numEnemyEntities || curIndex <= 0){
+                            targetGroup = 'player';
+                            newIndex = 0;
+
+                        } else {
+                            targetGroup = 'enemey';
+                            newIndex = curIndex - 1;
+                        }
+
+                    } else {
+                        targetGroup = 'enemy';
+                    }
+
+                } else {
+                    targetGroup = 'enemy';
+                    newIndex = 0;
+                }
 
             } else if(key.match(/[0123456789]/)){
                 // get index from key, start at 1 (not 0), so subtract 1 to
@@ -1019,7 +1053,7 @@ define(
                     targetGroup = 'player';
                 }
 
-                newIndex = parseInt(key.replace(/shift+/, ''),10) - 1;
+                newIndex = parseInt(key.replace(/shift+/, ''), 10) - 1;
 
                 if(newIndex < 0){
                     newIndex = 0;
@@ -1033,6 +1067,9 @@ define(
             // Update selected entity by index
             // --------------------------
             logger.log('views:subViews:Battle', 'new index: ' + newIndex);
+
+            // final checks
+            if(curIndex < 0){ curIndex = 0; }
 
             // select the entity
             this.selectEntity({
@@ -2216,6 +2253,7 @@ define(
                     index: i,
                     entityGroup: group
                 });
+
             } else {
                 logger.log("views:subViews:Battle:selectTarget", '\t clearing current target view');
                 this.clearIntendedTarget();
@@ -2658,7 +2696,6 @@ define(
                             return false;
                         }
                         var $effect = d3.sticker('#effect-' + selectedAbility.attributes.effectId);
-
                         // append it the ability effects group
                         $effect = $effect(self.$abilityEffects);
 
@@ -2680,6 +2717,11 @@ define(
 
                         // Render the effect
                         // --------------
+                        // adjust matrix for scaling
+                        var width=64, height=64;
+                        var bb = $effect.node().getBBox();
+                        var matrix = "matrix("+width / bb.width+", 0, 0, "+height / bb.height+", 0,0)";
+
                         // start in the middle of the source
                         $effect.attr({
                             'class': $effect.attr('class') + ' ' + effectClass,
@@ -2687,8 +2729,8 @@ define(
                             transform: 'translate(' + [
                                 // get midpoints
                                 sourcePos.left + ((sourcePos.right - sourcePos.left) / 2), 
-                                sourcePos.top + ((sourcePos.bottom - sourcePos.top) / 2)
-                                ] + ') ' + scaleAmount
+                                sourcePos.top - ((sourcePos.bottom - sourcePos.top) / 2)
+                                ] + ') ' + scaleAmount + ' ' + matrix
 
                         })
                             // then travel to the target
@@ -2698,10 +2740,10 @@ define(
                             .attr({
                                 transform: 'translate(' + [
                                     // send to edge of either enemy or player
-                                    targetEntityGroup === 'enemy' ? targetPos.left - 20 : targetPos.right + 20,
+                                    targetEntityGroup === 'enemy' ? targetPos.left + 20 : targetPos.right + 30,
                                     // get midpoints
-                                    targetPos.top + ((targetPos.bottom - targetPos.top) / 2)
-                                    ] + ') ' + scaleAmount
+                                    targetPos.top - ((targetPos.bottom - targetPos.top) / 2)
+                                    ] + ') ' + scaleAmount + ' ' + matrix
                             })
                             .each('end', function(){
                                 // remove the effect

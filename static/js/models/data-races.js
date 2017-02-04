@@ -18,13 +18,14 @@ define(
             name: 'Human',
 
             description: "Well rounded creatures with moderate attack and defense bonuses",
-            specialDescription: "<span class='positive'>+20%</span> experience bonus",
+            specialDescription: "<span class='positive'>+10%</span> health",
             
             sprite: 'human',
             baseStats: {
                 power: 5,
                 defense: 5,
-                health: 85,
+                health: 100,
+                maxHealth: 100,
 
                 armor: 4,
                 magicResist: 3,
@@ -34,17 +35,18 @@ define(
         new Race({
             name: 'Elf',
             description: 'Wise and agile creatures in touch with the natural world.',
-            specialDescription: "<span class='positive'>+5%</span> chance to avoid all damage",
+            specialDescription: "<span class='positive'>+10%</span> magic power and resist",
             sprite: 'elf',
             baseStats: {
                 power: 7,
                 defense: 3,
-                health: 50,
+                health: 80,
+                maxHealth: 80,
 
                 // TODO: Don't use these props?
                 armor: 2,
-                magicResist: 4,
-                magicPower: 4
+                magicResist: 6,
+                magicPower: 6
             }
         }),
         new Race({

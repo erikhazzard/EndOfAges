@@ -13,7 +13,7 @@ requirejs.config({
         async: 'lib/async.min',
         // We're using lodash in place of underscore
         lodash: 'lib/lodash.min',
-        
+
         jwerty: 'lib/jwerty.min',
 
         localForage: 'lib/localForage.min',
@@ -34,13 +34,8 @@ requirejs.config({
         'd3': {
             exports: 'd3'
         },
-        'lodash': {
-            exports: '_'
-        },
-
-        'jwerty': {
-            exports: 'jwerty'
-        },
+        'lodash': { exports: '_' },
+        'jwerty': { exports: 'jwerty' },
 
         'backbone': {
             //These script dependencies should be loaded before loading
@@ -129,12 +124,6 @@ requirejs([
 
     // log options
     logger.transports.get('Console').property({ showMeta: false });
-
-    logger.options.groupsEnabled = [
-        /pageHome/, /analytics/,
-        /PlayerEntityInfo/
-    ];
-
     logger.options.groupsEnabled = true;
     logger.options.groupsEnabled = [
         /views:subviews:battle:AbilityItem/

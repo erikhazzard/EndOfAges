@@ -28,6 +28,8 @@ define(
         RACES
     ){
 
+    var numBattles = 0;
+
     var Battle = Backbone.Model.extend({
         defaults: {
             id: 0,
@@ -71,6 +73,7 @@ define(
 
         initialize: function gameInitialize(options){
             logger.log('models/Battle', 'initialize() called');
+            numBattles++;
 
             // TODO: get entities from game model
             
@@ -84,18 +87,13 @@ define(
                 // generate random enemy entities
                 entities.push(this.getRandomEntity());
 
-                // DEV : Manually add a number of entities
-                entities.push(this.getRandomEntity());
-
                 // Add more enemies
                 // TODO: For dev, only add one for now.
-                if(false){
-                    while(i<3) {
-                        if(Math.random() < (1/(i+3))){
-                            entities.push(this.getRandomEntity()); 
-                        }
-                        i++;
+                while(i < numBattles - 1) {
+                    if(Math.random() < (1/(i+3))){
+                        entities.push(this.getRandomEntity()); 
                     }
+                    i++;
                 }
 
                 this.set({
@@ -115,17 +113,22 @@ define(
             var abilities = new Abilities();
 
             //// LEGIT Abilities
-            //abilities.add([
-                //new Ability(dataAbilities[1]),
-                //new Ability(dataAbilities[3]),
-                //new Ability(dataAbilities[7])
-            //]);
-            
-            //// suspend
             abilities.add([
-                new Ability(dataAbilities[2])
+                new Ability(dataAbilities[Math.random() * dataAbilities.length | 0])
             ]);
 
+            if (numBattles > 0) {
+                if (numBattles > 2) {
+                    abilities.add([ new Ability(dataAbilities[Math.random() * dataAbilities.length | 0]) ]);
+                }
+                if (Math.random() < 0.4) {
+                    abilities.add([ new Ability(dataAbilities[Math.random() * dataAbilities.length | 0]) ]);
+                }
+                if (Math.random() < 0.2) {
+                    abilities.add([ new Ability(dataAbilities[Math.random() * dataAbilities.length | 0]) ]);
+                }
+            }
+            
             // generate new entity
             entity = new Entity({
                 //// FOR ALL : 

@@ -20,7 +20,7 @@
 
     h3 {
         color: #a69172;
-        font-size: 2.5em;
+        font-size: 1.3em;
         margin-right: 40px;
         font-variant: small-caps;
         text-align: center;
@@ -37,9 +37,14 @@
 
     // Members
     .member {
-        cursor: pointer;
+        padding: 0 0 0 4px;
+        strong {
+            display: inline-block;
+            font-size: 0.9em;
+            margin: 4px 10px 0 0;
+            width: 100px;
+        }
     }
     .member:hover {
-        background: rgba(255,255,255,0.4);
     }
 }

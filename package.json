@@ -1,43 +1,64 @@
 {
-    "name": "EndOfAges",
-    "description": "End of Ages - party based rogue like",
-    "version": "0.0.1",
-    "author": "Erik Hazzard <enoex1@gmail.com>",
-    "dependencies": {
-        "winston": "0.7.2",
-        "nconf": "0.6.7",
-        "lodash": "1.3.1",
-        "async": "0.2.9",
-        "d3": "3.3.9",
-        "simple-statistics": "0.5.0",
-        "express": "3.3.1",
-        "superagent": "0.15.5",
-        "ejs": "0.8.4",
-        "bcrypt": "0.8.1",
-        "passport": "0.1.17",
-        "passport-local": "0.1.6",
-        "passport-facebook": "0.1.5",
-        "redis": "0.8.4",
-        "hiredis": "0.1.15",
-        "mongoose": "3.6.13",
-        "connect-redis": "1.4.5",
-        "connect-flash": "0.1.1",
-        "amqp": "0.1.7",
-        "uuid": "1.4.1"
-    },
-    "devDependencies": {
-        "jshint": "*",
-        "requirejs": "2.1.10",
-        "chai": "*",
-        "mocha": "*",
-        "supertest": "*",
-        "d3": "*"
-    },
-    "engines": {
-        "node": ">=0.9.0"
-    },
-    "scripts": {
-        "start": "export NODE_ENV=local && node server.js",
-        "test": "make test"
-    }
+  "main": "app://epitaph/index.html",
+  "window": {
+    "title": "Epitaph",
+    "icon": "link.png",
+    "toolbar": true,
+    "frame": true,
+    "width": 1000,
+    "height": 700,
+    "position": "mouse",
+    "min_width": 1000,
+    "min_height": 700,
+    "max_width": 1000,
+    "max_height": 700
+  },
+  "name": "EndOfAges",
+  "description": "End of Ages - party based rogue like",
+  "version": "0.0.1",
+  "author": "Erik Hazzard <enoex1@gmail.com>",
+  "dependencies": {
+    "amqp": "0.1.7",
+    "async": "0.2.9",
+    "bcrypt": "^0.8.7",
+    "connect-flash": "0.1.1",
+    "connect-redis": "1.4.5",
+    "d3": "3.3.9",
+    "ejs": "0.8.4",
+    "express": "3.3.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^5.2.1",
+    "gulp-requirejs": "^0.3.0",
+    "gulp-requirejs-optimize": "^1.2.0",
+    "gulp-shell": "^0.4.2",
+    "lodash": "^1.3.1",
+    "mongoose": "^4.1.10",
+    "nconf": "0.6.7",
+    "passport": "0.1.17",
+    "passport-facebook": "0.1.5",
+    "passport-local": "0.1.6",
+    "redis": "0.8.4",
+    "requirejs": "^2.3.2",
+    "requirejs-babel": "0.0.6",
+    "sass": "^0.5.0",
+    "simple-statistics": "0.5.0",
+    "superagent": "0.15.5",
+    "uuid": "1.4.1",
+    "winston": "0.7.2"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "d3": "*",
+    "gulp-rjs": "^0.1.0",
+    "jshint": "*",
+    "mocha": "*",
+    "supertest": "*"
+  },
+  "engines": {
+    "node": ">=0.9.0"
+  },
+  "scripts": {
+    "start": "export NODE_ENV=local && node server.js",
+    "test": "make test"
+  }
 }

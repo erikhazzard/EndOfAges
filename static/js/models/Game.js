@@ -35,6 +35,11 @@ define(
         ,Race
     ){
 
+    var _gameTimer;
+    var _gameTimerObject = {
+        timer: 0
+    };
+
     var Game = Backbone.Model.extend({
         defaults: {
             // actual ID used on backend
@@ -42,6 +47,8 @@ define(
 
             // current map
             activeMap: null,
+
+            timer: _gameTimerObject,
 
             // Instance of the node type (e.g., battle)
             activeNodeInstance: null,
@@ -86,6 +93,17 @@ define(
             return this;
         },
 
+        /**
+         * Global game timer, updated on a subsecond interval
+         */
+        startTimer: function () {
+            if (!_gameTimer) {
+                _gameTimer = setInterval(function () {
+                    _gameTimerObject.timer += 0.25;
+                }, 250);
+            }
+        },
+
         parse: function(res){
             // Load from JSON and turn into object
             // Need to overwrite the parse function so we can load in data
@@ -93,6 +111,8 @@ define(
             // NOTE: Could automate this, store embedded collection / models
             // as a property and include the class
             var entities = [];
+
+            logger.log('game:parse', 'parsing: %j', res)
 
             // create entity models for each entity, then add them to the
             // collection

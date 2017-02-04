@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Epitaph</title>
+
+    <meta name="description" content="Epitaph is a rogue-like game with an active battle system">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+
+    <link rel="shortcut icon" href="/static/resources/favicon.ico" />
+
+    <!-- bootstrap -->
+    <!-- TODO: UNCOMMENT for non dev -->
+    <!--<link rel='stylesheet' href='//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css' />-->
+
+    <!-- THIRD PART ( TODO: COMBINE ) -->
+    <link rel='stylesheet' href='/static/css/compiled/bootstrap.min.css' />
+    <link rel='stylesheet' href='/static/css/compiled/animate.css' />
+    <link rel='stylesheet' href='/static/css/compiled/shake.css' />
+
+    <!-- CSS -->
+    <link rel='stylesheet' href='/static/css/compiled/main.css' />
+
+    <!-- font awesome -->
+    <!-- TODO: UNCOMMENT for non dev -->
+    <!--<link rel='stylesheet' href='//netdna.bootstrapcdn.com/font-awesome/4.0.0/css/font-awesome.min.css' />-->
+
+    <!-- FONT TESTS -->
+    <!-- TODO: FIGURE OUT WHAT FONT TO USE -->
+
+    <link href='http://fonts.googleapis.com/css?family=Averia+Sans+Libre|Lustria|IM+Fell+English|Nothing+You+Could+Do|Shadows+Into+Light|Ubuntu+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+<div id='site-container'>
+    <div id='region-main'>
+        
+        <!-- ========================================== 
+        Pages
+        =========================================== -->
+        
+        
+            <div id='home'>
+
+    <div id='book-wrapper'>
+
+        <!-- Page wrappers for flip library -->
+        <div id='book-pages'>
+            <!-- empty cover page (used as an empty page for flip library) -->
+            <div class='page-cover'></div>
+
+            <!-- Title page -->
+            <div id='book-page-title' class='page-left'>
+                <div class='inner'>
+
+                    <h2>
+    Epitaph
+</h2>
+<hr />
+
+<div class='page-title-description'>
+    <p id='create-title-intro-text' class='p1 opacity-zero'>
+        I am old and tired now, but I was not young when the destruction of Felithport began. The years since then seem more dim and faded than the years of my youth. 
+
+        Now, I wait. Like a gnarled tree, withered and weathered, with nothing to do but decay to the grave.
+    </p>
+
+    <p id='name-input-wrapper' class='p2 opacity-zero'>
+    I was infamous; most people knew me as:
+
+    <input id='create-name' 
+        class='interaction opacity-zero'
+        maxlength=22
+        placeholder=''
+        type='text' 
+        />
+    </p>
+
+</div>
+
+                </div>
+            </div>
+
+            <!-- Race page -->
+            <div id='book-page-race' class='page-right'>
+                <div class='inner'>
+
+                    <div id='create-race-header' class='opacity-zero'>
+    <h2>Race</h2>
+</div>
+
+<div id='create-race-wrapper' class='opacity-zero'>
+    <div class='fade-out-top'></div>
+    <div id='region-create-races' class='interaction'>
+        <!-- Races will go here -->
+    </div>
+    <div class='fade-out-bottom'></div>
+</div>
+
+<div id='home-race-description' class='opacity-zero'>
+    <!-- template content goes here -->
+</div>
+<div id='home-race-visualization' class='opacity-zero'>
+    <!-- viz goes here -->
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-classes' class='page-left hidden'>
+                <div class='inner'>
+                    <div id='create-classes-header'>
+    <h2>Class</h2>
+</div>
+
+<div id='create-classes-wrapper' class='opacity-zero'>
+    <p id='create-classes-description' class='p1 opacity-zero'>
+        There were imitators, but I was the best... 
+    </p>
+
+    <div id='region-create-classes' class='interaction opacity-zero interaction-list'> </div>
+
+    <!-- NOTE: Selected abilities region would normally go here, but a repaint is triggered when mousing over classes and it's janky - so, it's put on a level above in the book-wrapper in page-home-preload.html -->
+
+
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-abilities' class='page-right hidden'>
+                <div class='inner'>
+                    <div id='create-abilities-header' class='opacity-zero'>
+    <!-- Abilities -->
+    <h2>Skills</h2>
+</div>
+
+<div id='create-abilities-wrapper' class='opacity-zero'>
+    <!-- labels / filter -->
+    <div id='create-abilities-filter-wrapper'>
+        <span id='label-filter-damage' 
+            class='label-filter label-filter-damage' data='damage'>
+            <span class='bg'></span>
+            <span class='label-name' data='damage'> Damage </span>
+        </span>
+
+        <span id='label-filter-debuff' 
+            class='label-filter label-filter-debuff' data='debuff'>
+            <span class='bg'></span>
+            <span class='label-name' data='debuff'> Debuff </span>
+        </span>
+
+        <span id='label-filter-heal'
+            class='label-filter label-filter-heal' data='heal'>
+            <span class='bg'></span>
+            <span class='label-name' data='heal'> Heal </span>
+        </span>
+
+        <span id='label-filter-buff'
+            class='label-filter label-filter-buff' data='buff'>
+            <span class='bg'></span>
+            <span class='label-name' data='heal'> Buff </span>
+        </span>
+        <div class='clear'></div>
+    </div>
+
+    <div id='region-create-all-abilities-list' 
+        class='interaction opacity-zero interaction-list'>
+        <!-- abilities filled in here -->
+    </div>
+    <div class='clear'></div>
+
+    <!-- Description -->
+    <div id='create-all-abilities-description' class='animated'>
+    </div>
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-final-data' class='page-left hidden'>
+                <div class='inner'>
+                    <div id='create-final-data-wrapper' class='opacity-zero'>
+    <!-- Data. Will be populated with template HTML-->
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-final-confirm' class='page-right hidden'>
+                <div class='inner'>
+                    <div id='create-book-page-final-confirm' 
+                    class='opacity-zero'>
+                        <h1 style='text-align: center;'>Chapter 1</h1>
+                        <hr />
+                        <br />
+                        And so I embark on my voyage to unexplored lands, 
+                            thus starting my story.
+
+                        <div id='create-book-final-start-button'>
+                            <h2>Begin Journey</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div> <!-- close book wrapper -->
+        
+        <!-- Arrows -->
+        <div id='arrow-right' class='interaction animated'>
+            <div class='arrow animated'></div>
+        </div>
+        <div id='arrow-left' class='interaction animated'>
+            <div class='arrow animated'></div>
+        </div>
+
+    <!-- Selected Abilities -->
+    <div id='create-selected-abilities-wrapper'>
+
+        <h3 id='selected-skills-h3'>Selected Skills</h3>
+        <div id='create-selected-abilities'>
+
+            <div class='create-selected-abilities-item'
+            id='create-selected-abilities-1'> </div>
+            <div class='create-selected-abilities-item'
+            id='create-selected-abilities-2'> </div>
+            <div class='create-selected-abilities-item'
+            id='create-selected-abilities-3'>
+            </div> <div class='create-selected-abilities-item'
+            id='create-selected-abilities-4'> </div>
+
+            <!-- Place outside to avoid weird filter shit -->
+            <span class='selected-hotkey q'>Q</span>
+            <span class='selected-hotkey w'>W</span>
+            <span class='selected-hotkey e'>E</span>
+            <span class='selected-hotkey r'>R</span>
+
+            <div class='clear'></div>
+        </div>
+        <div class='clear'></div>
+    </div>
+
+    </div>
+</div>
+
+        
+    </div>
+
+    
+    <div id='region-dev-tools'></div>
+</div>
+
+<!-- ============================================ 
+    Pages / Underscore templates
+    =============================================== -->
+
+<script id='template-create-race-list-item' type='text/template'>
+    <div class='item <% if(disabled){ %>disabled<% } %>' data-race-cid='<%= cid %>'>
+        <% if(disabled){ %>
+            <img src='/static/img/characters/<%= sprite %>-disabled.gif' class='race-image' height='50' width='50' />
+        <% } else { %>
+            <img src='/static/img/characters/<%= sprite %>.gif' class='race-image' height='50' width='50' />
+        <% } %>
+
+        <span class='race-name'>
+            <% if(disabled){ %>
+                Undiscovered
+            <% } else { %>
+                <%= name %>
+            <% } %>
+        </span>
+    </div>
+</script>
+
+
+<script id='template-create-race-viz' type='text/template'>
+    <% _.each(stats, function(value, key){ %>
+        <div>
+            <%= key %>: <%= value %>
+        </div>
+    <% }); %>
+</script>
+
+
+<!-- TEMPLATE for race info -->
+<script id='template-create-race-description' type='text/template'>
+    <div id='create-race-bonus'>
+        <%= model.attributes.specialDescription %>
+    </div>
+    <div id='create-race-info'>
+        <%= model.attributes.description %>
+    </div>
+</script>
+
+
+<script id='template-create-class-list-item' type='text/template'>
+    <div class='item <% if(disabled){ %>disabled<% } %>' data-template-cid='<%= cid %>'>
+        <% if(disabled){ %>
+            <img src='/static/img/classes/<%= sprite %>-disabled.svg' class='class-image' height='46' width='46' />
+        <% } else { %>
+            <img src='/static/img/classes/<%= sprite %>.svg' class='class-image' height='46' width='46' />
+        <% } %>
+
+        <span class='list-item-name'>
+            <% if(disabled){ %>
+                Undiscovered
+            <% } else { %>
+                <%= name %>
+            <% } %>
+        </span>
+    </div>
+</script>
+
+
+<script id='template-create-class-info' type='text/template'>
+    <h2 class='item-name'>
+        <%= classModel.get('name') %>
+    </h2>
+    <div class='item-description'>
+        <%= classModel.get('description') %>
+    </div>
+</script>
+
+
+<script id='template-create-all-abilities-list-item' type='text/template'>
+    <div class='item <% if(disabled){ %>disabled<% } %>' data-template-cid='<%= cid %>'>
+        <% if(disabled){ %>
+            <img src='/static/img/abilities/disabled.svg' class='ability-icon' height='46' width='46' />
+        <% } else { %>
+            <img src='/static/img/abilities/<%= id %>.svg' class='ability-icon' height='46' width='46' />
+        <% } %>
+
+        <div class='ability-timer-bar'>
+            <!-- HORIZONTAL -->
+            <div class='inner-bar' 
+                style='width: <%= (castTime / data.maxCastTime) * 100 | 0 %>%;'>
+            </div>
+        </div>
+    </div>
+        
+    <% if(!disabled){ %>
+        <div class='ability-list-item-meta-wrapper'>
+            <% if(spellTypes.indexOf('damage') > -1){ %>
+                <!-- <div class='ability-label damage'></div> -->
+            <% } %>
+        </div>
+    <% } %>
+
+    <div class='selected-text q'>Q</div>
+    <div class='selected-text w'>W</div>
+    <div class='selected-text e'>E</div>
+    <div class='selected-text r'>R</div>
+</script>
+
+
+<script id='template-create-abilities-filter-info-damage' type='text/template'>
+    <strong>Damage</strong>: Abilities that decrease an enemy's health
+</script>
+<script id='template-create-abilities-filter-info-debuff' type='text/template'>
+    <strong>Debuff</strong>: Abilities that weaken an enemy, making your opponent easier to defeat
+</script>
+<script id='template-create-abilities-filter-info-heal' type='text/template'>
+    <strong>Heal</strong>: Abilities that restore your own health, kepeing you alive
+</script>
+<script id='template-create-abilities-filter-info-buff' type='text/template'>
+    <strong>Buff</strong>: Abilities that strengthen you, making you harder to kill
+</script>
+
+
+
+<script id='template-create-abilities-item-info' type='text/template'>
+<% if(id !== ''){ %>
+    <div class='header'>
+        <img src='/static/img/abilities/<%= id %>.svg' 
+            class='ability-icon' />
+        <strong><%= name %></strong>
+
+        <div class='cast-time-meta'>
+            Cast Time
+        </div>
+        <div class='cast-time-value'>
+            <%= castTime %>
+        </div>
+        <div class='ability-timer-bar'>
+            <!-- HORIZONTAL -->
+            <div class='inner-bar' 
+                style='width: <%= (castTime / data.maxCastTime) * 100 | 0 %>%;'>
+            </div>
+        </div>
+    </div>
+
+    <div class='description-text'>
+        <%= description %>
+    </div>
+<% } %>
+</script>
+
+
+<script id='template-create-final-data-page' type='text/template'>
+    <h2 id='create-final-data-header'>
+        Prologue
+    </h2>
+
+    <div class='create-final-data-story'>
+    <p>
+        My name was 
+        <span class='interaction-font'><%= name %></span>. I was a
+
+        <%= ["forceful", "mighty", "vigorous", "dominant", "capable"][Math.random() * 5 | 0] %> and powerful 
+
+        <span class='interaction-font'><%= race.attributes.name %></span>.
+    </p>
+
+    <p>
+        <% if(className.toLowerCase() === "custom"){ %>
+            I chose a <span class='interaction-font'>custom</span> path, not fitting a sterotypical mold. I was the template which countless others tried to imitate.
+
+        <% } else if(className.toLowerCase() === "assassin"){ %>
+            Stalking in shadows, stealth my only companion, I was an <span class='interaction-font'><%= className %></span>. The most deadly of them all.
+
+        <% } else if(className.toLowerCase() === "ranger"){ %>
+            An unmatched master of the natural world, I was a <span class='interaction-font'><%= className %></span>.
+            
+        <% } else { %>
+            I followed the path of a <span class='interaction-font'><%= className %></span>. While others shared my skills, I was unique.  
+        <% } %>
+
+    </p>
+
+    <p>
+        <h2>Abilities</h2>
+        From an early age, I was a skill in the art of 
+        <span class='interaction-font'><%= selectedAbilities[0].attributes.name %></span>. 
+        Over time, I trained hard and mastered the art of 
+        <span class='interaction-font'><%= selectedAbilities[1].attributes.name %></span> and 
+        <span class='interaction-font'><%= selectedAbilities[2].attributes.name %></span>.
+
+        The last years I have spent practicing  
+        <span class='interaction-font'><%= selectedAbilities[3].attributes.name %></span>, and compared
+        to me there is truly no equal.
+    </p>
+
+    </div>
+</script>
+
+
+<script id='template-page-home' type='text/template'>
+    <div id='home'>
+
+    <div id='book-wrapper'>
+
+        <!-- Page wrappers for flip library -->
+        <div id='book-pages'>
+            <!-- empty cover page (used as an empty page for flip library) -->
+            <div class='page-cover'></div>
+
+            <!-- Title page -->
+            <div id='book-page-title' class='page-left'>
+                <div class='inner'>
+
+                    <h2>
+    Epitaph
+</h2>
+<hr />
+
+<div class='page-title-description'>
+    <p id='create-title-intro-text' class='p1 opacity-zero'>
+        I am old and tired now, but I was not young when the destruction of Felithport began. The years since then seem more dim and faded than the years of my youth. 
+
+        Now, I wait. Like a gnarled tree, withered and weathered, with nothing to do but decay to the grave.
+    </p>
+
+    <p id='name-input-wrapper' class='p2 opacity-zero'>
+    I was infamous; most people knew me as:
+
+    <input id='create-name' 
+        class='interaction opacity-zero'
+        maxlength=22
+        placeholder=''
+        type='text' 
+        />
+    </p>
+
+</div>
+
+                </div>
+            </div>
+
+            <!-- Race page -->
+            <div id='book-page-race' class='page-right'>
+                <div class='inner'>
+
+                    <div id='create-race-header' class='opacity-zero'>
+    <h2>Race</h2>
+</div>
+
+<div id='create-race-wrapper' class='opacity-zero'>
+    <div class='fade-out-top'></div>
+    <div id='region-create-races' class='interaction'>
+        <!-- Races will go here -->
+    </div>
+    <div class='fade-out-bottom'></div>
+</div>
+
+<div id='home-race-description' class='opacity-zero'>
+    <!-- template content goes here -->
+</div>
+<div id='home-race-visualization' class='opacity-zero'>
+    <!-- viz goes here -->
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-classes' class='page-left hidden'>
+                <div class='inner'>
+                    <div id='create-classes-header'>
+    <h2>Class</h2>
+</div>
+
+<div id='create-classes-wrapper' class='opacity-zero'>
+    <p id='create-classes-description' class='p1 opacity-zero'>
+        There were imitators, but I was the best... 
+    </p>
+
+    <div id='region-create-classes' class='interaction opacity-zero interaction-list'> </div>
+
+    <!-- NOTE: Selected abilities region would normally go here, but a repaint is triggered when mousing over classes and it's janky - so, it's put on a level above in the book-wrapper in page-home-preload.html -->
+
+
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-abilities' class='page-right hidden'>
+                <div class='inner'>
+                    <div id='create-abilities-header' class='opacity-zero'>
+    <!-- Abilities -->
+    <h2>Skills</h2>
+</div>
+
+<div id='create-abilities-wrapper' class='opacity-zero'>
+    <!-- labels / filter -->
+    <div id='create-abilities-filter-wrapper'>
+        <span id='label-filter-damage' 
+            class='label-filter label-filter-damage' data='damage'>
+            <span class='bg'></span>
+            <span class='label-name' data='damage'> Damage </span>
+        </span>
+
+        <span id='label-filter-debuff' 
+            class='label-filter label-filter-debuff' data='debuff'>
+            <span class='bg'></span>
+            <span class='label-name' data='debuff'> Debuff </span>
+        </span>
+
+        <span id='label-filter-heal'
+            class='label-filter label-filter-heal' data='heal'>
+            <span class='bg'></span>
+            <span class='label-name' data='heal'> Heal </span>
+        </span>
+
+        <span id='label-filter-buff'
+            class='label-filter label-filter-buff' data='buff'>
+            <span class='bg'></span>
+            <span class='label-name' data='heal'> Buff </span>
+        </span>
+        <div class='clear'></div>
+    </div>
+
+    <div id='region-create-all-abilities-list' 
+        class='interaction opacity-zero interaction-list'>
+        <!-- abilities filled in here -->
+    </div>
+    <div class='clear'></div>
+
+    <!-- Description -->
+    <div id='create-all-abilities-description' class='animated'>
+    </div>
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-final-data' class='page-left hidden'>
+                <div class='inner'>
+                    <div id='create-final-data-wrapper' class='opacity-zero'>
+    <!-- Data. Will be populated with template HTML-->
+</div>
+
+                </div>
+            </div>
+
+
+            <div id='book-page-final-confirm' class='page-right hidden'>
+                <div class='inner'>
+                    <div id='create-book-page-final-confirm' 
+                    class='opacity-zero'>
+                        <h1 style='text-align: center;'>Chapter 1</h1>
+                        <hr />
+                        <br />
+                        And so I embark on my voyage to unexplored lands, 
+                            thus starting my story.
+
+                        <div id='create-book-final-start-button'>
+                            <h2>Begin Journey</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div> <!-- close book wrapper -->
+        
+        <!-- Arrows -->
+        <div id='arrow-right' class='interaction animated'>
+            <div class='arrow animated'></div>
+        </div>
+        <div id='arrow-left' class='interaction animated'>
+            <div class='arrow animated'></div>
+        </div>
+
+    <!-- Selected Abilities -->
+    <div id='create-selected-abilities-wrapper'>
+
+        <h3 id='selected-skills-h3'>Selected Skills</h3>
+        <div id='create-selected-abilities'>
+
+            <div class='create-selected-abilities-item'
+            id='create-selected-abilities-1'> </div>
+            <div class='create-selected-abilities-item'
+            id='create-selected-abilities-2'> </div>
+            <div class='create-selected-abilities-item'
+            id='create-selected-abilities-3'>
+            </div> <div class='create-selected-abilities-item'
+            id='create-selected-abilities-4'> </div>
+
+            <!-- Place outside to avoid weird filter shit -->
+            <span class='selected-hotkey q'>Q</span>
+            <span class='selected-hotkey w'>W</span>
+            <span class='selected-hotkey e'>E</span>
+            <span class='selected-hotkey r'>R</span>
+
+            <div class='clear'></div>
+        </div>
+        <div class='clear'></div>
+    </div>
+
+    </div>
+</div>
+
+</script>
+
+
+<script id='template-game-battle-ability' type='text/template'>
+    
+    <div class='ability-item'>
+
+        <div class='ability-icon-wrapper'>
+            <img src='/static/img/abilities/<%= id %>.svg' 
+                class='ability-icon2' 
+                height='50' width='50' />
+            <div class='ability-icon-overlay'></div>
+            <canvas height=52 width=52 class='ability-icon-canvas'></canvas>
+        </div>
+
+    </div>
+    <div class='hotkey-title hotkey-<%= ['Q','W','E','R'][index] %>'>
+        <%= ['Q','W','E','R'][index] %>
+    </div>
+</script>
+
+
+<script id='template-game-battle-selected-entity-info' type='text/template'>
+    
+    <div class='entity'>
+        <h4><%= name %></h4>
+    </div>
+    Health: <div class='health-wrapper'></div>
+
+    <div class='health-bar-wrapper'>
+        <div class='health-amount'>80 / 100</div>
+        <div class='health-fill'></div>
+    </div>
+
+    <br />
+    Attack: <%= attributes.get('attack') %> 
+    <br />
+    Armor: <%= attributes.get('armor') %> 
+    <br />
+    Magic Power: <%= attributes.get('magicPower') %> 
+    <br />
+    Magic Resist: <%= attributes.get('magicResist') %> 
+
+    <h4>Active Effects</h4>
+    <div class='active-effecs'>
+        <% _.each(activeEffects, function(effect){ %>
+            <div class='active-effect'>
+                <img src='/static/img/abilities/<%= effect.id %>.svg' class='ability-icon' 
+                    height='46' width='46' />
+                <!--
+                <%= JSON.stringify(effect) %>
+                -->
+            </div>
+        <% }); %>
+    </div>
+
+    
+</script>
+
+<script id='template-game-battle-selected-entity-health' type='text/template'>
+    <%= attributes.get('health') %> / <%= attributes.get('maxHealth') %>
+</script>
+
+<script id='template-game-battle-player-entities' type='text/template'>
+    <div class='members'>
+    </div>
+</script>
+
+<script id='template-game-battle-log' type='text/template'>
+    <div id='battle-log'>
+        <!-- Logs go here -->
+    </div>
+</script>
+
+<script id='template-game-battle-log-health-item' type='text/template'>
+    <div class='log'>
+        
+        <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
+            <%= source.get('name') %>
+        </span>
+
+        uses 
+
+        <span class='ability'> <%= ability.get('name') %> </span>
+
+        on
+
+        
+        <% if( source !== target && healthDifference !== 0){ %>
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } else {  %>
+            themsevles
+        <% } %>
+
+        
+        <% if(healthDifference < 0){ %>
+            <!-- NEGATIVE damage -->
+
+            for
+            <span class='damage'>
+                <%= d3.format(',')(Math.abs(healthDifference)) %>
+            </span>
+            damage 
+
+        <% } else if (healthDifference > 0){ %>
+            <!-- POSITIVE damage (healt) -->
+            
+            for 
+            <span class='heal'>
+                <%= d3.format(',')(healthDifference) %>
+            </span>
+            health
+
+        <% } else if (healthDifference === 0){ %>
+            for <span class='zero'>0</span> health
+        <% } %>
+
+        <div class='date'>
+            <%= (new Date()).toTimeString().split(" ")[0] %>
+        </div>
+    </div>
+</script>
+
+<script id='template-game-battle-log-effect-item' type='text/template'>
+    <div class='log'>
+        
+        <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
+            <%= source.get('name') %>
+        </span><% if(type === 'remove'){ %>'s<% } %>
+
+        <% if(type === 'add'){ %>
+            uses 
+        <% } %>
+
+        <span class='ability'> <%= ability.get('name') %> </span>
+
+        <% if(type === 'add'){ %>
+            on
+        <% } else { %>
+            effect ends on 
+        <% } %>
+
+        
+        <% if( source !== target ){ %>
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } else {  %>
+            themsevles
+        <% } %>
+
+        <!-- date -->
+        <div class='date'>
+            <%= (new Date()).toTimeString().split(" ")[0] %>
+        </div>
+
+    </div>
+</script>
+
+<script id='template-game-battle-log-death-item' type='text/template'>
+    <div class='log'>
+        
+        <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
+            <%= source.get('name') %>
+        </span>
+
+        <% if(isAlive){ %>
+            is brought to life by
+        <% } else { %>
+            kills
+        <% } %>
+
+        
+        <% if( source !== target ){ %>
+            <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
+                <%= target.get('name') %>
+            </span>
+        <% } else {  %>
+            themsevles
+        <% } %>
+
+        <% if(ability){ %>
+            with 
+            <span class='ability'> <%= ability.get('name') %> </span>
+        <% } %>
+
+        <!-- date -->
+        <div class='date'>
+            <%= (new Date()).toTimeString().split(" ")[0] %>
+        </div>
+
+    </div>
+</script>
+
+<script id='template-game-battle-log-item-manual' type='text/template'>
+    <div class='log manual'>
+        <%= message %>
+    </div>
+</script>
+
+
+<script id='template-game-battle-intended-target-info' type='text/template'>
+    
+    <div class='entity'>
+        <h4><%= name %></h4>
+    </div>
+    Health: <%= attributes.get('health') %> / <%= attributes.get('maxHealth') %>
+    <br />
+    Power: <%= attributes.get('power') %> / <%= attributes.get('power') %>
+</script>
+
+
+<script id='template-game-battle' type='text/template'>
+    
+    <div id='battle-left-wrapper'>
+        <div id='battle-left-wrapper-inner'>
+            <!-- Entity info -->
+            <div id='region-battle-player-entities-info'></div>
+        </div>
+    </div>
+
+    
+    <div id='battle-center-wrapper'>
+
+        <!-- Battle scene -->
+        <div id='battle-wrapper'> 
+            <svg id='battle' 
+                viewBox='0 0 1000 500'
+                preserveAspectRation='xMinYMin'
+                xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
+            </svg>
+        </div>
+
+        <!-- Target Box -->
+        <div id='battle-meta-actions-wrapper'>
+
+            <!-- TODO: Make this better... -->
+            <!-- Info Message -->
+            <div id='battle-info-message'> </div>
+
+            <!-- health? / target -->
+            <div id='battle-interaction-target-bar'>
+                <div id='battle-interaction-target-bar-fill'></div>
+                <div id='battle-interaction-target-bar-name'></div>
+            </div>
+
+            <!-- Ability menu -->
+            <div id='region-battle-ability-wrapper'></div>
+        </div>
+
+
+        <!-- Battle log -->
+        <div id='region-battle-log-wrapper'>
+        </div>
+
+    </div>
+
+    
+    <div id='battle-right-wrapper'>
+        <div id='battle-right-wrapper-inner'>
+
+            <!-- Hover Intended Target info -->
+            <div id='region-battle-intended-target-wrapper'></div>
+
+            <div id='battle-meta-options'>
+                <button class='finish-instance btn btn-large'>Finish</button>
+                <br />
+                <button class='btn-pause btn btn-large'>Pause</button>
+                <br />
+
+                
+                State: <span class='state'></span> 
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id='template-game-map' type='text/template'>
+    <svg id='map' style='width:100%; height: 100%;'
+        viewBox='0 0 1000 500'
+        preserveAspectRation='xMinYMin'
+        xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+    >
+    </svg>
+</script>
+
+<script id='template-game-map-party-members' type='text/template'>
+    <div class='inner'>
+        <h3>Party</h3>
+        <div class='members'>
+            <!-- party members html populate here -->
+        </div>
+    </div>
+</script>
+
+<script id='template-game-map-party-member' type='text/template'>
+    <%= name %>
+    (<%= race.attributes.name %> )
+    <img src='/static/img/ui/party-member-divider-h.png' />
+</script>
+
+<script id='template-game-map-entity-info' type='text/template'>
+    <div class='member-inner'>
+        <%= model.attributes.name %> 
+        <br />
+        <%= model.attributes.race.attributes.name %>
+        <br />
+        Kills : <%= model.attributes.kills %>
+        <br />
+        <br />
+
+        <% for(attr in model.attributes.attributes.attributes){ %>
+            <%= attr %> : <%= model.attributes.attributes.attributes[attr] %>
+            <br />
+        <% } %>
+    </div>
+</script>
+
+
+<script id='template-game-container-map' type='text/template'>
+    
+    
+    
+    <div id='region-map-party-members'>
+    </div>
+
+
+    
+    
+    
+    <div id='map-title'>
+        <img src='/static/img/ui/scroll-map.png' />
+    </div>
+
+    
+    
+    
+    <div id='region-map-map'>
+    </div>
+
+    
+    
+    
+    <div id='region-map-entity-info' class='off-screen'>
+    </div>
+
+    
+    
+    
+    <div id='map-actions-wrapper'>
+        Sup
+    </div>
+</script>
+
+
+<script id='template-page-game' type='text/template'>
+    
+    <div id='region-node-instance-wrapper' class='inactive'></div>
+
+    
+    <div id='region-map'></div>
+</script>
+
+
+<svg id='filter-container' width=0 height=0 
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+>
+    <defs>
+        <filter id="filter-darken">
+            <feComponentTransfer>
+                <feFuncR type="linear" slope="1" intercept="0"/>
+                <feFuncG type="linear" slope="1" intercept="0"/>
+                <feFuncB type="linear" slope="1" intercept="0"/>
+            </feComponentTransfer>
+        </filter>
+
+        <filter id="filter-map" x="-0.15000001" y="-0.15000001" width="1.3" height="1.3" color-interpolation-filters="sRGB" >
+            <feGaussianBlur stdDeviation="4" in="SourceGraphic" result="result1" id="feGaussianBlur4202" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="4" result="result0" id="feTurbulence4204" />
+            <feDisplacementMap in2="result0" scale="20" xChannelSelector="R" yChannelSelector="G" in="result1" result="result2" id="feDisplacementMap4206" />
+            <feGaussianBlur stdDeviation="3" in="SourceGraphic" result="result4" id="feGaussianBlur4208" />
+            <feComposite in2="result2" operator="arithmetic" k1="1.5" k2="-0.25" k3="0.5" k4="0" in="result4" result="result5" id="feComposite4210" />
+        </filter>
+
+        <!-- map filter with a little variation -->
+        <filter id="filter-map-more-turbulence" x="-0.15000001" y="-0.15000001" width="1.3" height="1.3" color-interpolation-filters="sRGB" >
+            <feGaussianBlur stdDeviation="4" in="SourceGraphic" result="result1" id="feGaussianBlur4202" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" result="result0" id="feTurbulence4204" />
+            <feDisplacementMap in2="result0" scale="28" xChannelSelector="R" yChannelSelector="G" in="result1" result="result2" id="feDisplacementMap4206" />
+            <feGaussianBlur stdDeviation="3" in="SourceGraphic" result="result4" id="feGaussianBlur4208" />
+            <feComposite in2="result2" operator="arithmetic" k1="1.5" k2="-0.25" k3="0.5" k4="0" in="result4" result="result5" id="feComposite4210" />
+        </filter>
+
+        <filter id="filter-turb" x="-0.15000001" y="-0.15000001" width="1.3" height="1.3" color-interpolation-filters="sRGB"> 
+            <feTurbulence result="result4" seed="0" numOctaves="4" baseFrequency="0.04" type="fractalNoise" id="feTurbulence4068" />
+            <feDisplacementMap in2="result4" scale="10" xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" result="result3" id="feDisplacementMap4070" />
+            <feDiffuseLighting in="result4" result="result1" surfaceScale="2" diffuseConstant="1" lighting-color="#e9e6d7" id="feDiffuseLighting4072">
+                <feDistantLight elevation="40" azimuth="235" id="feDistantLight4074" />
+            </feDiffuseLighting>
+            <feComposite in2="result1" operator="in" in="result3" result="result2" id="feComposite4076" />
+            <feComposite in2="result1" operator="arithmetic" k1="1.7" k2="0" k3="0" k4="0" result="result5" id="feComposite4078" />
+            <feBlend in2="result3" mode="normal" in="result5" id="feBlend4080" /> 
+        </filter>
+
+        <filter id="filter-wavy" color-interpolation-filters="sRGB">
+            <feTurbulence result="result91" baseFrequency="0.04" type="turbulence" seed="0" numOctaves="3" id="feTurbulence5437" />
+            <feDisplacementMap in2="result91" scale="6.6" xChannelSelector="R" yChannelSelector="G" in="SourceGraphic" id="feDisplacementMap5439" />    
+        </filter>
+        <filter id="filter-wavy-ability-icon" color-interpolation-filters="sRGB">
+            <feTurbulence result="resultwl" baseFrequency="0.025" 
+                type="turbulence" seed="0" numOctaves="3" 
+                id="feTurbulencewl" />
+            <feDisplacementMap in2="resultwl" scale="3.6" 
+                xChannelSelector="R" yChannelSelector="G" 
+                in="SourceGraphic" id="feDisplacementMapwl" />
+        </filter>
+
+        <filter id="filter-drop-shadow">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1.2"/>
+            <feOffset dx="2" dy="2" result="offsetblur"/>
+            <feFlood flood-color="rgba(0,0,0,0.9)"/>
+            <feComposite in2="offsetblur" operator="in"/>
+            <feMerge> <feMergeNode/> <feMergeNode in="SourceGraphic"/> </feMerge>
+        </filter>
+
+        <filter id="filter-outline">
+            <feFlood flood-color="#000000" result="base" />
+            <feMorphology result="bigger" in="SourceGraphic" operator="dilate" radius="1"/>
+            <feColorMatrix result="mask" in="bigger" type="matrix"
+            values="0 0 0 0 0
+            0 0 0 0 0
+            0 0 0 0 0
+            0 0 0 1 0" />
+            <feComposite result="drop" in="base" in2="mask" operator="in" />
+            <feBlend in="SourceGraphic" in2="drop" mode="normal" />
+        </filter>
+
+
+        <filter id="filter-outline-blur">
+           <feFlood flood-color="white" result="base" />
+           <feMorphology result="bigger" in="SourceGraphic" operator="dilate" radius="2"/>
+           <feColorMatrix result="mask" in="bigger" type="matrix"
+              values="0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 1 0" />
+           <feComposite result="drop" in="base" in2="mask" operator="in" />
+           <feGaussianBlur result="blur" in="drop" stdDeviation="1" />
+           <feBlend in="SourceGraphic" in2="blur" mode="normal" />
+        </filter> 
+
+
+
+        <filter id="inset-shadow" >
+            <!-- dial up the opacity on the shape fill to "1" to select the full shape-->
+            <feComponentTransfer in="SourceAlpha" result="inset-selection">
+                <feFuncA type="discrete" tableValues="0 1 1 1 1 1"/>
+            </feComponentTransfer>
+
+            <!-- dial down the opacity on the shape fill to "0" to get rid of it -->
+            <feComponentTransfer in="SourceGraphic" result="original-no-fill">
+                <feFuncA type="discrete" tableValues="0 0 1"/>
+            </feComponentTransfer>
+
+            <!-- since you can't use the built in SourceAlpha generate your own -->
+            <feColorMatrix type="matrix" in="original-no-fill" result="new-source-alpha" values="0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 0 0
+                      0 0 0 1 0"
+/>            
+
+            <feGaussianBlur in="new-source-alpha" result="blur" stdDeviation="5" />
+            <feGaussianBlur in="new-source-alpha" result="blur2" stdDeviation="10" />
+            <feGaussianBlur in="new-source-alpha" result="blur3" stdDeviation="15" />
+            <feMerge result="blur">
+                <feMergeNode in="blur" mode="normal"/>
+                <feMergeNode in="blur2" mode="normal"/>
+                <feMergeNode in="blur3" mode="normal"/>
+            </feMerge>
+            <!-- select the portion of the blur that overlaps with your shape -->
+            <feComposite operator="in" in="inset-selection" in2="blur" result="inset-blur"/>
+             <!-- composite the blur on top of the original with the fill removed -->
+            <feComposite operator="over" in="original-no-fill" in2="inset-blur"/>            
+        </filter>
+
+
+        <filter id="filter-burned-edge" x="-0.15000001" y="-0.15000001" width="1.3" height="1.3" color-interpolation-filters="sRGB">
+          <feGaussianBlur stdDeviation="4" in="SourceGraphic" result="result1" id="feGaussianBlur4202" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="4" result="result0" id="feTurbulence4204" />
+          <feDisplacementMap in2="result0" scale="20" xChannelSelector="R" yChannelSelector="G" in="result1" result="result2" id="feDisplacementMap4206" />
+          <feGaussianBlur stdDeviation="3" in="SourceGraphic" result="result4" id="feGaussianBlur4208" />
+          <feComposite in2="result2" operator="arithmetic" k1="1.5" k2="-0.25" k3="0.5" k4="0" in="result4" result="result5" id="feComposite4210" />
+        </filter>
+
+
+
+
+
+
+    </defs>
+</svg>
+
+<svg id='gradient-container' width=0 height=0 
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+>
+
+
+    <linearGradient
+       id="linearGradient5735">
+      <stop
+         id="stop5739"
+         offset="0"
+         style="stop-color:#000000;stop-opacity:0;" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0.24705882;"
+         offset="0.62868899"
+         id="stop5751" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0.49803922;"
+         offset="0.79808617"
+         id="stop5747" />
+      <stop
+         id="stop5737"
+         offset="1"
+         style="stop-color:#000000;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5523"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5525" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5735"
+       id="map-node-gradient"
+       cx="258.94604"
+       cy="154.1674"
+       fx="258.94604"
+       fy="154.1674"
+       r="220.28572"
+       gradientTransform="matrix(-0.01301826,1.1692838,-1.1195888,-0.01246663,429.52345,-74.802063)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+
+
+
+
+
+
+
+    <linearGradient
+       id="linearGradient5735">
+      <stop
+         id="stop5739"
+         offset="0"
+         style="stop-color:#ffff00;stop-opacity:0;" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0.24705882;"
+         offset="0.72288144"
+         id="stop5751" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0.49803922;"
+         offset="0.79822296"
+         id="stop5747" />
+      <stop
+         id="stop5737"
+         offset="1"
+         style="stop-color:#000000;stop-opacity:1;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5523"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5525" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5735"
+       id="radialGradient5743"
+       cx="258.94604"
+       cy="154.1674"
+       fx="258.94604"
+       fy="154.1674"
+       r="220.28572"
+       gradientTransform="matrix(-0.01301826,1.1692838,-1.1195888,-0.01246663,429.52345,-74.802063)"
+       gradientUnits="userSpaceOnUse" />
+
+
+
+
+
+
+
+</svg>
+
+<svg id='svg-sprites-container' width=0 height=0 style="display:none;"
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+>
+
+<!-- preload all sprites. This will load sprites BEFORE the battle loads
+    NOTE: Don't put every sprite here, would be too much to load
+
+    TODO: How to have a single spritesheet in SVG?
+    answer: most likely, clip paths
+-->
+<image xlink:href="/static/img/characters/tiger.gif" />
+<image xlink:href="/static/img/characters/man1.gif" />
+<image xlink:href="/static/img/characters/darkelf.gif" />
+
+</svg>
+
+<svg id='svg-effects-container' width=0 height=0 style="display:none;"
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink"
+>
+
+<!-- SVG icons for spell effects -->
+<!-- TODO: Don't embed sprites here, use an asset loader -->
+<g id='effect-placeHolder' class='effect-magicMissle'>
+    <g>
+        <rect x="0.5" y="0.5" fill="#DC4298" stroke="#D9D8D7" stroke-miterlimit="10" width="55.615" height="27.805"/>
+    </g>
+</g>
+
+<g id='effect-magicMissle' class='effect-magicMissle'>
+    <g transform="matrix(15 0 0 15 -524 -3284)">
+        <path d="M38.641,219.86c0-0.556-0.372-0.927-0.742-0.927c-0.374,0-0.515,0.188-0.869,0.398
+            c-0.367-0.027-0.864-0.029-1.539-0.029c0.401,0.12,0.71,0.217,0.938,0.297c-0.346,0.112-0.815,0.208-1.495,0.261
+            c0.68,0.052,1.149,0.149,1.495,0.261c-0.228,0.08-0.536,0.177-0.938,0.297c0.679,0,1.179-0.002,1.546-0.029
+            c0.35,0.21,0.49,0.398,0.862,0.398C38.269,220.787,38.641,220.416,38.641,219.86L38.641,219.86z M38.271,219.86
+            c0,0.307-0.208,0.558-0.463,0.558c-0.101,0-0.195-0.043-0.272-0.109c0.26-0.078,0.362-0.212,0.362-0.449
+            c0-0.237-0.102-0.371-0.362-0.449c0.076-0.066,0.17-0.109,0.272-0.109C38.064,219.303,38.271,219.553,38.271,219.86z"/>
+    </g>
+</g>
+
+<g id='effect-fireball' class='effect-fireball'>
+    <g transform="matrix(18.68858,0,0,18.68858,4525.84296,-1586.73402)">
+        <path fill="#EE2F25" d="M-239.57,84.846c0.063,0.175,0.056,0.327-0.013,0.549c-0.294-0.221-0.855-0.562-1.246-0.355
+            c0.308,0.081,0.566,0.361,0.629,0.666c-0.46-0.2-1.275-0.023-1.807,0.452c0.512-0.132,1.02-0.119,1.296,0.132
+            c-0.229,0.235-0.405,0.271-0.713,0.237c0.516,0.351,0.928,0.412,1.199,0.26c0.023,0.228-0.142,0.426-0.337,0.573
+            c0.325-0.009,0.774-0.113,1.09-0.3c-0.008,0.151-0.066,0.295-0.181,0.453C-237.866,86.792-237.804,85.761-239.57,84.846
+            L-239.57,84.846z"/>
+        <path fill="#ee8888" d="M-238.983,85.589c0.363,0.033,0.63,0.354,0.597,0.716
+            c-0.033,0.363-0.354,0.63-0.716,0.597c-0.363-0.033-0.63-0.354-0.597-0.716C-239.667,85.823-239.346,85.556-238.983,85.589z"/>
+    </g>
+</g>
+
+<g id='effect-minorHealing' class='effect-minorHealing'>
+    <g transform="matrix(18.68858,0,0,18.68858,-6362.49306,-38782.5841)">
+        <g>
+            <path class='big-heart' fill="#EE3326" d="M342.584,2076.528c-0.106,0.45-0.889,0.576-1.021,0.804c0-0.287-0.594-0.737-0.484-1.207
+                c0.106-0.451,0.683-0.4,0.799,0.032C342.202,2075.832,342.688,2076.084,342.584,2076.528L342.584,2076.528z"/>
+            <path class='small-heart' fill="#F16062" d="M340.456,2075.57c0.054,0.23,0.454,0.294,0.521,0.411c0-0.147,0.303-0.376,0.247-0.616
+                c-0.054-0.23-0.349-0.204-0.408,0.016C340.65,2075.215,340.402,2075.344,340.456,2075.57z"/>
+        </g>
+    </g>
+</g>
+
+<g id='effect-flamelick' class='effect-flamelick'>
+    <path fill="#EF3A24" d="M28.388,0c4.25,6.05-2.917,39.728-11.192,16.945C11.253,38.371,2.846,39.289,2.835,29.378
+        c-8.874,9.83,5.431,27.362,10.829,30.233h6.46c-5.691-4.959-9.516-9.667-10.185-16.852c5.863,1.167,8.906,2.598,10.072-7.69
+        c7.527,10.732,12.511-6.119,17.002-13.276c-0.205,4.997-0.415,11.583,2.832,16.098c1.083,1.504,4.119,1.997,6.784,1.959
+        c-1.229,1.993-5.558,8.598-2.108,11.055c3.451,2.457,4.099-0.047,3.205,2.005c-1.644,2.588-2.85,4.88-7.321,6.701h6.949
+        c7.367-2.32,13.857-11.361,11.725-16.798c-2.729,2.312-5.425,3.83-7.597,3.661c6.088-8.933,4.69-18.083,1.828-27.433
+        c-2.507,8.971-4.15,10.224-6.764,12.334C50.154,22.866,35.958,4.797,28.388,0L28.388,0z"/>
+</g>
+
+<g id='effect-trivialHealing' class='effect-trivialHealing'>
+    <g transform="matrix(18.68858,0,0,18.68858,-6362.49306,-38782.5841)">
+        <g>
+            <path class='big-heart' fill="#EE3326" d="M342.584,2076.528c-0.106,0.45-0.889,0.576-1.021,0.804c0-0.287-0.594-0.737-0.484-1.207
+                c0.106-0.451,0.683-0.4,0.799,0.032C342.202,2075.832,342.688,2076.084,342.584,2076.528L342.584,2076.528z"/>
+            <path class='small-heart' fill="#F16062" d="M340.456,2075.57c0.054,0.23,0.454,0.294,0.521,0.411c0-0.147,0.303-0.376,0.247-0.616
+                c-0.054-0.23-0.349-0.204-0.408,0.016C340.65,2075.215,340.402,2075.344,340.456,2075.57z"/>
+        </g>
+    </g>
+</g>
+</svg>
+
+
+<script id='template-dev-tools' type='text/template'>
+    <!-- admin / dev buttons -->
+    <div class='btn-save btn btn-primary'>Save Game</div>
+    <br />
+    <br />
+    <div class='btn-clear-save btn btn-primary btn-danger'>Clear Save</div>
+</script>
+
+
+
+<!-- ============================================== 
+    Scripts
+    ================================================= -->
+<script>
+    var CONFIG = {
+        // for dev, disbale filters and high quality stuff
+        lowRes: false
+    };
+</script>
+<script src="/static/js/lib/lodash.min.js"></script>
+<script src="/static/js/lib/require-jquery.min.js?q=0.8693031035363674"
+        data-main="/static/build/main"></script>
+
+<!-- ============================================== 
+    THIRD PARTY SCRIPTS 
+    ================================================= -->
+<!-- GA 
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-44968377-1', 'quint.com');
+    ga('send', 'pageview');
+</script>
+-->
+
+<!-- סּ_סּ brought to you by Eriks-MacBook-Pro.local with a bit of hash:fa6236cbf5de977ac1b8ed84f873dc1e79771147 -->
+</body>
+</html>

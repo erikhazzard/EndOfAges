@@ -73,6 +73,9 @@ define(
             this.listenTo(events, 'node:instanceFinished', 
                 this.nodeInstanceFinished);
             
+            // start the game timer
+            this.model.startTimer();
+
             // --------------------------
             // Setup views
             // --------------------------

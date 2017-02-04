@@ -113,10 +113,12 @@ $map-entity-info-width: 500px;
         //filter: url('#filter-drop-shadow-base');
     }
     .destination-path-dotted {
-        fill: #ffffff;
+        // fill: #ffffff;
+        fill: none;
 
         //stroke: #fffb47; // yellow
         stroke: #ffffff;
+        stroke: rgba(255, 255, 255, 0.5);
 
         opacity: 0.6;
         stroke-dasharray: 10px 4px;
@@ -124,7 +126,8 @@ $map-entity-info-width: 500px;
     }
     .destination-path-animated{
         fill: none;
-        stroke: #343434;
-        stroke-width: 5px;
+        stroke: $COLOR-INTERACTION-SELECTED;
+        stroke-opacity: 0.5;
+        stroke-width: 9px;
     }
 }

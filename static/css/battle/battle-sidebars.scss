@@ -19,6 +19,24 @@
         width: $ui-left-side-width;
         z-index: 200;
 
+
+        h1, h2, h3, h4 {
+            color: #a69172;
+            font-size: 1.3em;
+            margin-right: 40px;
+            font-variant: small-caps;
+            text-align: center;
+            text-shadow:
+                0 -1px 0 rgba(255,255,255,0.8),
+                0 -1px 0 rgba(0,0,0,1),
+                1px 0 0 #000000,
+                1px 1px 0 #000000,
+                0 1px 0 #000000,
+                0 2px 0 #232323,
+                0 3px 0 rgba(0,0,0,0.3),
+                0px 0px 2px #232323;
+        }
+
     }
     #battle-left-wrapper-inner {
         position: absolute; bottom: 0; left: 0px; top: 0; right: $battle-ui-border-width;
@@ -76,7 +94,24 @@
         top: 0;
         width: $ui-right-side-width;
 
+        h1, h2, h3, h4 {
+            color: $COLOR-INTERACTION-SELECTED;
+            font-size: 1.3em;
+            margin-left: 0;
+            font-variant: small-caps;
+            text-align: center;
+            text-shadow:
+                0 -1px 0 rgba(255,255,255,0.8),
+                0 -1px 0 rgba(0,0,0,1),
+                1px 0 0 #000000,
+                1px 1px 0 #000000,
+                0 1px 0 #000000,
+                0 2px 0 #232323,
+                0 3px 0 rgba(0,0,0,0.3),
+                0px 0px 2px #232323;
+        }
     }
+
     #battle-right-wrapper-inner {
         position: absolute; bottom: 0; left: $battle-ui-border-width; top: 0; right: 0;
     }
