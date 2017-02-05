@@ -2,7 +2,7 @@
 // Left side entity window
 // --------------------------------------
 #region-map-party-members {
-    background: #808080 url(../../img/ui/combat-ui-left.png);
+    background: #808080 url(../../img/ui/map-ui-left.png);
     border-right: none;
     box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
     bottom: 0;
@@ -10,7 +10,7 @@
     left: 0;
     position: absolute;
     top: 0;
-    width: $party-width;
+    width: 300px;
     z-index: 1000;
 
     .inner {
@@ -18,7 +18,7 @@
         width: 100%;
     }
 
-    h3 {
+    h1,h2, h3 {
         color: #a69172;
         font-size: 1.3em;
         margin-right: 40px;
@@ -35,16 +35,28 @@
             0px 0px 2px #232323;
     }
 
+    .map__entity-name {
+        font-size: 2.1em;
+        margin: 20px 0 30px 0;
+        padding: 0 4px;
+        min-height: 40px;
+        overflow-y: hidden;
+    }
+
     // Members
     .member {
         padding: 0 0 0 4px;
         strong {
             display: inline-block;
             font-size: 0.9em;
-            margin: 4px 10px 0 0;
+            margin: 4px 20px 0 0;
             width: 100px;
         }
     }
     .member:hover {
+    }
+
+    .map__entity-stats-wrapper {
+        padding: 10px 10px 10px 30px;
     }
 }

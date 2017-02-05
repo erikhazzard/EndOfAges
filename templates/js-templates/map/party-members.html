@@ -8,9 +8,9 @@
 
 <script id='template-game-map-party-member' type='text/template'>
     <div>
-        <h1 class='map__entity-name'><%= name %></h1>
+        <h3 class='map__entity-name'><%= name %></h3>
     </div>
-    <div>
+    <div class='map__entity-stats-wrapper'>
         <strong>Kills</strong> <%= model.attributes.kills %>
         <br />
         <strong>Race</strong> <%= model.attributes.race.attributes.name %> 

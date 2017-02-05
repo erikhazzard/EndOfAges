@@ -24,7 +24,7 @@
     Magic Resist: <%= attributes.get('magicResist') %> 
 
     <h4>Active Effects</h4>
-    <div class='active-effecs'>
+    <div class='active-effecs player-entity__active-effects'>
         <% _.each(activeEffects, function(effect){ %>
             <div class='active-effect'>
                 <img src='/static/img/abilities/<%= effect.id %>.svg' class='ability-icon' 

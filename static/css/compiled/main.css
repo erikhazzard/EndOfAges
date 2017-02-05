@@ -63,7 +63,7 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   left: 0; }
 
 #region-map-party-members {
-  background: #808080 url(../../img/ui/combat-ui-left.png);
+  background: #808080 url(../../img/ui/map-ui-left.png);
   border-right: none;
   box-shadow: 1px 0 0 #070707, 4px 0 12px #101010;
   bottom: 0;
@@ -71,25 +71,33 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   left: 0;
   position: absolute;
   top: 0;
-  width: 200px;
+  width: 300px;
   z-index: 1000; }
   #region-map-party-members .inner {
     padding-right: 25px;
     width: 100%; }
-  #region-map-party-members h3 {
+  #region-map-party-members h1, #region-map-party-members h2, #region-map-party-members h3 {
     color: #a69172;
     font-size: 1.3em;
     margin-right: 40px;
     font-variant: small-caps;
     text-align: center;
     text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 #000000, 1px 1px 0 #000000, 0 1px 0 #000000, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
+  #region-map-party-members .map__entity-name {
+    font-size: 2.1em;
+    margin: 20px 0 30px 0;
+    padding: 0 4px;
+    min-height: 40px;
+    overflow-y: hidden; }
   #region-map-party-members .member {
     padding: 0 0 0 4px; }
     #region-map-party-members .member strong {
       display: inline-block;
       font-size: 0.9em;
-      margin: 4px 10px 0 0;
+      margin: 4px 20px 0 0;
       width: 100px; }
+  #region-map-party-members .map__entity-stats-wrapper {
+    padding: 10px 10px 10px 30px; }
 
 #region-map-entity-info.off-screen {
   -webkit-transform: translate(-300px, 0);
@@ -174,7 +182,7 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
 
 #map-wrapper {
   bottom: 0;
-  left: 200px;
+  left: 300px;
   position: absolute;
   right: 0;
   top: 0; }
@@ -595,7 +603,6 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   user-drag: none;
   -moz-user-select: none;
   -webkit-user-drag: none;
-  /*
   background: #808080 url(../../img/ui/combat-ui-left.png);
   bottom: 0;
   border-right: none;
@@ -604,9 +611,8 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   left: 0;
   position: absolute;
   top: 0;
-  width: $ui-left-side-width;
-  z-index: 200;
-  */ }
+  width: 200px;
+  z-index: 200; }
   .game-battle-wrapper #battle-left-wrapper h1, .game-battle-wrapper #battle-left-wrapper h2, .game-battle-wrapper #battle-left-wrapper h3, .game-battle-wrapper #battle-left-wrapper h4, .game-battle-wrapper #battle-left-wrapper h5 {
     color: #a69172;
     font-size: 1.3em;
