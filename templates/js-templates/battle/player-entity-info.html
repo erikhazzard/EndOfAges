@@ -1,10 +1,6 @@
 {{// Entity Info }}
 <script id='template-game-battle-selected-entity-info' type='text/template'>
     {{// This template shows the abilities for the currently selected entity }}
-    <div class='entity entity-name'>
-        <h1 class='battle__entity-name'><%= name %></h1>
-    </div>
-    <h5 class='entity-header__health'>Health</h5> 
     <div class='health-wrapper'></div>
 
     <div class='health-bar-wrapper'>
@@ -14,24 +10,12 @@
         </div>
     </div>
 
-    <br />
-    Attack: <%= attributes.get('attack') %> 
-    <br />
-    Armor: <%= attributes.get('armor') %> 
-    <br />
-    Magic Power: <%= attributes.get('magicPower') %> 
-    <br />
-    Magic Resist: <%= attributes.get('magicResist') %> 
-
-    <h4>Active Effects</h4>
     <div class='active-effecs player-entity__active-effects'>
         <% _.each(activeEffects, function(effect){ %>
             <div class='active-effect'>
                 <img src='/static/img/abilities/<%= effect.id %>.svg' class='ability-icon' 
-                    height='46' width='46' />
-                <!--
-                <%= JSON.stringify(effect) %>
-                -->
+                    data-effect='<%= JSON.stringify(effect) %>'
+                    height='36' width='36' />
             </div>
         <% }); %>
     </div>

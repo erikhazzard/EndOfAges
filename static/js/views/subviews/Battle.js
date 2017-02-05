@@ -23,11 +23,11 @@
 //
 //      Battles happen between the game player and a single enemy. Each player
 //      has a party (a collection of entities). The player's entities are
-//      managed in the Game model object's 'playerEntities' property (a 
+//      managed in the Game model object's 'playerEntities' property (a
 //      collection of entity models)
 //
 // Win condition:
-//      When all enemy entities are dead. 
+//      When all enemy entities are dead.
 //      Anytime an entity dies, the entity:died event is triggered. When all
 //      entities in a group die, the 'entityGroup:defeated' event is triggered
 //      (from the entity group collection), passing in the group
@@ -63,7 +63,7 @@
 //
 // ===========================================================================
 define(
-    [ 
+    [
         'd3', 'backbone', 'marionette', 'logger', 'events',
         'util/Timer',
         'views/subviews/battle/AbilityList',
@@ -86,8 +86,8 @@ define(
 
     function shakeBattle(intensity) {
         // Helper function to  shake the battle element
-        //  Takes in: 
-        //      intensity: {Number} shake intensity, amount of pixels to shake 
+        //  Takes in:
+        //      intensity: {Number} shake intensity, amount of pixels to shake
         //          the svg.  Around 200 would be a good upper limit
         intensity = intensity || 40;
         var duration = 45;
@@ -149,9 +149,9 @@ define(
             options = options || {};
             this.gameModel = options.gameModel;
 
-            logger.log('views:subViews:Battle', 
-                '1. initialize() called. Model: %O : Game Model: %O', 
-                this.model, this.gameModel); 
+            logger.log('views:subViews:Battle',
+                '1. initialize() called. Model: %O : Game Model: %O',
+                this.model, this.gameModel);
 
             // keep track of the selected entity and the current target
             this.selectedEntityIndex = undefined;
@@ -164,7 +164,7 @@ define(
 
             // target should reset whenever entity changes
             //  should be able to select own entities with 1 - n keys,
-            //      target with shift + n 
+            //      target with shift + n
             //  if target is null when an ability is attempted to be used,
             //      user must select a target for the ability
             this.selectedTarget = undefined;
@@ -221,7 +221,7 @@ define(
             // Handle ability usage
             // --------------------------
             this.listenTo(events, 'ability:activated', this.handleAbilityActivated);
-        
+
             // handle state changes
             this.listenTo(this.model, 'change:state', this.stateChange);
             this.listenTo(this.model, 'change:selectedAbility', this.selectedAbilityChange);
@@ -236,13 +236,13 @@ define(
             };
             $(window).on('mousewheel', this.handleMouseWheelProxy);
 
-            // Timer / Game loop 
+            // Timer / Game loop
             // --------------------------
             // used to pause or cancel timer
             this.isTimerActive = false;
 
             // NOTE: death listeners are setup in onShow
-            
+
             // ==========================
             // Window focus events
             // ==========================
@@ -325,7 +325,7 @@ define(
             _.each(['player', 'enemy'], function eachModelSetup(group){
                 // For each model, listen for an individual death
                 var collection = self.model.get(group + 'Entities');
-                
+
                 _.each(collection.models, function deathListener(model){
                     self.listenTo( model, 'entity:died', self.entityDied);
                 });
@@ -334,7 +334,7 @@ define(
                 // (this is either a win or lose state)
                 self.listenTo(
                     collection,
-                    'entityGroup:defeated', 
+                    'entityGroup:defeated',
                     self[group + 'GroupDied']);
             });
         },
@@ -353,7 +353,7 @@ define(
             // Note: This is called as one of the last actions in the onShow()
             // method
             var self = this,
-                
+
                 timerNow = null,
                 timerDt = 0,
                 timerLast = (window.performance && window.performance.now ? window.performance.now() : new Date().getTime()),
@@ -453,7 +453,7 @@ define(
                         }
 
                         if(entityGroup === 'player'){
-                            // PLAYER 
+                            // PLAYER
                             // ----------
                             // check abilities use timers for UI
                             // - Selected Entity - UI
@@ -466,7 +466,7 @@ define(
 
                             // TODO:
                             // If auto attack is enabled, let AI decide behavior
-                            
+
                         } else {
                             // ENEMY
                             // ----------
@@ -493,13 +493,13 @@ define(
 
         // ------------------------------
         //
-        // PAUSE 
+        // PAUSE
         //
         // ------------------------------
         togglePause: function pause(options){
             // This pauses all timers and animations, effectively pausing
             // the battle. When the battle is paused, abilities cannot be
-            // used. 
+            // used.
             //
             // Players may select an entity and mouse over to target entities
             //
@@ -525,7 +525,7 @@ define(
         _pause: function _pause(){
             // PAUSE
             // ----------------------
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 '1. togglePause(): PAUSING');
 
             // Show pause message
@@ -542,7 +542,7 @@ define(
                 state: 'pause',
                 previousState: this.model.get('previousState')
             });
-            
+
             // pause animations
             d3.selectAll('#battle .timer-bar').transition().duration(0);
 
@@ -559,7 +559,7 @@ define(
             // Called to pause the game state and animations
             //
             var self = this;
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 '1. togglePause(): UNPAUSING');
 
             // resume all timers
@@ -593,12 +593,12 @@ define(
                 // Otherwise, resume the timer
                 var val = self[entityGroup + 'EntityTimers'][index];
 
-                var duration = ( 
+                var duration = (
                     (targetModel.attributes.attributes.attributes.timerLimit - val) /
                     (targetModel.attributes.attributes.attributes.timerFactor)
                 ) * 1000;
 
-                $el.transition().ease('linear') 
+                $el.transition().ease('linear')
                     .duration( duration )
                     .attr({
                         'data-duration': duration,
@@ -620,10 +620,10 @@ define(
         // ==============================
         selectedAbilityChange: function selectedAbilityChange(model, ability){
             // When the player's selected ability changes, change the SVG wrapper
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 '1. abilityChange(): ability changed to %O', ability);
             var type = '';
-            var validTargets = ''; 
+            var validTargets = '';
 
             if(ability){
                 // TODO: more damage types? DOTs?
@@ -632,7 +632,7 @@ define(
 
                 // get valid targets
                 validTargets = ability.get('validTargets');
-                if(validTargets.join){ 
+                if(validTargets.join){
                     validTargets = validTargets.join(' selected-ability-');
                 }
                 validTargets = 'selected-ability-' + validTargets;
@@ -653,7 +653,7 @@ define(
         stateChange: function stateChange(model,state){
             // Called when the model state changes
             var self = this;
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 '1. stateChange(): model state changed to: ' + state);
 
             // remove all classes
@@ -669,11 +669,11 @@ define(
             if(state === 'normal'){
                 // From ability to normal
                 this.$wrapper.classed('state-normal', true);
-                
+
             } else if (state === 'ability'){
                 // From ability to normal
                 this.$wrapper.classed('state-ability', true);
-                
+
                 // ----------------------
                 // change the indicator keys based on selected ability
                 // ----------------------
@@ -713,15 +713,15 @@ define(
             //
             // NOTE: This is only triggered by a player
             //
-            // parameters: 
+            // parameters:
             //  options: {Object} with keys:
             //      ability: {Object} ability object
             //      //TODO: Rename to activateCallback or something
-            //      useCallback: {Object} callback to call after using an 
+            //      useCallback: {Object} callback to call after using an
             //      ability
             //
             // When an ability is activated:
-            //  1. check if ability can be used (check entity timer with passed 
+            //  1. check if ability can be used (check entity timer with passed
             //  entity)
             //  2. switch ability state
             //
@@ -842,7 +842,7 @@ define(
         //
         // ==============================
         handleKeyUpdateTarget: function handleKeyUpdateTarget(options){
-            // This function selects an entity based on a keypress. 
+            // This function selects an entity based on a keypress.
             // j / k and up / down select next or previous entity the
             // player controls, as does the 1 - 4 keys
             //
@@ -853,7 +853,7 @@ define(
             //
             // TODO: Handle changing the selected entity
             var self = this;
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 'handleKeyUpdateTarget() called : %O', options);
 
             // disable page scrolling with up / down arrow key
@@ -867,7 +867,7 @@ define(
             // using 1 - n, shift + 1 - n, and clicking / selecting an entity
             if(this.model.get('state') === 'ability' &&
                 key.match(/[0-9]+/) === null){
-                logger.log('views:subViews:Battle', 
+                logger.log('views:subViews:Battle',
                     '\t [x] in ability mode and a key other than 1 - n or shift + 1 -n was pressed');
                 return false;
             }
@@ -886,8 +886,8 @@ define(
                 targetGroup = this.selectedEntity.attributes.desiredTarget.group;
             }
 
-            logger.log('views:subViews:Battle', 
-                '\t selectedEntity : %O ( %O ) | targetIndex : %O | targetGroup : %O', 
+            logger.log('views:subViews:Battle',
+                '\t selectedEntity : %O ( %O ) | targetIndex : %O | targetGroup : %O',
                 this.selectedEntity,
                 this.selectedEntity.attributes.desiredTarget,
                 targetIndex, targetGroup);
@@ -901,13 +901,13 @@ define(
             // reverse up down - down key should go down the entity list
             if(key === 'up' || key === 'k'){ targetIndex -= 1; }
             else if (key === 'down' || key === 'j'){ targetIndex += 1; }
-            else if(key.match(/^shift\+[0-9]+/)){ 
+            else if(key.match(/^shift\+[0-9]+/)){
                 // Key shift + 1 -n
                 // ----------------------
                 // set the key being pressed to the number
                 targetIndex = +(key.replace('shift+', '')) - 1;
 
-                // If the keys are number keys, select the specific entity 
+                // If the keys are number keys, select the specific entity
                 // for the player
                 // TODO: Have shift + n target alternate (i.e., whatever
                 // the secondary target is)
@@ -916,7 +916,7 @@ define(
                 }
             }
             else if(key.match(/[0-9]+/)){
-                // Key 1 - n 
+                // Key 1 - n
                 // ----------------------
                 // set the key being pressed to the number
 
@@ -930,11 +930,11 @@ define(
                     // the player entities
                     if(abilityTargets && abilityTargets[0] === 'enemy'){
                         targetGroup = 'enemy';
-                    } 
-                } else { 
+                    }
+                } else {
                     // when the user is not in ability mode, do nothing when
                     // 1 - n key is pressed
-                    logger.log('views:subViews:Battle', 
+                    logger.log('views:subViews:Battle',
                         '\t [x] 1-n key pressed not in ability mode, returning');
                     return false;
                 }
@@ -956,7 +956,7 @@ define(
                 //} else if( targetIndex < 0) {
                     //targetIndex = 0;
                 //}
-                
+
                 // do not loop around
                 if(targetIndex >= modelsLength){
                     targetIndex = modelsLength-1;
@@ -1105,7 +1105,7 @@ define(
             // When the mousewheel is scrolled, determine if it's up or down,
             // then select the player's entity above or below the current one
             // stop scrolling on the page
-            if(!this.$battleWrapper.is(':hover')){ 
+            if(!this.$battleWrapper.is(':hover')){
                 return false;
             }
 
@@ -1127,7 +1127,7 @@ define(
         // ------------------------------
         cancelTarget: function cancelTarget(){
             // removes any selected targets, return to default state
-            logger.log('views:subViews:Battle', 
+            logger.log('views:subViews:Battle',
                 'cancelTarget() called, changing state');
 
             // clear out selected ability
@@ -1136,11 +1136,11 @@ define(
             // cancel ability usage
             events.trigger('ability:cancel');
 
-            if(this.selectedEntity && 
+            if(this.selectedEntity &&
             this.selectedEntity.attributes.desiredTarget){
                 // update the selected entity's target
                 this.selectedEntity.set({ desiredTarget: null }, {silent: true});
-                this.selectedEntity.trigger('change:desiredTarget', 
+                this.selectedEntity.trigger('change:desiredTarget',
                     this.selectedEntity, null);
             }
 
@@ -1171,7 +1171,7 @@ define(
             this.regionBattleLog.show(this.battleLogView);
 
             this.$battleWrapper = $('#battle-wrapper');
-            
+
             // Setup svg
             var svg = d3.select('#battle');
             this.$svg = svg;
@@ -1239,12 +1239,12 @@ define(
 
             // damage / heal effect flash
             this.$healthEffectBlocker = wrapper.append('rect')
-                .attr({ 'class': 'health-blocker', x: 0, y: 0, 
+                .attr({ 'class': 'health-blocker', x: 0, y: 0,
                     width: '100%', height: '100%' })
                 .style({ fill: 'none', opacity: 0 });
 
             this.$deathEffectBlocker = wrapper.append('rect')
-                .attr({ 'class': 'health-blocker', x: 0, y: 0, 
+                .attr({ 'class': 'health-blocker', x: 0, y: 0,
                     width: '100%', height: '100%' })
                 .style({ fill: 'none', opacity: 0 });
 
@@ -1287,13 +1287,13 @@ define(
             function drawEntities(entityGroup){
                 // This function is called to draw entities for a passed in
                 // entity group {String} ( either 'player' or 'enemy')
-                // The main difference between the two functions is the 
+                // The main difference between the two functions is the
                 // placement and model setup of the entities in each group
 
-                
+
                 // Setup the wrapper group
                 // ----------------------
-                // Whenever interaction happens with it, select or hover the 
+                // Whenever interaction happens with it, select or hover the
                 // entity
                 function entityClickedInteraction(d,i){
                     return self.selectEntity({index: i, entityGroup: entityGroup});
@@ -1306,7 +1306,7 @@ define(
                     entityGroup].selectAll('.entity-group')
                         .data(self.model.get(entityGroup + 'Entities').models)
                         .enter().append('g')
-                            .attr({ 
+                            .attr({
                                 'class': 'entity-group-wrapper ' + entityGroup,
 
                                 // transform the entire group to set the entity position
@@ -1314,10 +1314,10 @@ define(
 
                                     // position entiy wrapper
                                     // TODO: place near edge of map, don't
-                                    // hardcode 740 
+                                    // hardcode 740
                                     // if enemy entities, place near edge of map
                                     var entityGroupX = (entityGroup === 'player' ? 40 : 740);
-                                    var entityGroupY = 40 + 
+                                    var entityGroupY = 40 +
                                         (i * (entityHeight + entityHeight ));
 
                                     // Give it a little randomness
@@ -1329,25 +1329,25 @@ define(
                                     if(entityGroup === 'enemy' && i >= numEntitiesPerRow){
                                         entityGroupX -= ( 100 * Math.floor(((i+1)-0.001)/numEntitiesPerRow));
 
-                                        entityGroupY = 40 + 
+                                        entityGroupY = 40 +
                                             ( i % numEntitiesPerRow ) *
                                             (entityHeight + entityHeight );
                                     }
-                                    
+
                                     return "translate(" + [
-                                        entityGroupX, 
+                                        entityGroupX,
                                         entityGroupY
                                     ] + ")";
                                 }
                             })
                             .on('click', entityClickedInteraction)
                             .on('touchstart', entityClickedInteraction)
-                            .on('mouseenter',function entityMouseEnter(d,i){ 
+                            .on('mouseenter',function entityMouseEnter(d,i){
                                 // TODO: fix this when ability changes
                                 d3.select(this).classed('entity-hover', true);
                                 return self.entityHoverStart({index: i, entityGroup: entityGroup});
                             })
-                            .on('mouseleave',function entityMouseLeave(d,i){ 
+                            .on('mouseleave',function entityMouseLeave(d,i){
                                 d3.select(this).classed('entity-hover', false);
 
                                 return self.entityHoverEnd({index:i, entityGroup: entityGroup});
@@ -1361,7 +1361,7 @@ define(
                     .attr({
                         'class': 'entity-interaction-rect',
                         opacity: 0,
-                        x: (entityGroup === 'player') ? entityWidth/4 : -entityWidth, 
+                        x: (entityGroup === 'player') ? entityWidth/4 : -entityWidth,
                         y: -15,
                         width: entityWidth + 150,
                         height: entityHeight + 25
@@ -1386,8 +1386,8 @@ define(
                     });
 
                 // append interaction / UI circle (for flashing on invalid target, etc.)
-                // NOTE: This is a copy of the targetting rect, essentially. 
-                // Used to flash without modifying the target ellipse 
+                // NOTE: This is a copy of the targetting rect, essentially.
+                // Used to flash without modifying the target ellipse
                 groups.append('ellipse')
                     .attr({
                         'class': 'entity-bg-selection',
@@ -1397,7 +1397,7 @@ define(
                         ry: 15,
                         rx: entityWidth/1.5
                     }).style({ opacity: 0, 'fill-opacity': 0 });
-        
+
                 // --------------------------
                 // PLAYER SPRITE / image
                 // --------------------------
@@ -1416,9 +1416,9 @@ define(
                             return transform;
                         },
                         'xlink:href': function(d, i){
-                            return "/static/img/characters/" + 
+                            return "/static/img/characters/" +
                                 d.attributes.sprite + '.gif';
-                        }, 
+                        },
                         height: entityHeight,
                         width: entityWidth
                     });
@@ -1428,7 +1428,7 @@ define(
                 // ----------------------
                 // Draw bars
                 var healthGroups = groups.append('g')
-                    .attr({ 
+                    .attr({
                         'class': 'battle-entity-health ' + entityGroup,
                         'transform': 'translate(0, -10)'
                     });
@@ -1443,7 +1443,7 @@ define(
                         width: entityWidth,
                         height: healthBarHeight
                     });
-        
+
                 // actual health bar that updates
                 healthGroups.append('rect')
                     .attr({
@@ -1463,9 +1463,9 @@ define(
                                 .domain([0, maxHealth])
                                 .range([0, entityWidth])
                                 .clamp(true);
-                    
+
                             // when health changes, update width of health bar
-                            self.listenTo(model.get('attributes'), 
+                            self.listenTo(model.get('attributes'),
                                 'change:health',
                                 function updateHealth(returnedModel, health, changeOptions){
                                     // called when health updates
@@ -1488,14 +1488,14 @@ define(
                             // set current width based on model health
                             return healthScale(health);
                         }
-                    }); 
+                    });
 
                 // ----------------------
                 // timer bar group
                 // ----------------------
                 //  draw a group for each bar (frame + bar)
                 var timerGroup = groups
-                    .append('g').attr({ 
+                    .append('g').attr({
                         'class': 'entity-timer ' + entityGroup,
                         transform: 'translate(' + [0, entityHeight + 5] + ')'
                     });
@@ -1509,7 +1509,7 @@ define(
                         width: entityWidth,
                         height: 10
                     });
-        
+
                 // actual timer bar that updates
                 self[entityGroup + 'TimerBars'] = timerGroup.append('rect')
                     .attr({
@@ -1518,7 +1518,7 @@ define(
                         y: 0,
                         width: 0,
                         height: 10
-                    }); 
+                    });
 
                 // selection key
                 // ----------------------
@@ -1589,7 +1589,7 @@ define(
 
             // ==========================
             //
-            // Game Loop 
+            // Game Loop
             //
             // ==========================
             // Kick off the timer
@@ -1612,13 +1612,13 @@ define(
             var i = 0;
             var models = this.model.get('playerEntities').models;
             while(i < models.length){
-                if(models[i].get('isAlive')){ 
+                if(models[i].get('isAlive')){
                     firstAliveEntity = i;
                     break;
                 }
                 i++;
             }
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 "selected first living entity: index: " + i);
 
             // select first living player
@@ -1633,8 +1633,8 @@ define(
                     // show damage text whenever entitiy's health changes
                     // ----------------------
                     self.listenTo(
-                        model.get('attributes'), 
-                        'change:health', 
+                        model.get('attributes'),
+                        'change:health',
                         // model changes get passed in the model and the
                         // changed attribute value
                         function callShowText(attrModel, health, changeOptions){
@@ -1653,7 +1653,7 @@ define(
 
                     self.listenTo(
                         model,
-                        'change:activeEffects', 
+                        'change:activeEffects',
                         // model changes get passed in the model and the
                         // changed attribute value
                         function callUpdateEffects(entityModel, effects, changeOptions){
@@ -1685,7 +1685,7 @@ define(
         //
         // ------------------------------
         showEffectOnActiveEffectChange: function showEffectOnActiveEffectChange(options){
-            logger.log("views:subViews:Battle:showEffectOnActiveEffectChange", 
+            logger.log("views:subViews:Battle:showEffectOnActiveEffectChange",
             "called %o", options);
             var self = this;
 
@@ -1695,15 +1695,15 @@ define(
                 entityGroup: options.entityGroup
             });
 
-            // Wiggle 
+            // Wiggle
             if(options.entityModel.attributes.isAlive){
                 // reset transition
                 d3.select(this[options.entityGroup + 'EntitySprites'][0][options.index])
                     .interrupt().transition('shakeY');
 
-                // initiate the wiggle 
+                // initiate the wiggle
                 requestAnimationFrame(function(){
-                    // initiate the wiggle 
+                    // initiate the wiggle
                     d3.select(self[options.entityGroup + 'EntitySprites'][0][options.index])
                         .attr({
                             // wiggle the entity left / right or up / down depending
@@ -1734,9 +1734,9 @@ define(
             // options:
             //      model: {Object} the `attributes` model of the entity model
             options = options || {};
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 "1. showEffectOnHealthChange() : options: %O",
-                options); 
+                options);
 
             var self = this;
             var model = options.model; // attribute model (health / stats / etc)
@@ -1748,7 +1748,7 @@ define(
             var shakeScale = d3.scale.linear()
                 .domain([ 0, entityModel.get('attributes').get('maxHealth')])
                 .range([ 3, 24 ]);
-                        
+
 
             // shake the battle container
             // --------------------------
@@ -1768,7 +1768,7 @@ define(
             var opacity = '';
 
             if(entityGroup === 'player'){
-                if(difference < 0){ 
+                if(difference < 0){
                     // If damage is done, flash the screen red
                     fill = '#dd0000';
                     opacity = d3.scale.linear()
@@ -1776,7 +1776,7 @@ define(
                         .range([ 0.2, 0.9 ])
                         (difference);
 
-                } else { 
+                } else {
                     // if entity is healed, flash the screen green
                     fill = '#22dd22';
                     opacity = d3.scale.linear()
@@ -1784,7 +1784,7 @@ define(
                         .range([ 0.1, 0.8 ])
                         (difference);
                 }
-                
+
                 // do the flash
                 this.$healthEffectBlocker.transition('healthFlash').ease('elastic')
                     .style({ fill: fill, opacity: opacity })
@@ -1794,7 +1794,7 @@ define(
             }
 
             // --------------------------
-            // Wiggle 
+            // Wiggle
             // --------------------------
             // Do a wiggle event on the entity
             var intensityDamageScale = d3.scale.linear()
@@ -1809,7 +1809,7 @@ define(
                 d3.select(self[entityGroup + 'EntitySprites'][0][index])
                     .interrupt().transition('shakeX');
 
-                // initiate the wiggle 
+                // initiate the wiggle
                 requestAnimationFrame(function(){
                     d3.select(self[entityGroup + 'EntitySprites'][0][index])
                         .attr({
@@ -1861,7 +1861,7 @@ define(
             $damageText.classed(dmgClass, true);
 
             $damageText
-                .attr({ 
+                .attr({
                     y: self.entityHeight - 10,
                     opacity: 0.3
                 })
@@ -1870,21 +1870,21 @@ define(
 
             // then, fade in text and float it up and out
             $damageText.transition().ease('cubic-in').duration(160)
-                    .attr({ 
-                        y: -15, 
+                    .attr({
+                        y: -15,
                         x: textX < 0 ? textX - 20 : textX + 20,
                         opacity: 1
                     })
                     // reached the apex
                     .transition().ease('cubic-out').duration(420)
-                        .attr({  
-                            y: 0, 
+                        .attr({
+                            y: 0,
                             x: textX < 0 ? textX - 50 : textX + 50,
                             opacity: 1
                         })
                         .transition().ease('cubic-in').duration(270)
                             .attr({
-                                y: 40, 
+                                y: 40,
                                 'font-size': 0,
                                 opacity: 0
                             })
@@ -1900,14 +1900,14 @@ define(
         //
         // =====================================================================
         startTimerAnimation: function startTimerAnimation(options){
-            // Starts (or restarts) the timer animation, transitioning the 
+            // Starts (or restarts) the timer animation, transitioning the
             // bar's width to width of the entity scale. This happens to
             // all timer bars on a per entity level
             //
             // Options: {Object}
             //  index: {Number} index of entity
             //  entityGroup: {String} 'player' or 'enemy'
-            //  value: {Number} Value to start the count at (must be calculated 
+            //  value: {Number} Value to start the count at (must be calculated
             //      by caller based on the ability value and value left in timer
             //      If NOT passed in, will restart the animation. Useful for
             //      time based effects, like stuns
@@ -1937,8 +1937,8 @@ define(
             var models = this.model.get(options.entityGroup + 'Entities').models;
             var targetModel = models[options.index];
 
-            if(!targetModel.get('isAlive')){ 
-                logger.log("views:subViews:Battle", 
+            if(!targetModel.get('isAlive')){
+                logger.log("views:subViews:Battle",
                     "2. target model is not alive, not starting animation");
                 return false;
             }
@@ -1957,7 +1957,7 @@ define(
             d3sel.transition()
                 .ease('linear')
                 .duration(0)
-                .attr({ 
+                .attr({
                     // starting bar width based on value
                     width: startWidth,
                     'data-time': 0,
@@ -1967,15 +1967,15 @@ define(
                     // 2. After bar is reset, transition to specified width
                     // must divide by the timerFactor
                     var duration = (
-                        (targetModel.attributes.attributes.attributes.timerLimit - timeValue) / 
+                        (targetModel.attributes.attributes.attributes.timerLimit - timeValue) /
                         targetModel.attributes.attributes.attributes.timerFactor) * 1000;
 
                     // keep track of duration and end width for pausing
                     // we multiply data-time by data-duration to get the
                     // time left
-                    d3sel.attr({ 
+                    d3sel.attr({
                         'data-duration': duration,
-                        'data-endWidth': endWidth 
+                        'data-endWidth': endWidth
                     });
 
                     // transition the bar width to the end of the range
@@ -1983,7 +1983,7 @@ define(
                     d3sel.transition()
                         .ease('linear')
                         .duration( duration )
-                        .attr({ 
+                        .attr({
                             width: endWidth,
                             'data-time': 1
                         });
@@ -1995,7 +1995,7 @@ define(
         highlightValidEntityTargetRing: function highlightValidEntityTargetRing( ability ){
             // Takes in an ability and highlights the valid targets
             //
-            if(!ability){ 
+            if(!ability){
                 logger.log('battle:highlightValidEntityTargetRing',
                     'no ability passed in');
                 return false;
@@ -2020,7 +2020,7 @@ define(
 
         showBattleInfoMessage: function showBattleInfoMessage( message, ability ){
             // Adds a message to the info wrapper and show its then hides it
-            // Takes in a target message and an ability model 
+            // Takes in a target message and an ability model
             this.$battleInfoMessage = this.$battleInfoMessage || $('#battle-info-message');
 
             // Don't spam the mssage log
@@ -2061,7 +2061,7 @@ define(
             // Called whenever the selectedEntity's desired target changes, will
             // update the target ring
             //
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 'updateSVGTargetDisplay() called : %O', arguments);
 
             // turn off all selected entities
@@ -2096,7 +2096,7 @@ define(
         selectPlayerEntity: function selectPlayerEntity(options){
             // This triggers when an entity is selected - meaning, whenever
             // a user selects an entity to use an ability or see more info
-            // about it. 
+            // about it.
             //
             // index: index of selected entity (matches with the order of
             //  playerEntities.models)
@@ -2132,7 +2132,7 @@ define(
                     }, { silent: true });
 
                     // manually trigger the change since we're updating a model
-                    this.selectedEntity.trigger('change:desiredTarget', 
+                    this.selectedEntity.trigger('change:desiredTarget',
                         this.selectedEntity, desiredTarget);
                 }
 
@@ -2164,9 +2164,9 @@ define(
             //
             options = options || {};
             var i = options.index;
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 'selectEnemyEntity called with options : %O', options);
-            
+
             var target = this.selectTarget('enemy', i);
 
             if(!target){
@@ -2178,7 +2178,7 @@ define(
             var desiredTarget = {
                 model: target, index: i, group: 'enemy'
             };
-            
+
             if(this.model.get('state') === 'normal'){
                 // TODO: show more info on enemy?
                 logger.log("views:subViews:Battle", 'setting entity target');
@@ -2187,7 +2187,7 @@ define(
                 // TODO: index and group should NOT be stored in here,
                 // should have a util function to get index and group FROM
                 // a target
-                this.selectedEntity.set({ 
+                this.selectedEntity.set({
                     desiredTarget: desiredTarget
                 }, { silent: true });
 
@@ -2198,13 +2198,13 @@ define(
             } else if(this.model.get('state') === 'ability'){
                 // call the general select entity function to set the ability's
                 // target and use the ability
-                logger.log("views:subViews:Battle", 
+                logger.log("views:subViews:Battle",
                     'using ability on target %O', target);
 
                 // then, use the ability
                 this.useAbility({
                     target: target,
-                    targetIndex: i, 
+                    targetIndex: i,
                     entityGroup: 'enemy'
                 });
             }
@@ -2214,7 +2214,7 @@ define(
 
         // ------------------------------
         //
-        // Select entity by state 
+        // Select entity by state
         //
         // ------------------------------
         selectTarget: function selectTarget(group, i){
@@ -2229,7 +2229,7 @@ define(
             if(group){
                 model = this.model.get(group + 'Entities').models[i];
             }
-            logger.log("views:subViews:Battle:selectTarget", 
+            logger.log("views:subViews:Battle:selectTarget",
                 'selectTarget called: group %O | i %O | Model %O', group, i, model);
 
             // TODO: Update selectTarget when selectedEntity changes
@@ -2248,7 +2248,7 @@ define(
             // update the target window
             // --------------------------
             if(group && (i !== undefined)){
-                logger.log("views:subViews:Battle:selectTarget", 
+                logger.log("views:subViews:Battle:selectTarget",
                     '\t updating current target view : %O | %O', i, group);
                 this.setIntendedTarget({
                     index: i,
@@ -2269,8 +2269,8 @@ define(
             // If there is no model, clear out bar
             if(this._previouslySelectedModel){
                 _.each(['change:health', 'change:maxHealth'], function(eventName){
-                    self.model.stopListening( 
-                        self._previouslySelectedModel.get('attributes'), 
+                    self.model.stopListening(
+                        self._previouslySelectedModel.get('attributes'),
                         eventName
                     );
                 });
@@ -2290,15 +2290,15 @@ define(
 
             if(model){
                 var targetVal = (
-                    (model.get('attributes').attributes.health / 
+                    (model.get('attributes').attributes.health /
                     model.get('attributes').attributes.maxHealth) * 100
                 ) + '%';
                 self.$uiInteractionTargetBarFill.css({ width: targetVal });
 
                 _.each(['change:health', 'change:maxHealth'], function(eventName){
-                    self.model.listenTo( 
-                        model.get('attributes'), 
-                        eventName, 
+                    self.model.listenTo(
+                        model.get('attributes'),
+                        eventName,
                         function(d,health){
                             // callback when target's health changes
                             var targetVal = ((health / d.attributes.maxHealth) * 100) + '%';
@@ -2326,7 +2326,7 @@ define(
         setSelectedEntity: function setSelectedEntity(options){
             // Select an entity at passed in index in the normal state
             //
-            // NOTE: This sets which abilities and entity the player has 
+            // NOTE: This sets which abilities and entity the player has
             // control over
             // --------------------------
             // overview:
@@ -2340,15 +2340,15 @@ define(
             var i = options.index;
 
             // if the user selected the currently active entity, do nothing
-            if(i === this.previouslySelectedEntityIndex){ 
-                logger.log("views:subViews:Battle", 
+            if(i === this.previouslySelectedEntityIndex){
+                logger.log("views:subViews:Battle",
                     '\t 0. entity selected: same entity selected, exiting : i : %O', i);
-                return false; 
-            } 
+                return false;
+            }
 
             //1. get model based on selected element
             var model = this.model.get('playerEntities').models[i];
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 "\t 1. entity selected: %O \n model: %O", i, model);
 
             // update the selected entity
@@ -2421,8 +2421,8 @@ define(
         // ------------------------------
         setIntendedTarget: function setIntendedTarget(options){
             // Sets the intended target. The intended target specifies which
-            // entity the spell could be cast on. 
-            // Options: 
+            // entity the spell could be cast on.
+            // Options:
             //      entityGroup: {string} 'player' or 'enemy'
             //      index: {number} index of entity in entity group
             //
@@ -2431,7 +2431,7 @@ define(
                 entityGroup: options.entityGroup
             };
 
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 "1. setIntendedTarget : options: %O", options);
 
             var model = this.model.get(options.entityGroup + 'Entities')
@@ -2447,19 +2447,19 @@ define(
 
         clearIntendedTarget: function clearIntendedTarget(){
             // Clears out the intended target info window
-            logger.log("views:subViews:Battle", 
-                "1. clearIntendedTarget : previous target: %O", 
+            logger.log("views:subViews:Battle",
+                "1. clearIntendedTarget : previous target: %O",
                 this.intendedTarget);
 
             this.regionIntendedTarget.close();
             this.intendedTarget = null;
 
             if(this.selectedEntity && this.selectedEntity.attributes.desiredTarget){
-                var infoView = new IntendedTargetInfoView({ 
+                var infoView = new IntendedTargetInfoView({
                     model: this.selectedEntity.attributes.desiredTarget.model
                 });
                 this.regionIntendedTarget.show(infoView);
-            }   
+            }
             return this;
         },
 
@@ -2471,7 +2471,7 @@ define(
         useAbility: function battleUseAbility(options){
             // TODO: think of call structure
             // TODO: Move forward entity when ability is used
-            // TODO: Split out the visible stuff and the logic parts. most of 
+            // TODO: Split out the visible stuff and the logic parts. most of
             // this function is logic that could live elsewhere
             options = options || {};
             var self = this;
@@ -2481,7 +2481,7 @@ define(
             var targetEntityGroup = options.entityGroup;
             var targetEntityIndex = options.targetIndex;
 
-            // SOURCE 
+            // SOURCE
             // By default, is the selected entity
             //
             // set the source entity index ( the entity using the ability )
@@ -2514,14 +2514,14 @@ define(
             // Use the ability
             // --------------------------
             // Uses whatever the active ability is on the target
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 "1. useAbility(): using ability: %O on %O",
-                selectedAbility, 
+                selectedAbility,
                 target);
 
             // check that selected ability is an ability
             if(!selectedAbility){
-                logger.log("views:subViews:Battle", 
+                logger.log("views:subViews:Battle",
                     "x. useAbility(): CANNOT use, invalid ABILITY");
                 return false;
             }
@@ -2530,7 +2530,7 @@ define(
             var entityTime = this[sourceEntityGroup + 'EntityTimers'][
                 sourceEntityIndex];
 
-            // If the intended target is not in the ability's usable target 
+            // If the intended target is not in the ability's usable target
             // group, cannot use the ability
             var validTarget = selectedAbility.get('validTargets');
 
@@ -2541,26 +2541,26 @@ define(
             // if the PLAYER used the ability, check for valid target.
             //  The handleAI() logic will handle valid target checks for enemies
             if(playerUsedAbility){
-                invalidTarget = (validTarget !== targetEntityGroup && 
+                invalidTarget = (validTarget !== targetEntityGroup &&
                     validTarget.indexOf(targetEntityGroup) === -1);
-            } 
+            }
 
             // check that target is valid (either enemy or player)
             if( invalidTarget ||
-                !target || 
+                !target ||
                 // check if target is dead
                 ( !target.get('isAlive') && validTarget.indexOf('dead') === -1 )
             ){
                 //
-                // Cannot use because the entity group of the intended target 
+                // Cannot use because the entity group of the intended target
                 // is not valid
-                logger.log("views:subViews:Battle", 
+                logger.log("views:subViews:Battle",
                     "x. useAbility(): CANNOT use, invalid TARGET | target %O",
                     target);
                 // don't cancel out the target, just let anyone listening know
                 // the target is invalid
                 events.trigger('battle:useAbility:invalidTarget', {
-                    ability: selectedAbility    
+                    ability: selectedAbility
                 });
 
                 // Show invalid target message IF the player used it (NOT the AI)
@@ -2572,30 +2572,30 @@ define(
                     self.highlightValidEntityTargetRing(selectedAbility);
                 }
 
-                return false; 
+                return false;
             }
 
-            // If the battle's timer is LESS than the castTime attribute, do 
+            // If the battle's timer is LESS than the castTime attribute, do
             // nothing
             if(entityTime < selectedAbility.get('castTime')){
                 //  CAN NOT use (timer not met)
                 // TODO: visual spell effect
-                // TODO: multiple targets 
-                logger.log("views:subViews:Battle", 
-                    "2. CANNNOT use ability! Time: %O / %O", entityTime, 
+                // TODO: multiple targets
+                logger.log("views:subViews:Battle",
+                    "2. CANNNOT use ability! Time: %O / %O", entityTime,
                     selectedAbility.get('castTime'));
 
                 return false;
 
             } else {
                // CAN use (timer met)
-                logger.log("views:subViews:Battle", 
-                    "2. USING ability! Time: %O / %O", entityTime, 
+                logger.log("views:subViews:Battle",
+                    "2. USING ability! Time: %O / %O", entityTime,
                     selectedAbility.get('castTime'));
 
                 // update the timer
                 // --------------------------
-                this[sourceEntityGroup + 'EntityTimers'][sourceEntityIndex] -= 
+                this[sourceEntityGroup + 'EntityTimers'][sourceEntityIndex] -=
                     selectedAbility.get('timeCost');
 
                 // trigger ability usage on entiy model
@@ -2612,12 +2612,12 @@ define(
                     value: entityTime - selectedAbility.get('timeCost'),
                     entityGroup: sourceEntityGroup
                 });
-                
+
                 // --------------------------
                 // use ability
                 // --------------------------
                 // get effect function and call it
-                // TODO: multiple targets 
+                // TODO: multiple targets
                 selectedAbility.effect({
                     target: target,
                     source: sourceEntity
@@ -2637,7 +2637,7 @@ define(
                 // TODO: put this in a separate method
                 //
                 // effect needs a source and a target. each spell can have
-                // its own custom effect. 
+                // its own custom effect.
                 // TODO: put this in model? model hold data, so it doesn't seem
                 // like view logic should be there, but placing it there
                 // would encapsulate all ability logic / effects which the
@@ -2683,8 +2683,8 @@ define(
                     }
 
                     // draw effect from target to source
-                    // TODO: Make this a function outside of this scope, pass 
-                    // in selected ability and entities. 
+                    // TODO: Make this a function outside of this scope, pass
+                    // in selected ability and entities.
                     // Then, this allows us to just listen for a health change
                     // or whatever other event and trigger it
                     //
@@ -2708,8 +2708,8 @@ define(
                         var highestElement = { value: 0, element: '' };
 
                         _.each(selectedAbility.attributes.element, function(val,key){
-                            if(highestElement.value < val){ 
-                                highestElement.value = val; 
+                            if(highestElement.value < val){
+                                highestElement.value = val;
                                 highestElement.element = key;
                             }
                         });
@@ -2719,7 +2719,7 @@ define(
                         // Render the effect
                         // --------------
                         // adjust matrix for scaling
-                        var width=64, height=64;
+                        var width = 34, height = 34;
                         var bb = $effect.node().getBBox();
                         var matrix = "matrix("+width / bb.width+", 0, 0, "+height / bb.height+", 0,0)";
 
@@ -2729,26 +2729,26 @@ define(
                             // set start position immediately
                             transform: 'translate(' + [
                                 // get midpoints
-                                sourcePos.left + ((sourcePos.right - sourcePos.left) / 2), 
-                                sourcePos.top - ((sourcePos.bottom - sourcePos.top) / 2)
+                                targetEntityGroup === 'enemy' ? sourcePos.left - 30 : sourcePos.right + 30,
+                                sourcePos.top - ((sourcePos.bottom - sourcePos.top) / 4)
                                 ] + ') ' + scaleAmount + ' ' + matrix
 
                         })
                             // then travel to the target
                             .transition()
                             .ease('cubic-in')
-                            .duration(selectedAbility.attributes.castDuration * 1000) 
+                            .duration(selectedAbility.attributes.castDuration * 1000)
                             .attr({
                                 transform: 'translate(' + [
                                     // send to edge of either enemy or player
-                                    targetEntityGroup === 'enemy' ? targetPos.left + 20 : targetPos.right + 30,
+                                    targetEntityGroup === 'enemy' ? targetPos.left : targetPos.right + 30,
                                     // get midpoints
-                                    targetPos.top - ((targetPos.bottom - targetPos.top) / 2)
+                                    targetPos.top - ((targetPos.bottom - targetPos.top) / 4)
                                     ] + ') ' + scaleAmount + ' ' + matrix
                             })
                             .each('end', function(){
                                 // remove the effect
-                                // NOTE: the entity wiggle will happen in the 
+                                // NOTE: the entity wiggle will happen in the
                                 // change:health callback
                                 d3.select(this).remove();
                             });
@@ -2782,7 +2782,7 @@ define(
                     d3.select(this[sourceEntityGroup + 'EntityGroups'][0][sourceEntityIndex])
                         .transition()
                         .attr({ transform: 'translate(' + [
-                                (sourceEntityGroup === 'enemy' ? -100 : 100), 
+                                (sourceEntityGroup === 'enemy' ? -100 : 100),
                                 0] + ')' })
                             .transition()
                                 .attr({ transform: 'translate(0 0)' });
@@ -2794,22 +2794,22 @@ define(
         },
 
         // ==============================
-        // 
-        // Entity death 
+        //
+        // Entity death
         //
         // ==============================
         entityDied: function battleEntityDied(options){
             // Called when an entity dies
             // TODO : pass in index and whatnot
             //
-            // options: {Object} consisting of 
+            // options: {Object} consisting of
             //  model: {Object} entity object
             var self = this;
 
-            logger.log("views:subViews:Battle", 
+            logger.log("views:subViews:Battle",
                 "1. entityDied() : options: %O", options);
 
-            
+
             // Reset timer animation
             // Get index
             var index;
@@ -2863,14 +2863,14 @@ define(
                     transform: function(){
                         var transform = '';
                         transform = 'translate(' + [
-                            0, self.entityHeight ] + 
+                            0, self.entityHeight ] +
                             ') scale(' + [
                                 1, -1
                             ] + ')';
 
                         if(group === 'enemy'){
                             transform = 'translate(' + [
-                                self.entityWidth, self.entityHeight ] + 
+                                self.entityWidth, self.entityHeight ] +
                                 ') scale(' + [
                                     -1, -1
                                 ] + ')';
@@ -2897,7 +2897,7 @@ define(
             'Finished battle: %j', {
                 healthHistory: this.playerEntityModels[0].get('healthHistory')
             });
-            
+
             for (var i = 0; i < this.playerEntityModels.length; i++) {
                 this.playerEntityModels[i].resetAfterBattle();
             }

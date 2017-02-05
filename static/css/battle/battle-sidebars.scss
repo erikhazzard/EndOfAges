@@ -8,6 +8,7 @@
     #battle-left-wrapper {
         @include noSelect();
 
+        /*
         background: #808080 url(../../img/ui/combat-ui-left.png);
         bottom: 0;
         border-right: none;
@@ -18,73 +19,80 @@
         top: 0;
         width: $ui-left-side-width;
         z-index: 200;
-
-
-        h1, h2, h3, h4, h5 {
-            color: #a69172;
-            font-size: 1.3em;
-            margin-right: 40px;
-            font-variant: small-caps;
-            text-align: center;
-            padding: auto 4px;
-            text-shadow:
-                0 -1px 0 rgba(255,255,255,0.8),
-                0 -1px 0 rgba(0,0,0,1),
-                1px 0 0 #000000,
-                1px 1px 0 #000000,
-                0 1px 0 #000000,
-                0 2px 0 #232323,
-                0 3px 0 rgba(0,0,0,0.3),
-                0px 0px 2px #232323;
-        }
-
-        .entity-name {
-            h1 {
-                height: 80px;
-                font-size: 1.6em;
-            }
-        }
-
-        .entity-header__health {
-            display: inline-block;
-        }
+        */
     }
     #battle-left-wrapper-inner {
         position: absolute; bottom: 0; left: 0px; top: 0; right: $battle-ui-border-width;
     }
 
-    .health-bar-wrapper {
-        background: url(../../img/ui/health-bar-bg.png) no-repeat;
-        height: 30px;
-        position: relative;
-        width: 171px;
-
+    // Health text
+    .health-wrapper {
         position: fixed;
         display: table;
         left: 0;
         margin: 0 auto;
         right: 0;
-        margin-left: 337px;
+        margin-left: 239px;
         top: auto;
-        bottom: 198px;
+        bottom: 227px;
+        z-index: 2000;
+        color: #ffffff;
+        font-size: 0.6em;
+    }
+
+    // PLAYER health - position in middle
+    .health-bar-wrapper {
+        // background: url(../../img/ui/health-bar-bg.png) no-repeat;
+        background: url(../../img/ui/health-bar.png) no-repeat;
+        height: 50px;
+        position: relative;
+        width: 274px;
+
+        position: fixed;
+        display: table;
+        left: -655px;
+        margin: 0 auto;
+        right: 0;
+        top: auto;
+        bottom: 178px;
 
         z-index: 2000;
 
         .health-fill-wrapper {
             bottom: 8px;
-            left: 12px;
+            left: 10px;
             position: absolute; 
             top: 8px;
-            right: 12px;
+            right: 10px;
         }
 
         .health-fill {
-            background: rgba(255,50,50, 0.5);
+            @include transition('width 0.20s');
+            background: rgba(255,50,50, 0.7);
             bottom: 0;
+            mix-blend-mode: color;
             position: absolute;
             top: 0;
             left: 0;
+
+            @include filter(url('#filter-map'));
         }
+    }
+
+    // PLAYER effects - position under health bar
+    .player-entity__active-effects {
+        background: rgba(255, 255, 255, 0.2);
+        position: fixed;
+        display: table;
+        left: 0;
+        margin: 0 auto;
+        right: 0;
+        margin-left: 239px;
+        top: auto;
+        bottom: 118px;
+        z-index: 2000;
+        width: 169px;
+        height: 59px;
     }
 
     // --------------------------------------
@@ -115,30 +123,6 @@
     // --------------------------------------
     #battle-right-wrapper {
         @include noSelect();
-
-        background: #808080 url(../../img/ui/combat-ui-right.png);
-        bottom: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: $ui-right-side-width;
-
-        h1, h2, h3, h4 {
-            color: $COLOR-INTERACTION-SELECTED;
-            font-size: 1.3em;
-            margin-left: 0;
-            font-variant: small-caps;
-            text-align: center;
-            text-shadow:
-                0 -1px 0 rgba(255,255,255,0.8),
-                0 -1px 0 rgba(0,0,0,1),
-                1px 0 0 #000000,
-                1px 1px 0 #000000,
-                0 1px 0 #000000,
-                0 2px 0 #232323,
-                0 3px 0 rgba(0,0,0,0.3),
-                0px 0px 2px #232323;
-        }
     }
 
     #battle-right-wrapper-inner {
