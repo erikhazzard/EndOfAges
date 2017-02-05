@@ -115,7 +115,7 @@ define(
     function getNewBattleObject () {
         return {
             model: {},
-            isActive: false,
+            isActive: true,
             stats: {}
         };
     }
@@ -257,6 +257,7 @@ define(
             });
 
             window._BATTLE = getNewBattleObject();
+            window._BATTLE.isActive = true;
             window._BATTLE.model = this.model;
 
             return this;
@@ -2892,6 +2893,15 @@ define(
         //
         // ==============================
         finishInstance: function finishInstance(){
+            logger.log('views:subViews:Battle/finishInstance',
+            'Finished battle: %j', {
+                healthHistory: this.playerEntityModels[0].get('healthHistory')
+            });
+            
+            for (var i = 0; i < this.playerEntityModels.length; i++) {
+                this.playerEntityModels[i].resetAfterBattle();
+            }
+
             events.trigger('node:instanceFinished');
         }
 

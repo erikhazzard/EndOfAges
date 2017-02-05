@@ -8,6 +8,7 @@
     #battle-left-wrapper {
         @include noSelect();
 
+        /*
         background: #808080 url(../../img/ui/combat-ui-left.png);
         bottom: 0;
         border-right: none;
@@ -18,14 +19,16 @@
         top: 0;
         width: $ui-left-side-width;
         z-index: 200;
+        */
 
 
-        h1, h2, h3, h4 {
+        h1, h2, h3, h4, h5 {
             color: #a69172;
             font-size: 1.3em;
             margin-right: 40px;
             font-variant: small-caps;
             text-align: center;
+            padding: auto 4px;
             text-shadow:
                 0 -1px 0 rgba(255,255,255,0.8),
                 0 -1px 0 rgba(0,0,0,1),
@@ -37,6 +40,16 @@
                 0px 0px 2px #232323;
         }
 
+        .entity-name {
+            h1 {
+                height: 80px;
+                font-size: 1.6em;
+            }
+        }
+
+        .entity-header__health {
+            display: inline-block;
+        }
     }
     #battle-left-wrapper-inner {
         position: absolute; bottom: 0; left: 0px; top: 0; right: $battle-ui-border-width;
@@ -48,13 +61,31 @@
         position: relative;
         width: 171px;
 
-        .health-fill {
-            background: rgba(255,50,50, 0.5);
+        position: fixed;
+        display: table;
+        left: 0;
+        margin: 0 auto;
+        right: 0;
+        margin-left: 337px;
+        top: auto;
+        bottom: 198px;
+
+        z-index: 2000;
+
+        .health-fill-wrapper {
             bottom: 8px;
             left: 12px;
-            position: absolute;
+            position: absolute; 
             top: 8px;
             right: 12px;
+        }
+
+        .health-fill {
+            background: rgba(255,50,50, 0.5);
+            bottom: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
     }
 

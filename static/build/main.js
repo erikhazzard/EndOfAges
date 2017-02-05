@@ -2416,12 +2416,16 @@ define(
                 this.get('baseAttributes').attributes
             );
 
+            this.get('attributes').set({
+                health: this.get('baseAttributes').get('maxHealth')
+            });
+
             // get rid of the health history
             this.set({ healthHistory: [] });
 
             // Remove non permanent buffs
             this.removeAllBuffs();
-            //
+
             return this;
         },
 
@@ -2544,6 +2548,8 @@ define(
             logger.log('models/Entity', 'removeBuff(): called %O', abilityBuffInstance);
             var effects = this.get('activeEffects');
             var foundAbility = null;
+
+            if (!abilityBuffInstance) { return false; }
 
             // remove the FIRST occurence of the targeted ability
             //      abilities are added in order of cast time, so the first
@@ -3669,8 +3675,6 @@ define(
             // as a property and include the class
             var entities = [];
 
-            logger.log('game:parse', 'parsing: %j', res)
-
             // create entity models for each entity, then add them to the
             // collection
             _.each(res.playerEntities, function(entity){
@@ -3678,7 +3682,7 @@ define(
                 // For non flat structure, we need to create objects based on
                 // the data
                 // TODO: don't use class, call it entityClass in model
-                entity.class.abilities = new Abilities(entity.class.abilities);
+                entity.abilities = new Abilities(entity.abilities);
                 entity.class = new EntityClass(entity.class);
                 entity.race = new Race(entity.race);
 
@@ -4266,9 +4270,9 @@ define(
             description: 'A quick stabbing attack which deals a small amount of damage',
             effectId: 'stab',
             sprite: 'stab',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 0.2,
+            castTime: 0.7,
+            timeCost: 0.7,
+            castDuration: 0.3,
             validTargets: ['enemy'],
             type: {'physical': 1},
             element: 'air',
@@ -4282,13 +4286,13 @@ define(
             description: 'A powerful attack which will do additional damage based on previous attacks',
             effectId: 'backstab',
             sprite: 'backstab',
-            castTime: 0.6,
-            timeCost: 0.6,
-            castDuration: 1,
+            castTime: 0.9,
+            timeCost: 0.9,
+            castDuration: 1.2,
             validTargets: ['enemy'],
             type: {'physical': 1},
             element: 'air',
-            damage: 7,
+            damage: 8,
             attackBonusPercent: 0.2,
             effect: function effect(options){
                 var self = this;
@@ -4334,8 +4338,8 @@ define(
             spellTypes: ['debuff'],
             description: "Temporarily prevents a single enemy's timer from regenerating",
             effectId: 'suspend',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 0.7,
+            timeCost: 0.7,
             validTargets: ['enemy','player'],
             type: 'magic',
             element: 'light',
@@ -4376,9 +4380,9 @@ define(
             description: "An attack which may deal tremendous damage, having a chance to kill the enemy instantly depending on the enemy's health",
             effectId: 'assassinate',
             sprite: 'assassinate',
-            castTime: 2,
-            timeCost: 2,
-            castDuration: 1.8,
+            castTime: 2.5,
+            timeCost: 2.5,
+            castDuration: 2.1,
             validTargets: ['enemy'],
             type: {'physical': 1},
             element: 'air',
@@ -4420,8 +4424,8 @@ define(
             spellTypes: ['buff'],
             description: "Increases your timer speed by 20%",
             effectId: 'haste',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 0.7,
+            timeCost: 0.7,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -4459,13 +4463,13 @@ define(
             id: 'minor-healing',
             spellTypes: ['heal'],
             effectId: 'minorHealing',
-            castTime: 3,
+            castTime: 2.5,
             description: "A quick ability that restores a minor amount of health",
-            timeCost: 3,
+            timeCost: 2.5,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
-            heal: 15
+            heal: 10
         },
         {
             name: 'Heal',
@@ -4478,7 +4482,7 @@ define(
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
-            heal: 20
+            heal: 30
         },
         // ==============================
         // 
@@ -4510,9 +4514,9 @@ define(
             spellTypes: ['damage'],
             description: "An attack that deals a true damage equal to 25% of the enemy's current health, ignoring armor and magic resist",
             effectId: 'deathtouch',
-            castTime: 1,
-            timeCost: 1,
-            castDuration: 1.5,
+            castTime: 2,
+            timeCost: 2,
+            castDuration: 2.5,
             validTargets: ['enemy'],
             type: {'magic': 0.5, 'physical': 0.5},
             element: 'dark',
@@ -4706,13 +4710,13 @@ define(
             spellTypes: ['debuff'],
             description: "Temporarily prevents an enemy from using abilities",
             effectId: 'stun',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 3.5,
+            timeCost: 3.5,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
 
-            buffDuration: 8,
+            buffDuration: 3,
             // to prevent ability usage, set the time to be greater than the
             // entitiy's max timer value. Setting to something ridiculously high
             // also accomplishes this
@@ -4728,15 +4732,15 @@ define(
             spellTypes: ['debuff'],
             description: "Temporarily prevents enemies from using abilities and regenerating time",
             effectId: 'comatose',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 5.5,
+            timeCost: 5.5,
             validTargets: ['enemy'],
             type: 'magic',
             element: 'light',
 
-            damage: 1,
+            damage: 5,
 
-            buffDuration: 8,
+            buffDuration: 3,
             // to prevent ability usage, set the time to be greater than the
             // entitiy's max timer value. Setting to something ridiculously high
             // also accomplishes this
@@ -7049,10 +7053,10 @@ define(
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
-                armor: Math.random() * -40,
-                attack: Math.random() * -80,
-                magicResist:  Math.random() * -20,
-                magicPower: Math.random() * -20
+                armor: (Math.random() * -40) + (numBattles * 4),
+                attack: (Math.random() * -80) + (numBattles * 4),
+                magicResist:  (Math.random() * -20) + (numBattles * 4),
+                magicPower: (Math.random() * -20) + (numBattles * 4)
             });
 
             return entity;
@@ -8635,6 +8639,11 @@ define(
         rerenderHealth: function healthRerender(){
             // Update the health
             if(!this.$health){ this.$health = $('.health-wrapper', this.$el); }
+            if (!this.$healthFill) { this.$healthFill = $('.health-fill', this.$el); }
+
+            this.$healthFill.css({
+                width: ((this.model.get('attributes').get('health') / this.model.get('attributes').get('maxHealth')) * 100) + '%'
+            });
 
             this.$health.html(
                 Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
@@ -8894,6 +8903,9 @@ define(
             // Called whenever health changes
             //
             options = options || {};
+
+            if (!options.options) { options.options = {}; }
+            if (!options.options.source) { options.options.source = {collection: {}}; }
             
             // get health change
             // --------------------------
@@ -9163,7 +9175,7 @@ define(
     function getNewBattleObject () {
         return {
             model: {},
-            isActive: false,
+            isActive: true,
             stats: {}
         };
     }
@@ -9305,6 +9317,7 @@ define(
             });
 
             window._BATTLE = getNewBattleObject();
+            window._BATTLE.isActive = true;
             window._BATTLE.model = this.model;
 
             return this;
@@ -11940,6 +11953,15 @@ define(
         //
         // ==============================
         finishInstance: function finishInstance(){
+            logger.log('views:subViews:Battle/finishInstance',
+            'Finished battle: %j', {
+                healthHistory: this.playerEntityModels[0].get('healthHistory')
+            });
+            
+            for (var i = 0; i < this.playerEntityModels.length; i++) {
+                this.playerEntityModels[i].resetAfterBattle();
+            }
+
             events.trigger('node:instanceFinished');
         }
 
@@ -12676,10 +12698,9 @@ requirejs([
 
     // log options
     logger.transports.get('Console').property({ showMeta: false });
-    logger.options.groupsEnabled = true;
-    logger.options.groupsEnabled = [
-        /views:subviews:battle:AbilityItem/
-    ];
+    logger.options.groupsEnabled = [ /views:subviews:battle:AbilityItem/ ]; // specific
+    logger.options.groupsEnabled = true; // everything
+    // logger.options.groupsEnabled = []; // nothing
 
     window.LOGGER = logger;
 

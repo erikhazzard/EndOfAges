@@ -112,8 +112,6 @@ define(
             // as a property and include the class
             var entities = [];
 
-            logger.log('game:parse', 'parsing: %j', res)
-
             // create entity models for each entity, then add them to the
             // collection
             _.each(res.playerEntities, function(entity){
@@ -121,7 +119,7 @@ define(
                 // For non flat structure, we need to create objects based on
                 // the data
                 // TODO: don't use class, call it entityClass in model
-                entity.class.abilities = new Abilities(entity.class.abilities);
+                entity.abilities = new Abilities(entity.abilities);
                 entity.class = new EntityClass(entity.class);
                 entity.race = new Race(entity.race);
 

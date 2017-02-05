@@ -91,3 +91,9 @@ Notes on Pixijs
     -Can use spritesheets to load assets
     -check spritesheet example for using spritesheet with frames
     -use JSON Hash in texture packer
+
+
+=======================================
+
+- Fix drawOverlay error
+

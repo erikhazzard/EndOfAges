@@ -124,10 +124,9 @@ requirejs([
 
     // log options
     logger.transports.get('Console').property({ showMeta: false });
-    logger.options.groupsEnabled = true;
-    logger.options.groupsEnabled = [
-        /views:subviews:battle:AbilityItem/
-    ];
+    logger.options.groupsEnabled = [ /views:subviews:battle:AbilityItem/ ]; // specific
+    logger.options.groupsEnabled = true; // everything
+    // logger.options.groupsEnabled = []; // nothing
 
     window.LOGGER = logger;
 

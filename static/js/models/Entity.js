@@ -219,12 +219,16 @@ define(
                 this.get('baseAttributes').attributes
             );
 
+            this.get('attributes').set({
+                health: this.get('baseAttributes').get('maxHealth')
+            });
+
             // get rid of the health history
             this.set({ healthHistory: [] });
 
             // Remove non permanent buffs
             this.removeAllBuffs();
-            //
+
             return this;
         },
 
@@ -347,6 +351,8 @@ define(
             logger.log('models/Entity', 'removeBuff(): called %O', abilityBuffInstance);
             var effects = this.get('activeEffects');
             var foundAbility = null;
+
+            if (!abilityBuffInstance) { return false; }
 
             // remove the FIRST occurence of the targeted ability
             //      abilities are added in order of cast time, so the first

@@ -82,6 +82,11 @@ define(
         rerenderHealth: function healthRerender(){
             // Update the health
             if(!this.$health){ this.$health = $('.health-wrapper', this.$el); }
+            if (!this.$healthFill) { this.$healthFill = $('.health-fill', this.$el); }
+
+            this.$healthFill.css({
+                width: ((this.model.get('attributes').get('health') / this.model.get('attributes').get('maxHealth')) * 100) + '%'
+            });
 
             this.$health.html(
                 Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(

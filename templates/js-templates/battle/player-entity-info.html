@@ -1,14 +1,17 @@
 {{// Entity Info }}
 <script id='template-game-battle-selected-entity-info' type='text/template'>
     {{// This template shows the abilities for the currently selected entity }}
-    <div class='entity'>
-        <h4><%= name %></h4>
+    <div class='entity entity-name'>
+        <h1 class='battle__entity-name'><%= name %></h1>
     </div>
-    Health: <div class='health-wrapper'></div>
+    <h5 class='entity-header__health'>Health</h5> 
+    <div class='health-wrapper'></div>
 
     <div class='health-bar-wrapper'>
-        <div class='health-amount'>80 / 100</div>
-        <div class='health-fill'></div>
+        <div class='health-amount'></div>
+        <div class='health-fill-wrapper'>
+            <div class='health-fill'></div>
+        </div>
     </div>
 
     <br />

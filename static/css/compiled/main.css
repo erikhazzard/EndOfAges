@@ -595,6 +595,7 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   user-drag: none;
   -moz-user-select: none;
   -webkit-user-drag: none;
+  /*
   background: #808080 url(../../img/ui/combat-ui-left.png);
   bottom: 0;
   border-right: none;
@@ -603,15 +604,22 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   left: 0;
   position: absolute;
   top: 0;
-  width: 200px;
-  z-index: 200; }
-  .game-battle-wrapper #battle-left-wrapper h1, .game-battle-wrapper #battle-left-wrapper h2, .game-battle-wrapper #battle-left-wrapper h3, .game-battle-wrapper #battle-left-wrapper h4 {
+  width: $ui-left-side-width;
+  z-index: 200;
+  */ }
+  .game-battle-wrapper #battle-left-wrapper h1, .game-battle-wrapper #battle-left-wrapper h2, .game-battle-wrapper #battle-left-wrapper h3, .game-battle-wrapper #battle-left-wrapper h4, .game-battle-wrapper #battle-left-wrapper h5 {
     color: #a69172;
     font-size: 1.3em;
     margin-right: 40px;
     font-variant: small-caps;
     text-align: center;
+    padding: auto 4px;
     text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.8), 0 -1px 0 black, 1px 0 0 #000000, 1px 1px 0 #000000, 0 1px 0 #000000, 0 2px 0 #232323, 0 3px 0 rgba(0, 0, 0, 0.3), 0px 0px 2px #232323; }
+  .game-battle-wrapper #battle-left-wrapper .entity-name h1 {
+    height: 80px;
+    font-size: 1.6em; }
+  .game-battle-wrapper #battle-left-wrapper .entity-header__health {
+    display: inline-block; }
 .game-battle-wrapper #battle-left-wrapper-inner {
   position: absolute;
   bottom: 0;
@@ -622,14 +630,28 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   background: url(../../img/ui/health-bar-bg.png) no-repeat;
   height: 30px;
   position: relative;
-  width: 171px; }
-  .game-battle-wrapper .health-bar-wrapper .health-fill {
-    background: rgba(255, 50, 50, 0.5);
+  width: 171px;
+  position: fixed;
+  display: table;
+  left: 0;
+  margin: 0 auto;
+  right: 0;
+  margin-left: 337px;
+  top: auto;
+  bottom: 198px;
+  z-index: 2000; }
+  .game-battle-wrapper .health-bar-wrapper .health-fill-wrapper {
     bottom: 8px;
     left: 12px;
     position: absolute;
     top: 8px;
     right: 12px; }
+  .game-battle-wrapper .health-bar-wrapper .health-fill {
+    background: rgba(255, 50, 50, 0.5);
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    left: 0; }
 .game-battle-wrapper #region-battle-player-entities-info {
   cursor: pointer;
   /*.entity-selected {*/

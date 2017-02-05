@@ -138,10 +138,10 @@ define(
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
-                armor: Math.random() * -40,
-                attack: Math.random() * -80,
-                magicResist:  Math.random() * -20,
-                magicPower: Math.random() * -20
+                armor: (Math.random() * -40) + (numBattles * 4),
+                attack: (Math.random() * -80) + (numBattles * 4),
+                magicResist:  (Math.random() * -20) + (numBattles * 4),
+                magicPower: (Math.random() * -20) + (numBattles * 4)
             });
 
             return entity;

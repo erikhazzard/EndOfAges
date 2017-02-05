@@ -91,6 +91,9 @@ define(
             // Called whenever health changes
             //
             options = options || {};
+
+            if (!options.options) { options.options = {}; }
+            if (!options.options.source) { options.options.source = {collection: {}}; }
             
             // get health change
             // --------------------------
