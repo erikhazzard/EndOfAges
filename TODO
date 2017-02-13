@@ -96,4 +96,12 @@ Notes on Pixijs
 =======================================
 
 - Fix drawOverlay error
+- Fix bug where player health bar sometimes disapears (fix it so entity[0]
+is ALWAYS used for player)
+- Fix stylings for health # and name in health bar
+- Add ability bar
+- Add battle over screen
+- Add game timer / clock to map and battle
+- Fix ability positioning
+- Add score / stat tracker
 

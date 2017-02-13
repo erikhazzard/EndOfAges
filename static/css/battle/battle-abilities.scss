@@ -21,7 +21,7 @@
         position: absolute;
         right: 0;
         width: $battle-ability-container-width;
-        z-index: 2000;
+        z-index: 5000;
     }
 
     // --------------------------------------
@@ -37,7 +37,7 @@
         text-shadow: 0 0 1px #000000, 0 1px 0 #000000, 1px 0 0 #000000, 0 0 5px #000000, 0 0 10px #000000;
         top: -10px;
         width: 170px;
-        z-index: 99999;
+        z-index: 999999;
 
         .message {
             @include transition("all 0.8s");
@@ -94,6 +94,9 @@
         box-shadow: 0 0 30px $COLOR-INTERACTION-SELECTED;
         */
         opacity: 1;
+        #battle-interaction-target-bar-fill {
+            opacity: 1;
+        }
     }
     #battle-interaction-target-bar.enemy {
         /*
@@ -101,6 +104,9 @@
         box-shadow: 0 0 30px $COLOR-INTERACTION-SELECTED;
         */
         opacity: 1;
+        #battle-interaction-target-bar-fill {
+            opacity: 1;
+        }
     }
     
     #battle-interaction-target-bar-fill {
@@ -108,6 +114,7 @@
         background: #cc2222;
         bottom: 8px;
         left: 0;
+        opacity: 0;
         position: absolute;
         width: 0;
         top: 8px;

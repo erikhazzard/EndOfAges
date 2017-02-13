@@ -523,6 +523,9 @@ define(
         },
 
         _pause: function _pause(){
+            // NOTE: DISABLE PAUSE FUNCTIONALITY
+            return false;
+
             // PAUSE
             // ----------------------
             logger.log('views:subViews:Battle',
@@ -1988,6 +1991,36 @@ define(
                             'data-time': 1
                         });
                 });
+
+            // Update bar width for global timer animation bar for player
+            if (entityGroup === 'player' && options.index === 0) {
+                var globalAbilityBar = d3.select('#battle__ability-timer-bar');
+                this._globalAbilityBarWidth = this._globalAbilityBarWidth || +(d3.select('#battle__ability-timer-bar-wrapper').style('width').replace('px', ''));
+                let globalAbilityBarWidth = this._globalAbilityBarWidth;
+
+                globalAbilityBar.transition()
+                    .ease('linear')
+                    .duration(0)
+                    .style({
+                        // starting bar width based on value
+                        width: Math.round((startWidth) / (endWidth / globalAbilityBarWidth)) + 'px'
+                    }).each('end', function startTimerAnimationTransitionEnd(){
+                        // 2. After bar is reset, transition to specified width
+                        // must divide by the timerFactor
+                        var duration = (
+                            (targetModel.attributes.attributes.attributes.timerLimit - timeValue) /
+                            targetModel.attributes.attributes.attributes.timerFactor) * 1000;
+
+                        // transition the bar width to the end of the range
+                        // --------------------------
+                        globalAbilityBar.transition()
+                            .ease('linear')
+                            .duration( duration )
+                            .style({
+                                width: Math.round((endWidth) / (endWidth / globalAbilityBarWidth)) + 'px'
+                            });
+                    });
+            }
 
             return this;
         },
