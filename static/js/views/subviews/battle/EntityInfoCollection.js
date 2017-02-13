@@ -30,6 +30,7 @@ define(
         },
         
         setSelectedEntityView: function setSelectedEntityView(model){
+            logger.log('views/subviews/battle/EntityInfoCollection:setSelectedEntityView', 'called', model);
             // Called whenever the selected entity changes. Takes in a model
             // and adds a class to the corresponding view
             $('.entity-selected', this.$el).removeClass('entity-selected');

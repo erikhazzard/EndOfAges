@@ -76,19 +76,20 @@ define(
         rerender: function infoRerender(){
             this.render();
             this.onShow();
+            this.rerenderHealth();
             return this;
         },
 
         rerenderHealth: function healthRerender(){
             // Update the health
-            if(!this.$health){ this.$health = $('.health-wrapper', this.$el); }
-            if (!this.$healthFill) { this.$healthFill = $('.health-fill', this.$el); }
+            var $health = $('.health-wrapper', this.$el);
+            var $healthFill = $('.health-fill', this.$el);
 
-            this.$healthFill.css({
+            $healthFill.css({
                 width: ((this.model.get('attributes').get('health') / this.model.get('attributes').get('maxHealth')) * 100) + '%'
             });
 
-            this.$health.html(
+            $health.html(
                 Backbone.Marionette.TemplateCache.get('#template-game-battle-selected-entity-health')(
                     this.model.toJSON()    
                 )
@@ -104,7 +105,7 @@ define(
         // ------------------------------
         updateActiveEffects: function updateActiveEffects(){
             var self = this;
-            this.$activeEffectsEl = this.$activeEffectsEl || $('.active-effect', this.$el);
+            var $activeEffectsEl = $('.active-effect', this.$el);
 
             logger.log('PlayerEntityInfo:updateActiveEffects', 
                 'updateActiveEffects called', this.model);
@@ -113,13 +114,13 @@ define(
             // duration
             // The active effect elements are in order of the activeEffects
             //  array on the entity
-            _.each(this.$activeEffectsEl, function(el, i){
+
+            // TODO: This. Doesn't quite work...
+            _.each($activeEffectsEl, function(el, i){
                 var duration = self.model.attributes.activeEffects[i].get('buffDuration');
 
                 // Don't do anything for buffs that have no duration
-                if(duration < 1){ 
-                    return false;
-                }
+                if(duration < 1){ return false; }
 
                 // convert to seconds
                 duration *= 1000;
