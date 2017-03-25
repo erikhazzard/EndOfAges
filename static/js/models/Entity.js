@@ -89,6 +89,8 @@ define(
                 // // TODO: set to null for real game
                 aiDelay: 5,
 
+                level: 1,
+
                 // list of enemies and their aggro. Key is entity ID, value is
                 // aggro value
                 aggroList: {},
@@ -777,6 +779,10 @@ define(
             //  time: {Number} in seconds
             //  battle: {Battle Model}
             //
+            // Supppper hacky. Only run AI sometimes. This prevents
+            // AI from immediately using an ability
+            if (Math.random() < 0.1) { return true; }
+        
             //
             // called each tick to control AI
             // Note: using this.attributes instead of this.get() for performance

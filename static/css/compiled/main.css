@@ -710,7 +710,8 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   left: 0;
   height: 300px;
   position: absolute;
-  right: 0; }
+  right: 0;
+  z-index: 9999; }
 
 /**
  *
@@ -1065,6 +1066,34 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
   .game-battle-wrapper .pause-blocker.active {
     fill: #ababab !important;
     opacity: 0.6 !important; }
+  .game-battle-wrapper #battle__finished-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    background: #ababab;
+    transition-delay: 2.5s;
+    transition: opacity 1s;
+    z-index: -1; }
+  .game-battle-wrapper #battle__finished-wrapper {
+    background: #336699;
+    bottom: 10%;
+    left: 10%;
+    position: fixed;
+    right: 10%;
+    z-index: 99999;
+    top: 10%;
+    transition: all 0.8s;
+    transition-delay: 2.5s;
+    transform: translate3d(0, -120vh, 0); }
+  .game-battle-wrapper.battle-over #battle__finished-wrapper {
+    transform: translate3d(0, 0, 0); }
+  .game-battle-wrapper.battle-over #battle__finished-overlay {
+    display: block;
+    opacity: 0.85;
+    z-index: 99999; }
 
 #region-node-instance-wrapper {
   -webkit-transition: all 0.4s;

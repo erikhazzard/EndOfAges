@@ -298,6 +298,7 @@ define(
             };
 
             console.log("you win." + JSON.stringify(reward));
+            $('.game-battle-wrapper').addClass('battle-over');
             // TODO: YOU WIN
             // you win - show battle drop down
             return this;
@@ -309,7 +310,7 @@ define(
 
             // TODO: compile stats
 
-            console.log("you LOSE.");
+            $('.game-battle-wrapper').addClass('battle-over');
             // TODO: YOU LOSE
             // you lose - show battle drop down
             return this;

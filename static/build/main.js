@@ -2286,6 +2286,8 @@ define(
                 // // TODO: set to null for real game
                 aiDelay: 5,
 
+                level: 1,
+
                 // list of enemies and their aggro. Key is entity ID, value is
                 // aggro value
                 aggroList: {},
@@ -2974,6 +2976,10 @@ define(
             //  time: {Number} in seconds
             //  battle: {Battle Model}
             //
+            // Supppper hacky. Only run AI sometimes. This prevents
+            // AI from immediately using an ability
+            if (Math.random() < 0.1) { return true; }
+        
             //
             // called each tick to control AI
             // Note: using this.attributes instead of this.get() for performance
@@ -4639,8 +4645,8 @@ define(
             spellTypes: ['buff', 'heal'],
             description: "Virtue bolsters an ally's armor, magic resist, and maximum health",
             effectId: 'virtue',
-            castTime: 0.5,
-            timeCost: 0.5,
+            castTime: 0.8,
+            timeCost: 0.9,
             validTargets: ['player'],
             type: 'magic',
             element: 'light',
@@ -9360,6 +9366,7 @@ define(
             };
 
             console.log("you win." + JSON.stringify(reward));
+            $('.game-battle-wrapper').addClass('battle-over');
             // TODO: YOU WIN
             // you win - show battle drop down
             return this;
@@ -9371,7 +9378,7 @@ define(
 
             // TODO: compile stats
 
-            console.log("you LOSE.");
+            $('.game-battle-wrapper').addClass('battle-over');
             // TODO: YOU LOSE
             // you lose - show battle drop down
             return this;
