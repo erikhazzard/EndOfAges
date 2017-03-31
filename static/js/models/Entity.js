@@ -99,6 +99,8 @@ define(
                 // function, may change before using (e.g., if health changes)
                 desiredAbility: null,
 
+                isEnemy: false,
+
                 // desired target is the intended target to use the ability on
                 desiredTarget: null
             };
@@ -123,6 +125,7 @@ define(
             // set attributes and base attributes from server
             this.set({
                 name: generateName(),
+                isEnemy: !!options.isEnemy,
                 attributes: new EntityAttributes(options.attributes || {})
             }, {silent: true});
 
@@ -438,6 +441,7 @@ define(
             // update it (NOTE: it's an array, so it's updating in place without
             // triggering a change event)
             healthHistory.unshift({
+                sourceIsPlayer: !options.source.attributes.isEnemy,
                 element: sourceAbility.get('element'),
                 type: sourceAbility.get('type'),
                 date: new Date(),
@@ -779,10 +783,6 @@ define(
             //  time: {Number} in seconds
             //  battle: {Battle Model}
             //
-            // Supppper hacky. Only run AI sometimes. This prevents
-            // AI from immediately using an ability
-            if (Math.random() < 0.1) { return true; }
-        
             //
             // called each tick to control AI
             // Note: using this.attributes instead of this.get() for performance
@@ -795,6 +795,10 @@ define(
             var targetIndex, targetGroup;
             var targets, model, len;
             this._lastAIHandleCall = this._lastAIHandleCall || Date.now();
+
+            if (Math.random() < 0.3) {
+                return false;
+            }
 
             var canUseAbility = false;
 

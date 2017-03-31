@@ -1074,7 +1074,7 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
     bottom: 0;
     opacity: 0;
     background: #ababab;
-    transition-delay: 2.5s;
+    transition-delay: 1.0s;
     transition: opacity 1s;
     z-index: -1; }
   .game-battle-wrapper #battle__finished-wrapper {
@@ -1086,7 +1086,7 @@ $COLOR-INTERACTION-SELECTED: #98c2b6;
     z-index: 99999;
     top: 10%;
     transition: all 0.8s;
-    transition-delay: 2.5s;
+    transition-delay: 1.5s;
     transform: translate3d(0, -120vh, 0); }
   .game-battle-wrapper.battle-over #battle__finished-wrapper {
     transform: translate3d(0, 0, 0); }

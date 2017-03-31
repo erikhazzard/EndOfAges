@@ -2296,6 +2296,8 @@ define(
                 // function, may change before using (e.g., if health changes)
                 desiredAbility: null,
 
+                isEnemy: false,
+
                 // desired target is the intended target to use the ability on
                 desiredTarget: null
             };
@@ -2320,6 +2322,7 @@ define(
             // set attributes and base attributes from server
             this.set({
                 name: generateName(),
+                isEnemy: !!options.isEnemy,
                 attributes: new EntityAttributes(options.attributes || {})
             }, {silent: true});
 
@@ -2635,6 +2638,7 @@ define(
             // update it (NOTE: it's an array, so it's updating in place without
             // triggering a change event)
             healthHistory.unshift({
+                sourceIsPlayer: !options.source.attributes.isEnemy,
                 element: sourceAbility.get('element'),
                 type: sourceAbility.get('type'),
                 date: new Date(),
@@ -2976,10 +2980,6 @@ define(
             //  time: {Number} in seconds
             //  battle: {Battle Model}
             //
-            // Supppper hacky. Only run AI sometimes. This prevents
-            // AI from immediately using an ability
-            if (Math.random() < 0.1) { return true; }
-        
             //
             // called each tick to control AI
             // Note: using this.attributes instead of this.get() for performance
@@ -2992,6 +2992,10 @@ define(
             var targetIndex, targetGroup;
             var targets, model, len;
             this._lastAIHandleCall = this._lastAIHandleCall || Date.now();
+
+            if (Math.random() < 0.3) {
+                return false;
+            }
 
             var canUseAbility = false;
 
@@ -7052,6 +7056,7 @@ define(
             
             // generate new entity
             entity = new Entity({
+                isEnemy: true,
                 //// FOR ALL : 
                 //TODO: set abilities
                 abilities: abilities,
@@ -7059,10 +7064,10 @@ define(
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
-                armor: (Math.random() * -40) + (numBattles * 4),
-                attack: (Math.random() * -80) + (numBattles * 4),
-                magicResist:  (Math.random() * -20) + (numBattles * 4),
-                magicPower: (Math.random() * -20) + (numBattles * 4)
+                armor: (Math.random() * -40) + (numBattles * 2),
+                attack: (Math.random() * -80) + (numBattles * 2),
+                magicResist:  (Math.random() * -20) + (numBattles * 2),
+                magicPower: (Math.random() * -20) + (numBattles * 2)
             });
 
             return entity;
@@ -9181,11 +9186,70 @@ define(
     // entity models. A little shitty...there's a better way to do this,
     // but we need fast read-only access in other components
     function getNewBattleObject () {
-        return {
+        var battle = {
+            battleStart: new Date(),
+            duration: 0,
+
+            finishBattle: function () {
+                battle.duration = new Date() - battle.battleStart;
+                battle.isActive = false;
+
+                var playerHealthHistory = [];
+                var enemiesHealthHistory = [];
+                var enemyEntities = [];
+                var curHistory;
+                var curItem;
+
+                // calculate totals
+                if (battle.model && battle.model.attributes) {
+                    // calculate player
+                    playerHealthHistory = battle.model.attributes.playerEntities.models[0].attributes.healthHistory;
+                    for (var i = 0; i < playerHealthHistory.length; i++) {
+                        curItem = playerHealthHistory[i];
+                        if (curItem.amount > 0) {
+                            battle.stats.self.totalDamageTaken += -curItem.amount;
+                        } else {
+                            battle.stats.self.totalHeal += -curItem.amount;
+                        }
+                            
+                        battle.stats.self.totalHealthChange += -curItem.amount;
+                    }
+
+                    // calculate enemies
+                    enemyEntities = playerHealthHistory = battle.model.attributes.enemyEntities.models;
+                    for (i = 0; i < enemyEntities.length; i++) {
+                        curHistory = enemyEntities[i].attributes.healthHistory;
+                        for (var j = 0; j < curHistory.length; j++) {
+                            curItem = curHistory[j];
+                         
+                            if (curItem.sourceIsPlayer && curItem.amount < 0) {
+                                battle.stats.selfToEnemy.totalDamageDealt += -curItem.amount;
+                            }
+                        }
+                    }
+                }
+
+                logger.log('battle/finishBattle', 'Called ', battle);
+                return battle.duration;
+            },
+
+            stats: {
+                self: {
+                    totalDamageTaken: 0,
+                    totalHealthChange: 0,
+                    totalHeal: 0
+                },
+                selfToEnemy: {
+                    totalDamageDealt: 0
+                }
+
+            },
+
             model: {},
             isActive: true,
-            stats: {}
         };
+
+        return battle;
     }
     window._BATTLE = getNewBattleObject();
     window._BATTLE_HISTORY = window._BATTLE_HISTORY || [];
@@ -9356,7 +9420,7 @@ define(
 
             // stop timer
             this.isTimerActive = false;
-            window._BATTLE.isActive = false;
+            window._BATTLE.finishBattle();
 
             // TODO: compile stats
 
@@ -9366,7 +9430,9 @@ define(
             };
 
             console.log("you win." + JSON.stringify(reward));
-            $('.game-battle-wrapper').addClass('battle-over');
+            setTimeout(function () {
+                $('.game-battle-wrapper').addClass('battle-over');
+            }, 100);
             // TODO: YOU WIN
             // you win - show battle drop down
             return this;
@@ -9374,13 +9440,15 @@ define(
         playerGroupDied: function playerGroupDied(options){
             // stop timer
             this.isTimerActive = false;
-            window._BATTLE.isActive = false;
+            window._BATTLE.finishBattle();
 
-            // TODO: compile stats
 
-            $('.game-battle-wrapper').addClass('battle-over');
             // TODO: YOU LOSE
             // you lose - show battle drop down
+            setTimeout(function () {
+                // TODO: compile stats
+                $('.game-battle-wrapper').addClass('battle-over');
+            }, 100);
             return this;
         },
 

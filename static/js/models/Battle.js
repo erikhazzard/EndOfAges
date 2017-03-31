@@ -131,6 +131,7 @@ define(
             
             // generate new entity
             entity = new Entity({
+                isEnemy: true,
                 //// FOR ALL : 
                 //TODO: set abilities
                 abilities: abilities,
@@ -138,10 +139,10 @@ define(
             });
             // gimp stats. TODO: Scale based on encounter
             entity.get('attributes').set({
-                armor: (Math.random() * -40) + (numBattles * 4),
-                attack: (Math.random() * -80) + (numBattles * 4),
-                magicResist:  (Math.random() * -20) + (numBattles * 4),
-                magicPower: (Math.random() * -20) + (numBattles * 4)
+                armor: (Math.random() * -40) + (numBattles * 2),
+                attack: (Math.random() * -80) + (numBattles * 2),
+                magicResist:  (Math.random() * -20) + (numBattles * 2),
+                magicPower: (Math.random() * -20) + (numBattles * 2)
             });
 
             return entity;

@@ -8,7 +8,7 @@
     <div class='log'>
         {{// show source }}
         <span class='<%= sourceIsPlayer ? "player" : "enemy" %> entity-name'>
-            <%= source.get('name') %>
+            <%= source && source.get('name') %>
         </span>
 
         uses 
@@ -20,7 +20,7 @@
         {{// show target  }}
         <% if( source !== target && healthDifference !== 0){ %>
             <span class='<%= targetIsPlayer ? "player" : "enemy" %> entity-name'>
-                <%= target.get('name') %>
+                <%= target && target.get('name') %>
             </span>
         <% } else {  %>
             themsevles

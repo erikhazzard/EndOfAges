@@ -135,7 +135,7 @@
         opacity: 0;
         background: #ababab;
 
-        transition-delay: 2.5s;
+        transition-delay: 1.0s;
         transition: opacity 1s;
         z-index: -1;
     }
@@ -149,7 +149,7 @@
         top: 10%;
 
         transition: all 0.8s;
-        transition-delay: 2.5s;
+        transition-delay: 1.5s;
         transform: translate3d(0, -120vh, 0);
     }
 
